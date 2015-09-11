@@ -17,7 +17,7 @@ vault-mysql:
         #        calculate a MySQL network string (192.168.56.%) from an IP and a netmask inside Salt
         - host: '%'
         - connection_user: root
-        - connection_pass: {{pillar['dynamicpasswords']['secure-root']}}
+        - connection_pass: {{pillar['dynamicpasswords']['secure-mysql-root']}}
         - connection_host: localhost
         - connection_port: 3307
         - require:
@@ -25,7 +25,7 @@ vault-mysql:
     mysql_database.present:
         - name: vault
         - connection_user: root
-        - connection_pass: {{pillar['dynamicpasswords']['secure-root']}}
+        - connection_pass: {{pillar['dynamicpasswords']['secure-mysql-root']}}
         - connection_host: localhost
         - connection_pass: 3307
         - require:
@@ -36,7 +36,7 @@ vault-mysql:
         - database: '{{pillar['vault']['mysql']['dbname']}}.*'
         - user: {{pillar['vault']['mysql']['dbuser']}}
         - connection_user: root
-        - connection_pass: {{pillar['dynamicpasswords']['secure-root']}}
+        - connection_pass: {{pillar['dynamicpasswords']['secure-mysql-root']}}
         - connection_host: localhost
         - connection_pass: 3307
         - require:
