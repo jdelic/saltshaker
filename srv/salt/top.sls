@@ -28,7 +28,7 @@ base:
 
     'saltmaster.maurusnet.test':
         - samba
-        - vault.{{pillar['vault'].get('backend', 'mysql')}}
+        - vault
 
     'roles:dev':
         - match: grain
@@ -64,9 +64,7 @@ base:
     'roles:secure-database':
         - match: grain
         - mysql.secure
-        {% if pillar['vault'].get('backend', 'mysql'} == 'mysql' %}
-        - vault.mysql.database
-        {% endif %}
+        - vault.mysql_database
 
     'roles:mail':
         - match: grain

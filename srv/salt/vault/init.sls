@@ -78,6 +78,14 @@ vault-setcap:
         - unless: getcap /usr/local/bin | grep -q cap_ipc_lock
 
 
+/etc/vault/vault.conf:
+    file.managed:
+        - source: salt://vault/vault.jinja.conf
+        - template: jinja
+        - user: {{vault_user}}
+        - group: {{vault_group}}
+
+
 vault-service:
     file.managed:
         - name: /etc/systemd/system/vault.service
@@ -86,9 +94,9 @@ vault-service:
         - context:
             user: {{vault_user}}
             group: {{vault_group}}
-            file: /etc/vault/vault.conf
         - require:
-            file: vault
+            - file: vault
+            - file: /etc/vault/vault.conf
     service.running:
         - name: vault
         - sig: vault
@@ -121,3 +129,25 @@ vault-service-reload:
             port: {{pillar.get('vault', {}).get('bind-port', 8200)}}
         - require:
             - service: vault-service
+
+
+vault-ssl-cert:
+    file.managed:
+        - name: {{pillar['vault']['sslcert']}}
+        - user: vault
+        - group: root
+        - mode: 400
+        - contents_pillar: ssl:vault:combined
+        - require:
+            - file: ssl-cert-location
+
+
+vault-ssl-key:
+    file.managed:
+        - name: {{pillar['vault']['sslkey']}}
+        - user: vault
+        - group: root
+        - mode: 400
+        - contents_pillar: ssl:vault:key
+        - require:
+            - file: ssl-key-location

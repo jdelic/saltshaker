@@ -1,7 +1,18 @@
+#
+# This pillar configures the Vault secret storage system which is installed on servers with the
+# "vaultserver" role.
+# https://vaultproject.io/docs/config/index.html
+#
 
 vault:
-    backend: mysql  # or consul or s3
-    path: 'vault/'  # see https://vaultproject.io/docs/config/index.html
+    # "mysql" or "consul" or "s3". Only "consul" supports redundancy (more than one vault server in the cluster
+    # with leader elections. However, "consul" is *only* a good choice if your consul nodes run on multiple
+    # physical machines.
+    backend: mysql
+    kvpath: 'vault/'  # see https://vaultproject.io/docs/config/index.html
+
+    sslcert: /etc/ssl/local/vault.crt
+    sslkey: /etc/ssl/private/vault.key
 
     mysql:
         dbname: vault  # only needed for mysql backend

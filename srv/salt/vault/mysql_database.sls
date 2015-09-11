@@ -6,7 +6,9 @@
 # This state is meant to be run on a server with the "secure-database" role.
 #
 
+{% if pillar['vault'].get('backend', 'mysql') == 'mysql' %}
 
+# only create this if the MySQL backend is selected
 vault-mysql:
     mysql_user.present:
         - name: {{pillar['vault']['mysql']['dbuser']}}
@@ -41,3 +43,5 @@ vault-mysql:
             - mysql_user: vault-mysql
             - mysql_database: vault-mysql
             - mysql_user: mysql-root-secure
+
+{% endif %}
