@@ -30,6 +30,7 @@ Vagrant.configure('2') do |config|
                 mkdir -p /etc/salt/roles.d
                 touch /etc/salt/roles.d/master
                 touch /etc/salt/roles.d/consulserver
+                touch /etc/salt/roles.d/vault
 SCRIPT
         end
 
