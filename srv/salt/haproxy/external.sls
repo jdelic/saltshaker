@@ -11,3 +11,8 @@
 # should probably tag a service with its SmartStack default port.
 
 # Finally the resulting haproxy instance would run on ports 80 and 443.
+
+include:
+    - haproxy.install
+
+# vim: syntax=yaml

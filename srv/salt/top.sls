@@ -10,6 +10,7 @@ base:
         - mn.users
         - roles
         - consul.template  # everything needs consul-template in smartstack
+        - haproxy.internal  # everything needs local proxies in smartstack
 
     'G@roles:secure-database or G@roles:mail':
         - match: compound
