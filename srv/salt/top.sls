@@ -27,6 +27,10 @@ base:
 # this needs network interface config
 #        - djb.dns.services
 
+    'roles:vault':
+        - match: grain
+        - vault
+
     'saltmaster.maurusnet.test':
         - samba
 
@@ -64,6 +68,7 @@ base:
     'roles:secure-database':
         - match: grain
         - mysql.secure
+        - vault.mysql_database  # this state is empty if vault uses a different backend than "mysql"
 
     'roles:mail':
         - match: grain
