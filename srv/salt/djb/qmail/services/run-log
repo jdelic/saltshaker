@@ -1,0 +1,13 @@
+#!/bin/sh
+exec \
+setuidgid qmaild \
+envdir ./env \
+sh -c '
+    exec \
+    multilog \
+        t \
+        ${MAXFILESIZE+"s$MAXFILESIZE"} \
+        ${MAXLOGFILES+"n$MAXLOGFILES"} \
+        ${PROCESSOR+"!$PROCESSOR"} \
+        ./main
+'

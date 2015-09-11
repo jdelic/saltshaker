@@ -1,0 +1,336 @@
+#!/usr/bin/perl -w
+#
+# jgreylist
+# John Simpson <jms1@jms1.net> 2006-02-20
+#
+# The concept of using inodes to store IP timers came from Jon Atkins'
+# "qgreylist" program, which is similar in concept to this script. It
+# should be noted that, while I did not copy any of his code in the
+# construction of this script, I did copy and expand on the idea.
+#
+# If you would like to see his program, visit
+# http://www.jonatkins.com/page/software/qgreylist
+#
+# 2006-08-23 jms1 - fixed a bug where $list_c was being interpreted as
+#   the exact opposite of what i had originally intended. thanks to
+#   "Jagular" for pointing it out.
+#
+# 2006-08-27 jms1 - fixed a bug which was causing fake()d connections 
+#   which terminated uncleanly (i.e. hung up without saying QUIT) to
+#   incorrectly log multiple lines. thanks again to "Jagular" for 
+#   noticing the issue.
+#
+# 2006-08-27 jms1 - adding the ability to never allow connections from
+#   IP addresses without reverse DNS.
+#
+# 2006-08-30 jms1 - making the timeout for the fake SMTP session into a
+#   configuration variable, rather than being hard-coded for 60 seconds.
+#   thanks to Egor A. Fisher for the suggestion.
+#
+# 2006-08-30 jms1 - removing "whitelist.cdb" and "blacklist.cdb", adding
+#   support for JGREYLIST variable. if it exists and is empty, the connection
+#   will always be allowed. if it exists and is non-empty, the value will be
+#   used as the error message sent to the client. otherwise, greylisting will
+#   happen as normal. Thanks to Robert Hanson for making me think of 
+#   this idea- it's much easier to administer than maintaining cdb files.
+#
+# 2006-11-15 jms1 - removing all references to the CDB_File module from the
+#   program, since it no longer uses cdb files. Thanks to Patrick Woo for
+#   pointing this out.
+#
+# 2006-11-23 jms1 - adding the IP address to the "no reverse DNS" error,
+#   so that it can be tracked later.
+#
+# 2007-08-21 jms1 - adding the $max_rcpt variable and functionality. 
+#   thanks to Egor Fisher for the suggestion.
+#
+###############################################################################
+#
+# Copyright (C) 2006,2007 John Simpson.
+#
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License, version 3, as
+# published by the Free Software Foundation.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program. If not, see <http://www.gnu.org/licenses/>.
+#
+###############################################################################
+#
+# This script is dolphin-safe. No animals were harmed in the writing or
+# testing of this script. Prosecutors will be violated. All rites reversed.
+#
+###############################################################################
+
+require 5.003 ;
+use strict ;
+
+use Socket ;
+
+$| = 1 ;
+
+###############################################################################
+#
+# configuration
+
+my $greydir	= "/var/qmail/jgreylist" ;
+my $time_grey	= 120 ;	# seconds
+my $fake_max	= 60 ;	# max length of time for fake SMTP conversation
+my $list_c	= 1 ;	# if 1, greylist entries are /24 rather than /32
+my $show_log	= 1 ;	# if 1, phony SMTP conversation is logged
+my $log_pid	= 1 ;	# if 1, log lines will include the process ID
+my $block_norev	= 1 ;	# if 1, IPs with no reverse DNS are ignored
+my $max_rcpt	= 0 ;	# if >0, limit RCPT commands before hangup
+
+umask 022 ;
+
+###############################################################################
+#
+# global variables
+
+my ( $now , $ip , $rip , $ip_file , $atime , $mtime ) ;
+
+###############################################################################
+#
+# logging functions
+
+sub logline($)
+{
+	my $line = shift ;
+	chomp $line ;
+
+	print STDERR $log_pid
+		? "jgreylist[$$]: $line\n"
+		: "jgreylist: $line\n" ;
+}
+
+sub logsmtp($)
+{
+	return unless $show_log ;
+	logline $_[0] ;
+}
+
+###############################################################################
+#
+# check the status of a given file
+#
+# mtime is the FIRST time a given IP address was seen.
+#   connections sooner than mtime+time_grey are told to wait.
+# atime is the LAST time a given IP address was seen.
+#   this is updated every time a connection is allowed.
+#   cleanup involves removing files with atime's older than limit.
+
+sub ip_check()
+{
+	unless ( $ip =~ /(\d+)\.(\d+)\.(\d+)\.(\d+)/ )
+	{
+		die "Invalid IP format \"$ip\"\n" ;
+	}
+
+	if ( $list_c )
+	{
+		$ip_file = sprintf ( "%s/%03d/%03d/%03d" ,
+			$greydir , $1 , $2 , $3 ) ;
+	}
+	else
+	{
+		$ip_file = sprintf ( "%s/%03d/%03d/%03d/%03d" ,
+			$greydir , $1 , $2 , $3 , $4 ) ;
+	}
+
+	my @s = stat ( $ip_file ) ;
+	$atime = ( $s[8] || 0 ) ;
+	$mtime = ( $s[9] || 0 ) ;
+}
+
+###############################################################################
+#
+# create a given file
+
+sub makedir($) ;
+sub makedir($)
+{
+	my $dir = shift ;
+
+	$dir =~ m|(.+)/| ;
+	my $parent = $1 ;
+	( -e $parent ) || makedir $parent ;
+
+	mkdir ( $dir , 0700 ) ;
+}
+
+sub ip_create()
+{
+	$ip_file =~ m|(.+)/| ;
+	my $parent = $1 ;
+	( -e $parent ) || makedir $parent ;
+
+	open ( F , ">$ip_file" ) ;
+	close F ;
+}
+
+###############################################################################
+#
+# update "last seen" timer (file's atime) when a previously approved IP 
+# is seen.
+
+sub ip_update()
+{
+	$atime = $now ;
+	utime ( $atime , $mtime , $ip_file ) ;
+}
+
+###############################################################################
+#
+# fake an SMTP conversation
+
+sub fake($;$)
+{
+	my $status = shift ;	# 0 = deny
+				# 1 = first time
+				# 2 = too soon
+
+	my $deny_msg = ( shift || "We do not accept mail from $ip" ) ;
+
+	my $banner = "jgreylist" ;
+	my $rcpt_count = 0 ;
+
+	logsmtp ">>>220 $banner" ;
+	print "220 $banner\n" ;
+
+	eval
+	{
+		local $SIG{"ALRM"} = sub { die "timeout\n" } ;
+		alarm $fake_max ;
+
+		while ( my $line = <STDIN> )
+		{
+			chomp $line ;
+			logsmtp "<<<$line" ;
+
+			$line =~ /^(\w+)/ ;
+			my $cmd = lc $1 ;
+
+			if ( $cmd eq "quit" )
+			{
+				logsmtp ">>>221 $banner" ;
+				print "221 $banner\n" ;
+				exit 0 ;
+			}
+			if (	   ( $cmd eq "helo" )
+				|| ( $cmd eq "ehlo" )
+				|| ( $cmd eq "mail" )
+				|| ( $cmd eq "rset" ) )
+			{
+				logsmtp ">>>250 $banner" ;
+				print "250 $banner\n" ;
+				next ;
+			}
+
+			if ( $max_rcpt && ( $cmd eq "rcpt" ) )
+			{
+				$rcpt_count ++ ;
+				if ( $rcpt_count >= $max_rcpt )
+				{
+					logline "$ip: HANGUP too many RCPT commands\n" ;
+					logsmtp ">>>421 Too many RCPT commands, goodbye." ;
+					print "421 Too many RCPT commands, goodbye.\n" ;
+					exit 0 ;
+				}
+			}
+
+			if ( 1 == $status ) # first time
+			{
+				logsmtp ">>>450 GREYLIST Try again later." ;
+				print "450 GREYLIST Try again later.\n" ;
+			}
+			elsif ( 2 == $status ) # too soon
+			{
+				logsmtp ">>>450 GREYLIST I said to try later." ;
+				print "450 GREYLIST I said to try later.\n" ;
+			}
+			else	# denied
+			{
+				logsmtp ">>>553 DENIED $deny_msg" ;
+				print "553 DENIED $deny_msg\n" ;
+			}
+		}
+
+		alarm 0 ;
+	} ;
+
+	# did we die inside the eval block?
+	if ( $@ )
+	{
+		die unless ( $@ eq "timeout\n" ) ;
+
+		logsmtp ">>>421 timeout" ;
+		print "421 timeout\n" ;
+	}
+
+	# client hung up without saying QUIT first
+	exit 0 ;
+}
+
+###############################################################################
+#
+# run the next program on the command line
+
+sub okay()
+{
+	exec @ARGV ;
+	die ( "exec(\"" . join ( " " , @ARGV ) . "\"): #!\n" ) ;
+}
+
+###############################################################################
+###############################################################################
+###############################################################################
+#
+# it all starts here
+
+$now = time() ;
+
+$ip = ( $ENV{"TCPREMOTEIP"} || die "TCPREMOTEIP not found\n" ) ;
+ip_check() ;
+
+if ( exists $ENV{"JGREYLIST"} )
+{
+	if ( $ENV{"JGREYLIST"} eq "" )
+	{
+		logline "$ip: OK whitelisted" ;
+		okay() ;
+	}
+
+	logline "$ip: DENY blacklisted" ;
+	fake ( 0 , $ENV{"JGREYLIST"} ) ;
+}
+
+if ( $block_norev && ( ! exists $ENV{"TCPREMOTEHOST"} ) )
+{
+	logline "$ip: DENY no reverse DNS\n" ;
+	fake ( 0 , "We do not accept mail from $ip, it has no reverse DNS." ) ;
+}
+
+# rbl checks could be done here
+
+unless ( $mtime )
+{
+	logline "$ip: GREY first time\n" ;
+	ip_create() ;
+	fake(1) ;
+}
+
+if ( $now < ( $mtime + $time_grey ) )
+{
+	logline "$ip: GREY too soon\n" ;
+	fake(2) ;
+}
+
+logline "$ip: OK known\n" ;
+ip_update() ;
+okay() ;

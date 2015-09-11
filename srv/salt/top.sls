@@ -1,0 +1,117 @@
+#
+# maurus.net salt states
+#
+
+base:
+    '*':
+        - basics
+        - iptables
+        - byobu
+        - mn.users
+        - roles
+        - consul.template  # everything needs consul-template in smartstack
+
+    'G@roles:secure-database or G@roles:mail':
+        - match: compound
+        - fstab.secure
+
+    'roles:master':
+        - match: grain
+        - compilers
+        - djb
+        - djb.daemontools
+        - djb.ucspitcp
+        - djb.dns
+        - salt-master
+# this needs network interface config
+#        - djb.dns.services
+
+    'saltmaster.maurusnet.test':
+        - samba
+
+    'roles:dev':
+        - match: grain
+        - apache
+        - djb.daemontools
+        - java          # for jenkins
+        - dev.pbuilder
+        - dev.jenkins
+        - dev.aptly_nightly
+#        - dev.pypi
+#        - sentry
+        - compilers
+        - python.dev
+        - docker
+
+    'roles:apps':
+        - match: grain
+        - apache
+        - php
+        - djb.daemontools
+        - mn.services
+        - docker
+
+    'roles:servicerunner':
+        - mn.services
+
+    'roles:database':
+        - match: grain
+        - fstab.data
+        - mysql.fast
+        - redis.cache
+
+    'roles:secure-database':
+        - match: grain
+        - mysql.secure
+
+    'roles:mail':
+        - match: grain
+        - compilers
+        - djb
+        - djb.daemontools
+        - djb.ucspitcp
+        - djb.qmail
+        - mn.mail
+        - dovecot
+        - mn.cas.client  # only use with casserver, otherwise comment out
+
+    'roles:pim':
+        - match: grain
+        - sogo
+
+    'roles:casserver':
+        - match: grain
+        - mn.cas.server
+
+    # leading "not" is not supported http://docs.saltstack.com/en/latest/topics/targeting/compound.html
+    # everything that is not a consul server has a consul agent
+    '* and not G@roles:consulserver':
+        - match: compound
+        - consul.agent
+
+    'roles:consulserver':
+        - match: grain
+        - consul.server
+
+    'roles:loadbalancer':
+        - match: grain
+        - haproxy.external
+
+    'G@roles:mail and not *.test':
+        - match: compound
+        - djb.qmail.mounts.live
+
+    '*.test and G@roles:mail':
+        - match: compound
+        - djb.qmail.mounts.test
+
+    '*.test':
+        # put vagrant user config on .test machines
+        - mn.users.vagrant
+        # enable the NAT networking device for all network traffic
+        - iptables.vagrant
+
+# put my personal user on every other machine
+    '(?!saltmaster).*?net(|.internal)$':
+        - match: pcre
+        - mn.users.jonas

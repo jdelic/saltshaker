@@ -1,0 +1,9 @@
+[client]
+user     = debian-sys-maint
+password = {{password}}
+
+[mysql_upgrade]
+user     = debian-sys-maint
+password = {{password}}
+basedir  = /usr
+

@@ -1,0 +1,9 @@
+{
+    "service": {
+        "name": "mail-relay",
+        "tags": [],
+        "address": "{{pillar['smtp'].get('relay-ip', grains['ip_interfaces'][pillar['ifassign']['external-alt']][pillar['ifassign'].get('external-alt-ip-index', 0)|int()])}}",
+        "port": 25
+        {# TODO: add service checks here? Or add haproxy in front? #}
+    }
+}

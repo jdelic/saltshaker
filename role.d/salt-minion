@@ -1,0 +1,40 @@
+#!/bin/sh
+
+#
+# XEN role.d script to automatically install the salt-minion .deb
+# package on XEN VMs.
+# 
+# This script should be placed in /etc/xen-tools/role.d and can 
+# then be referenced when calling xen-create-image. This only
+# works on Debian VMs.
+#
+
+prefix=$1
+
+#
+#  Source our common functions - this will let us install a Debian package.
+#
+if [ -e /usr/lib/xen-tools/common.sh ]; then
+    . /usr/lib/xen-tools/common.sh
+else
+    echo "Installation problem"
+fi
+
+logMessage Script $0 starting
+
+# add the repo and key
+logMessage Installing saltstack.org apt key
+chroot ${prefix} 'wget -O - -q "http://debian.saltstack.com/debian-salt-team-joehealy.gpg.key" | apt-key add -'
+logMessage Installing salt-minion
+chroot ${prefix} 'echo "deb http://debian.saltstack.com/debian wheezy-saltstack main" > /etc/apt/sources.list.d/saltstack.list'
+chroot ${prefix} 'apt-get update && apt-get -y install salt-minion'
+
+# untested! but this should do everything we need it to
+/etc/init.d/salt-minion stop
+sed s/#master: salt/master: saltmaster.maurusnet.internal/g /etc/salt/minion > /etc/salt/minion.new
+mv /etc/salt/minion.new /etc/salt/minion
+/etc/init.d/salt-minion start
+salt-call state.highstate
+
+logMessage Script $0 finished
+

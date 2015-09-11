@@ -1,0 +1,18 @@
+#!/bin/sh
+# WARNING: This file was auto-generated. Do not edit!
+
+PATH=/usr/local/bin:/usr/local/sbin:/bin:/sbin:/usr/bin:/usr/sbin:/usr/X11R6/bin
+
+exec </dev/null
+exec >/dev/null
+exec 2>/dev/null
+
+svc -dx /etc/service/* /etc/service/*/log
+
+if [ ! -e /var/log/svscan ]; then
+    mkdir -p /var/log/svscan
+fi
+
+env - PATH=$PATH svscan /etc/service 2>&1 | \
+multilog t /var/log/svscan
+

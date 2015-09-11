@@ -1,0 +1,9 @@
+{
+    "service": {
+        "name": "mail-receiver",
+        "tags": [],
+        "address": "{{pillar['smtp'].get('receiver-ip', grains['ip_interfaces'][pillar['ifassign']['external']][pillar['ifassign'].get('external-ip-index', 0)|int()])}}",
+        "port": 25
+        {# TODO: add service checks here? Or add haproxy in front? #}
+    }
+}

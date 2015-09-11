@@ -1,0 +1,12 @@
+--- mysqld_multi.bak    2014-08-05 14:40:10.704194353 +0200
++++ mysqld_multi        2014-08-05 14:40:13.444193993 +0200
+@@ -487,7 +487,10 @@
+                '/usr/my.cnf',
+                ($ENV{MYSQL_HOME} ? "$ENV{MYSQL_HOME}/my.cnf" : undef),
+                $opt{'extra-file'},
+-               ($ENV{HOME} ? "$ENV{HOME}/.my.cnf" : undef));
++               ($ENV{HOME} ? "$ENV{HOME}/.my.cnf" : undef),
++               </etc/mysql.d/*.cnf>,
++               </etc/mysql/conf.d/*.cnf>
++               );
+ }

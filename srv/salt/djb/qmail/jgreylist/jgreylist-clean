@@ -1,0 +1,222 @@
+#!/usr/bin/perl -w
+#
+# jgreylist-clean
+# John Simpson <jms1@jms1.net> 2006-08-21
+#
+# 2006-11-26 jms1 - adding optional check to remove non-revisited entries
+#   (i.e. an IP connects exactly one time and then gives up, much like a
+#   zombie PC without any kind of "retry" would do) after a given length
+#   of time. Thanks to Ron Miller for the suggestion.
+#
+# 2006-11-29 jms1 - keeping count of entries deleted for $max_age and 
+#   $one_age, so i can get a feel for how many IPs are actually zombies.
+#   also making the list of what's deleted optional, use "-v" if you want
+#   to see the full list, or "-q" if you want to see nothing at all (i.e.
+#   no totals.)
+#
+###############################################################################
+#
+# Copyright (C) 2006 John Simpson.
+#
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License, version 2, as
+# published by the Free Software Foundation.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program; if not, write to the Free Software
+# Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+# or visit http://www.gnu.org/licenses/gpl.txt
+#
+###############################################################################
+
+require 5.003 ;
+use strict ;
+
+use Getopt::Std ;
+
+###############################################################################
+#
+# configuration
+
+# directory where entries are stored.
+# should be the same as $greydir in the "jgreylist" script.
+my $greydir = "/var/qmail/jgreylist" ;
+
+# if a client doesn't connect at all for this number of seconds, their
+# file is removed and they become "unknown" again.
+my $max_age = 30 * 24 * 60 * 60 ;
+
+# if a client only connected exactly one time, their file is removed
+# after this number of seconds and they become "unknown" again.
+# if set to zero, this check is not done.
+my $one_age = 24 * 60 * 60 ;
+
+###############################################################################
+#
+# global variables
+
+my $now = time() ;
+my $nrf = 0 ;
+my $nof = 0 ;
+my $nkf = 0 ;
+my $do_show = 1 ;
+
+my ( @ent ) ;
+our ( $opt_q , $opt_d , $opt_v ) ;
+
+$| = 1 ;
+
+###############################################################################
+#
+# output functions
+
+sub vdebug(@)
+{
+	return unless ( $do_show > 2 ) ;
+	print @_ ;
+}
+
+sub debug(@)
+{
+	return unless ( $do_show > 1 ) ;
+	print @_ ;
+}
+
+sub show(@)
+{
+	return unless ( $do_show > 0 ) ;
+	print @_ ;
+}
+
+###############################################################################
+#
+# recursive function to "do the deed"
+
+sub rrmdir($) ;
+sub rrmdir($)
+{
+	my $d = shift ;
+	my $ec = 0 ;
+	my ( $dh , @df ) ;
+
+	vdebug "$d         \r" ;
+
+	unless ( opendir ( $dh , "$d" ) )
+	{
+		print "$d: opendir() failed: $!\n" ;
+		return 0 ;
+	}
+
+	while ( my $f = readdir $dh )
+	{
+		next if ( $f =~ /^\.\.?$/ ) ;
+		push ( @df , $f ) ;
+	}
+	close $dh ;
+
+	for my $f ( sort @df )
+	{
+		if ( -d "$d/$f" )
+		{
+			$ec += rrmdir ( "$d/$f" ) ;
+		}
+		elsif ( -f "$d/$f" )
+		{
+			my @s = stat ( "$d/$f" ) ;
+			if ( ( $now - $s[8] ) > $max_age )
+			{
+				if ( unlink ( "$d/$f" ) )
+				{
+					debug "$d/$f: removed\n" ;
+					$nrf ++ ;
+				}
+				else
+				{
+					print "$d/$f: unlink(): $!\n" ;
+					$ec ++ ;
+				}
+			}
+			elsif (    $one_age
+				&& ( $s[8] == $s[9] )
+				&& ( ( $now - $s[8] ) > $one_age ) )
+			{
+				if ( unlink ( "$d/$f" ) )
+				{
+					debug "$d/$f: removed\n" ;
+					$nof ++ ;
+				}
+				else
+				{
+					print "$d/$f: unlink(): $!\n" ;
+					$ec ++ ;
+				}
+			}
+			else
+			{
+				$nkf ++ ;
+				$ec ++ ;
+			}
+		}
+		else
+		{
+			$ec ++ ;
+		}
+	}
+	close $dh ;
+
+	if ( 0 == $ec )
+	{
+		if ( rmdir ( $d ) )
+		{
+			debug "$d: removed\n" ;
+		}
+		else
+		{
+			print "$d: rmdir() failed: $!\n" ;
+			$ec ++ ;
+		}
+	}
+
+	return $ec ;
+}
+
+###############################################################################
+###############################################################################
+###############################################################################
+#
+# the magic starts here
+
+getopts ( "qdv" ) ;
+if ( $opt_q ) { $do_show = 0 ; }
+if ( $opt_d ) { $do_show = 2 ; }
+if ( $opt_v ) { $do_show = 3 ; }
+
+opendir ( D , $greydir )
+	or die "opendir($greydir) failed: $!\n" ;
+
+while ( my $e = readdir D )
+{
+	next if ( $e =~ /^\.\.?$/ ) ;
+	push ( @ent , $e ) ;
+}
+close D ;
+
+for my $e ( sort @ent )
+{
+	if ( -d "$greydir/$e" )
+	{
+		rrmdir ( "$greydir/$e" ) ;
+	}
+}
+
+show sprintf ( "Removed %8d max_age entries                \n" , $nrf ) ;
+if ( $one_age )
+{
+	show sprintf ( "Removed %8d one-time entries\n" , $nof ) ;
+}
+show sprintf ( "Kept    %8d entries\n" , $nkf ) ;

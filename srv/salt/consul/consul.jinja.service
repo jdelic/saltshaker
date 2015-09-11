@@ -1,0 +1,26 @@
+[Unit]
+Description=Consul Agent
+Wants=basic.target
+After=basic.target network.target
+
+[Service]
+User={{user}}
+Group={{group}}
+Environment=GOMAXPROCS=2
+ExecStart=/usr/local/bin/consul agent \
+    -bind={{pillar.get('consul-instance', {}).get('bind-ip', grains['ip_interfaces'][pillar['ifassign']['internal']][pillar['ifassign'].get('internal-ip-index', 0)|int()])}} \
+    -dc={{pillar['consul-cluster']['datacenter']}} \
+    -config-dir=/etc/consul.d -data-dir=/run/consul -pid-file=/run/consul/consul.pid {% if extra_parameters is defined %}{{extra_parameters}}{% endif %}
+    {%- for server, addr in salt['mine.get']('roles:consulserver', 'internal_ip', expr_form='grain').items() -%}
+        {%- if loop.first -%}
+            {{" "}}\{{"\n"}}
+        {%- endif -%}
+        {{"    "}}-retry-join={{addr}}{{" "}}
+    {%- endfor %}
+ExecReload=/bin/kill -HUP $MAINPID
+KillMode=process
+Restart=on-failure
+RestartSec=42s
+
+[Install]
+WantedBy=multi-user.target

@@ -1,0 +1,9 @@
+{
+    "service": {
+        "name": "redis-cache",
+        "tags": ["smartstack:internal"],
+        "address": "{{ip}}",
+        "port": {{port}}
+        {# TODO: add service checks here? Or add haproxy in front? #}
+    }
+}

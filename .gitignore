@@ -1,0 +1,9 @@
+*.o
+*.pyc
+.idea
+*.iml
+.pydev
+.settings
+.eclipse
+/etc/salt-master/pki
+

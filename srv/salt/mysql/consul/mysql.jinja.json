@@ -1,0 +1,9 @@
+{
+    "service": {
+        "name": "mysql-{{prefix}}",
+        "tags": ["smartstack:internal", "smartstack:port:{{port}}"],
+        "address": "{{ip}}",
+        "port": {{port}}
+        {# TODO: add service checks here? Or add haproxy in front? #}
+    }
+}

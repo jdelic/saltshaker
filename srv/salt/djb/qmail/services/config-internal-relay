@@ -1,0 +1,58 @@
+SERVICELINK={{pillar['smtp']['internal-relay-service-link']}}
+IP={{pillar['smtp'].get('internal-relay-ip', grains['ip_interfaces'][pillar['ifassign']['internal']][pillar['ifassign'].get('internal-ip-index', 0)|int()])}}
+PORT=25
+SSL=0
+SSL_CERT="{{pillar['smtp']['sslcert']}}"
+SMTP_CDB="{{pillar['smtp']['internal-relay-service-dir']}}/tcp.cdb"
+MAX=30
+
+# allow authentication
+AUTH=0
+REQUIRE_AUTH=0
+ALLOW_INSECURE_AUTH=0
+
+# if using the AUTH_CDB method
+#AUTH_CDB="$VQ/control/auth.cdb"
+
+# if using the CHECKPW method
+CHECKPW="{{pillar['mail-scripts']['install-dir']}}/checkdomainpasswd"
+TRUE=`which true`
+
+###############################################################################
+#
+# options for programs which run before qmail-smtpd
+
+#RBLSMTPD_PROG="rblsmtpd"
+#RBL_GOOD=""
+#RBL_BAD="ix.dnsbl.manitu.net zen.spamhaus.org dnsbl.njabl.org dnsbl.sorbs.net bl.spamcop.net"
+
+#GREYLIST="jgreylist"
+
+#JGREYLIST_DIR="$VQ/jgreylist"
+#JGREYLIST_NOREV=1
+#JGREYLIST_BY_IP=0
+#JGREYLIST_HOLDTIME=120
+#JGREYLIST_LOG=1
+#JGREYLIST_LOG_PID=1
+#JGREYLIST_LOG_SMTP=0
+#JGREYLIST_TIMEOUT=60
+#JGREYLIST_LIMIT=0
+
+#RECORDIO="recordio"
+
+###############################################################################
+#
+# options for qmail-smtpd itself
+
+SMTPD="$VQ/bin/qmail-smtpd"
+#SMTPGREETING="$LOCAL NO UCE"
+GREETDELAY=0
+DROP_PRE_GREET=0
+DENY_TLS=0
+MFCHECK=0
+#MAXRCPT=100
+#RELAYREJ=1
+QMAILSMTPD_LOG_MAIL=1
+QMAILSMTPD_LOG_RCPT=1
+#QMAILSMTPD_HELP_VERSION=1
+

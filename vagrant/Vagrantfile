@@ -1,0 +1,167 @@
+# -*- mode: ruby -*-
+# vi: set ft=ruby :
+
+Vagrant.configure('2') do |config|
+
+    $box_url = 'https://s3-eu-west-1.amazonaws.com/jdelic.eu/maurusnet-debian.box'
+
+    config.ssh.insert_key = false
+    config.ssh.forward_agent = true
+
+    config.vm.define :master do |master|
+        master.vm.provider :virtualbox do |vb|
+            vb.customize ['modifyvm', :id, '--rtcuseutc', 'on']
+        end
+
+        master.vm.box = 'maurusnet-debian'
+        master.vm.box_url = $box_url
+        master.vm.network :private_network, ip: '192.168.56.88'
+        master.vm.hostname = 'saltmaster.maurusnet.test'
+
+        master.vm.synced_folder 'saltshaker/srv/salt', '/srv/salt'
+        master.vm.synced_folder 'saltshaker/srv/salt-modules', '/srv/salt-modules'
+        master.vm.synced_folder 'saltshaker/srv/pillar', '/srv/pillar'
+        master.vm.synced_folder 'saltshaker/srv/reactor', '/srv/reactor'
+        master.vm.synced_folder 'saltshaker/etc/salt-minion/minion.d', '/etc/salt/minion.d'
+        master.vm.synced_folder 'saltshaker/etc/salt-master/master.d', '/etc/salt/master.d'
+
+        master.vm.provision :shell do |s|
+            s.inline = <<SCRIPT
+                mkdir -p /etc/salt/roles.d
+                touch /etc/salt/roles.d/master
+                touch /etc/salt/roles.d/consulserver
+SCRIPT
+        end
+
+        master.vm.provision :salt do |salt|
+            salt.run_highstate = true
+            salt.colorize = true
+            salt.log_level = 'warning'
+            salt.verbose = false
+            salt.no_minion = false
+            salt.always_install = true
+            salt.install_master = true
+            salt.install_syndic = false
+            salt.bootstrap_options = '-P -c /tmp'
+            salt.master_pub = 'saltshaker/vagrant/preseed-keys/saltmaster.maurusnet.test.pub'
+            salt.master_key = 'saltshaker/vagrant/preseed-keys/saltmaster.maurusnet.test.pem'
+            salt.minion_pub = 'saltshaker/vagrant/preseed-keys/saltmaster.maurusnet.test.pub'
+            salt.minion_key = 'saltshaker/vagrant/preseed-keys/saltmaster.maurusnet.test.pem'
+            salt.seed_master = {
+                'saltmaster.maurusnet.test' => salt.minion_pub,
+                'test.maurusnet.test' => 'saltshaker/vagrant/preseed-keys/test.maurusnet.test.pub'
+            }
+       end
+    end
+
+    config.vm.define :test do |test|
+        test.vm.provider :virtualbox do |vb|
+            vb.customize ['modifyvm', :id, '--rtcuseutc', 'on']
+        end
+
+        test.vm.box = 'maurusnet-debian'
+        test.vm.box_url = $box_url
+        test.vm.network :private_network, ip: '192.168.56.162'
+        test.vm.network :private_network, ip: '192.168.56.163'
+        test.vm.network :private_network, ip: '192.168.56.164'
+        test.vm.hostname = 'test.maurusnet.test'
+
+        test.vm.synced_folder 'saltshaker/etc/salt-minion/minion.d', '/etc/salt/minion.d'
+
+        test.vm.provision :shell do |s|
+            s.inline = <<SCRIPT
+                sh -c 'if ! grep -q 192.168.56.88 /etc/hosts; then echo "192.168.56.88        saltmaster.maurusnet.test" >> /etc/hosts; fi'
+                mkdir -p /etc/salt/roles.d
+                chown 700 /etc/salt/roles.d
+                touch /etc/salt/roles.d/mail
+                touch /etc/salt/roles.d/database
+                touch /etc/salt/roles.d/pim
+                touch /etc/salt/roles.d/mail
+                touch /etc/salt/roles.d/dev
+                chown 600 /etc/salt/roles.d/*
+SCRIPT
+        end
+
+        test.vm.provision :salt do |salt|
+            salt.run_highstate = true
+            salt.colorize = true
+            salt.log_level = 'warning'
+            salt.verbose = false
+            salt.no_minion = false
+            salt.always_install = false
+            salt.install_master = false
+            salt.install_syndic = false
+            salt.bootstrap_options = '-P -c /tmp'
+            salt.minion_key = 'saltshaker/vagrant/preseed-keys/test.maurusnet.test.pem'
+            salt.minion_pub = 'saltshaker/vagrant/preseed-keys/test.maurusnet.test.pub'
+        end
+    end
+
+    # config.vm.define :dev do |dev|
+        # # see https://github.com/mitchellh/vagrant/issues/912
+        # dev.vm.provider :virtualbox do |vb|
+            # vb.customize ['modifyvm', :id, '--rtcuseutc', 'on']
+            # #vb.customize ['modifyvm', :id, '--nictype1', 'Am79C973']
+            # #vb.customize ['modifyvm', :id, '--natdnshostresolver1', 'on']
+            # #vb.gui = true
+            # #vb.customize ['modifyvm', :id, '--memory', '1024']
+        # end
+
+        # # Every Vagrant virtual environment requires a box to build off of.
+        # dev.vm.box = 'maurusnet-debian'
+
+        # # The url from where the 'dev.vm.box' box will be fetched if you
+        # # don't have it already.
+        # dev.vm.box_url = $box_url
+
+        # # Create a private network, which allows host-only access to the machine
+        # # using a specific IP.
+        # dev.vm.network :private_network, ip: '192.168.56.160'
+
+        # # set up key forwarding for GIT
+        # config.ssh.forward_agent = true
+        # #config.ssh.max_tries = 150
+
+        # dev.vm.hostname = 'dev.maurus.net.test'
+
+        # dev.vm.provision :shell do |s|
+            # s.inline = $salt_script
+        # end
+
+        # dev.vm.provision :salt do |salt|
+            # salt.run_highstate = true
+            # # we installed using the shell provisioner above, because
+            # # bootstrap_salt.sh is broken on Debian 7
+            # salt.no_minion = true
+            # salt.verbose = true
+            # salt.minion_config = 'z:/saltshaker/etc/salt-minion/minion'
+            # salt.minion_key = 'z:/saltshaker/vagrant/preseed-keys/dev.maurus.net.pem'
+            # salt.minion_pub = 'z:/saltshaker/vagrant/preseed-keys/dev.maurus.net.pub'
+        # end
+    # end
+
+    # config.vm.define :db do |db|
+        # db.vm.provider :virtualbox do |vb|
+            # vb.customize ['modifyvm', :id, '--rtcuseutc', 'on']
+        # end
+
+        # db.vm.box = 'maurusnet-debian'
+        # db.vm.box_url = $box_url
+        # db.vm.network :private_network, ip: '192.168.56.161'
+        # config.ssh.forward_agent = true
+        # db.vm.hostname = 'db.maurusnet.internal.test'
+
+        # db.vm.provision :shell do |s|
+            # s.inline = $salt_script
+        # end
+
+        # db.vm.provision :salt do |salt|
+            # salt.run_highstate = true
+            # salt.no_minion = true
+            # salt.minion_config = 'z:/saltshaker/etc/salt-minion/minion'
+            # salt.minion_key = 'z:/saltshaker/vagrant/preseed-keys/db.maurusnet.internal.pem'
+            # salt.minion_pub = 'z:/saltshaker/vagrant/preseed-keys/db.maurusnet.internal.pub'
+        # end
+    # end
+
+end
