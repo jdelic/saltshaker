@@ -5,7 +5,7 @@ base:
         - shared.global
         - shared.saltmine
 
-    'roles:master':
+    'roles:vault':
         - match: grain
         - shared.vault
 
