@@ -1,0 +1,9 @@
+{
+    "service": {
+        "name": "vault",
+        "tags": ["smartstack:internal", "smartstack:port:8200"],
+        "address": "{{ip}}",
+        "port": {{port}}
+        {# TODO: add service checks here? Or add haproxy in front? #}
+    }
+}
