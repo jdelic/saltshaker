@@ -84,6 +84,9 @@ vault-setcap:
         - template: jinja
         - user: {{vault_user}}
         - group: {{vault_group}}
+        - context:
+            ip: {{pillar.get('vault', {}).get('bind-ip', grains['ip_interfaces'][pillar['ifassign']['internal']][pillar['ifassign'].get('internal-ip-index', 0)|int()])}}
+            port: {{pillar.get('vault', {}).get('bind-port', 8200)}}
 
 
 vault-service:
