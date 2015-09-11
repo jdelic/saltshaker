@@ -5,6 +5,14 @@ base:
         - shared.global
         - shared.saltmine
 
+    'roles:vault':
+        - match: grain
+        - shared.vault
+
+    'roles:secure-database':
+        - match: grain
+        - shared.vault
+
     # every minion ID not ending in "test" is at Hetzner right now
     '(?!test)$':
         - match: pcre
