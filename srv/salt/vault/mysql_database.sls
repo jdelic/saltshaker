@@ -19,7 +19,7 @@ vault-mysql:
         - connection_user: root
         - connection_pass: {{pillar['dynamicpasswords']['secure-mysql-root']}}
         - connection_host: localhost
-        - connection_port: 3307
+        - connection_port: '3307'
         - require:
             - mysql_user: mysql-root-secure
     mysql_database.present:
@@ -27,7 +27,7 @@ vault-mysql:
         - connection_user: root
         - connection_pass: {{pillar['dynamicpasswords']['secure-mysql-root']}}
         - connection_host: localhost
-        - connection_pass: 3307
+        - connection_pass: '3307'
         - require:
             - mysql_user: mysql-root-secure
     mysql_grants.present:
@@ -38,7 +38,7 @@ vault-mysql:
         - connection_user: root
         - connection_pass: {{pillar['dynamicpasswords']['secure-mysql-root']}}
         - connection_host: localhost
-        - connection_pass: 3307
+        - connection_pass: '3307'
         - require:
             - mysql_user: vault-mysql
             - mysql_database: vault-mysql
