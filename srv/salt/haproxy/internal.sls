@@ -10,7 +10,8 @@ include:
 
 smartstack-internal:
     file.managed:
-        - name: /etc/haproxy/
+        - name: /etc/systemd/system/consul-template-smartstack.service
+        - source: salt://consul/consul-
         - require:
             - pkg: haproxy
 

@@ -38,17 +38,27 @@ vault-data-dir-systemd:
             - group: vault
 
 
+vault-config-dir:
+    file.directory:
+        - name: /etc/vault
+        - makedirs: True
+        - user: {{vault_user}}
+        - group: {{vault_group}}
+        - mode: '0750'
+
+
 vault:
     group.present:
         - name: {{vault_group}}
     user.present:
         - name: {{vault_user}}
         - gid: {{vault_group}}
-        - createhome: True
+        - createhome: False
         - home: /etc/vault
         - shell: /bin/sh
         - require:
             - group: vault
+            - file: vault-config-dir
     archive.extracted:
         - name: /usr/local/bin
         - source: https://dl.bintray.com/mitchellh/vault/vault_0.2.0_linux_amd64.zip
@@ -87,6 +97,8 @@ vault-setcap:
         - context:
             ip: {{pillar.get('vault', {}).get('bind-ip', grains['ip_interfaces'][pillar['ifassign']['internal']][pillar['ifassign'].get('internal-ip-index', 0)|int()])}}
             port: {{pillar.get('vault', {}).get('bind-port', 8200)}}
+        - require:
+            file: vault-config-dir
 
 
 vault-service:
@@ -122,7 +134,7 @@ vault-service-reload:
             - file: /etc/vault/vault.conf
 
 
-/etc/consul.d/vault.json:
+/etc/consul/services.d/vault.json:
     file.managed:
         - source: salt://vault/consul/vault.jinja.json
         - mode: '0644'

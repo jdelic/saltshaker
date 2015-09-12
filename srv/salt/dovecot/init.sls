@@ -96,7 +96,7 @@ dovecot-in{{port}}-recv:
 
 dovecot-consul-servicedef:
     file.managed:
-        - name: /etc/consul.d/imap.json
+        - name: /etc/consul/services.d/imap.json
         - source: salt://dovecot/consul/imap.json
         - mode: '0644'
         - template: jinja

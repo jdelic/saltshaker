@@ -142,7 +142,7 @@ def add_mysql_instance(
     consul_servicedef = state('mysql-%s-consul-servicedef' % prefix)
     c_sdef = consul_servicedef.file.managed
     c_sdef(
-        name='/etc/consul.d/mysql-%s.json' % prefix,
+        name='/etc/consul/services.d/mysql-%s.json' % prefix,
         source='salt://mysql/consul/mysql.jinja.json',
         mode='0644',
         template='jinja',

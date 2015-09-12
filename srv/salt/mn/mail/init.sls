@@ -120,7 +120,7 @@ horde:
     user.present:
         - gid: mail
         - home: /secure/webfilters
-        - createhome: True
+        - createhome: False
         - shell: /bin/false
         - require:
             - file: secure-mount

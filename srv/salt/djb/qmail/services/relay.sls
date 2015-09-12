@@ -107,7 +107,7 @@ qmail-smtpd-relay-service-Makefile:
 
 qmail-smtpd-relay-consul-servicedef:
     file.managed:
-        - name: /etc/consul.d/qmail-smtpd-relay.json
+        - name: /etc/consul/services.d/qmail-smtpd-relay.json
         - source: salt://djb/qmail/services/consul/relay.json
         - mode: '0644'
         - template: jinja

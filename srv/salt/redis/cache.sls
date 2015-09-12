@@ -35,7 +35,7 @@ redis-in{{pillar.get('redis-server', {}).get('bind-port', 6379)}}-recv:
             - pkg: redis
 
 
-/etc/consul.d/redis-cache.json:
+/etc/consul/services.d/redis-cache.json:
     file.managed:
         - source: salt://redis/consul/redis.jinja.json
         - mode: '0644'

@@ -201,8 +201,8 @@ and assign them a port in your [port map](PORTS.md). This will cause
 available on `localhost:[port]`. The ideal machines to assign these states to
 in my opinion are all machines that have the `consulserver` role. Registering
 services with consul that way can either be done by dropping service
-definitions into `/etc/consul.d`, which might lead to strange behavior if
-different versions end up on multiple machines or better
+definitions into `/etc/consul/services.d`, which might lead to strange behavior
+if different versions end up on multiple machines or better
 [use salt consul states](https://github.com/pravka/salt-consul).
 
 # Vault

@@ -88,7 +88,7 @@ qmail-smtpd-receiver-service-Makefile:
 
 qmail-smtpd-receiver-consul-servicedef:
     file.managed:
-        - name: /etc/consul.d/qmail-smtpd-receiver.json
+        - name: /etc/consul/services.d/qmail-smtpd-receiver.json
         - source: salt://djb/qmail/services/consul/receiver.json
         - mode: '0644'
         - template: jinja
