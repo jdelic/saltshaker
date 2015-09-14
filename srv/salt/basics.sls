@@ -76,8 +76,9 @@ openssh-in22-recv:
 
 
 # ssh out, dns out, http out, ntp out, https out
-# pgp keyserver hkp out
-{%- set tcp = ['22', '53', '80', '123', '443', '11371'] %}
+# Vault out, pgp keyserver hkp out
+# Note: Consul is installed on all machines so it's covered by consul.install
+{%- set tcp = ['22', '53', '80', '123', '443', '8200', '11371'] %}
 
 # dns out, ntp out
 {%- set udp = ['53', '123'] %}
