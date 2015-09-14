@@ -15,6 +15,11 @@ haproxy:
             - service: haproxy
 
 
+haproxy-remove-packaged-config:
+    file.absent:
+        - name: /etc/haproxy/haproxy.cfg
+
+
 haproxy-data-dir:
     file.directory:
         - name: /run/haproxy
