@@ -139,10 +139,9 @@ def add_mysql_instance(
     st_h_cw.require(mysql_grants='debian-sys-maint-%s' % prefix)
     st_h_cw.require(mysql_user='mysql-root-%s' % prefix)
 
-    consul_servicedef = state('mysql-%s-consul-servicedef' % prefix)
+    consul_servicedef = state('/etc/consul/services.d/mysql-%s.json' % prefix)
     c_sdef = consul_servicedef.file.managed
     c_sdef(
-        name='/etc/consul/services.d/mysql-%s.json' % prefix,
         source='salt://mysql/consul/mysql.jinja.json',
         mode='0644',
         template='jinja',
