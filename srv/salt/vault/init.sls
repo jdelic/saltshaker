@@ -98,7 +98,7 @@ vault-setcap:
             ip: {{pillar.get('vault', {}).get('bind-ip', grains['ip_interfaces'][pillar['ifassign']['internal']][pillar['ifassign'].get('internal-ip-index', 0)|int()])}}
             port: {{pillar.get('vault', {}).get('bind-port', 8200)}}
         - require:
-            file: vault-config-dir
+            - file: vault-config-dir
 
 
 vault-service:
@@ -166,3 +166,19 @@ vault-ssl-key:
         - contents_pillar: ssl:vault:key
         - require:
             - file: ssl-key-location
+
+
+# This is for contacting Vault. Outgoing connections to port 8200 are covered by basics.sls
+vault-tcp8200-recv:
+    iptables.append:
+        - table: filter
+        - chain: INPUT
+        - jump: ACCEPT
+        - in-interface: {{pillar['ifassign']['internal']}}
+        - dport: 8200
+        - match: state
+        - connstate: NEW
+        - proto: tcp
+        - save: True
+        - require:
+            - sls: iptables
