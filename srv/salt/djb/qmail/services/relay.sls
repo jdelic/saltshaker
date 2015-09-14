@@ -112,6 +112,6 @@ qmail-smtpd-relay-consul-servicedef:
         - mode: '0644'
         - template: jinja
         - require:
-            - file: consul-data-dir
+            - file: consul-service-dir
 
 # vim: syntax=yaml

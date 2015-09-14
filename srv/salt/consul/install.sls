@@ -42,6 +42,7 @@ consul-data-dir-systemd:
 consul-basedir:
     file.directory:
         - name: /etc/consul
+        - makedirs: True
         - user: root
         - group: root
         - mode: '0755'

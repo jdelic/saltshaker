@@ -143,6 +143,7 @@ vault-service-reload:
             ip: {{pillar.get('vault', {}).get('bind-ip', grains['ip_interfaces'][pillar['ifassign']['internal']][pillar['ifassign'].get('internal-ip-index', 0)|int()])}}
             port: {{pillar.get('vault', {}).get('bind-port', 8200)}}
         - require:
+            - file: consul-service-dir
             - service: vault-service
 
 

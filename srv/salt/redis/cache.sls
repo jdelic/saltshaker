@@ -45,3 +45,4 @@ redis-in{{pillar.get('redis-server', {}).get('bind-port', 6379)}}-recv:
             port: {{pillar.get('redis-server', {}).get('bind-port', 6379)}}
         - require:
             - service: redis
+            - file: consul-service-dir
