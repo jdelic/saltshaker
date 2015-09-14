@@ -60,17 +60,6 @@ consul-service-dir:
             - file: consul-basedir
 
 
-consul-template-dir:
-    file.directory:
-        - name: /etc/consul/template.d
-        - makedirs: True
-        - user: root
-        - group: root
-        - mode: '0755'
-        - require:
-            - file: consul-basedir
-
-
 consul:
     group.present:
         - name: {{consul_group}}
