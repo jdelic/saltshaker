@@ -129,6 +129,8 @@ def main():
     parser.add_argument("--no-match", dest="nomatch",  action="append",
                         help="Only render services that do NOT have tags which match the passed regular "
                              "expressions.")
+    parser.add_argument("--smartstack-localip", dest="localip", default="127.0.0.1",
+                        help="Sets the local ip address all smartstack services should bind to. (Default: 127.0.0.1)")
 
     _args = parser.parse_args()
 
@@ -139,6 +141,7 @@ def main():
 
     context = {
         "services": filtered,
+        "localip": _args.localip,
     }
 
     with open(_args.template) as inf, file_or_stdout(_args.output) as outf:
