@@ -17,9 +17,11 @@
 
 
 import re
+import sys
 import jinja2
 import argparse
 import subprocess
+import contextlib
 
 
 # The Go template is in the comments (yes, this works and therefor keeps
@@ -43,6 +45,7 @@ _services = [
 _args = None
 
 
+@contextlib.contextmanager
 def file_or_stdout(filename=None):
     if filename and filename != "-":
         fh = open(filename, "w")
