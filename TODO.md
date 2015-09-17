@@ -6,7 +6,9 @@
  * all PHP should run through php-fpm behind Apache2
  * add Pillar config for a list of application apt repositories?
  * add Nagios/Icinca/xyz monitoring via consul-template
- * add iptables states for port 8200 to vault config
+ * clean up the MySQL state folder
+ * add "client" states to redis, mysql, vault etc. to allow outgoing connections to the internal providers and
+   add them to the roles that need them in top.sls
 
 # Ponder
 
