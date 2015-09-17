@@ -98,7 +98,7 @@ def parse_smartstack_tags(service):
         if re.match("^smartstack:host:", tag):
             service["smartstack_host"] = tag.split(":")[2]
 
-        if re.match["^smartstack:mode:", tag):
+        if re.match("^smartstack:mode:", tag):
             service["smartstack_mode"] = tag.split(":")[2]
 
 
