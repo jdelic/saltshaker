@@ -9,8 +9,10 @@
 #
 # i.e.
 # $ consul-template \
-#     -template 'haproxy_servicerenderer.ctmpl.py:/output/lb1.py:/output/lb1.py --template test.tpl \
-#                --exec "systemctl reload haproxy"'
+#     -template 'haproxy_servicerenderer.ctmpl.py:/output/lb1.py:/output/lb1.py
+#                --cmd "systemctl reload haproxy"' \
+#                -o /etc/haproxy/haproxy.conf
+#                test.tpl
 #
 
 
