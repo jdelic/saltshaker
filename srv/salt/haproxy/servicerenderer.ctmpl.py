@@ -42,8 +42,8 @@ _args = None
 
 
 def file_or_stdout(filename=None):
-    if filename and filename != '-':
-        fh = open(filename, 'w')
+    if filename and filename != "-":
+        fh = open(filename, "w")
     else:
         fh = sys.stdout
 
@@ -52,6 +52,54 @@ def file_or_stdout(filename=None):
     finally:
         if fh is not sys.stdout:
             fh.close()
+
+
+def filter_services(svcs):
+    filtered = []
+
+    # filter includes
+    if _args.include:
+        for sv in services:
+            for inc in _args.include:
+                if inc in sv["tags"] and sv not in filtered:
+                    filtered.append(sv)
+
+    if _args.match:
+        for sv in svcs:
+            for regex in _args.match:
+                for tag in sv["tags"]:
+                    if re.match(regex, tag):
+                        filtered.append(sv)
+
+    if not filtered or not _args.include or not _args.match:
+        filtered = svcs
+
+    if _args.exclude:
+        for sv in filtered:
+            for exc in _args.exclude:
+                if exc in sv["tags"]:
+                    filtered.remove(sv)
+
+    if _args.nomatch:
+        for sv in filtered:
+            for regex in _args.nomatch:
+                for tag in sv["tags"]:
+                    if re.match(regex, tag):
+                        filtered.remove(sv)
+
+    return filtered
+
+
+def parse_smartstack_tags(service):
+    for tag in service["tags"]:
+        if re.match("^smartstack:port:([0-9]+)$", tag):
+            service["smartstack_port"] = int(tag.split(":")[2])
+
+        if re.match("^smartstack:host:", tag):
+            service["smartstack_host"] = tag.split(":")[2]
+
+        if re.match["^smartstack:mode:", tag):
+            service["smartstack_mode"] = tag.split(":")[2]
 
 
 def main():
@@ -63,7 +111,7 @@ def main():
     parser.add_argument("template",
                         help="The Jinja2 template to render")
     parser.add_argument("--cmd", dest="command", required=True,
-                        help="The command to invoke after rendering the template.")
+                        help="The command to invoke after rendering the template. Will be executed in a shell.")
     parser.add_argument("-o", "--output", dest="output", help="The target file. Renders to stdout if not specified.")
     parser.add_argument("--has", dest="include", action="append",
                         help="Only render services that have the (all of the) specified tag(s). This parameter "
@@ -79,37 +127,10 @@ def main():
 
     _args = parser.parse_args()
 
-    filtered = []
+    filtered = filter_services(_services)
 
-    # filter includes
-    if _args.include:
-        for sv in _services:
-            for inc in _args.include:
-                if inc in sv['tags'] and sv not in filtered:
-                    filtered.append(sv)
-
-    if _args.match:
-        for sv in _services:
-            for regex in _args.match:
-                for tag in sv['tags']:
-                    if re.match(regex, tag):
-                        filtered.append(sv)
-
-    if not filtered or not _args.include or not _args.match:
-        filtered = _services
-
-    if _args.exclude:
-        for sv in filtered:
-            for exc in _args.exclude:
-                if exc in sv['tags']:
-                    filtered.remove(sv)
-
-    if _args.nomatch:
-        for sv in filtered:
-            for regex in _args.nomatch:
-                for tag in sv['tags']:
-                    if re.match(regex, tag):
-                        filtered.remove(sv)
+    for sv in filtered:
+        parse_smartstack_tags(sv)
 
     context = {
         "services": filtered,
