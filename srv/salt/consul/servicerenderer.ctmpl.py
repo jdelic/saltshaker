@@ -25,7 +25,7 @@ import contextlib
 
 
 # The Go template is in the comments (yes, this works and therefor keeps
-# IntelliJ's Python plugin from freaking out
+# IntelliJ's Python plugin from freaking out)
 _services = [
     # {{ range services }}
     #    {{ range service .Name }}
