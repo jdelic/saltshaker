@@ -64,7 +64,7 @@ def filter_services(svcs):
 
     # filter includes
     if _args.include:
-        for sv in services:
+        for sv in svcs:
             for inc in _args.include:
                 if inc in sv["tags"] and sv not in filtered:
                     filtered.append(sv)
@@ -73,20 +73,20 @@ def filter_services(svcs):
         for sv in svcs:
             for regex in _args.match:
                 for tag in sv["tags"]:
-                    if re.match(regex, tag):
+                    if re.match(regex, tag) and sv not in filtered:
                         filtered.append(sv)
 
-    if not filtered or not _args.include or not _args.match:
+    if not filtered and not _args.include and not _args.match:
         filtered = svcs
 
     if _args.exclude:
-        for sv in filtered:
+        for sv in list(filtered):  # operate on a copy, otherwise .remove would change the list under our feet
             for exc in _args.exclude:
                 if exc in sv["tags"]:
                     filtered.remove(sv)
 
     if _args.nomatch:
-        for sv in filtered:
+        for sv in list(filtered):
             for regex in _args.nomatch:
                 for tag in sv["tags"]:
                     if re.match(regex, tag):
