@@ -7,8 +7,7 @@
  * add Pillar config for a list of application apt repositories?
  * add Nagios/Icinca/xyz monitoring via consul-template
  * clean up the MySQL state folder
- * add "client" states to redis, mysql, vault etc. to allow outgoing connections to the internal providers and
-   add them to the roles that need them in top.sls
+
 
 # Ponder
 

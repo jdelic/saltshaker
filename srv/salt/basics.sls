@@ -75,10 +75,11 @@ openssh-in22-recv:
         - order: 2
 
 
+# NETWORK SERVICES ON THE INTERNET ===========================================
 # ssh out, dns out, http out, ntp out, https out
-# Vault out, pgp keyserver hkp out
+# pgp keyserver hkp out
 # Note: Consul is installed on all machines so it's covered by consul.install
-{%- set tcp = ['22', '53', '80', '123', '443', '8200', '11371'] %}
+{%- set tcp = ['22', '53', '80', '123', '443', '11371'] %}
 
 # dns out, ntp out
 {%- set udp = ['53', '123'] %}
@@ -112,6 +113,7 @@ basics-udp-out{{port}}-send:
         - save: True
         - order: 2
 
+
 # allow others to answer. For UDP we make this stateless here to guarantee it works.
 basics-udp-out{{port}}-recv:
     iptables.append:
@@ -124,5 +126,32 @@ basics-udp-out{{port}}-recv:
         - order: 2
 {% endfor %}
 
-# vim: syntax=yaml
 
+# OPEN THE INTERNAL NETWORK FOR OUTGOING CONNECTIONS =========================
+basics-internal-network-tcp:
+    iptables.append:
+        - table: filter
+        - chain: OUTPUT
+        - jump: ACCEPT
+        - out-interface: {{pillar['ifassign']['internal']}}
+        - match: state
+        - connstate: NEW
+        - proto: tcp
+        - save: True
+        - require:
+            - sls: iptables
+
+
+basics-internal-network-udp:
+    iptables.append:
+        - table: filter
+        - chain: OUTPUT
+        - jump: ACCEPT
+        - out-interface: {{pillar['ifassign']['internal']}}
+        - proto: udp
+        - save: True
+        - require:
+            - sls: iptables
+
+
+# vim: syntax=yaml
