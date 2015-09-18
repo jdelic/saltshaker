@@ -14,8 +14,8 @@ smartstack-internal:
         - template: jinja
         - context:
             servicescript: /etc/consul/renders/smartstack-internal.py
-            target: /etc/haproxy/haproxy-smartstack.cfg
-            command: systemctl reload haproxy@smartstack
+            target: /etc/haproxy/haproxy-internal.cfg
+            command: systemctl reload haproxy@internal
             parameters: --has smartstack:internal
             template: /etc/haproxy/haproxy.jinja.cfg
         - require:
