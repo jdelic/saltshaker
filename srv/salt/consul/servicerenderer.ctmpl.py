@@ -115,7 +115,7 @@ def main():
     )
     parser.add_argument("template",
                         help="The Jinja2 template to render")
-    parser.add_argument("--cmd", dest="command", required=True,
+    parser.add_argument("-c", "--command", dest="command", required=True,
                         help="The command to invoke after rendering the template. Will be executed in a shell.")
     parser.add_argument("-o", "--output", dest="output", help="The target file. Renders to stdout if not specified.")
     parser.add_argument("--has", dest="include", action="append",
