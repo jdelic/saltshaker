@@ -1,9 +1,8 @@
 # install haproxy
 
 haproxy:
-    pkg.installed:
-        - require:
-            - sls: consul.template
+    pkg:
+        - installed
     service.dead:
         - name: haproxy
         - enable: False
@@ -13,6 +12,18 @@ haproxy:
         - name: /etc/init.d/haproxy
         - require:
             - service: haproxy
+
+
+# set up a systemd config that supports multiple haproxy instances on one machine
+haproxy-multi:
+    file.managed:
+        - name: /etc/systemd/system/haproxy@.service
+        - source: salt://haproxy/haproxy@.service
+        - user: root
+        - group: root
+        - mode: '0644'
+        # note that there is NO dependency to pkg: haproxy here! This is because we declare haproxy to be
+        # a prereq of haproxy-multi
 
 
 haproxy-remove-packaged-config:
@@ -42,14 +53,10 @@ haproxy-data-dir-systemd:
             - pkg: haproxy
 
 
-# set up a systemd config that supports multiple haproxy instances on one machine
-haproxy-multi:
+haproxy-config-template:
     file.managed:
-        - name: /etc/systemd/system/haproxy@.service
-        - source: salt://haproxy/haproxy@.service
-        - user: root
-        - group: root
-        - mode: '0644'
+        - name: /etc/haproxy/haproxy.jinja.cfg
+        - source: salt://haproxy/haproxy.jinja.cfg
         - require:
             - pkg: haproxy
 

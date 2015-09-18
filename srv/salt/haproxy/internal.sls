@@ -11,6 +11,7 @@ smartstack-internal:
     file.managed:
         - name: /etc/consul/template.d/smartstack-internal.conf
         - source: salt://consul/template-config.jinja.conf
+        - template: jinja
         - context:
             servicescript: /etc/consul/renders/smartstack-internal.py
             target: /etc/haproxy/haproxy-smartstack.cfg
@@ -18,9 +19,7 @@ smartstack-internal:
             parameters: --has smartstack:internal
             template: /etc/haproxy/haproxy.jinja.cfg
         - require:
-            - pkg: haproxy
-            - file: consul-template-dir
-            - file: consul-template-servicerenderer
+            - file: haproxy-config-template
     service.running:
         - name: haproxy@internal
         - sig: haproxy -f /etc/haproxy/haproxy-smartstack.cfg
@@ -28,7 +27,6 @@ smartstack-internal:
         - require:
             - file: haproxy-multi
             - file: smartstack-internal
-            - service: consul-template-service
 
 
 # vim: syntax=yaml
