@@ -37,6 +37,17 @@ consul-template-dir:
             - file: consul-basedir
 
 
+consul-renders-dir:
+    file.directory:
+        - name: /etc/consul/renders
+        - makedirs: True
+        - user: root
+        - group: root
+        - mode: '0755'
+        - require:
+            - file: consul-basedir
+
+
 consul-template-config:
     file.managed:
         - name: /etc/consul/consul-template.conf
@@ -78,6 +89,17 @@ consul-template-service-reload:
         - watch:
             - file: /etc/consul/template.d*
             - file: /etc/consul/consul-template.conf
+
+
+consul-template-servicerenderer:
+    file.managed:
+        - name: /etc/consul/servicerenderer.ctmpl.py
+        - source: salt://consul/servicerenderer.ctmpl.py
+        - user: root
+        - group: root
+        - mode: '0644'
+        - require:
+            - file: consul-basedir
 
 
 # vim: syntax=yaml
