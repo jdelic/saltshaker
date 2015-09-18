@@ -12,6 +12,16 @@ base:
         - consul.template  # everything needs consul-template in smartstack
         - haproxy.internal  # everything needs local proxies in smartstack
 
+    # leading "not" is not supported http://docs.saltstack.com/en/latest/topics/targeting/compound.html
+    # everything that is not a consul server has a consul agent
+    '* and not G@roles:consulserver':
+        - match: compound
+        - consul.agent
+
+    'roles:consulserver':
+        - match: grain
+        - consul.server
+
     'G@roles:secure-database or G@roles:mail':
         - match: compound
         - fstab.secure
@@ -88,16 +98,6 @@ base:
     'roles:casserver':
         - match: grain
         - mn.cas.server
-
-    # leading "not" is not supported http://docs.saltstack.com/en/latest/topics/targeting/compound.html
-    # everything that is not a consul server has a consul agent
-    '* and not G@roles:consulserver':
-        - match: compound
-        - consul.agent
-
-    'roles:consulserver':
-        - match: grain
-        - consul.server
 
     'roles:loadbalancer':
         - match: grain
