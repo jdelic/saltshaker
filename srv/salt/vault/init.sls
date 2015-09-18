@@ -45,6 +45,9 @@ vault-config-dir:
         - user: {{vault_user}}
         - group: {{vault_group}}
         - mode: '0750'
+        - require:
+            - user: vault
+            - group: vault
 
 
 vault:
@@ -58,7 +61,6 @@ vault:
         - shell: /bin/sh
         - require:
             - group: vault
-            - file: vault-config-dir
     archive.extracted:
         - name: /usr/local/bin
         - source: https://dl.bintray.com/mitchellh/vault/vault_0.2.0_linux_amd64.zip
@@ -85,7 +87,7 @@ vault-setcap:
         - cwd: /usr/local/bin
         - user: root
         - group: root
-        - unless: getcap /usr/local/bin | grep -q cap_ipc_lock
+        - unless: getcap /usr/local/bin/vault | grep -q cap_ipc_lock
 
 
 /etc/vault/vault.conf:
