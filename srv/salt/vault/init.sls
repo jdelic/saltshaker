@@ -56,11 +56,14 @@ vault:
     user.present:
         - name: {{vault_user}}
         - gid: {{vault_group}}
+        - groups:
+            - ssl-cert
         - createhome: False
         - home: /etc/vault
         - shell: /bin/sh
         - require:
             - group: vault
+            - group: ssl-cert
     archive.extracted:
         - name: /usr/local/bin
         - source: https://dl.bintray.com/mitchellh/vault/vault_0.2.0_linux_amd64.zip
