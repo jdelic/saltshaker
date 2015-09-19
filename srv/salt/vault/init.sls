@@ -38,17 +38,32 @@ vault-data-dir-systemd:
             - group: vault
 
 
+vault-config-dir:
+    file.directory:
+        - name: /etc/vault
+        - makedirs: True
+        - user: {{vault_user}}
+        - group: {{vault_group}}
+        - mode: '0750'
+        - require:
+            - user: vault
+            - group: vault
+
+
 vault:
     group.present:
         - name: {{vault_group}}
     user.present:
         - name: {{vault_user}}
         - gid: {{vault_group}}
-        - createhome: True
+        - groups:
+            - ssl-cert
+        - createhome: False
         - home: /etc/vault
         - shell: /bin/sh
         - require:
             - group: vault
+            - group: ssl-cert
     archive.extracted:
         - name: /usr/local/bin
         - source: https://dl.bintray.com/mitchellh/vault/vault_0.2.0_linux_amd64.zip
@@ -75,7 +90,7 @@ vault-setcap:
         - cwd: /usr/local/bin
         - user: root
         - group: root
-        - unless: getcap /usr/local/bin | grep -q cap_ipc_lock
+        - unless: getcap /usr/local/bin/vault | grep -q cap_ipc_lock
 
 
 /etc/vault/vault.conf:
@@ -87,6 +102,8 @@ vault-setcap:
         - context:
             ip: {{pillar.get('vault', {}).get('bind-ip', grains['ip_interfaces'][pillar['ifassign']['internal']][pillar['ifassign'].get('internal-ip-index', 0)|int()])}}
             port: {{pillar.get('vault', {}).get('bind-port', 8200)}}
+        - require:
+            - file: vault-config-dir
 
 
 vault-service:
@@ -122,7 +139,7 @@ vault-service-reload:
             - file: /etc/vault/vault.conf
 
 
-/etc/consul.d/vault.json:
+/etc/consul/services.d/vault.json:
     file.managed:
         - source: salt://vault/consul/vault.jinja.json
         - mode: '0644'
@@ -131,6 +148,7 @@ vault-service-reload:
             ip: {{pillar.get('vault', {}).get('bind-ip', grains['ip_interfaces'][pillar['ifassign']['internal']][pillar['ifassign'].get('internal-ip-index', 0)|int()])}}
             port: {{pillar.get('vault', {}).get('bind-port', 8200)}}
         - require:
+            - file: consul-service-dir
             - service: vault-service
 
 
@@ -154,3 +172,19 @@ vault-ssl-key:
         - contents_pillar: ssl:vault:key
         - require:
             - file: ssl-key-location
+
+
+# This is for contacting Vault. Outgoing connections to port 8200 are covered by basics.sls
+vault-tcp8200-recv:
+    iptables.append:
+        - table: filter
+        - chain: INPUT
+        - jump: ACCEPT
+        - in-interface: {{pillar['ifassign']['internal']}}
+        - dport: 8200
+        - match: state
+        - connstate: NEW
+        - proto: tcp
+        - save: True
+        - require:
+            - sls: iptables

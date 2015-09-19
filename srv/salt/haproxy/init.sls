@@ -1,6 +1,1 @@
-# install haproxy
-
-haproxy:
-    pkg.installed
-
-# vim: syntax=yaml
+# Empty. States in this module should include haproxy.install.

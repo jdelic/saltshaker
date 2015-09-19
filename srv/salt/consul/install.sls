@@ -39,9 +39,18 @@ consul-data-dir-systemd:
             - group: consul
 
 
+consul-basedir:
+    file.directory:
+        - name: /etc/consul
+        - makedirs: True
+        - user: root
+        - group: root
+        - mode: '0755'
+
+
 consul-service-dir:
     file.directory:
-        - name: /etc/consul.d
+        - name: /etc/consul/services.d
         - makedirs: True
         - user: {{consul_user}}
         - group: {{consul_group}}
@@ -49,6 +58,7 @@ consul-service-dir:
         - require:
             - user: consul
             - group: consul
+            - file: consul-basedir
 
 
 consul:
@@ -57,8 +67,8 @@ consul:
     user.present:
         - name: {{consul_user}}
         - gid: {{consul_group}}
-        - createhome: True
-        - home: /etc/consul.d
+        - createhome: False
+        - home: /etc/consul/services.d
         - shell: /bin/sh
         - require:
              - group: consul

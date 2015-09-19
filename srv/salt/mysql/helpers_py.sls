@@ -11,6 +11,8 @@ def add_mysql_instance(
             datadir=None,
             user='mysql',
             group='mysql',
+            root_password_pillar="mysql-root",
+            debiansys_password_pillar="debian-sys-maint",
             require_mount=None
         ):
     # run and enable the mysqld instance. The config states defined below insert themselves as a required_in
@@ -85,7 +87,7 @@ def add_mysql_instance(
     st_r_u = st_root.mysql_user.present
     st_r_u(
         name='root',
-        password=__pillar__['dynamicpasswords']['mysql-root'],
+        password=__pillar__['dynamicpasswords'][root_password_pillar],
         connection_default_file='/etc/mysql/conf.d/%s.cnf' % prefix,
         connection_user='root',
         connection_pass='',
@@ -97,25 +99,25 @@ def add_mysql_instance(
     st_debiansys = state('debian-sys-maint-%s' % prefix)
     st_d_sg = st_debiansys.mysql_grants.present
     st_d_sg(
-        name='debian-sys-maint',
+        name=debiansys_password_pillar,
         grant='all privileges',
         database='*.*',
-        user='debian-sys-maint',
+        user=debiansys_password_pillar,
         grant_option=True,
         connection_default_file='/etc/mysql/conf.d/%s.cnf' % prefix,
         connection_user='root',
-        connection_pass=__pillar__['dynamicpasswords']['mysql-root'],
+        connection_pass=__pillar__['dynamicpasswords'][root_password_pillar],
     )
     st_d_sg.require(service=service_state_name)
     st_d_sg.require(mysql_user='debian-sys-maint-%s' % prefix)
 
     st_d_u = st_debiansys.mysql_user.present
     st_d_u(
-        name='debian-sys-maint',
-        password=__pillar__['dynamicpasswords']['debian-sys-maint'],
+        name=debiansys_password_pillar,
+        password=__pillar__['dynamicpasswords'][debiansys_password_pillar],
         connection_default_file='/etc/mysql/conf.d/%s.cnf' % prefix,
         connection_user='root',
-        connection_pass=__pillar__['dynamicpasswords']['mysql-root'],
+        connection_pass=__pillar__['dynamicpasswords'][root_password_pillar],
     )
     st_d_u.require(service=service_state_name)
     st_d_u.require(mysql_user='mysql-root-%s' % prefix)
@@ -125,8 +127,8 @@ def add_mysql_instance(
     st_h_cw = st_harden.cmd.wait_script
     st_h_cw(
         name='/tmp/mysql_secure_installation_auto %s %s /etc/mysql/conf.d/%s.cnf' % (
-            __pillar__['dynamicpasswords']['mysql-root'],
-            __pillar__['dynamicpasswords']['debian-sys-maint'],
+            __pillar__['dynamicpasswords'][root_password_pillar],
+            __pillar__['dynamicpasswords'][debiansys_password_pillar],
             prefix,
         ),
         source='salt://mysql/mysql_secure_installation_auto',
@@ -139,10 +141,9 @@ def add_mysql_instance(
     st_h_cw.require(mysql_grants='debian-sys-maint-%s' % prefix)
     st_h_cw.require(mysql_user='mysql-root-%s' % prefix)
 
-    consul_servicedef = state('mysql-%s-consul-servicedef' % prefix)
+    consul_servicedef = state('/etc/consul/services.d/mysql-%s.json' % prefix)
     c_sdef = consul_servicedef.file.managed
     c_sdef(
-        name='/etc/consul.d/mysql-%s.json' % prefix,
         source='salt://mysql/consul/mysql.jinja.json',
         mode='0644',
         template='jinja',

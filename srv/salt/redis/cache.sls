@@ -25,6 +25,7 @@ redis-in{{pillar.get('redis-server', {}).get('bind-port', 6379)}}-recv:
         - jump: ACCEPT
         - proto: tcp
         - source: '0/0'
+        - in-interface: {{pillar['ifassign']['internal']}}
         - destination: {{pillar.get('redis-server', {}).get('bind-ip', grains['ip_interfaces'][pillar['ifassign']['internal']][pillar['ifassign'].get('internal-ip-index', 0)|int()])}}
         - dport: {{pillar.get('redis-server', {}).get('bind-port', 6379)}}
         - match: state
@@ -35,7 +36,7 @@ redis-in{{pillar.get('redis-server', {}).get('bind-port', 6379)}}-recv:
             - pkg: redis
 
 
-/etc/consul.d/redis-cache.json:
+/etc/consul/services.d/redis-cache.json:
     file.managed:
         - source: salt://redis/consul/redis.jinja.json
         - mode: '0644'
@@ -45,3 +46,4 @@ redis-in{{pillar.get('redis-server', {}).get('bind-port', 6379)}}-recv:
             port: {{pillar.get('redis-server', {}).get('bind-port', 6379)}}
         - require:
             - service: redis
+            - file: consul-service-dir

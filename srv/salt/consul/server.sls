@@ -43,11 +43,11 @@ consul-server-service-reload:
             - file: consul-server
         - watch:
             # If we detect a change in the service definitions reload, don't restart. This matches STATE names not FILE
-            # names, so this watch ONLY works on STATES named /etc/consul.d/[whatever]!
-            # We match on consul.d with NO TRAILING SLASH because otherwise the watch prerequisite will FAIL if there
-            # is no other state that matches "/etc/consul.d/*" whereas "/etc/consul.d*" will match the
+            # names, so this watch ONLY works on STATES named /etc/consul/services.d/[whatever]!
+            # We match on services.d with NO TRAILING SLASH because otherwise the watch prerequisite will FAIL if there
+            # is no other state that matches "/etc/consul/services.d/*" whereas "/etc/consul/services.d*" will match the
             # consul.install.consul-service-dir state.
-            - file: /etc/consul.d*
+            - file: /etc/consul/services.d*
 
 
 consul-agent-absent:

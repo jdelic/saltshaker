@@ -1,0 +1,22 @@
+[Unit]
+Description=HAProxy Load Balancer
+Documentation=man:haproxy(1)
+Documentation=file:/usr/share/doc/haproxy/configuration.txt.gz
+After=network.target syslog.service
+Wants=syslog.service
+
+[Service]
+Environment=CONFIG=/etc/haproxy/haproxy-%i.cfg
+EnvironmentFile=-/etc/default/haproxy
+ExecStartPre=/usr/sbin/haproxy -f ${CONFIG} -c -q
+ExecStart=/usr/sbin/haproxy-systemd-wrapper -f ${CONFIG} -p /run/haproxy-%i.pid $EXTRAOPTS
+ExecReload=/usr/sbin/haproxy -c -f ${CONFIG}
+ExecReload=/bin/kill -USR2 $MAINPID
+KillMode=mixed
+Restart=always
+# StartLimitInterval: try to restart for unlimited times, because this is an essential service!
+StartLimitInterval=0
+RestartSec=10s
+
+[Install]
+WantedBy=multi-user.target

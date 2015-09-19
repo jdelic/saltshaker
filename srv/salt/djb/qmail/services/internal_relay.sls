@@ -88,11 +88,11 @@ qmail-smtpd-internal-relay-service-Makefile:
 
 qmail-smtpd-internal-relay-consul-servicedef:
     file.managed:
-        - name: /etc/consul.d/qmail-smtpd-internal-relay.json
+        - name: /etc/consul/services.d/qmail-smtpd-internal-relay.json
         - source: salt://djb/qmail/services/consul/internal-relay.json
         - mode: '0644'
         - template: jinja
         - require:
-            - file: consul-data-dir
+            - file: consul-service-dir
 
 # vim: syntax=yaml

@@ -22,6 +22,7 @@ helpers.add_mysql_instance(
     ip=__pillar__.get('mysql-secure', {}).get('ip', __grains__['ip_interfaces'][__pillar__['ifassign']['internal']][int(__pillar__['ifassign'].get('internal-ip-index', 0))]),
     port=3307,
     datadir='/secure/db/mysql',
+    root_password_pillar="secure-mysql-root",
     require_mount='mysql-secure-db-folder',
 )
 

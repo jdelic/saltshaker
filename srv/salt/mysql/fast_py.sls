@@ -10,6 +10,7 @@ helpers.add_mysql_instance(
     ip=__pillar__.get('mysql-fast', {}).get('ip', __grains__['ip_interfaces'][__pillar__['ifassign']['internal']][int(__pillar__['ifassign'].get('internal-ip-index', 0))]),
     port=3306,
     datadir='/data/mysql',
+    root_password_pillar="mysql-root",
     require_mount='data-mount',
 )
 
