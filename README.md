@@ -58,7 +58,7 @@ any of the other stuff.
 Deploying this salt configuration requires you to:
 
   1. create a bootstrap server (for example a Amazon EC2 instance, a
-     Dom0 VM on your own Xen server or a Digital Ccoean droplet)
+     Dom0 VM on your own Xen server or a Digital Ooean droplet)
 
   2. Assign that server the `saltmaster` and `consulserver` roles
      ```
