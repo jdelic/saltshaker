@@ -76,21 +76,25 @@ consul-template-service:
             - file: consul-template-config
             - file: consul-template-dir
             - file: consul-template
-
-
-consul-template-service-reload:
-    service.running:
-        - name: consul-template
-        - sig: consul-template
-        - enable: True
-        - reload: True  # makes Salt send a SIGHUP (systemctl reload consul) instead of restarting
-        - require:
-            - file: consul-template
-            - file: consul-template-config
-            - file: consul-template-dir
         - watch:
             - file: /etc/consul/template.d*
             - file: /etc/consul/consul-template.conf
+
+
+# https://github.com/hashicorp/consul-template/issues/408
+#consul-template-service-reload:
+#    service.running:
+#        - name: consul-template
+#        - sig: consul-template
+#        - enable: True
+#        - reload: True  # makes Salt send a SIGHUP (systemctl reload consul) instead of restarting
+#        - require:
+#            - file: consul-template
+#            - file: consul-template-config
+#            - file: consul-template-dir
+#        - watch:
+#            - file: /etc/consul/template.d*
+#            - file: /etc/consul/consul-template.conf
 
 
 consul-template-servicerenderer:
