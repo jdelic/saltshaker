@@ -10,6 +10,7 @@
  * add a consul-template cmd.wait watcher state for haproxy.internal that deletes the servicerenderer
    if the command-line parameters change, because consul-template will not do it by itself
 
+
 # Ponder
 
  * front consul through dnscache and make /etc/resolv.conf point to local dnscache? What about IPv6?
