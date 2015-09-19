@@ -142,20 +142,20 @@ that seem to be "interwoven" in this repository. The whole setup is meant to
     that has the "loadbalancer" role
 
 I generally, if in any way possible, would always prefer deploying an
-application not through salt states, but other means (for example: installing
-a .deb package on all servers that have the role "apps" through the salt CLI
-client), but if you have to (for example when configuring a service typically
-part of a Unix system like a mail server) you **totally can** use salt states
-for that. This way you don't have to repackage services which are already set
-up for your system. No need to repackage dovecot in a Docker container, for
-example, if the Debian Maintainers do such an awesome job of already providing
-ready-to-run packages anyway!
+application **not through salt states**, but other means (for example: 
+installing a .deb package on all servers that have the role "apps" through the 
+salt CLI client), but if you have to (for example when configuring a service 
+typically part of a Unix system like a mail server) you **totally can** use 
+salt states for that. This way you don't have to repackage services which are 
+already set up for your system. No need to repackage dovecot in a Docker 
+container, for example, if the Debian Maintainers do such an awesome job of 
+already providing ready-to-run packages anyway!
 
-As I see it, use the best tool for the job. There is no dogma requiring you to
+As I see it: use the best tool for the job. There is no dogma requiring you to
 run all services inside a container for example. And a container is not a VM,
 so services consisting of multiple daemons don't "containerize" easily anyway.
-And some services really expect use all available resources on a server
-(databases, for example) and shouldn't be containerized for that reason. And so
+And some services really expect to use all available resources on a server
+(databases, for example) and *shouldn't be containerized* for that reason. And so
 on and so forth..... so use whatever feels natural. This salt setup is flexible
 enough to accommodate all of these options.
 
