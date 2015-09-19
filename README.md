@@ -173,7 +173,7 @@ the `loadbalancer` role.
 
 # SmartStack
 
-## Taga
+## Tags
 
 Tag                            | Description
 -------------------------------|-----------------------------------------------
