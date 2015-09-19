@@ -11,6 +11,8 @@ ExecStart=/usr/local/bin/vault server -config=/etc/vault/vault.conf
 ExecReload=/bin/kill -HUP $MAINPID
 KillMode=process
 Restart=on-failure
+# StartLimitInterval: try to restart for unlimited times, because this is an essential service!
+StartLimitInterval=0
 RestartSec=42s
 
 [Install]

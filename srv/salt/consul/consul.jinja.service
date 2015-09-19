@@ -20,6 +20,8 @@ ExecStart=/usr/local/bin/consul agent \
 ExecReload=/bin/kill -HUP $MAINPID
 KillMode=process
 Restart=on-failure
+# StartLimitInterval: try to restart for unlimited times, because this is an essential service!
+StartLimitInterval=0
 RestartSec=42s
 
 [Install]

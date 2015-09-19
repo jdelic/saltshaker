@@ -14,6 +14,9 @@ ExecReload=/usr/sbin/haproxy -c -f ${CONFIG}
 ExecReload=/bin/kill -USR2 $MAINPID
 KillMode=mixed
 Restart=always
+# StartLimitInterval: try to restart for unlimited times, because this is an essential service!
+StartLimitInterval=0
+RestartSec=10s
 
 [Install]
 WantedBy=multi-user.target
