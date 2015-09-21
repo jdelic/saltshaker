@@ -1,5 +1,5 @@
 
-apache2.2-common:
+apache2:
     pkg.installed
 
 
@@ -15,7 +15,7 @@ apache2:
     service:
         - running
         - require:
-            - pkg: apache2.2-common
+            - pkg: apache2
             - pkg: apache2-mpm-event
 
 
