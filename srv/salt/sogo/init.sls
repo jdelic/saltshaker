@@ -1,9 +1,8 @@
 
 sogo:
-# SOGO is now part of Debian Jessie
 #    pkgrepo.managed:
 #        - humanname: SOGo Debian
-#        - name: deb http://inverse.ca/debian jessie jessie
+#        - name: {{pillar["repos"]["sogo"]}}
 #        - file: /etc/apt/sources.list.d/sogo.list
 #        - key_url: salt://sogo/sogo_810273C4.pgp.key
 #        - require_in:

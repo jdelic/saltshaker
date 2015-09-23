@@ -34,11 +34,39 @@ dnsutils:
     pkg.installed
 
 
+jessie:
+    pkgrepo.managed:
+        - humanname: Jessie Base
+        - name: {{pillar["repos"]["jessie"]}}
+        - file: /etc/apt/sources.list
+        {% if pillar["repos"].get("pgpkey", None) %}
+        - key_url: {{pillar["repos"]["pgpkey"]}}
+        {% endif %}
+        - order: 1  # execute this state early!
+
+
+updates-jessie:
+    pkgrepo.managed:
+        - humanname: Jessie Updates
+        - name: {{pillar["repos"]["jessie-updates"]}}
+        - file: /etc/apt/sources.list.d/jessie-updates.list
+        - order: 2  # execute this state early!
+
+
+security-updates-jessie:
+    pkgrepo.managed:
+        - humanname: Jessie Security Updates
+        - name: {{pillar["repos"]["jessie-security"]}}
+        - file: /etc/apt/sources.list.d/jessie-security.list
+        - order: 2  # execute this state early!
+
+
 backports-org-jessie:
     pkgrepo.managed:
         - humanname: Jessie Backports
-        - name: deb http://ftp-stud.hs-esslingen.de/debian/ jessie-backports main
+        - name: {{pillar["repos"]["jessie-backports"]}}
         - file: /etc/apt/sources.list.d/jessie-backports.list
+        - order: 2  # execute this state early!
 
 
 openssl:

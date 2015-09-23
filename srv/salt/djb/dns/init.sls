@@ -18,8 +18,8 @@ include:
 
 /usr/local/src/djb/djbdns-1.05.tar.gz:
     file.managed:
-        - source: http://cr.yp.to/djbdns/djbdns-1.05.tar.gz
-        - source_hash: md5=3147c5cd56832aa3b41955c7a51cbeb2
+        - source: {{pillar["urls"]["djbdns"]}}
+        - source_hash: sha256=3ccd826a02f3cde39be088e1fc6aed9fd57756b8f970de5dc99fcd2d92536b48
         - require:
              - file: /usr/local/src/djb
 
@@ -43,7 +43,7 @@ dns-group:
     group.present:
          - name: dns
 
-dns: 
+dns:
     user.present:
         - gid: dns
         - home: /etc/tinydns-internal

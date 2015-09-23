@@ -46,7 +46,7 @@ qmail-equivs:
 #        - require:
 #            - file: /tmp/qmail-jm_1.03_all.deb
 #        - order: 1
-        
+
 
 
 sendmail-symlinks:
@@ -68,7 +68,7 @@ qmail-mailqueue-remove-default:
             - file: /var/qmail
             {% for user in qmail_users %}
             - user: {{user}}
-            {% endfor %} 
+            {% endfor %}
 
 
 qmail-mailqueue-symlink:
@@ -101,8 +101,8 @@ qmail-mailqueue-create:
 
 /usr/local/src/djb/qmail-1.03.tar.gz:
     file.managed:
-        - source: http://cr.yp.to/software/qmail-1.03.tar.gz
-        - source_hash: md5=622f65f982e380dbe86e6574f3abcb7c
+        - source: {{pillar["urls"]["qmail"]}}
+        - source_hash: sha256=21ed6c562cbb55092a66197c35c8222b84115d1acab0854fdb1ad1f301626f88
         - require:
              - file: /usr/local/src/djb
 
@@ -115,7 +115,7 @@ qmail-mailqueue-create:
 qmail-install:
     cmd.script:
         - args: {{grains['fqdn']}}
-        - source: salt://djb/qmail/install.sh 
+        - source: salt://djb/qmail/install.sh
         - cwd: /usr/local/src/djb
         - user: root
         - group: root

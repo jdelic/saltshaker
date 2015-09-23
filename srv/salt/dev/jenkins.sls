@@ -2,7 +2,7 @@
 jenkins:
     pkgrepo.managed:
         - humanname: Jenkins CI
-        - name: deb http://pkg.jenkins-ci.org/debian binary/
+        - name: {{pillar["repos"]["jenkins"]}}
         - file: /etc/apt/sources.list.d/jenkins.list
         - key_url: http://pkg.jenkins-ci.org/debian/jenkins-ci.org.key
         - require_in:

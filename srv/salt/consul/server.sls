@@ -64,7 +64,7 @@ consul-agent-absent:
 #consul-web-ui:
 #    archive.extracted:
 #        - name: /srv/consul-web-ui
-#        - source: https://dl.bintray.com/mitchellh/consul/0.5.2_web_ui.zip
+#        - source: {{pillar["urls"]["consul-webui"]}}
 #        - source_hash: md5=eb98ba602bc7e177333eb2e520881f4f
 #        - archive_format: zip
 #        - if_missing: /srv/consul-web-ui/dist

@@ -8,7 +8,7 @@ vault:
     # "mysql" or "consul" or "s3". Only "consul" supports redundancy (more than one vault server in the cluster
     # with leader elections. However, "consul" is *only* a good choice if your consul nodes run on multiple
     # physical machines.
-    backend: mysql
+    backend: consul
     kvpath: 'vault/'  # see https://vaultproject.io/docs/config/index.html
 
     sslcert: /etc/ssl/local/vault.crt

@@ -2,8 +2,8 @@
 consul-template:
     archive.extracted:
         - name: /usr/local/bin
-        - source: https://github.com/hashicorp/consul-template/releases/download/v0.10.0/consul-template_0.10.0_linux_amd64.tar.gz
-        - source_hash: md5=c09d9e77ff079e17b7097af882eab5d6
+        - source: {{pillar["urls"]["consul-template"]}}
+        - source_hash: sha256=ef298a2ae54cf51dbfc4108194299a9055b252ff9b917e7dd40c72fa30820096
         - archive_format: tar
         - tar_options: z
         - if_missing: /usr/local/bin/consul-template

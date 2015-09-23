@@ -74,7 +74,7 @@ consul:
              - group: consul
     archive.extracted:
         - name: /usr/local/bin
-        - source: https://dl.bintray.com/mitchellh/consul/0.5.2_linux_amd64.zip
+        - source: {{pillar["urls"]["consul"]}}
         - source_hash: sha256=171cf4074bfca3b1e46112105738985783f19c47f4408377241b868affa9d445
         - archive_format: zip
         - if_missing: /usr/local/bin/consul

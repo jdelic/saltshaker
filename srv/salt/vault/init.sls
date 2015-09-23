@@ -66,7 +66,7 @@ vault:
             - group: ssl-cert
     archive.extracted:
         - name: /usr/local/bin
-        - source: https://dl.bintray.com/mitchellh/vault/vault_0.2.0_linux_amd64.zip
+        - source: {{pillar["urls"]["vault"]}}
         - source_hash: sha256=b4b64fcea765ebfc7cdbae9cdd2c32bff130ca51f15b9cf47194f112fd5515cf
         - archive_format: zip
         - if_missing: /usr/local/bin/vault

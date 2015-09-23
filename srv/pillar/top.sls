@@ -20,6 +20,7 @@ base:
         - hetzner.dns
         - hetzner.network
         - hetzner.consul
+        - shared.urls
 
     # the minion ID starting with "cic" is the main PIM and mail server at Hetzner
     'cic*':
@@ -34,6 +35,7 @@ base:
         - local.network
         - shared.ssl
         - local.consul
+        - local.url_overrides
 
     # the minion ID starting with "test" is currently the main test VM in my Vagrant environment
     # "shared.ssl" is omitted here, because it's already assigned by '*.test'
