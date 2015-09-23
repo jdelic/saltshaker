@@ -7,7 +7,7 @@ repos:
     aptly: deb http://fileserver.maurusnet.test/aptly/ squeeze main
     aptly-nightly: deb http://fileserver.maurusnet.test/aptly-nightly/ nightly main
     jenkins: deb http://fileserver.maurusnet.test/jenkins/ jenkins main
-    jessie: deb http://fileserver.maurusnet.test/debian/ jessie main contrib
+    jessie: deb http://fileserver.maurusnet.test/debian/ jessie main
     jessie-backports: deb http://fileserver.maurusnet.test/debian/ jessie-backports main
     jessie-security: deb http://fileserver.maurusnet.test/debian/security/ jessie-updates main
     jessie-updates: deb http://fileserver.maurusnet.test/debian/ jessie-updates main

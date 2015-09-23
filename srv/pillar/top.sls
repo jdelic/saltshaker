@@ -44,4 +44,3 @@ base:
         - shared.casserver
 
 # vim: syntax=yaml
-
