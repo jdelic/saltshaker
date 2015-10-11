@@ -5,6 +5,14 @@ Vagrant.configure('2') do |config|
 
     $box_url = 'https://s3-eu-west-1.amazonaws.com/jdelic.eu/maurusnet-debian.box'
 
+    $local_privision = false
+    $local_provision_script = <<SCRIPT
+        sh -c 'echo 192.168.56.10 fileserver.maurusnet.test debian.saltstack.com httpredir.debian.org >> /etc/hosts'
+        sh -c 'echo deb http://fileserver.maurusnet.test/debian/ jessie main > /etc/apt/sources.list'
+        wget -q -O - http://fileserver.maurusnet.test/dev_apt_signing.public.pgp | apt-key add -
+        apt-get update
+SCRIPT
+
     config.ssh.insert_key = false
     config.ssh.forward_agent = true
 
@@ -26,11 +34,14 @@ Vagrant.configure('2') do |config|
         master.vm.synced_folder 'saltshaker/etc/salt-master/master.d', '/etc/salt/master.d'
 
         master.vm.provision :shell do |s|
-            s.inline = <<SCRIPT
+            if $local_privision
+                s.inline = $local_provision_script
+            end
+            s.inline += <<SCRIPT
                 mkdir -p /etc/salt/roles.d
                 touch /etc/salt/roles.d/master
-                touch /etc/salt/roles.d/consulserver
                 touch /etc/salt/roles.d/vault
+                touch /etc/salt/roles.d/consulserver
 SCRIPT
         end
 
@@ -43,6 +54,7 @@ SCRIPT
             salt.always_install = true
             salt.install_master = true
             salt.install_syndic = false
+            salt.bootstrap_script = 'saltshaker/vagrant/bootstrap-salt.sh'
             salt.bootstrap_options = '-P -c /tmp'
             salt.master_pub = 'saltshaker/vagrant/preseed-keys/saltmaster.maurusnet.test.pub'
             salt.master_key = 'saltshaker/vagrant/preseed-keys/saltmaster.maurusnet.test.pem'
@@ -76,7 +88,10 @@ SCRIPT
         test.vm.synced_folder 'saltshaker/etc/salt-minion/minion.d', '/etc/salt/minion.d'
 
         test.vm.provision :shell do |s|
-            s.inline = <<SCRIPT
+            if $local_privision
+                s.inline = $local_provision_script
+            end
+            s.inline += <<SCRIPT
                 sh -c 'if ! grep -q 192.168.56.88 /etc/hosts; then echo "192.168.56.88        saltmaster.maurusnet.test" >> /etc/hosts; fi'
                 mkdir -p /etc/salt/roles.d
                 chown 700 /etc/salt/roles.d
@@ -85,6 +100,7 @@ SCRIPT
                 touch /etc/salt/roles.d/pim
                 touch /etc/salt/roles.d/mail
                 touch /etc/salt/roles.d/dev
+                touch /etc/salt/roles.d/apps
                 chown 600 /etc/salt/roles.d/*
 SCRIPT
         end
@@ -98,6 +114,7 @@ SCRIPT
             salt.always_install = false
             salt.install_master = false
             salt.install_syndic = false
+            salt.bootstrap_script = 'saltshaker/vagrant/bootstrap-salt.sh'
             salt.bootstrap_options = '-P -c /tmp'
             salt.minion_key = 'saltshaker/vagrant/preseed-keys/test.maurusnet.test.pem'
             salt.minion_pub = 'saltshaker/vagrant/preseed-keys/test.maurusnet.test.pub'
