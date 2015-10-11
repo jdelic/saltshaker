@@ -69,7 +69,7 @@ SCRIPT
         # we have to restart salt-minion because the master's hostname is set in minion.d
         # on a vboxsf mount
         master.vm.provision :shell, run: 'always' do |s|
-            s.inline = 'systemctl restart salt-minion'
+            s.inline = 'systemctl restart salt-minion; sleep 1'
         end
     end
 
@@ -123,7 +123,7 @@ SCRIPT
         # we have to restart salt-minion because the master's hostname is set in minion.d
         # on a vboxsf mount
         test.vm.provision :shell, run: 'always' do |s|
-            s.inline = 'systemctl restart salt-minion'
+            s.inline = 'systemctl restart salt-minion; sleep 1'
         end
     end
 

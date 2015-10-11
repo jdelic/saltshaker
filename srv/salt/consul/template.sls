@@ -6,23 +6,13 @@ consul-template:
         - source_hash: sha256=1162de7ecd6303dccc3e8c3cb7faaecb55d1577eea9b690c56cb156102694f15
         - archive_format: zip
         - if_missing: /usr/local/bin/consul-template
-    file.copy:
+    file.managed:
         - name: /usr/local/bin/consul-template
-        - source: /usr/local/bin/consul-template_0.10.0_linux_amd64/consul-template
-        - force: True
         - mode: '0750'
         - user: root
         - group: root
-        - onlyif: test -e /usr/local/bin/consul-template_0.10.0_linux_amd64/consul-template
         - require:
             - archive: consul-template
-
-
-consul-template-cleanup:
-    file.absent:
-        - name: /usr/local/bin/consul-template_0.10.0_linux_amd64
-        - require:
-            - file: consul-template
 
 
 consul-template-dir:
