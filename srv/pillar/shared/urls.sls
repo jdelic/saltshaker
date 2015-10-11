@@ -20,7 +20,7 @@ repos:
 
 urls:
     consul: https://dl.bintray.com/mitchellh/consul/0.5.2_linux_amd64.zip
-    consul-template: https://github.com/hashicorp/consul-template/releases/download/v0.10.0/consul-template_0.10.0_linux_amd64.tar.gz
+    consul-template: https://github.com/hashicorp/consul-template/releases/download/v0.11.0/consul_template_0.11.0_linux_amd64.zip
     consul-webui: https://dl.bintray.com/mitchellh/consul/0.5.2_web_ui.zip
     djbdns: http://cr.yp.to/djbdns/djbdns-1.05.tar.gz
     qmail: http://cr.yp.to/software/qmail-1.03.tar.gz
