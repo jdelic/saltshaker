@@ -21,6 +21,6 @@ urls:
     consul-template: http://fileserver.maurusnet.test/downloads/consul-template/consul_template_0.11.0_linux_amd64.zip
     consul-webui: http://fileserver.maurusnet.test/downloads/consul/0.5.2_web_ui.zip
     djbdns: http://fileserver.maurusnet.test/downloads/djbdns/djbdns-1.05.tar.gz
+    nomad: http://fileserver.maurusnet.test/downloads/nomad/v0.1.2.zip
     qmail: http://fileserver.maurusnet.test/downloads/qmail/qmail-1.03.tar.gz
     vault: http://fileserver.maurusnet.test/downloads/vault/vault_0.2.0_linux_amd64.zip
-    nomad: http://fileserver.maurusnet.test/downloads/nomad/v0.1.2.zip
