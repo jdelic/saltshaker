@@ -25,4 +25,4 @@ urls:
     djbdns: http://cr.yp.to/djbdns/djbdns-1.05.tar.gz
     nomad: https://github.com/hashicorp/nomad/archive/v0.1.2.zip
     qmail: http://cr.yp.to/software/qmail-1.03.tar.gz
-    vault: https://dl.bintray.com/mitchellh/vault/vault_0.2.0_linux_amd64.zip
+    vault: https://dl.bintray.com/mitchellh/vault/vault_0.3.1_linux_amd64.zip

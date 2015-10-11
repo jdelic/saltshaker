@@ -23,4 +23,4 @@ urls:
     djbdns: http://fileserver.maurusnet.test/downloads/djbdns/djbdns-1.05.tar.gz
     nomad: http://fileserver.maurusnet.test/downloads/nomad/v0.1.2.zip
     qmail: http://fileserver.maurusnet.test/downloads/qmail/qmail-1.03.tar.gz
-    vault: http://fileserver.maurusnet.test/downloads/vault/vault_0.2.0_linux_amd64.zip
+    vault: http://fileserver.maurusnet.test/downloads/vault/vault_0.3.1_linux_amd64.zip
