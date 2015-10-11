@@ -78,6 +78,7 @@ vault:
         - require:
             - user: vault
             - file: vault-data-dir
+            - archive: vault
 
 
 # the vault executable must have the "cap_ipc_lock=+ep" flag so it can lock memory from swap.
@@ -91,6 +92,8 @@ vault-setcap:
         - user: root
         - group: root
         - unless: getcap /usr/local/bin/vault | grep -q cap_ipc_lock
+        - require:
+            - file: vault
 
 
 /etc/vault/vault.conf:
