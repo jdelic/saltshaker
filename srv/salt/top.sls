@@ -41,9 +41,6 @@ base:
         - match: grain
         - vault
 
-    'saltmaster.maurusnet.test':
-        - samba
-
     'roles:dev':
         - match: grain
         - apache
