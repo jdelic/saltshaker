@@ -18,20 +18,16 @@ include:
     - iptables  # forces "order: 1"
     - ssl
 
-less:
-    pkg.installed
 
-
-coreutils:
-    pkg.installed
-
-
-patch:
-    pkg.installed
-
-
-dnsutils:
-    pkg.installed
+basic-required-packages:
+    pkg.installed:
+        - pkgs:
+            - less
+            - coreutils
+            - patch
+            - dnsutils
+            - unzip
+        -  order: 1  # execute this state early, because later states need unzip
 
 
 jessie:
