@@ -24,4 +24,15 @@ ssl-key-location:
         - mode: 710
         - makedirs: True
 
+
+maurusnet-ca-certificate:
+    file.managed:
+        - name: /usr/share/ca-certificates/local/maurusnet-ca.crt
+        - source: salt://ssl/maurusnet-ca.crt
+        - user: root
+        - group: root
+        - mode: 755
+        - makedirs: True
+
+
 # vim: syntax=yaml
