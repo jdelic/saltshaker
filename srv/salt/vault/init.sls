@@ -120,6 +120,8 @@ vault-service:
         - require:
             - file: vault
             - file: /etc/vault/vault.conf
+            - file: vault-ssl-cert
+            - file: vault-ssl-key
     service.running:
         - name: vault
         - sig: vault
