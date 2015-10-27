@@ -11,9 +11,10 @@ libapache2-mod-xsendfile:
     pkg.installed
 
 
-apache2:
-    service:
-        - running
+apache2-service:
+    service.running:
+        - name: apache2
+        - enable: True
         - require:
             - pkg: apache2
             - pkg: apache2-mpm-event
