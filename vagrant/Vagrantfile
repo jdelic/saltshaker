@@ -143,7 +143,6 @@ SCRIPT
                 touch /etc/salt/roles.d/mail
                 touch /etc/salt/roles.d/database
                 touch /etc/salt/roles.d/pim
-                touch /etc/salt/roles.d/mail
                 touch /etc/salt/roles.d/dev
                 touch /etc/salt/roles.d/apps
                 chown 600 /etc/salt/roles.d/*
