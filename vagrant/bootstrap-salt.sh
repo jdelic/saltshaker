@@ -5108,6 +5108,7 @@ daemons_running() {
             FAILED_DAEMONS=$((FAILED_DAEMONS + 1))
         fi
     done
+    sleep 3
     return $FAILED_DAEMONS
 }
 #
