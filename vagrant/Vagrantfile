@@ -7,10 +7,51 @@ Vagrant.configure('2') do |config|
 
     $local_privision = false
     $local_provision_script = <<SCRIPT
-        sh -c 'echo 192.168.56.10 fileserver.maurusnet.test debian.saltstack.com httpredir.debian.org >> /etc/hosts'
+        sh -c 'echo 192.168.56.10 fileserver.maurusnet.test repo.saltstack.com httpredir.debian.org >> /etc/hosts'
         sh -c 'echo deb http://fileserver.maurusnet.test/debian/ jessie main > /etc/apt/sources.list'
         wget -q -O - http://fileserver.maurusnet.test/dev_apt_signing.public.pgp | apt-key add -
         apt-get update
+        sh -c 'apt-get install ca-certificates'
+        sh -c 'if ! grep -q maurusnet-ca /etc/ca-certificates.conf; then echo local/maurusnet-ca.crt >> /etc/ca-certificates.conf; fi'
+        sh -c 'mkdir -p /usr/share/ca-certificates/local'
+        sh -c 'cat > /usr/share/ca-certificates/local/maurusnet-ca.crt <<EOF
+-----BEGIN CERTIFICATE-----
+MIIGJjCCBA4CAQAwDQYJKoZIhvcNAQELBQAwgdgxCzAJBgNVBAYTAkRFMQ8wDQYD
+VQQHDAZNdW5pY2gxHTAbBgNVBAoMFG1hdXJ1cy5uZXR3b3JrcyBHbWJIMRswGQYD
+VQQLDBJJbnRlcm5ldCBTZXJ2ZXIgQ0ExKzApBgNVBAMMIm1hdXJ1cy5uZXR3b3Jr
+cyBJbnRlcm5ldCBTZXJ2ZXIgQ0ExHDAaBgkqhkiG9w0BCQEWDWNhQG1hdXJ1cy5u
+ZXQxMTAvBgkqhkiG9w0BCQIMIm1hdXJ1cy5uZXR3b3JrcyBJbnRlcm5ldCBTZXJ2
+ZXIgQ0EwHhcNMTUwOTExMDgzNjMwWhcNMzUwOTA2MDgzNjMwWjCB2DELMAkGA1UE
+BhMCREUxDzANBgNVBAcMBk11bmljaDEdMBsGA1UECgwUbWF1cnVzLm5ldHdvcmtz
+IEdtYkgxGzAZBgNVBAsMEkludGVybmV0IFNlcnZlciBDQTErMCkGA1UEAwwibWF1
+cnVzLm5ldHdvcmtzIEludGVybmV0IFNlcnZlciBDQTEcMBoGCSqGSIb3DQEJARYN
+Y2FAbWF1cnVzLm5ldDExMC8GCSqGSIb3DQEJAgwibWF1cnVzLm5ldHdvcmtzIElu
+dGVybmV0IFNlcnZlciBDQTCCAiIwDQYJKoZIhvcNAQEBBQADggIPADCCAgoCggIB
+ALd6kb9lqTCFz8oQY6/Z0LGnLvPTJFklNYBEdKY1FKFDaX9avyKRHcN8AqGNCmBW
+/h5yW8TgkpPS523LoaNi/TKrjlN7HeoYntnlYEe7NOyOgTmgEZ37lkQyNmdjhtoi
+AzC1ViW3TVeC9I6nH+PgTHrPTKXjKfdfr/EIzfZ7UESgRiitLFbwX3z08ps3m6aB
+8kRx1fftU3cM9X0CGY71pEv0aBhL8m/iPdzCHJrkQ3oDqsaFtpfPF6e3yurZvgz+
+PIKqnCIQGSd2WleOY1LjUP3W5fvstXMCiErYPfFDKpPM1ZWD4zBN/DsOeX3+e9k/
+uh8+Xb+FHYYJnR4zs7BsfwSWg/G8hC+DN6BvYSBvY5bI+BnAzFXwCD+58guPzlKR
+97Z5DTHZYHnuvZi3HdqkjpYk45CpFGW8MHIHc0HbDlFWCQ2KdmcxLYbc9+g+J1Jc
+8OBYgRG+Bj5YhNxeZUpljjV7GDVqFjwGg59wwnStJZhiuvMP+oRQ79TK3nAvB5P7
+CO2jbQcRdRKdBGgvThZvbCkF3gLpXamGm+u/rLC4faTp3zZ87RNg5PgiwDOb2azY
+SSUCVwv42IAzLChZsFTBvFegqMCY7h/P4qz5APbOBrPuJYffk626uxMcMuG90Xpa
+efhqsnWEmk/ZVSZvB6E+2XARpHcH8EMrwRudUE80uvWFAgMBAAEwDQYJKoZIhvcN
+AQELBQADggIBAF5N40kz6RFs3AX22ZD1SA6vfkx0ENotoZp9/npZUp+MurIfTpCr
+fKTk8LZRlCRVlwZRAkmg6miqSv0UmnokwOQt6L/ai6/gbp6hm4xsZcgMdCAP4DzM
+lVvstOE0ntdHC/4sMxp19m2yLz4U6tZgxOsXsfGhu7mPBa8IxWBagQwK4vGCRZyA
+bpYv+LbTViKMfFxs2XjIb5ZvKOHsyxH57wafBll9XWYj/6TflkVApS4bfgT/E77V
+CtSxeqABL51S5LY7+kQ5jCMudNTsgGL2ZRxDqZxNoenpYktoyiBXC+BHwO8udtLs
+U75ziFxIFxiBjGIZ8uQOnb4Sh6YSDqEMm9YmDjx0DiA0fuMFX84afoNGJxOns35V
+QbCmEdoujXUlt+e4j1y0Aqa0PP0KZjiEzrqW9l5OX+MaFrmsuacAWfNcbjwdsyQT
+bF62riyvvDGBkFZRPGjak9fXkfnzTXxmWqiJ7RHWXxvIi3by6NJTY80TK9OWgxEL
+li5zEbLih0mXXbRnYm63KlhaujnPrkjSXPo1RIi5g4sUEkxj4iBClqeeJcvQGN8X
+F+dwVYXA3JwanHoTPOZ670s9+pKQtAYilAd7H2SSxzrhxZAlq6i6k13mFW44W+a+
+b4I6FbJUSm7ZifmWy93M86ylLuMwUV+19NsAf5ocdpXyCeJ73zpqA/lg
+-----END CERTIFICATE-----
+EOF'
+        sh -c 'update-ca-certificates'
 SCRIPT
 
     config.ssh.insert_key = false
