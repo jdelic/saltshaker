@@ -2336,13 +2336,14 @@ install_debian_8_deps() {
     if [ "$(grep -R 'jessie-saltstack' /etc/apt)" = "" ]; then
         #echo "deb http://debian.saltstack.com/debian jessie-saltstack main" >> \
         #    /etc/apt/sources.list.d/saltstack.list
-        echo "deb http://repo.saltstack.com/apt/debian jessie contrib" >> \
+        echo "http://repo.saltstack.com/apt/debian/latest jessie main" >> \
             /etc/apt/sources.list.d/saltstack.list
     fi
 
     # shellcheck disable=SC2086
     #wget $_WGET_ARGS -q http://debian.saltstack.com/debian-salt-team-joehealy.gpg.key -O - | apt-key add - || return 1
-    wget $_WGET_ARGS -q https://repo.saltstack.com/apt/debian/SALTSTACK-GPG-KEY.pub -O - | apt-key add - || return 1
+    echodebug "installing salt key"
+    wget $_WGET_ARGS -q https://repo.saltstack.com/apt/debian/latest/SALTSTACK-GPG-KEY.pub -O - | apt-key add - || return 1
 
     apt-get update || return 1
     __apt_get_install_noinput -t jessie-backports libzmq3 libzmq3-dev python-zmq python-requests python-apt || return 1
