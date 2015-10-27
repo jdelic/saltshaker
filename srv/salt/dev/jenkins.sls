@@ -16,9 +16,9 @@ jenkins:
             - pkgrepo: jenkins
             - pkg: openjdk-8-jre-headless
 
-    service:
+    service.running:
         - name: jenkins
-        - running
+        - enable: True
         - require:
             - pkg: jenkins
 
