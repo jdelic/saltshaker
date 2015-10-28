@@ -1,5 +1,5 @@
 [Unit]
-Description=MySQL Multi Server for instance %i
+Description=MariaDB Multi Server for instance %i
 After=syslog.target
 After=network.target
 
