@@ -19,10 +19,10 @@ repos:
 #           state for that!
 
 urls:
-    consul: https://dl.bintray.com/mitchellh/consul/0.5.2_linux_amd64.zip
-    consul-template: https://github.com/hashicorp/consul-template/releases/download/v0.11.0/consul_template_0.11.0_linux_amd64.zip
-    consul-webui: https://dl.bintray.com/mitchellh/consul/0.5.2_web_ui.zip
+    consul: https://releases.hashicorp.com/consul/0.5.2/consul_0.5.2_linux_amd64.zip
+    consul-template: https://releases.hashicorp.com/consul-template/0.11.1/consul-template_0.11.1_linux_amd64.zip
+    consul-webui: https://releases.hashicorp.com/consul/0.5.2/consul_0.5.2_web_ui.zip
     djbdns: http://cr.yp.to/djbdns/djbdns-1.05.tar.gz
-    nomad: https://github.com/hashicorp/nomad/archive/v0.1.2.zip
+    nomad: https://releases.hashicorp.com/nomad/0.1.2/nomad_0.1.2_linux_amd64.zip
     qmail: http://cr.yp.to/software/qmail-1.03.tar.gz
-    vault: https://dl.bintray.com/mitchellh/vault/vault_0.3.1_linux_amd64.zip
+    vault: https://releases.hashicorp.com/vault/0.3.1/vault_0.3.1_linux_amd64.zip
