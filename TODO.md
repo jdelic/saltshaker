@@ -4,11 +4,11 @@
  * add health checks for services monitored through consul
  * write docs for placeholders in README.md
  * all PHP should run through php-fpm behind Apache2
- * add Pillar config for a list of application apt repositories?
  * add Nagios/Icinca/xyz monitoring via consul-template
  * clean up the MySQL state folder
  * add a consul-template cmd.wait watcher state for haproxy.internal that deletes the servicerenderer
    if the command-line parameters change, because consul-template will not do it by itself
+ * add ssmtp to all servers that don't run qmail
 
 
 # Ponder
