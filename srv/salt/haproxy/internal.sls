@@ -22,7 +22,7 @@ smartstack-internal:
             - file: haproxy-config-template
     service.running:
         - name: haproxy@internal
-        - sig: haproxy -f /etc/haproxy/haproxy-smartstack.cfg
+        - sig: haproxy -f /etc/haproxy/haproxy-internal.cfg
         - enable: True
         - require:
             - file: haproxy-multi
