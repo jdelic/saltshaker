@@ -37,6 +37,11 @@ spamassassin:
             - spamassassin
             - spamc
             - procmail
+    service.running:
+        - sig: spamd
+        - enable: True
+        - require:
+            - pkg: spamassassin
 
 
 git:
