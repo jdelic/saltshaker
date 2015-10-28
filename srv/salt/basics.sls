@@ -19,6 +19,27 @@ include:
     - ssl
 
 
+# enforce that Debian packages can't launch daemons while salt runs
+# see http://people.debian.org/~hmh/invokerc.d-policyrc.d-specification.txt
+policy-deny:
+    file.managed:
+        - name: /usr/sbin/policy-rc.d
+        - source: salt://policy-rc.d
+        - mode: 0755
+        - user: root
+        - group: root
+        - order: 1  # execute super-early before we install most packages
+
+
+# at the end we remove the policy-rc.d file again to restore default behavior...
+# it might be worthwhile to switch all Debian boxes to a default policy of "deny"
+# and remove this state.
+policy-allow:
+    file.absent:
+        - name: /usr/sbin/policy-rc.d
+        - order: last  # remove the file when we're basically done
+
+
 basic-required-packages:
     pkg.installed:
         - pkgs:
