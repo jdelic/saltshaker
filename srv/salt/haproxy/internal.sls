@@ -15,15 +15,17 @@ smartstack-internal:
         - context:
             servicescript: /etc/consul/renders/smartstack-internal.py
             target: /etc/haproxy/haproxy-internal.cfg
-            command: systemctl reload haproxy@internal
+            # this (yaml folded) command-line will reload haproxy if it is running and restart it otherwise
+            command: >
+                ps awwfux | grep -v grep | grep -q 'haproxy -f /etc/haproxy/haproxy-internal.cfg' &&
+                systemctl reload haproxy@internal ||
+                systemctl restart haproxy@internal
             parameters: --has smartstack:internal
             template: /etc/haproxy/haproxy.jinja.cfg
         - require:
             - file: haproxy-config-template
-    service.running:
+    service.enabled:  # haproxy will be started by the smartstack script rendered by consul-template (see command above)
         - name: haproxy@internal
-        - sig: haproxy -f /etc/haproxy/haproxy-internal.cfg
-        - enable: True
         - require:
             - file: haproxy-multi
             - file: smartstack-internal
