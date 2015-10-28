@@ -7,8 +7,11 @@ mysql-server:
     pkg:
         - installed
         - pkgs:
-            - mysql-server
-            - python-mysqldb
+            - mariadb-server-10.0
+            - mariadb-server-core-10.0
+            - mariadb-client-10.0
+            - mariadb-client-core-10.0
+            - mariadb-common
     service.dead:  # make sure mysql is down before we switch to mysqld-multi
         - name: mysql
         - enable: False
