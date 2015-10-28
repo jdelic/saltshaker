@@ -3,7 +3,7 @@ consul-template:
     archive.extracted:
         - name: /usr/local/bin
         - source: {{pillar["urls"]["consul-template"]}}
-        - source_hash: sha256=1162de7ecd6303dccc3e8c3cb7faaecb55d1577eea9b690c56cb156102694f15
+        - source_hash: sha256=aa681229e77f93c569eca2883f674184d05d1bdc0ca33234e28c2b60f17dc398
         - archive_format: zip
         - if_missing: /usr/local/bin/consul-template
     file.managed:

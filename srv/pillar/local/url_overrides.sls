@@ -18,7 +18,7 @@ repos:
 
 urls:
     consul: http://fileserver.maurusnet.test/downloads/consul/0.5.2_linux_amd64.zip
-    consul-template: http://fileserver.maurusnet.test/downloads/consul-template/consul_template_0.11.0_linux_amd64.zip
+    consul-template: http://fileserver.maurusnet.test/downloads/consul-template/consul-template_0.11.1_linux_amd64.zip
     consul-webui: http://fileserver.maurusnet.test/downloads/consul/0.5.2_web_ui.zip
     djbdns: http://fileserver.maurusnet.test/downloads/djbdns/djbdns-1.05.tar.gz
     nomad: http://fileserver.maurusnet.test/downloads/nomad/v0.1.2.zip
