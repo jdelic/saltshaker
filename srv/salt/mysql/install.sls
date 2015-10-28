@@ -72,7 +72,6 @@ mysql-multi:
          - require:
              - pkg: mysql-server
              - file: mysql-multi-config
-             - file: mysql-multi-includedir-patch
 
 
 mysql-multi-config:
@@ -87,14 +86,6 @@ mysql-multi-config:
             - user
             - group
             - mode
-
-
-# work around http://bugs.mysql.com/bug.php?id=29327
-mysql-multi-includedir-patch:
-    file.patch:
-        - name: /usr/bin/mysqld_multi
-        - source: salt://mysql/mysqld_multi.patch
-        - hash: md5=b9ae0de4f3235fbe03de12a6dfbcafa8
 
 
 /etc/mysql/debian.cnf:
