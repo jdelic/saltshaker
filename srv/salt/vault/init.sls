@@ -129,6 +129,12 @@ vault-service:
         - enable: True
         - require:
             - file: vault-service
+            # if vault runs on MySQL or AWS those services are external. Consul runs always local.
+            {% if 'consulserver' in grains['roles'] and pillar['vault']['backend'] == 'consul' %}
+            - service: consul-server-service
+            {% elif 'consulserver' not in grains['roles'] and pillar['vault']['backend'] == 'consul' %}
+            - service: consul-agent-service
+            {% endif %}
         - watch:
             - file: vault-service
 
