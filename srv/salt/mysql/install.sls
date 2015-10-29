@@ -4,8 +4,7 @@
 #
 
 mysql-server:
-    pkg:
-        - installed
+    pkg.installed:
         - pkgs:
             - mariadb-server-10.0
             - mariadb-server-core-10.0
@@ -91,9 +90,9 @@ mysql-multi-config:
             - mode
 
 
-/etc/mysql/debian.cnf:
-    file:
-        - managed
+mysql-debian-config:
+    file.managed:
+        - name: /etc/mysql/debian.cnf
         - source: salt://mysql/debian.jinja.cnf
         - template: jinja
         - context:

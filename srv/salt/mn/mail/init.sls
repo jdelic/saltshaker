@@ -3,8 +3,9 @@
 # nixspam, spamassassin and the mailsystem helper scripts
 
 
-/var/qmail/control/smtpgreeting:
+smtpgreeting:
     file.managed:
+        - name: /var/qmail/control/smtpgreeting
         - source: salt://mn/mail/smtpgreeting.tpl
         - user: root
         - group: root
@@ -21,8 +22,9 @@ nixspam:
             - file: email-storage
 
 
-/var/lib/nixspam:
+nixspam-data-directory:
     file.directory:
+        - name: /var/lib/nixspam
         - user: virtmail
         - group: mail
         - dir_mode: '755'
@@ -64,8 +66,9 @@ mn-mailsystem:
             - libcdb-file-perl
 
 
-/usr/local/mail/checkdomainpasswd:
+checkdomainpasswd-setuid-binary:
     file.managed:
+        - name: /usr/local/mail/checkdomainpasswd
         - user: virtmail
         - group: mail
         - mode: '4755'
@@ -74,8 +77,9 @@ mn-mailsystem:
            - cmd: mn-mailsystem
 
 
-/usr/local/mail/checkdomainpasswd.py:
+checkdomainpasswd-script:
     file.managed:
+        - name: /usr/local/mail/checkdomainpasswd.py
         - user: virtmail
         - group: mail
         - mode: '750'
@@ -84,16 +88,18 @@ mn-mailsystem:
             - cmd: mn-mailsystem
 
 
-/etc/cron.d/nixspam:
+nixspam-crontab:
     file.managed:
+        - name: /etc/cron.d/nixspam
         - source: salt://mn/mail/cron/nixspam
         - user: root
         - group: root
         - mode: '644'
 
 
-/etc/cron.daily/removespam:
+removespam-daily-cron:
     file.managed:
+        - name: /etc/cron.daily/removespam
         - source: salt://mn/mail/cron/removespam.tpl
         - template: jinja
         - user: root
@@ -101,8 +107,9 @@ mn-mailsystem:
         - mode: '750'
 
 
-/etc/cron.daily/checkvalidrcptto:
+checkvalidrcptto-daily-cron:
     file.managed:
+        - name: /etc/cron.daily/checkvalidrcptto
         - source: salt://mn/mail/cron/checkvalidrcptto.tpl
         - template: jinja
         - user: root
@@ -110,8 +117,9 @@ mn-mailsystem:
         - mode: '750'
 
 
-/secure/webfilters:
+webfilters-directory:
     file.directory:
+        - name: /secure/webfilters
         - user: horde
         - group: mail
         - dir_mode: '750'

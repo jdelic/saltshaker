@@ -11,9 +11,9 @@ include:
     - djb.qmail.jgreylist
 
 
-/var/qmail:
-    file:
-        - exists
+var-qmail-directory:
+    file.exists:
+        - name: /var/qmail
         - require:
             - cmd: qmail-install
 
@@ -56,7 +56,7 @@ sendmail-symlinks:
             - /usr/sbin/sendmail
             - /usr/lib/sendmail
         - require:
-            - file: /var/qmail
+            - file: var-qmail-directory
 
 
 qmail-mailqueue-remove-default:
@@ -65,7 +65,7 @@ qmail-mailqueue-remove-default:
         - unless: test -h /var/qmail/queue
         - onlyif: test -d /var/qmail/queue
         - require:
-            - file: /var/qmail
+            - file: var-qmail-directory
             {% for user in qmail_users %}
             - user: {{user}}
             {% endfor %}
@@ -76,7 +76,7 @@ qmail-mailqueue-symlink:
         - target: /mailqueue
         - name: /var/qmail/queue
         - require:
-            - file: /var/qmail
+            - file: var-qmail-directory
             - cmd: qmail-mailqueue-remove-default
             {% for user in qmail_users %}
             - user: {{user}}
@@ -99,16 +99,18 @@ qmail-mailqueue-create:
     # djb.qmail.mounts.* set a require_in for this state
 
 
-/usr/local/src/djb/qmail-1.03.tar.gz:
+qmail-source-archive:
     file.managed:
+        - name: /usr/local/src/djb/qmail-1.03.tar.gz
         - source: {{pillar["urls"]["qmail"]}}
         - source_hash: sha256=21ed6c562cbb55092a66197c35c8222b84115d1acab0854fdb1ad1f301626f88
         - require:
-             - file: /usr/local/src/djb
+             - file: djb-source-build-directory
 
 
-/usr/local/src/djb/qmail-1.03-jms1-7.10.patch:
+qmail-jms1-patch:
     file.managed:
+        - name: /usr/local/src/djb/qmail-1.03-jms1-7.10.patch
         - source: salt://djb/qmail/qmail-1.03-jms1-7.10.patch
 
 
@@ -120,8 +122,8 @@ qmail-install:
         - user: root
         - group: root
         - require:
-            - file: /usr/local/src/djb/qmail-1.03-jms1-7.10.patch
-            - file: /usr/local/src/djb/qmail-1.03.tar.gz
+            - file: qmail-jms1-patch
+            - file: qmail-source-archive
             {% for user in qmail_users %}
             - user: {{user}}
             {% endfor %}

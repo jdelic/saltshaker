@@ -2,6 +2,9 @@
 samba:
     pkg:
         - installed
+
+
+samba-config:
     file.managed:
         - name: /etc/samba/smb.conf
         - source: salt://samba/smb.conf.tpl
@@ -17,24 +20,25 @@ smbd:
     service.running:
         - enable: True
         - watch:
-             - file: /etc/samba/smb.conf
+             - file: samba-config
         - require:
             - pkg: samba
-            - file: /etc/samba/smb.conf
-            - file: /mnt/smb
+            - file: samba-config
+            - file: samba-default-mount
 
 
-/mnt/smb:
+samba-default-mount:
     file.directory:
-         - user: vagrant
-         - group: vagrant
-         - recurse:
-             - user
-             - group
-         - dir_mode: '0755'
-         - file_mode: '0644'
-         - require:
-              - user: vagrant
+        - name: /mnt/smb
+        - user: vagrant
+        - group: vagrant
+        - recurse:
+            - user
+            - group
+        - dir_mode: '0755'
+        - file_mode: '0644'
+        - require:
+             - user: vagrant
 
 
 # portlist from https://wiki.samba.org/index.php/Samba_port_usage

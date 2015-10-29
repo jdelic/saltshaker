@@ -2,26 +2,28 @@
 include:
     - djb
 
-/usr/local/djbdns-1.05:
-    file:
-        - exists
+djbdns-install-directory:
+    file.exists:
+        - name: /usr/local/djbdns-1.05
         - require:
             - cmd: djbdns-install
 
 
-/usr/local/djbdns:
+djbdns-version-symlink:
     file.symlink:
+        - name: /usr/local/djbdns
         - target: /usr/local/djbdns-1.05
         - require:
-            - file: /usr/local/djbdns-1.05
+            - file: djbdns-install-directory
 
 
-/usr/local/src/djb/djbdns-1.05.tar.gz:
+djbdns-source-archive:
     file.managed:
+        - name: /usr/local/src/djb/djbdns-1.05.tar.gz
         - source: {{pillar["urls"]["djbdns"]}}
         - source_hash: sha256=3ccd826a02f3cde39be088e1fc6aed9fd57756b8f970de5dc99fcd2d92536b48
         - require:
-             - file: /usr/local/src/djb
+            - file: djb-source-build-directory
 
 
 djbdns-install:
@@ -31,7 +33,7 @@ djbdns-install:
         - user: root
         - group: root
         - require:
-            - file: /usr/local/src/djb/djbdns-1.05.tar.gz
+            - file: djbdns-source-archive
             - pkg: build-essential
             - pkg: make
             - pkg: ucspi-tcp
@@ -67,7 +69,7 @@ tinydns-install:
     cmd.run:
         - name: /usr/local/djbdns/bin/tinydns-conf dns dnslog /etc/tinydns-internal 127.0.0.1
         - require:
-            - file: /usr/local/djbdns
+            - file: djbdns-version-symlink
             - user: dns
             - user: dnslog
         - unless: test -e /etc/tinydns-internal
@@ -86,7 +88,7 @@ dnscache-install:
     cmd.run:
         - name: /usr/local/djbdns/bin/dnscache-conf dns dnslog /etc/dnscache {{pillar['dns-internal']['ip']}}
         - require:
-            - file: /usr/local/djbdns
+            - file: djbdns-version-symlink
             - user: dns
             - user: dnslog
         - unless: test -e /etc/dnscache

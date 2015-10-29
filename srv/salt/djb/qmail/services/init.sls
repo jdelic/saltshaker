@@ -28,7 +28,7 @@ qmail-service-folders:
             - {{pillar['smtp']['internal-relay-service-dir']}}/log
             - {{pillar['smtp']['internal-relay-service-dir']}}/log/env
         - require:
-            - file: /var/qmail
+            - file: var-qmail-directory
             {% for user in qmail_users %}
             - user: {{user}}
             {% endfor %}

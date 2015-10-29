@@ -8,18 +8,20 @@ daemontools:
             - daemontools
             - daemontools-run
         - require:
-            - file: /var/log/svscan
+            - file: svscan-log-folder
 
 
-/var/log/svscan:
+svscan-log-folder:
     file.directory:
+        - name: /var/log/svscan
         - mode: 755
         - user: root
         - group: root
-        
 
-/usr/bin/svscanboot:
+
+svscanboot-script:
     file.managed:
+        - name: /usr/bin/svscanboot
         - source: salt://djb/svscanboot.override
         - mode: 755
         - user: root
@@ -32,7 +34,7 @@ svscanboot-restart:
     cmd.wait:
         - name: kill $(pgrep svscanboot) $(pgrep svscan) $(pgrep readproctitle)
         - watch:
-            - file: /usr/bin/svscanboot
+            - file: svscanboot-script
         - onlyif: pgrep readproctitle
 
 

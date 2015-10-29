@@ -3,8 +3,9 @@ include:
     - redis.install
 
 
-/etc/redis/redis.conf:
+redis-config:
     file.managed:
+        - name: /etc/redis/redis.conf
         - source: salt://redis/redis.jinja.conf
         - template: jinja
         - context:

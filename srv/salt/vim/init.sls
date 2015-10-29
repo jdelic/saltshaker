@@ -7,9 +7,9 @@
 vim:
     pkg.installed
 
-/etc/vim/vimrc:
-    file:
-        - managed
+vimrc:
+    file.managed:
+        - name: /etc/vim/vimrc
         - source: salt://vim/vimrc
         - require:
             - pkg: vim

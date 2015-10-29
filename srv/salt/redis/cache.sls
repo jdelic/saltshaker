@@ -3,8 +3,9 @@ include:
     - redis.install
 
 
-/etc/redis/redis.conf:
+redis-config:
     file.managed:
+        - name: /etc/redis/redis.conf
         - source: salt://redis/redis.jinja.conf
         - template: jinja
         - context:
@@ -36,8 +37,9 @@ redis-in{{pillar.get('redis-server', {}).get('bind-port', 6379)}}-recv:
             - pkg: redis
 
 
-/etc/consul/services.d/redis-cache.json:
+redis-servicdef:
     file.managed:
+        - name: /etc/consul/services.d/redis-cache.json
         - source: salt://redis/consul/redis.jinja.json
         - mode: '0644'
         - template: jinja

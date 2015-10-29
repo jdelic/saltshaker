@@ -9,7 +9,7 @@ redis:
         - require:
             - pkg: redis
         - watch:
-            - file: /etc/redis/redis.conf
+            - file: redis-config
 
 
 remove-stale-redis-log-file:

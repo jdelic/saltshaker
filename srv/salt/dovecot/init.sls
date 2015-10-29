@@ -21,7 +21,7 @@ dovecot:
 {% endfor %}
             - file: dovecot-ssl-cert
             - file: dovecot-ssl-key
-            - file: /usr/local/bin/sa-learn-pipe.sh
+            - file: sa-learn-pipe-script
 
 
 dovecot-ssl-cert:
@@ -46,8 +46,9 @@ dovecot-ssl-key:
             - file: ssl-key-location
 
 
-/usr/local/bin/sa-learn-pipe.sh:
+sa-learn-pipe-script:
     file.managed:
+        - name: /usr/local/bin/sa-learn-pipe.sh
         - source: salt://dovecot/sa-learn-pipe.sh
         - user: dovecot
         - group: dovecot
@@ -65,8 +66,9 @@ dovecot-pam:
 
 
 {% for file in conffiles %}
-/etc/dovecot/conf.d/{{file}}:
+dovecot-config-{{file}}:
     file.managed:
+        - name: /etc/dovecot/conf.d/{{file}}
         - source: salt://dovecot/conf.d/{{file}}
         - mode: 644
         - template: jinja

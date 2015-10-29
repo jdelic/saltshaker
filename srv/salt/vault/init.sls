@@ -96,8 +96,9 @@ vault-setcap:
             - file: vault
 
 
-/etc/vault/vault.conf:
+vault-config:
     file.managed:
+        - name: /etc/vault/vault.conf
         - source: salt://vault/vault.jinja.conf
         - template: jinja
         - user: {{vault_user}}
@@ -119,7 +120,7 @@ vault-service:
             group: {{vault_group}}
         - require:
             - file: vault
-            - file: /etc/vault/vault.conf
+            - file: vault-config
             - file: vault-ssl-cert
             - file: vault-ssl-key
     service.running:
@@ -144,8 +145,9 @@ vault-service-reload:
             - file: /etc/vault/vault.conf
 
 
-/etc/consul/services.d/vault.json:
+vault-servicedef:
     file.managed:
+        - name: /etc/consul/services.d/vault.json
         - source: salt://vault/consul/vault.jinja.json
         - mode: '0644'
         - template: jinja

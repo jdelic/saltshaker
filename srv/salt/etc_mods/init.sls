@@ -3,8 +3,8 @@
 # Usually, you won't need to assign this state manually. Assign "basics" instead.
 #
 
-/etc/inputrc:
-    file:
-        - managed
+inputrc:
+    file.managed:
+        - name: /etc/inputrc
         - source: salt://etc_mods/inputrc
 

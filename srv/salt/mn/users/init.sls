@@ -7,10 +7,11 @@ root:
         - uid: 0
         - gid: 0
         - home: /root
-        - password: 
+        - password:
 
-/root/.bashrc:
+root-bashrc:
     file.managed:
+        - name: /root/.bashrc
         - source: salt://mn/users/bashrc.root
         - user: root
         - group: root

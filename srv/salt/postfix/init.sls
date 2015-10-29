@@ -2,17 +2,17 @@
 include:
     - postfix.users
 
-    
+
 postfix:
     service:
         - running
         - watch:
-            - file: /etc/postfix/main.cf
-            - file: /etc/postfix/master.cf
+            - file: postfix-main-config
+            - file: postfix-master-config
         - require:
             - pkg: postfix
-            - file: /etc/postfix/main.cf
-            - file: /etc/postfix/master.cf
+            - file: postfix-main-config
+            - file: postfix-master-config
         - enable: True
 
     pkg:
@@ -27,18 +27,21 @@ postfix:
             - spamc
 
 
-/etc/postfix/domainkeys:
+domainkeys-directory:
     file.directory:
+        - name: /etc/postfix/domainkeys
         - dir_mode: 700
         - makedirs: True
-        
-        
-/etc/postfix/main.cf:
+
+
+postfix-main-config:
     file.managed:
+        - name: /etc/postfix/main.cf
         - source: salt://postfix/main.cf
-        
-        
-/etc/postfix/master.cf:
+
+
+postfix-master-config:
     file.managed:
+        - name: /etc/postfix/master.cf
         - source: salt://postfix/master.cf
-        
+

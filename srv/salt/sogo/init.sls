@@ -11,8 +11,7 @@ sogo:
         - name: sogo
         - require:
             - file: sogo.preferences
-    service:
-        - running
+    service.running:
         - enable: True
         - sig: /usr/sbin/sogod
         - require:
