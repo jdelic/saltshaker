@@ -9,7 +9,7 @@ include:
 {% from 'consul/install.sls' import consul_user, consul_group %}
 
 
-consul-server:
+consul-server-service:
     file.managed:
         - name: /etc/systemd/system/consul-server.service
         - source: salt://consul/consul.jinja.service
@@ -28,9 +28,9 @@ consul-server:
         - sig: consul
         - enable: True
         - require:
-            - file: consul-server
+            - file: consul-server-service
         - watch:
-            - file: consul-server  # if consul.service changes we want to *restart* (reload: False)
+            - file: consul-server-service  # if consul.service changes we want to *restart* (reload: False)
 
 
 consul-server-service-reload:
@@ -40,7 +40,7 @@ consul-server-service-reload:
         - enable: True
         - reload: True  # makes Salt send a SIGHUP (systemctl reload consul) instead of restarting
         - require:
-            - file: consul-server
+            - file: consul-server-service
         - watch:
             # If we detect a change in the service definitions reload, don't restart. This matches STATE names not FILE
             # names, so this watch ONLY works on STATES named /etc/consul/services.d/[whatever]!
