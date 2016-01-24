@@ -17,10 +17,10 @@ repos:
     pgpkey: salt://mn/fileserver_ACADBD6B.pgp.key
 
 urls:
-    consul: http://fileserver.maurusnet.test/downloads/consul/0.5.2_linux_amd64.zip
-    consul-template: http://fileserver.maurusnet.test/downloads/consul-template/consul-template_0.11.1_linux_amd64.zip
-    consul-webui: http://fileserver.maurusnet.test/downloads/consul/0.5.2_web_ui.zip
+    consul: http://fileserver.maurusnet.test/downloads/consul/consul_0.6.3_linux_amd64.zip
+    consul-template: http://fileserver.maurusnet.test/downloads/consul-template/consul-template_0.12.2_linux_amd64.zip
+    consul-webui: http://fileserver.maurusnet.test/downloads/consul/consul_0.6.3_web_ui.zip
     djbdns: http://fileserver.maurusnet.test/downloads/djbdns/djbdns-1.05.tar.gz
-    nomad: http://fileserver.maurusnet.test/downloads/nomad/v0.1.2.zip
+    nomad: http://fileserver.maurusnet.test/downloads/nomad/nomad_0.2.3_linux_amd64.zip
     qmail: http://fileserver.maurusnet.test/downloads/qmail/qmail-1.03.tar.gz
-    vault: http://fileserver.maurusnet.test/downloads/vault/vault_0.3.1_linux_amd64.zip
+    vault: http://fileserver.maurusnet.test/downloads/vault/vault_0.4.1_linux_amd64.zip
