@@ -10,6 +10,13 @@ mailqueue-mount:
             - pass_num: 0
             - persist: True
             - mkmnt: True
+    {% else %}
+        file.directory:
+            - name: /mailqueue
+            - makedirs: True
+            - user: root
+            - group: root
+            - mode: '0755'
     {% endif %}
 
 # vim: syntax=yaml
