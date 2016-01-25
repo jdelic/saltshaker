@@ -87,6 +87,7 @@ base:
         - mn.mail
         - dovecot
         - mn.cas.client  # only use with casserver, otherwise comment out
+        - fstab.mailqueue
 
     'roles:pim':
         - match: grain
