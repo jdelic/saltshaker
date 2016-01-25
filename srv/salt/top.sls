@@ -5,7 +5,6 @@
 base:
     '*':
         - basics
-        - iptables
         - byobu
         - mn.users
         - roles
