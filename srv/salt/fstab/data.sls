@@ -1,6 +1,6 @@
 
 data-mount:
-    {% if grains['envdir']['secure'] is defined %}
+    {% if grains['envdir']['data'] is defined %}
        mount.mounted:
             - name: /data
             - device: {{grains['envdir']['data']['device']}}
@@ -16,7 +16,7 @@ data-mount:
             - group: root
             - mode: '0755'
             - require:
-                - mount: data-mount 
+                - mount: data-mount
     {% else %}
         file.directory:
             - name: /data
