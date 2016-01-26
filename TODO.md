@@ -1,5 +1,6 @@
 # TODO
 
+ * write docs for ssl pillar
  * add consul service defs to sogo, apache2
  * add health checks for services monitored through consul
  * write docs for placeholders in README.md
