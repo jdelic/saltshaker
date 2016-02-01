@@ -67,7 +67,7 @@ vault:
     archive.extracted:
         - name: /usr/local/bin
         - source: {{pillar["urls"]["vault"]}}
-        - source_hash: sha256=4005f0ae1bd88ad2676859430209129ed13bc3ade6b64fcf40cc3a6d4d9469e7
+        - source_hash: sha256=f21f8598728faa4e1920704c37047bad6e9b360aec39ba8a1cc712c373ffb61a
         - archive_format: zip
         - if_missing: /usr/local/bin/vault
     file.managed:

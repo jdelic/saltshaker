@@ -75,7 +75,7 @@ consul:
     archive.extracted:
         - name: /usr/local/bin
         - source: {{pillar["urls"]["consul"]}}
-        - source_hash: sha256=171cf4074bfca3b1e46112105738985783f19c47f4408377241b868affa9d445
+        - source_hash: sha256=b0532c61fec4a4f6d130c893fd8954ec007a6ad93effbe283a39224ed237e250
         - archive_format: zip
         - if_missing: /usr/local/bin/consul
     file.managed:
