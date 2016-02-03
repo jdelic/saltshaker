@@ -1,12 +1,12 @@
 
 sogo:
-#    pkgrepo.managed:
-#        - humanname: SOGo Debian
-#        - name: {{pillar["repos"]["sogo"]}}
-#        - file: /etc/apt/sources.list.d/sogo.list
-#        - key_url: salt://sogo/sogo_810273C4.pgp.key
-#        - require_in:
-#            - pkg: sogo
+    pkgrepo.managed:
+        - humanname: SOGo V3 Debian
+        - name: {{pillar["repos"]["sogo"]}}
+        - file: /etc/apt/sources.list.d/sogo.list
+        - key_url: salt://sogo/sogo_810273C4.pgp.key
+        - require_in:
+            - pkg: sogo
     pkg.installed:
         - name: sogo
         - require:
