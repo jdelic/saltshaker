@@ -19,5 +19,7 @@ python-packages:
             - libfreetype6
             - libgd3
         - install_recommends: False
+        # salt dependencies on Jessie lead to an installation error for python setuptools when installing to stable
+        # so we install from jessie-backports
         - fromrepo: jessie-backports
 
