@@ -59,6 +59,7 @@ jessie:
         {% if pillar["repos"].get("pgpkey", None) %}
         - key_url: {{pillar["repos"]["pgpkey"]}}
         {% endif %}
+        - consolidate: True
         - order: 1  # execute this state early!
 
 
