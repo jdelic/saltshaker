@@ -18,4 +18,6 @@ python-packages:
             - libxslt1.1
             - libfreetype6
             - libgd3
+        - install_recommends: False
+        - fromrepo: jessie-backports
 
