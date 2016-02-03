@@ -9,8 +9,8 @@ sogo:
             - pkg: sogo
     pkg.installed:
         - name: sogo
-        - require:
-            - file: sogo.preferences
+#        - require:
+#            - file: sogo.preferences
     service.running:
         - enable: True
         - sig: /usr/sbin/sogod
@@ -18,9 +18,10 @@ sogo:
             - pkg: sogo
 
 
-sogo.preferences:
-    file.managed:
-        - name: /etc/apt/preferences.d/sogo
-        - source: salt://sogo/preferences.d/sogo
+# commented out until version 3 hits Debian Stable
+#sogo.preferences:
+#    file.managed:
+#        - name: /etc/apt/preferences.d/sogo
+#        - source: salt://sogo/preferences.d/sogo
 
 # vim: syntax=yaml
