@@ -11,6 +11,7 @@ repos:
     jessie-backports: deb http://fileserver.maurusnet.test/debian/ jessie-backports main
     jessie-security: deb http://fileserver.maurusnet.test/debian/security/ jessie-updates main
     jessie-updates: deb http://fileserver.maurusnet.test/debian/ jessie-updates main
+    stretch-testing: deb http://fileserver.maurusnet.test/debian/ stretch-testing main
     saltstack: deb http://fileserver.maurusnet.test/saltstack/ jessie contrib
     sogo: deb http://fileserver.maurusnet.test/sogo/ jessie jessie
 

@@ -1,0 +1,4 @@
+# don't install anything from stretch automatically
+Package: *
+Pin: release a=stretch
+Pin-Priority: 50

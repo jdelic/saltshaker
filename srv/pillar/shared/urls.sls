@@ -11,6 +11,7 @@ repos:
     jessie-backports: deb http://ftp-stud.hs-esslingen.de/debian/ jessie-backports main
     jessie-security: deb http://security.debian.org/ jessie/updates main
     jessie-updates: deb http://ftp-stud.hs-esslingen.de/debian/ jessie-updates main
+    stretch-testing: deb http://ftp-stud.hs-esslingen.de/debian/ stretch main
     saltstack: deb http://repo.saltstack.com/apt/debian jessie contrib
     sogo: deb http://inverse.ca/debian-v3 jessie jessie
 

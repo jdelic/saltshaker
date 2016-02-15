@@ -87,6 +87,17 @@ backports-org-jessie:
         - order: 2  # execute this state early!
 
 
+stretch:
+    pkgrepo.managed:
+        - humanname: Stretch Debian Testing
+        - name: {{pillar["repos"]["stretch-testing"]}}
+        - file: /etc/apt/sources.list.d/stretch-testing.list
+        - order: 2
+    file.managed:
+        - name: /etc/apt/preferences.d/stretch-testing
+        - source: salt://opensmtpd/preferences.d/stretch-testing
+
+
 openssl:
     pkg.installed:
         - pkgs:
