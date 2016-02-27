@@ -1,1 +1,1 @@
-# Empty. States in this module should include haproxy.install.
+# Empty. States in this module should include opensmtpd.install.
