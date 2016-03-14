@@ -8,8 +8,11 @@
  * add Nagios/Icinca/xyz monitoring via consul-template
  * clean up the MySQL state folder
  * add a consul-template cmd.wait watcher state for haproxy.internal that deletes the servicerenderer
-   if the command-line parameters change, because consul-template will not do it by itself
- * add ssmtp to all servers that don't run qmail
+   if the command-line parameters change, because consul-template will not do it by itself (has this 
+   been fixed upstream?)
+ * add ssmtp to all servers that don't run opensmtpd
+ * integrate opensmtpd
+ * switch Dovecot from maildir to sdbox
 
 
 # Ponder
