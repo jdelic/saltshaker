@@ -47,7 +47,7 @@ base:
         - java          # for jenkins
         - dev.pbuilder
         - dev.jenkins
-        - dev.aptly_nightly
+        - dev.aptly
 #        - dev.pypi
 #        - sentry
         - compilers
