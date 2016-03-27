@@ -1,4 +1,4 @@
 # don't install anything from stretch automatically
 Package: *
-Pin: release a=stretch
+Pin: release a=testing
 Pin-Priority: 50
