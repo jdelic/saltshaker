@@ -25,7 +25,6 @@ python-packages:
             # for Jessie because of https://bugs.debian.org/cgi-bin/bugreport.cgi?bug=786580
             # and https://bugs.debian.org/cgi-bin/bugreport.cgi?bug=786580
             - python-distlib
-            - python-distlib-whl
             # -------------------
         - install_recommends: False
         # salt dependencies on Jessie lead to an installation error for python setuptools when installing to stable
