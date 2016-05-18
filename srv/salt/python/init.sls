@@ -9,7 +9,6 @@ python-packages:
     pkg.installed:
         - pkgs:
             - python3
-            - python3.5
             - python3-pip
             - python-pip
             - python-setuptools
