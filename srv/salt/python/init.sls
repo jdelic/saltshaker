@@ -8,16 +8,26 @@
 python-packages:
     pkg.installed:
         - pkgs:
-            - python2.7
+            - python3
+            - python3.5
+            - python3-pip
             - python-pip
+            - python-setuptools
+            - python-pkg-resources
             - python-pip-whl
-            - python-virtualenv
+            - python3-virtualenv
+            - virtualenv
             - gettext
             - libjpeg62-turbo
             - libxml2
             - libxslt1.1
             - libfreetype6
             - libgd3
+            # for Jessie because of https://bugs.debian.org/cgi-bin/bugreport.cgi?bug=786580
+            # and https://bugs.debian.org/cgi-bin/bugreport.cgi?bug=786580
+            - python-distlib
+            - python-distlib-whl
+            # -------------------
         - install_recommends: False
         # salt dependencies on Jessie lead to an installation error for python setuptools when installing to stable
         # so we install from jessie-backports
