@@ -24,6 +24,6 @@ urls:
     consul-template: https://releases.hashicorp.com/consul-template/0.14.0/consul-template_0.14.0_linux_amd64.zip
     consul-webui: https://releases.hashicorp.com/consul/0.6.4/consul_0.6.4_web_ui.zip
     djbdns: http://cr.yp.to/djbdns/djbdns-1.05.tar.gz
-    nomad: https://releases.hashicorp.com/nomad/0.3.1/nomad_0.3.1_linux_amd64.zip
+    nomad: https://releases.hashicorp.com/nomad/0.3.2/nomad_0.3.2_linux_amd64.zip
     qmail: http://cr.yp.to/software/qmail-1.03.tar.gz
     vault: https://releases.hashicorp.com/vault/0.5.2/vault_0.5.2_linux_amd64.zip
