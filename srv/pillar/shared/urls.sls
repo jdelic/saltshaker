@@ -12,7 +12,7 @@ repos:
     jessie-security: deb http://security.debian.org/ jessie/updates main
     jessie-updates: deb http://ftp-stud.hs-esslingen.de/debian/ jessie-updates main
     stretch-testing: deb http://ftp-stud.hs-esslingen.de/debian/ stretch main
-    saltstack: deb http://repo.saltstack.com/apt/debian jessie contrib
+    saltstack: deb http://repo.saltstack.com/apt/debian/8/amd64/latest jessie main
     sogo: deb http://inverse.ca/debian-v3 jessie jessie
 
 #   pgpkey: Set this to a salt:// url if you need to deploy your own repo signing key

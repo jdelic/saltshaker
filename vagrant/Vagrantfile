@@ -7,7 +7,7 @@ Vagrant.configure('2') do |config|
 
     $local_provision = false
     $local_provision_script = <<SCRIPT
-        sh -c 'echo 192.168.56.10 fileserver.maurusnet.test repo.saltstack.com httpredir.debian.org >> /etc/hosts'
+        sh -c 'echo 192.168.56.10 fileserver.maurusnet.test  debian.saltstack.com repo.saltstack.com httpredir.debian.org >> /etc/hosts'
         sh -c 'echo deb http://fileserver.maurusnet.test/debian/ jessie main > /etc/apt/sources.list'
         wget -q -O - http://fileserver.maurusnet.test/dev_apt_signing.public.pgp | apt-key add -
         apt-get update
