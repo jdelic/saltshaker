@@ -4,7 +4,7 @@ jenkins:
         - humanname: Jenkins CI
         - name: {{pillar["repos"]["jenkins"]}}
         - file: /etc/apt/sources.list.d/jenkins.list
-        - key_url: http://pkg.jenkins-ci.org/debian/jenkins-ci.org.key
+        - key_url: salt://dev/jenkins_E12A9B7D32F2D50582E6.pgp.key
         - require_in:
             - pkg: jenkins
         - require:
