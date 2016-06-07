@@ -48,6 +48,7 @@ base:
         - dev.pbuilder
         - dev.jenkins
         - dev.aptly
+        - dev.fpm
 #        - dev.pypi
 #        - sentry
         - compilers

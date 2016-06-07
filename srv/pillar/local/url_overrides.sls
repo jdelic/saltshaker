@@ -25,3 +25,4 @@ urls:
     nomad: http://fileserver.maurusnet.test/downloads/nomad/nomad_0.3.2_linux_amd64.zip
     qmail: http://fileserver.maurusnet.test/downloads/qmail/qmail-1.03.tar.gz
     vault: http://fileserver.maurusnet.test/downloads/vault/vault_0.5.2_linux_amd64.zip
+    fpmdeps: http://fileserver.maurusnet.test/downloads/ruby/fpm+deps.zip
