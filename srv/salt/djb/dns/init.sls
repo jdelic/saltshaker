@@ -21,7 +21,7 @@ djbdns-source-archive:
     file.managed:
         - name: /usr/local/src/djb/djbdns-1.05.tar.gz
         - source: {{pillar["urls"]["djbdns"]}}
-        - source_hash: sha256=3ccd826a02f3cde39be088e1fc6aed9fd57756b8f970de5dc99fcd2d92536b48
+        - source_hash: {{pillar["hashes"]["djbdns"]}}
         - require:
             - file: djb-source-build-directory
 

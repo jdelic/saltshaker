@@ -19,10 +19,20 @@ repos:
 
 urls:
     consul: http://fileserver.maurusnet.test/downloads/consul/consul_0.6.4_linux_amd64.zip
-    consul-template: http://fileserver.maurusnet.test/downloads/consul-template/consul-template_0.14.0_linux_amd64.zip
+    consul-template: http://fileserver.maurusnet.test/downloads/consul-template/consul-template_0.15.0_linux_amd64.zip
     consul-webui: http://fileserver.maurusnet.test/downloads/consul/consul_0.6.4_web_ui.zip
     djbdns: http://fileserver.maurusnet.test/downloads/djbdns/djbdns-1.05.tar.gz
     nomad: http://fileserver.maurusnet.test/downloads/nomad/nomad_0.3.2_linux_amd64.zip
     qmail: http://fileserver.maurusnet.test/downloads/qmail/qmail-1.03.tar.gz
-    vault: http://fileserver.maurusnet.test/downloads/vault/vault_0.5.2_linux_amd64.zip
+    vault: http://fileserver.maurusnet.test/downloads/vault/vault_0.6.0_linux_amd64.zip
     fpmdeps: http://fileserver.maurusnet.test/downloads/ruby/fpm+deps.zip
+
+hashes:
+    consul: sha256=abdf0e1856292468e2c9971420d73b805e93888e006c76324ae39416edcf0627
+    consul-template: sha256=b7561158d2074c3c68ff62ae6fc1eafe8db250894043382fb31f0c78150c513a
+    consul-webui: sha256sum=5f8841b51e0e3e2eb1f1dc66a47310ae42b0448e77df14c83bb49e0e0d5fa4b7
+    djbdns: sha256=3ccd826a02f3cde39be088e1fc6aed9fd57756b8f970de5dc99fcd2d92536b48
+    nomad: sha256sum=710ff3515bc449bc2a06652464f4af55f1b76f63c77a9048bc30d6fde284b441
+    qmail: sha256=21ed6c562cbb55092a66197c35c8222b84115d1acab0854fdb1ad1f301626f88
+    vault: sha256=283b4f591da8a4bf92067bf9ff5b70249f20705cc963bea96ecaf032911f27c2
+    fpmdeps: sha256=0c0aeee1f982c9fd83abc8efd2cd09d8919bbc9be3c0702aa7673cf9be4bf5be

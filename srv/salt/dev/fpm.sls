@@ -15,7 +15,7 @@ fpm:
     archive.extracted:
         - name: /usr/local/src/fpm
         - source: {{pillar["urls"]["fpmdeps"]}}
-        - source_hash: sha256=0c0aeee1f982c9fd83abc8efd2cd09d8919bbc9be3c0702aa7673cf9be4bf5be
+        - source_hash: {{pillar["hashes"]["fpmdeps"]}}
         - archive_format: zip
         - if_missing: /usr/local/src/fpm/fpm-1.6.0.gem
         - require:

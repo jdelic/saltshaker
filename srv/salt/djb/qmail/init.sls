@@ -103,7 +103,7 @@ qmail-source-archive:
     file.managed:
         - name: /usr/local/src/djb/qmail-1.03.tar.gz
         - source: {{pillar["urls"]["qmail"]}}
-        - source_hash: sha256=21ed6c562cbb55092a66197c35c8222b84115d1acab0854fdb1ad1f301626f88
+        - source_hash: {{pillar["hashes"]["qmail"]}}
         - require:
              - file: djb-source-build-directory
 

@@ -65,7 +65,7 @@ consul-agent-absent:
 #    archive.extracted:
 #        - name: /srv/consul-web-ui
 #        - source: {{pillar["urls"]["consul-webui"]}}
-#        - source_hash: md5=eb98ba602bc7e177333eb2e520881f4f
+#        - source_hash: {{pillar["hashes"]["consul-webui"]}}
 #        - archive_format: zip
 #        - if_missing: /srv/consul-web-ui/dist
 
