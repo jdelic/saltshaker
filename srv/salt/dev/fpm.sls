@@ -1,4 +1,10 @@
 
+gemdeps:
+    pkg.installed:
+        - pkgs:
+            - ruby
+            - ruby-dev
+
 {% if pillar["urls"].get("fpmdeps", None) %}
 fpm-download-dir:
     file.directory:
@@ -33,3 +39,5 @@ fpm:
         - user: root
         - group: root
         - unless: test -e /usr/local/bin/fpm
+        - require:
+            - pkg: gemdeps
