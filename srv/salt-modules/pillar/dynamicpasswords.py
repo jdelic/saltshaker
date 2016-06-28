@@ -157,7 +157,7 @@ def ext_pillar(minion_id, pillar, *roledefs):
                     serverusers[username] = db[username]
 
     if 'roles' not in __grains__:
-        return { 'dynamicpasswords': db.items() }
+        return { 'dynamicpasswords': {} }
 
     return { 'dynamicpasswords': serverusers }
 
