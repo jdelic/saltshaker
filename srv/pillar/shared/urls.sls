@@ -6,6 +6,7 @@
 repos:
     aptly: deb http://repo.aptly.info/ squeeze main
     aptly-nightly: deb http://repo.aptly.info/ nightly main
+    docker: deb https://apt.dockerproject.org/repo debian-jessie main
     jenkins: deb http://pkg.jenkins-ci.org/debian binary/
     jessie: deb http://ftp-stud.hs-esslingen.de/debian/ jessie main contrib
     jessie-backports: deb http://ftp-stud.hs-esslingen.de/debian/ jessie-backports main

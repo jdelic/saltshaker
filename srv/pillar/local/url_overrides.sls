@@ -6,6 +6,7 @@
 repos:
     aptly: deb http://fileserver.maurusnet.test/aptly/ squeeze main
     aptly-nightly: deb http://fileserver.maurusnet.test/aptly-nightly/ nightly main
+    docker: deb http://fileserver.maurusnet.test/repo/ debian-jessie main
     jenkins: deb http://fileserver.maurusnet.test/jenkins/ jenkins main
     jessie: deb http://fileserver.maurusnet.test/debian/ jessie main
     jessie-backports: deb http://fileserver.maurusnet.test/debian/ jessie-backports main
