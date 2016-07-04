@@ -156,8 +156,4 @@ def ext_pillar(minion_id, pillar, *roledefs):
                 if r == '*' or r in __grains__.get('roles', []):  # '*' matches every node
                     serverusers[username] = db[username]
 
-    if 'roles' not in __grains__:
-        return { 'dynamicpasswords': {} }
-
     return { 'dynamicpasswords': serverusers }
-
