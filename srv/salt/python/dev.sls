@@ -5,6 +5,7 @@ python-dev-packages:
     pkg.installed:
         - pkgs:
             - python2.7-dev
+            - python3-dev
             - libssl-dev
             - libcurl4-openssl-dev
             - libapt-pkg-dev
