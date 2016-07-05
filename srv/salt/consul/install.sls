@@ -86,6 +86,7 @@ consul:
         - require:
             - user: consul
             - file: consul-data-dir
+            - archive: consul
 
 
 # open consul ports TCP
