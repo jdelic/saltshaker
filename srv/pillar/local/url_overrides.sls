@@ -25,7 +25,7 @@ urls:
     djbdns: http://fileserver.maurusnet.test/downloads/djbdns/djbdns-1.05.tar.gz
     exxo: http://fileserver.maurusnet.test/downloads/exxo/exxo-0.0.5.tar.xz
     nomad: http://fileserver.maurusnet.test/downloads/nomad/nomad_0.3.2_linux_amd64.zip
-    pyrun34: ]http://fileserver.maurusnet.test/downloads/exxo/egenix-pyrun-2.2.1-py3.4_ucs4-linux-x86_64.tgz
+    pyrun34: http://fileserver.maurusnet.test/downloads/exxo/egenix-pyrun-2.2.1-py3.4_ucs4-linux-x86_64.tgz
     pyrun35: http://fileserver.maurusnet.test/downloads/exxo/egenix-pyrun-2.2.1-py3.5_ucs4-linux-x86_64.tgz
     qmail: http://fileserver.maurusnet.test/downloads/qmail/qmail-1.03.tar.gz
     vault: http://fileserver.maurusnet.test/downloads/vault/vault_0.6.0_linux_amd64.zip
