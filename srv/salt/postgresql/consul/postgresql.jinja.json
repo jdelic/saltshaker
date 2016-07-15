@@ -1,0 +1,8 @@
+{
+    "service": {
+        "name": "postgresql",
+        "tags": ["smartstack:internal", "smartstack:port:{{port}}"],
+        "address": "{{ip}}",
+        "port": {{port}}
+    }
+}

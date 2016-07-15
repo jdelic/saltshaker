@@ -66,12 +66,13 @@ base:
     'roles:database':
         - match: grain
         - fstab.data
-        - mysql.fast
+        - postgresql.fast
         - redis.cache
 
     'roles:secure-database':
         - match: grain
-        - mysql.secure
+        - fstab.secure
+        - postgresql.secure
         - vault.mysql_database  # this state is empty if vault uses a different backend than "mysql"
 
     'roles:mail':
