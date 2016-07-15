@@ -43,10 +43,7 @@ base:
     'roles:dev':
         - match: grain
         - apache
-        - djb.daemontools
-        - java          # for jenkins
         - dev.pbuilder
-        - dev.jenkins
         - dev.aptly
         - dev.fpm
 #        - dev.pypi
