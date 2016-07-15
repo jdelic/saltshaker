@@ -7,7 +7,7 @@
 #
 
 # TODO: Vault currently fails to initialize with InnoDB and utf-8 due to a "key size"
-#       problem intil https://github.com/hashicorp/vault/pull/522 ships.
+#       problem until https://github.com/hashicorp/vault/pull/522 ships.
 
 {% if pillar['vault'].get('backend', 'mysql') == 'mysql' %}
 
@@ -24,7 +24,7 @@ vault-mysql:
 
         # FIXME: either connect directly to the internal interface using the line below OR wait for consul-template
         #        ...localhost might not be available when this state runs otherwise. This might be an ideal use-case
-        #        for a noop state in each database-tyle and the "use:" directive. I.e.
+        #        for a noop state in each database-style and the "use:" directive. I.e.
         #        "use: secure-mysql-local-connection" where "secure-mysql-local-connection" is built by helpers_py
         #        to have the correct connection_default_file etc.
         #        See https://github.com/saltstack/salt/issues/27227 and https://github.com/saltstack/salt/pull/27208
