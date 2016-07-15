@@ -72,6 +72,7 @@ checkdomainpasswd-setuid-binary:
         - group: mail
         - mode: '4755'
         - create: False
+        - replace: False
         - require:
            - cmd: mn-mailsystem
 
@@ -83,6 +84,7 @@ checkdomainpasswd-script:
         - group: mail
         - mode: '750'
         - create: False
+        - replace: False
         - require:
             - cmd: mn-mailsystem
 

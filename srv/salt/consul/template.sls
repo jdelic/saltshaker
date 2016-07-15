@@ -11,6 +11,7 @@ consul-template:
         - mode: '0750'
         - user: root
         - group: root
+        - replace: False
         - require:
             - archive: consul-template
 

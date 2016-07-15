@@ -83,6 +83,7 @@ consul:
         - mode: '0755'
         - user: {{consul_user}}
         - group: {{consul_group}}
+        - replace: False
         - require:
             - user: consul
             - file: consul-data-dir
