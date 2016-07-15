@@ -14,4 +14,4 @@ docker:
         - name: docker
         - enable: True
         - require:
-            - pkg: jenkins
+            - pkg: docker
