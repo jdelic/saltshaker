@@ -8,6 +8,18 @@ secure-base-dir:
         - require:
             - secure-mount
 
+
+secure-tablespace-dir:
+    file.directory:
+        - name: /secure/postgres/9.4/main
+        - user: postgres
+        - group: postgres
+        - mode: '0750'
+        - makedirs: True
+        - require:
+            - file: secure-base-dir
+
+
 secure-tablespace:
     postgres_tablespace.present:
         - name: secure
@@ -16,7 +28,7 @@ secure-tablespace:
         - user: postgres
         - require:
             - data-cluster
-            - secure-base-dir
+            - secure-tablespace-dir
 
 
 # vim: syntax=yaml
