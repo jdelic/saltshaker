@@ -54,8 +54,7 @@ mn-mailsystem:
     cmd.script:
         - source: salt://mn/mail/install.sh
         - cwd: /usr/local
-        - user: root
-        - group: root
+        - runas: root
         - require:
             - user: virtmail
             - pkg: git

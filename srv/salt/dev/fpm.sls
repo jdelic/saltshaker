@@ -36,8 +36,7 @@ fpm:
         {% else %}
         - name: gem install fpm
         {% endif %}
-        - user: root
-        - group: root
+        - runas: root
         - unless: test -e /usr/local/bin/fpm
         - require:
             - pkg: gemdeps

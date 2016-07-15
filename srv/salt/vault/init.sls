@@ -89,8 +89,7 @@ vault-setcap:
     cmd.run:
         - name: setcap cap_ipc_lock=+ep /usr/local/bin/vault
         - cwd: /usr/local/bin
-        - user: root
-        - group: root
+        - runas: root
         - unless: getcap /usr/local/bin/vault | grep -q cap_ipc_lock
         - require:
             - file: vault

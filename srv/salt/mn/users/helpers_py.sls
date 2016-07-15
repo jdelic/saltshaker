@@ -14,20 +14,20 @@ def create_user(username, groups=[], keys=[], password=None, create_default_grou
 
     st_group = state("groups-%s" % username).group
     st_group.present(names=groups)
-    
+
     st_user = state(username).user
     st_user.require(st_group)
-    
+
     st_user.present(
-        groups=groups, home='/home/%s' % username, 
+        groups=groups, home='/home/%s' % username,
         password=password, gid_from_name=create_default_group
     )
-    
+
     names = []
     for k in keys:
         if k in _sshkeys:
             names.append(_sshkeys[k])
-    
+
     if len(names) > 0:
         fn_auth = state(username).ssh_auth.present
         fn_auth.require(st_user)
@@ -38,8 +38,7 @@ def create_user(username, groups=[], keys=[], password=None, create_default_grou
         st_byobu.require(pkg='byobu')
         st_byobu(
             name='/usr/bin/byobu-launcher-install',
-            user=username,
-            group=username,
+            runas=username,
             unless='grep -q byobu /home/%s/.profile' % username
         )
 
@@ -53,7 +52,7 @@ def create_user(username, groups=[], keys=[], password=None, create_default_grou
         )
         sbcm.require(cmd='byobu-%s' % username)
         sbcm.watch(cmd='byobu-%s' % username)
-    
+
     if set_bashrc:
         file_bashrc = state('/home/%s/.bashrc' % username).file
         file_bashrc.require(st_user)

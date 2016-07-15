@@ -30,8 +30,7 @@ djbdns-install:
     cmd.script:
         - source: salt://djb/dns/install.sh
         - cwd: /usr/local/src/djb
-        - user: root
-        - group: root
+        - runas: root
         - require:
             - file: djbdns-source-archive
             - pkg: build-essential

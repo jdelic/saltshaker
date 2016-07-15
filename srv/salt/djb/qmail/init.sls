@@ -89,8 +89,7 @@ qmail-mailqueue-create:
         - name: create-mailqueue.sh /mailqueue
         - source: salt://djb/qmail/create-mailqueue.sh
         - cwd: /mailqueue
-        - user: root
-        - group: root
+        - runas: root
         - unless: test -e /mailqueue/mess
         - require:
             {% for user in qmail_users %}
@@ -119,8 +118,7 @@ qmail-install:
         - args: {{grains['fqdn']}}
         - source: salt://djb/qmail/install.sh
         - cwd: /usr/local/src/djb
-        - user: root
-        - group: root
+        - runas: root
         - require:
             - file: qmail-jms1-patch
             - file: qmail-source-archive
