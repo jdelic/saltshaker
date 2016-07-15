@@ -69,7 +69,7 @@ def add_mysql_instance(
     st_d_fd.require(pkg='mysql-server')
 
     if require_mount:
-        st_d_fd.require(file=require_mount)
+        st_d_fd.require(id=require_mount)
 
     # initialize the db
     st_d_cr = st_data.cmd.run

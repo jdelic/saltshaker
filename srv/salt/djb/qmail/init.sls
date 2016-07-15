@@ -81,7 +81,7 @@ qmail-mailqueue-symlink:
             {% for user in qmail_users %}
             - user: {{user}}
             {% endfor %}
-    # djb.qmail.mounts.* set a require_in for this state
+            - mailqueue-mount
 
 
 qmail-mailqueue-create:
@@ -95,7 +95,7 @@ qmail-mailqueue-create:
             {% for user in qmail_users %}
             - user: {{user}}
             {% endfor %}
-    # djb.qmail.mounts.* set a require_in for this state
+            - mailqueue-mount
 
 
 qmail-source-archive:

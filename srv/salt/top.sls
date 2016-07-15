@@ -88,6 +88,7 @@ base:
         - dovecot
         - mn.cas.client  # only use with casserver, otherwise comment out
         - fstab.mailqueue
+        - djb.qmail.storage.email
 
     'roles:pim':
         - match: grain
@@ -100,14 +101,6 @@ base:
     'roles:loadbalancer':
         - match: grain
         - haproxy.external
-
-    'G@roles:mail and not *.test':
-        - match: compound
-        - djb.qmail.mounts.live
-
-    '*.test and G@roles:mail':
-        - match: compound
-        - djb.qmail.mounts.test
 
     '*.test':
         # put vagrant user config on .test machines

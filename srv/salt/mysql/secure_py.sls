@@ -11,7 +11,7 @@ st_sec_db(
     group='root',
     mode='0755',
 )
-st_sec_db.require(file='secure-mount')
+st_sec_db.require(id='secure-mount')
 
 
 helpers = include('mysql.helpers_py')
