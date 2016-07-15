@@ -133,8 +133,7 @@ def add_mysql_instance(
         ),
         source='salt://mysql/mysql_secure_installation_auto',
         cwd='/tmp',
-        user='root',
-        group='root',
+        runas='root',
     )
     st_h_cw.watch(cmd='mysql-datadir-%s' % prefix)
     st_h_cw.require(file='mysql-config-%s' % prefix)
