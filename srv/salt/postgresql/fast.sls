@@ -1,9 +1,21 @@
 
 # setting create_main_cluster = false in postgresql-common will prevent the automativ
 # creation of a postgres cluster when we install the database
+
+postgresql-repo:
+    pkgrepo.managed:
+        - humanname: PostgreSQL official repos
+        - name: {{pillar["repos"]["postgresql"]}}
+        - file: /etc/apt/sources.list.d/postgresql.list
+        - key_url: salt://postgresql/postgresql_44A07FCC7D46ACCC4CF8.pgp.key
+
+
 postgresql-step1:
     pkg.installed:
         - name: postgresql-common
+        - fromrepo: jessie-pgdg
+        - require:
+            - pkgrepo: postgresql-repo
     file.managed:
         - name: /etc/postgresql-common/createcluster.conf
         - source: salt://postgresql/createcluster.conf
@@ -25,9 +37,10 @@ postgresql-step2:
     pkg.installed:
         - pkgs:
             - postgresql
-            - postgresql-9.4
-            - postgresql-client-9.4
+            - postgresql-9.5
+            - postgresql-client-9.5
             - libpq5
+        - fromrepo: jessie-pgdg
         - require:
             - postgresql-step1
 
