@@ -47,14 +47,14 @@ postgresql-step2:
 
 data-cluster:
     cmd.run:
-        - name: /usr/bin/pg_createcluster -d /data/postgres/9.4/main --locale=en_US.utf-8 -e utf-8 9.4 main
+        - name: /usr/bin/pg_createcluster -d /data/postgres/9.5/main --locale=en_US.utf-8 -e utf-8 9.5 main
         - runas: root
-        - unless: test -e /data/postgres/9.4/main
+        - unless: test -e /data/postgres/9.5/main
         - require:
             - postgresql-step2
             - data-base-dir
     service.running:
-        - name: postgresql@9.4-main
+        - name: postgresql@9.5-main
         - sig: postgres
         - enable: True
         - require:
