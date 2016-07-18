@@ -1,0 +1,18 @@
+[Unit]
+Description=Concourse CI
+Wants=basic.target
+After=basic.target network.target
+
+[Service]
+User=concourse
+Group=concourse
+ExecStart=/usr/local/bin/concourse
+ExecReload=/bin/kill -HUP $MAINPID
+PIDFile=/run/concourse-{{type}}.pid
+KillMode=process
+Restart=on-failure
+StartLimitInterval=3
+RestartSec=30s
+
+[Install]
+WantedBy=multi-user.target
