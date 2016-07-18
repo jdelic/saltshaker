@@ -49,7 +49,7 @@ data-cluster:
     cmd.run:
         - name: >
             /usr/bin/pg_createcluster -d /data/postgres/9.5/main --locale=en_US.utf-8 -e utf-8 -p 5432
-            --pgoption listen_address={{pillar.get('postgresql-server', {}).get('bind-ip', grains['ip_interfaces'][pillar['ifassign']['internal']][pillar['ifassign'].get('internal-ip-index', 0)|int()])}}
+            --pgoption listen_address='{{pillar.get('postgresql-server', {}).get('bind-ip', grains['ip_interfaces'][pillar['ifassign']['internal']][pillar['ifassign'].get('internal-ip-index', 0)|int()])}}'
             9.5 main
         - runas: root
         - unless: test -e /data/postgres/9.5/main
