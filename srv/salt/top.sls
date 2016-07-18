@@ -46,6 +46,8 @@ base:
         - dev.pbuilder
         - dev.aptly
         - dev.fpm
+        - dev.concourse.server
+        - dev.concourse.worker
 #        - dev.pypi
 #        - sentry
         - compilers
@@ -78,14 +80,10 @@ base:
     'roles:mail':
         - match: grain
         - compilers
-        - djb
-        - djb.daemontools
-        - djb.ucspitcp
-        - djb.qmail
-        - mn.mail
         - dovecot
         - mn.cas.client  # only use with casserver, otherwise comment out
         - fstab.mailqueue
+        - fstab.secure
         - djb.qmail.storage.email
 
     'roles:pim':
