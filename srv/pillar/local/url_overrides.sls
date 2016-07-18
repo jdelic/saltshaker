@@ -20,6 +20,7 @@ repos:
     pgpkey: salt://mn/fileserver_ACADBD6B.pgp.key
 
 urls:
+    concourse: http://fileserver.maurusnet.test/downloads/concourse/concourse_linux_amd64
     consul: http://fileserver.maurusnet.test/downloads/consul/consul_0.6.4_linux_amd64.zip
     consul-template: http://fileserver.maurusnet.test/downloads/consul-template/consul-template_0.15.0_linux_amd64.zip
     consul-webui: http://fileserver.maurusnet.test/downloads/consul/consul_0.6.4_web_ui.zip
@@ -33,11 +34,15 @@ urls:
     fpmdeps: http://fileserver.maurusnet.test/downloads/ruby/fpm+deps.zip
 
 hashes:
+    concourse: sha256=1d7e3e55ffe0d6d1307e956afac03613a5e386ce9fbd4bd6de18a0050b33517a
     consul: sha256=abdf0e1856292468e2c9971420d73b805e93888e006c76324ae39416edcf0627
     consul-template: sha256=b7561158d2074c3c68ff62ae6fc1eafe8db250894043382fb31f0c78150c513a
     consul-webui: sha256sum=5f8841b51e0e3e2eb1f1dc66a47310ae42b0448e77df14c83bb49e0e0d5fa4b7
     djbdns: sha256=3ccd826a02f3cde39be088e1fc6aed9fd57756b8f970de5dc99fcd2d92536b48
+    exxo: sha256=3c8e7a9cbe2f88b7c67d4e970f60de7f63a9ce4206aaf214326ead49cc5a2396
     nomad: sha256sum=710ff3515bc449bc2a06652464f4af55f1b76f63c77a9048bc30d6fde284b441
+    pyrun34: sha256sum=9798f3cd00bb39ee07daddb253665f4e3777ab58ffb6b1d824e206d338017e71
+    pyrun35: sha256sum=d20bd23b3e6485c0122d4752fb713f30229e7c522e4482cc9716afc05413b02e
     qmail: sha256=21ed6c562cbb55092a66197c35c8222b84115d1acab0854fdb1ad1f301626f88
     vault: sha256=283b4f591da8a4bf92067bf9ff5b70249f20705cc963bea96ecaf032911f27c2
     fpmdeps: sha256=0c0aeee1f982c9fd83abc8efd2cd09d8919bbc9be3c0702aa7673cf9be4bf5be
