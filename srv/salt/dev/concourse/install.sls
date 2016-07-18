@@ -15,7 +15,7 @@ concourse-user:
         - shell: /bin/false
         - createhome: True
         - require:
-            - user: concourse
+            - group: concourse-user
 
 
 concourse-config-folder:
