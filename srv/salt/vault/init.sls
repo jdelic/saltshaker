@@ -161,7 +161,7 @@ vault-servicedef:
             port: {{pillar.get('vault', {}).get('bind-port', 8200)}}
         - require:
             - file: consul-service-dir
-            - service: vault-service
+            - file: vault-service
 
 
 vault-ssl-cert:

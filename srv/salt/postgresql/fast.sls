@@ -86,7 +86,7 @@ postgresql-in{{pillar.get('postgresql-server', {}).get('bind-port', 5432)}}-recv
             - sls: iptables
 
 
-postgresql-servicdef:
+postgresql-servicedef:
     file.managed:
         - name: /etc/consul/services.d/postgresql.json
         - source: salt://postgresql/consul/postgresql.jinja.json
@@ -96,7 +96,7 @@ postgresql-servicdef:
             ip: {{pillar.get('postgresql-server', {}).get('bind-ip', grains['ip_interfaces'][pillar['ifassign']['internal']][pillar['ifassign'].get('internal-ip-index', 0)|int()])}}
             port: {{pillar.get('postgresql-server', {}).get('bind-port', 5432)}}
         - require:
-            - service: data-cluster
+            - file: data-cluster
             - file: consul-service-dir
 
 
