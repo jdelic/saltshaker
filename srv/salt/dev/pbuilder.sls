@@ -12,6 +12,7 @@ pbuilder-uml:
             - uml-utilities
             - user-mode-linux
             - slirp
+            - fakeroot
         - install_recommends: False
 
 
