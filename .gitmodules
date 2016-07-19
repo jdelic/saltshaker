@@ -1,3 +1,6 @@
 [submodule "srv/salt/mn/cas/pam_cas"]
 	path = srv/salt/mn/cas/pam_cas
 	url = ssh://git@bitbucket.org/jdelic/pam_cas
+[submodule "saltshaker-secrets"]
+	path = srv/pillar/shared/secrets
+	url = ssh://git@bitbucket.org/jdelic/saltshaker-secrets
