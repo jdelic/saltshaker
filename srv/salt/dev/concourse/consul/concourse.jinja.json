@@ -1,0 +1,9 @@
+{
+    "service": {
+        "name": "concourse",
+        "tags": ["smartstack:internal", "smartstack:port:{{port}}"],
+        "address": "{{ip}}",
+        "port": {{port}}
+        {# TODO: add service checks here? #}
+    }
+}
