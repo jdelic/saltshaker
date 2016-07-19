@@ -73,7 +73,6 @@ base:
 
     'roles:secure-database':
         - match: grain
-        - fstab.secure
         - postgresql.secure
         - vault.mysql_database  # this state is empty if vault uses a different backend than "mysql"
 
@@ -83,8 +82,6 @@ base:
         - dovecot
         - mn.cas.client  # only use with casserver, otherwise comment out
         - fstab.mailqueue
-        - fstab.secure
-        - djb.qmail.storage.email
 
     'roles:pim':
         - match: grain
