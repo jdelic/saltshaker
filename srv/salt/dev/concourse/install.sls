@@ -41,33 +41,16 @@ concourse-private-config-folder:
             - file: concourse-config-folder
 
 
-# ssh-keygen -t rsa -f session_signing_key -N ''
-{% for key in ["host_key", "worker_key" "session_signing_key"] %}
-concourse-keys-{{key}}:
-    cmd.run:
-        - name: ssh-keygen -t rsa -f /etc/concourse/private/{{key}}.pem -N ''
-        - runas: concourse
-        - unless: test -f /etc/concourse/private/{{key}}.pem
-        - require:
-            - file: concourse-private-config-folder
-            - user: concourse-user
+concourse-keys-host_key-public:
     file.managed:
-        - name: /etc/concourse/private/{{key}}.pem
+        - name: /etc/concourse/host_key.pub
+        - contents_pillar: ssl:concourse:public
         - user: concourse
         - group: concourse
-        - mode: '0640'
-        - replace: False
+        - mode: '0644'
+        - replace: True
         - require:
-            - cmd: concourse-keys-{{key}}
-{% endfor %}
-
-
-require-concourse-keys:
-    test.nop:
-        - require:
-{% for key in ["host_key", "worker_key" "session_signing_key"] %}
-            - cmd: concourse-keys-{{key}}
-{% endfor %}
+            - file: concourse-config-folder
 
 
 concourse-install:
@@ -78,10 +61,9 @@ concourse-install:
         - mode: '0755'
         - user: concourse
         - group: concourse
-        - use:
-            - require-concourse-keys
         - require:
             - user: concourse-user
+            - file: concourse-keys-host_key-public
 
 
 # vim: syntax=yaml

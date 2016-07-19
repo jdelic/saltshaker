@@ -22,10 +22,11 @@ concourse-worker:
         - group: root
         - context:
             - type: worker
-            # postgresql on 127.0.0.1 works because there is haproxy@internal proxying it
+            # tsa-host on 127.0.0.1 works because there is haproxy@internal proxying it
             - arguments: >
                 --work-dir /srv/concourse-worker
-                --tsa-public-key /etc/concourse/private/host_key.pem.pub
+                --tsa-host 127.0.0.1
+                --tsa-public-key /etc/concourse/host_key.pem.pub
                 --external-url {{pillar['hostnames']['ci']['protocol']}}://{{pillar['hostnames']['ci']['domain']}}
         - require:
             - file: concourse-install
