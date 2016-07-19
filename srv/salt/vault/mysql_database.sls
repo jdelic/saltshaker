@@ -9,7 +9,7 @@
 # TODO: Vault currently fails to initialize with InnoDB and utf-8 due to a "key size"
 #       problem until https://github.com/hashicorp/vault/pull/522 ships.
 
-{% if pillar['vault'].get('backend', 'mysql') == 'mysql' %}
+{% if pillar['vault'].get('backend', '') == 'mysql' %}
 
 # only create this if the MySQL backend is selected
 vault-mysql:
