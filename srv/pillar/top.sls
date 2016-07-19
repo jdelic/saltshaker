@@ -20,6 +20,7 @@ base:
         - hetzner.dns
         - hetzner.network
         - hetzner.consul
+        - hetzner.hostnames
         - shared.urls
 
     # the minion ID starting with "cic" is the main PIM and mail server at Hetzner
@@ -35,6 +36,7 @@ base:
         - local.network
         - shared.ssl
         - local.consul
+        - local.hostnames
         - local.url_overrides
         # - shared.urls
 
