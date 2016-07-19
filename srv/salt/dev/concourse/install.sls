@@ -45,14 +45,14 @@ concourse-private-config-folder:
 {% for key in ["host_key", "worker_key" "session_signing_key"] %}
 concourse-keys-{{key}}:
     cmd.run:
-        - name: ssh-keygen -t rsa -f /etc/concourse/private/{{key}} -N ''
+        - name: ssh-keygen -t rsa -f /etc/concourse/private/{{key}}.pem -N ''
         - runas: concourse
-        - unless: test -f /etc/concourse/private/{{key}}
+        - unless: test -f /etc/concourse/private/{{key}}.pem
         - require:
             - file: concourse-private-config-folder
             - user: concourse-user
     file.managed:
-        - name: /etc/concourse/private/{{key}}
+        - name: /etc/concourse/private/{{key}}.pem
         - user: concourse
         - group: concourse
         - mode: '0640'

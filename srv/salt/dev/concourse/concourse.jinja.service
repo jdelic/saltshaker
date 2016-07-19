@@ -6,7 +6,7 @@ After=basic.target network.target
 [Service]
 User=concourse
 Group=concourse
-ExecStart=/usr/local/bin/concourse
+ExecStart=/usr/local/bin/concourse {{type}} {{arguments}}
 ExecReload=/bin/kill -HUP $MAINPID
 PIDFile=/run/concourse-{{type}}.pid
 KillMode=process
