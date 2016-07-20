@@ -55,6 +55,15 @@ require-concourse-keys:
 {% endfor %}
 
 
+# concourse requires this file to at least exist, even if empty
+concourse-authorized-key-file:
+    file.managed:
+        - name: /etc/concourse/authorized_worker_keys
+        - replace: False
+        - mode: '0640'
+        - create: True
+
+
 concourse-server:
     file.managed:
         - name: /etc/systemd/system/concourse-web.service
@@ -81,6 +90,7 @@ concourse-server:
             - require-concourse-keys
         - require:
             - file: concourse-install
+            - file: concourse-authorized-key-file
     service.running:
         - name: concourse-web
         - sig: /usr/local/bin/concourse web
