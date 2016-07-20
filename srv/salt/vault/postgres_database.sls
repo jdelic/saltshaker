@@ -22,6 +22,8 @@ vault-postgres:
         - replication: False
         - password: {{pillar['dynamicpasswords']['secure-vault']}}
         - user: postgres
+        - require:
+            - secure-tablespace
     postgres_database.present:
         - name: vault
         - tablespace: secure

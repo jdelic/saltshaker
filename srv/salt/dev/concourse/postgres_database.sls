@@ -4,6 +4,7 @@
 concourse-db-role:
     postgres_user.present:
         - name: concourse
+        - password: {{pillar['dynamicpasswords']['concourse-db']}}
         - createdb: False
         - createroles: False
         - createuser: False
@@ -12,8 +13,9 @@ concourse-db-role:
         - inherit: False
         - superuser: False
         - replication: False
-        - password: {{pillar['dynamicpasswords']['concourse-db']}}
         - user: postgres
+        - require:
+            - data-cluster-service
 
 
 concourse-db:
