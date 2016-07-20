@@ -42,7 +42,6 @@ base:
 
     'roles:dev':
         - match: grain
-        - apache
         - dev.pbuilder
         - dev.aptly
         - dev.fpm
@@ -56,10 +55,6 @@ base:
 
     'roles:apps':
         - match: grain
-        - apache
-        - php
-        - djb.daemontools
-        - mn.services
         - docker
 
     'roles:servicerunner':
