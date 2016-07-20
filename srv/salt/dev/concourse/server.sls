@@ -118,8 +118,9 @@ concourse-servicedef-tsa:
         - mode: '0644'
         - template: jinja
         - context:
+            routing: internal
             suffix: tsa
-            mode: http
+            mode: tcp
             ip: {{pillar.get('concourse-server', {}).get('tsa-internal-ip', grains['ip_interfaces'][pillar['ifassign']['internal']][pillar['ifassign'].get('internal-ip-index', 0)|int()])}}
             port: {{pillar.get('concourse-server', {}).get('tsa-port', 2222)}}
         - require:
@@ -134,8 +135,10 @@ concourse-servicedef-atc:
         - mode: '0644'
         - template: jinja
         - context:
+            routing: external
+            protocol: http
             suffix: atc
-            mode: tcp
+            mode: http
             ip: {{pillar.get('concourse-server', {}).get('atc-ip', grains['ip_interfaces'][pillar['ifassign']['internal']][pillar['ifassign'].get('internal-ip-index', 0)|int()])}}
             port: {{pillar.get('concourse-server', {}).get('atc-port', 8080)}}
             hostname: {{pillar['hostnames']['ci']['domain']}}

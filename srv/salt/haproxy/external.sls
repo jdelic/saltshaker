@@ -30,7 +30,6 @@ smartstack-external:
         - source: salt://consul/template-config.jinja.conf
         - template: jinja
         - context:
-            ip: {{pillar.get('loadbalancer', {}).get('external-ip', grains['ip_interfaces'][pillar['ifassign']['external']][pillar['ifassign'].get('external-ip-index', 0)|int()])}}
             servicescript: /etc/consul/renders/smartstack-external.py
             target: /etc/haproxy/haproxy-external.cfg
             # this (yaml folded) command-line will reload haproxy if it is running and restart it otherwise
@@ -38,7 +37,7 @@ smartstack-external:
                 ps awwfux | grep -v grep | grep -q 'haproxy -f /etc/haproxy/haproxy-external.cfg' &&
                 systemctl reload haproxy@external ||
                 systemctl restart haproxy@external
-            parameters: --has smartstack:external
+            parameters: --has smartstack:external --localip {{pillar.get('loadbalancer', {}).get('external-ip', grains['ip_interfaces'][pillar['ifassign']['external']][pillar['ifassign'].get('external-ip-index', 0)|int()])}}
             template: /etc/haproxy/haproxy-external.jinja.cfg
         - require:
             - file: haproxy-config-template-external

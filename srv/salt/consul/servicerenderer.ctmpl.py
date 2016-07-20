@@ -93,13 +93,11 @@ class SmartstackServiceContainer(object):
         self.filtered_to = filtered_to or []
 
     def add(self, service):
-        if isinstance(self.services, dict):
-            if self.grouped_by in service.svc:
-                if service.svc[self.grouped_by] not in self.services:
-                    self.services[service.svc[self.grouped_by]] = []
-                self.services[service.svc[self.grouped_by]].append(service)
-        elif isinstance(self.services, list):
+        if isinstance(self.services, list):
             self.services.append(service)
+        else:
+            raise ValueError(".add() can't be called on SmartstackServiceContainers that contain a grouping dict (%s)" %
+                             repr(self))
 
     def iter_services(self, all=False):
         if all:
@@ -111,7 +109,7 @@ class SmartstackServiceContainer(object):
                 if sk != "__untagged" and not all:
                     for ss in self.services[sk]:
                         yield ss
-        elif isinstance(self.services, dict):
+        elif isinstance(self.services, list):
             for ss in self.services:
                 yield ss
 
@@ -122,7 +120,25 @@ class SmartstackServiceContainer(object):
         return self.iter_services()
 
     def __getitem__(self, item):
+        if isinstance(self.services, dict):
+            if item not in self.services:
+                raise KeyError("%s not in %s (%s)" % (item, type(self.services), repr(self)))
         return self.services[item]
+
+    def __getattr__(self, item):
+        if item not in self.services:
+            raise KeyError("%s not in %s (%s)" % (item, type(self.services), repr(self)))
+        return self.services[item]
+
+    def __contains__(self, item):
+        return item in self.services
+
+    def __repr__(self):
+        return "SmartstackServiceContainer<%s services of %s known services, grouped: %s, group_by_type: %s, " \
+               "filtered_to: %s>" % (len(list(self.iter_services())), len(self.all_services),
+                                    ".".join(self.grouped_by) if self.grouped_by is not None else "None",
+                                    ".".join(self.group_by_type) if self.group_by_type is not None else "None",
+                                    ".".join(self.filtered_to if self.filtered_to is not None else "None"))
 
     def keys(self):
         res = self.services.keys()
@@ -132,6 +148,12 @@ class SmartstackServiceContainer(object):
 
     def items(self):
         return self.services.items()
+
+    def count(self):
+        if isinstance(self.services, dict):
+            return len(self.keys())
+        elif isinstance(self.services, list):
+            return len(self.services)
 
     def group_by(self, field):
         grouped = {}
@@ -154,7 +176,7 @@ class SmartstackServiceContainer(object):
     def group_by_tagvalue(self, tagpart):
         grouped = {}
 
-        for ss in self.iter_services(all=True):
+        for ss in self.iter_services():
             v = ss.tagvalue(tagpart)
             if v is None:
                 if "__untagged" not in grouped:
