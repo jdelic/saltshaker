@@ -63,9 +63,9 @@ concourse-server:
         - user: root
         - group: root
         - context:
-            - type: web
+            type: web
             # postgresql on 127.0.0.1 works because there is haproxy@internal proxying it
-            - arguments: >
+            arguments: >
                 --basic-auth-username sysop
                 --basic-auth-password {{pillar['dynamicpasswords']['concourse-sysop']}}
                 --session-signing-key /etc/concourse/private/session_signing_key.pem
@@ -78,7 +78,7 @@ concourse-server:
         - require:
             - file: concourse-install
     service.running:
-        - name: concourse-web
+        - name: concourse-server
         - sig: /usr/local/bin/concourse web
         - enable: True
         - require:

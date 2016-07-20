@@ -21,9 +21,9 @@ concourse-worker:
         - user: root
         - group: root
         - context:
-            - type: worker
+            type: worker
             # tsa-host on 127.0.0.1 works because there is haproxy@internal proxying it
-            - arguments: >
+            arguments: >
                 --work-dir /srv/concourse-worker
                 --tsa-host 127.0.0.1
                 --tsa-public-key /etc/concourse/host_key.pem.pub
@@ -32,11 +32,11 @@ concourse-worker:
             - file: concourse-install
             - file: concourse-worker-dir
     service.running:
-        - name: concourse-web
+        - name: concourse-worker
         - sig: /usr/local/bin/concourse web
         - enable: True
         - require:
-            - file: concourse-server
+            - file: concourse-worker
 
 
 # vim: syntax=yaml
