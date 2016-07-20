@@ -27,7 +27,6 @@ concourse-worker:
                 --work-dir /srv/concourse-worker
                 --tsa-host 127.0.0.1
                 --tsa-public-key /etc/concourse/host_key.pub
-                --external-url {{pillar['hostnames']['ci']['protocol']}}://{{pillar['hostnames']['ci']['domain']}}
         - require:
             - file: concourse-install
             - file: concourse-worker-dir
