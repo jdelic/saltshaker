@@ -82,7 +82,7 @@ concourse-server:
         - require:
             - file: concourse-install
     service.running:
-        - name: concourse-server
+        - name: concourse-web
         - sig: /usr/local/bin/concourse web
         - enable: True
         - require:
@@ -92,7 +92,7 @@ concourse-server:
 concourse-servicedef-tsa:
     file.managed:
         - name: /etc/consul/services.d/concourse-tsa.json
-        - source: salt://concourse/consul/postgresql.jinja.json
+        - source: salt://concourse/consul/concourse.jinja.json
         - mode: '0644'
         - template: jinja
         - context:
@@ -107,7 +107,7 @@ concourse-servicedef-tsa:
 concourse-servicedef-atc:
     file.managed:
         - name: /etc/consul/services.d/concourse-tsa.json
-        - source: salt://concourse/consul/postgresql.jinja.json
+        - source: salt://concourse/consul/concourse.jinja.json
         - mode: '0644'
         - template: jinja
         - context:
