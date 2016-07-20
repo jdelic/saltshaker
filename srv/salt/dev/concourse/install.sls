@@ -62,6 +62,7 @@ concourse-install:
         - mode: '0755'
         - user: concourse
         - group: concourse
+        - replace: False
         - require:
             - user: concourse-user
             - file: concourse-keys-host_key-public
