@@ -116,7 +116,7 @@ concourse-servicedef-tsa:
 
 concourse-servicedef-atc:
     file.managed:
-        - name: /etc/consul/services.d/concourse-tsa.json
+        - name: /etc/consul/services.d/concourse-atc.json
         - source: salt://dev/concourse/consul/concourse.jinja.json
         - mode: '0644'
         - template: jinja
