@@ -38,6 +38,8 @@ concourse-worker:
         - enable: True
         - require:
             - file: concourse-worker
+        - watch:
+            - file: concourse-worker
 
 
 # vim: syntax=yaml

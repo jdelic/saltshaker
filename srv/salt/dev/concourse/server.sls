@@ -107,6 +107,8 @@ concourse-server:
         - enable: True
         - require:
             - file: concourse-server
+        - watch:
+            - file: concourse-server
 
 
 concourse-servicedef-tsa:
