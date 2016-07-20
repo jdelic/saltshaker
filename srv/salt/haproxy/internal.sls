@@ -7,6 +7,14 @@ include:
     - haproxy.install
 
 
+haproxy-config-template-internal:
+    file.managed:
+        - name: /etc/haproxy/haproxy-internal.jinja.cfg
+        - source: salt://haproxy/haproxy-internal.jinja.cfg
+        - require:
+            - pkg: haproxy
+
+
 smartstack-internal:
     file.managed:
         - name: /etc/consul/template.d/smartstack-internal.conf
@@ -23,7 +31,7 @@ smartstack-internal:
             parameters: --has smartstack:internal
             template: /etc/haproxy/haproxy.jinja.cfg
         - require:
-            - file: haproxy-config-template
+            - file: haproxy-config-template-internal
     service.enabled:  # haproxy will be started by the smartstack script rendered by consul-template (see command above)
         - name: haproxy@internal
         - require:

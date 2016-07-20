@@ -3,6 +3,7 @@
 haproxy:
     pkg:
         - installed
+        - fromrepo: jessie-backports
     service.dead:
         - name: haproxy
         - enable: False
@@ -49,14 +50,6 @@ haproxy-data-dir-systemd:
         - user: root
         - group: root
         - mode: '0644'
-        - require:
-            - pkg: haproxy
-
-
-haproxy-config-template:
-    file.managed:
-        - name: /etc/haproxy/haproxy.jinja.cfg
-        - source: salt://haproxy/haproxy.jinja.cfg
         - require:
             - pkg: haproxy
 

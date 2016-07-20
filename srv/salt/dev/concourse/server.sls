@@ -138,6 +138,7 @@ concourse-servicedef-atc:
             mode: tcp
             ip: {{pillar.get('concourse-server', {}).get('atc-ip', grains['ip_interfaces'][pillar['ifassign']['internal']][pillar['ifassign'].get('internal-ip-index', 0)|int()])}}
             port: {{pillar.get('concourse-server', {}).get('atc-port', 8080)}}
+            hostname: {{pillar['hostnames']['ci']['domain']}}
         - require:
             - file: concourse-server
             - file: consul-service-dir

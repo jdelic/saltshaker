@@ -1,7 +1,8 @@
 {
     "service": {
         "name": "concourse-{{suffix}}",
-        "tags": ["smartstack:internal", "smartstack:port:{{port}}", "smartstack:mode:{{mode}}"],
+        "tags": ["smartstack:internal", "smartstack:port:{{port}}", "smartstack:mode:{{mode}}"
+                {% if defined(hostname) %}, "smartstack:hostname:{{hostname}}"{% endif %}],
         "address": "{{ip}}",
         "port": {{port}}
         {# TODO: add service checks here? #}

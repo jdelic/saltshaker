@@ -1,4 +1,4 @@
-#! /usr/bin/env python
+#!/usr/bin/env python
 
 # This script template takes a list of dicts describing services in Consul,
 # rendered directly into this script by consul-template and then
@@ -32,7 +32,7 @@ _services = [
     {
         "name": "{{.Name}}",
         "ip": "{{.Address}}",
-        "port": "{{.Port}}",
+        "port": int("{{.Port}}"),
         "tags": [  # {{ range .Tags}}
              "{{.}}",  # {{ end }}
         ]
@@ -43,6 +43,146 @@ _services = [
 
 
 _args = None
+
+
+class SmartstackService(object):
+    def __init__(self, servicedict, protocol=None, port=None, host=None, mode=None):
+        self.protocol = protocol
+        self._port = port
+        self.host = host
+        self.mode = mode
+        self.svc = servicedict
+
+    @property
+    def port(self):
+        if self._port:
+            return self._port
+        else:
+            return self.svc["port"]
+
+    @port.setter
+    def port(self, value):
+        self._port = value
+
+    @property
+    def name(self):
+        return self.svc["name"]
+
+    @property
+    def ip(self):
+        return self.svc["ip"]
+
+    @property
+    def tags(self):
+        return self.svc["tags"]
+
+    def tagvalue(self, tagpart):
+        for tag in self.svc["tags"]:
+            if tag.startswith(tagpart):
+                return tag[len(tagpart):]
+        return None
+
+
+class SmartstackServiceContainer(object):
+    def __init__(self, services=None, all_services=None, grouped_by=None, group_by_type=None,
+                 filtered_to=None):
+        self.services = services if services is not None else all_services or []
+        self.all_services = all_services
+        self.grouped_by = grouped_by or []
+        self.group_by_type = group_by_type or []
+        self.filtered_to = filtered_to or []
+
+    def add(self, service):
+        if isinstance(self.services, dict):
+            if self.grouped_by in service.svc:
+                if service.svc[self.grouped_by] not in self.services:
+                    self.services[service.svc[self.grouped_by]] = []
+                self.services[service.svc[self.grouped_by]].append(service)
+        elif isinstance(self.services, list):
+            self.services.append(service)
+
+    def iter_services(self, all=False):
+        if all:
+            return iter(self.all_services)
+
+        if isinstance(self.services, dict):
+            for sk in self.services.keys():
+                if sk != "__untagged" and not all:
+                    for ss in self.services[sk]:
+                        yield ss
+        elif isinstance(self.services, dict):
+            for ss in self.services:
+                yield ss
+
+    def ungroup(self):
+        return SmartstackServiceContainer(all_services=self.all_services)
+
+    def __iter__(self):
+        return self.iter_services()
+
+    def __getitem__(self, item):
+        return self.services[item]
+
+    def keys(self):
+        res = self.services.keys()
+        if "__untagged" in res:
+            del res["__untagged"]
+        return res
+
+    def items(self):
+        return self.services.items()
+
+    def group_by(self, field):
+        grouped = {}
+
+        for ss in self.iter_services():
+            if field in ss.svc:
+                if ss.svc[field] not in grouped:
+                    grouped[ss.svc[field]] = SmartstackServiceContainer([], all_services=self.all_services,
+                                                                        filtered_to=self.filtered_to + [field])
+                grouped[ss.svc[field]].add(ss)
+            else:
+                if "__untagged" not in grouped:
+                    grouped["__untagged"] = SmartstackServiceContainer([], all_services=self.all_services,
+                                                                       filtered_to=self.filtered_to + ["__untagged"])
+                grouped["__untagged"].add(ss)
+        return SmartstackServiceContainer(grouped, all_services=self.all_services,
+                                          grouped_by=self.grouped_by + [field],
+                                          group_by_type=self.group_by_type + ["field"])
+
+    def group_by_tagvalue(self, tagpart):
+        grouped = {}
+
+        for ss in self.iter_services(all=True):
+            v = ss.tagvalue(tagpart)
+            if v is None:
+                if "__untagged" not in grouped:
+                    grouped["__untagged"] = SmartstackServiceContainer([], all_services=self.all_services,
+                                                                       filtered_to=self.filtered_to + ["__untagged"])
+                grouped["__untagged"].add(ss)
+            else:
+                if v not in grouped:
+                    grouped[v] = SmartstackServiceContainer([], all_services=self.all_services,
+                                                            filtered_to=self.filtered_to + [v])
+                grouped[v].add(ss)
+        return SmartstackServiceContainer(grouped, all_services=self.all_services,
+                                          grouped_by=self.grouped_by + [tagpart],
+                                          group_by_type=self.group_by_type + ["tag"])
+
+    def value_set(self, field):
+        res = set()
+        for ss in self.iter_services():
+            if field in ss.svc:
+                res.add(ss.svc[field])
+        return res
+
+    def tagvalue_set(self, tagpart):
+        res = set()
+        for ss in self.iter_services():
+            for tag in ss.svc["tags"]:
+                if tag.startswith(tagpart):
+                    res.add(tag[len(tagpart):])
+        return res
 
 
 @contextlib.contextmanager
@@ -96,24 +236,20 @@ def filter_services(svcs):
 
 
 def parse_smartstack_tags(service):
+    sv = SmartstackService(service)
     for tag in service["tags"]:
         if re.match("^smartstack:port:([0-9]+)$", tag):
-            service["smartstack_port"] = int(tag.split(":")[2])
+            sv.port = int(tag.split(":")[2])
 
-        if re.match("^smartstack:host:", tag):
-            service["smartstack_host"] = tag.split(":")[2]
+        if tag.startswith("smartstack:host:"):
+            sv.host = tag.split(":")[2]
 
-        if re.match("^smartstack:mode:", tag):
-            service["smartstack_mode"] = tag.split(":")[2]
+        if tag.startswith("smartstack:mode:"):
+            sv.mode = tag.split(":")[2]
 
-
-def group_services(services):
-    grouped = {}
-    for svc in services:
-        if svc["name"] not in grouped:
-            grouped[svc["name"]] = []
-        grouped[svc["name"]].append(svc)
-    return grouped
+        if tag.startswith("smartstack:protocol:"):
+            sv.protocol = tag.split(":")[2]
+    return sv
 
 
 def main():
@@ -144,21 +280,21 @@ def main():
     _args = parser.parse_args()
 
     filtered = filter_services(_services)
+    parsed = []
 
     for sv in filtered:
-        parse_smartstack_tags(sv)
-
-    servicegroups = group_services(filtered)
+        parsed.append(parse_smartstack_tags(sv))
 
     context = {
-        "services": filtered,
-        "servicegroups": servicegroups,
+        "services": SmartstackServiceContainer(all_services=parsed),
         "localip": _args.localip,
     }
 
+    env = jinja2.Environment(extensions=['jinja2.ext.do'])
+
     with open(_args.template) as inf, file_or_stdout(_args.output) as outf:
         tplstr = inf.read()
-        tpl = jinja2.Template(tplstr)
+        tpl = env.from_string(tplstr)
         outf.write(tpl.render(context))
 
     if _args.command:

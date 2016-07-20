@@ -15,4 +15,37 @@
 include:
     - haproxy.install
 
+
+haproxy-config-template-external:
+    file.managed:
+        - name: /etc/haproxy/haproxy-external.jinja.cfg
+        - source: salt://haproxy/haproxy-external.jinja.cfg
+        - require:
+            - pkg: haproxy
+
+
+smartstack-external:
+    file.managed:
+        - name: /etc/consul/template.d/smartstack-external.conf
+        - source: salt://consul/template-config.jinja.conf
+        - template: jinja
+        - context:
+            ip: {{pillar.get('loadbalancer', {}).get('external-ip', grains['ip_interfaces'][pillar['ifassign']['external']][pillar['ifassign'].get('external-ip-index', 0)|int()])}}
+            servicescript: /etc/consul/renders/smartstack-external.py
+            target: /etc/haproxy/haproxy-external.cfg
+            # this (yaml folded) command-line will reload haproxy if it is running and restart it otherwise
+            command: >
+                ps awwfux | grep -v grep | grep -q 'haproxy -f /etc/haproxy/haproxy-external.cfg' &&
+                systemctl reload haproxy@external ||
+                systemctl restart haproxy@external
+            parameters: --has smartstack:external
+            template: /etc/haproxy/haproxy.jinja.cfg
+        - require:
+            - file: haproxy-config-template-external
+    service.enabled:  # haproxy will be started by the smartstack script rendered by consul-template (see command above)
+        - name: haproxy@external
+        - require:
+            - file: haproxy-multi
+            - file: smartstack-external
+
 # vim: syntax=yaml
