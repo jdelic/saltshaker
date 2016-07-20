@@ -1,9 +1,0 @@
-{
-    "service": {
-        "name": "internal-mail-relay",
-        "tags": ["smartstack:internal", "smartstack:port:25"],
-        "address": "{{pillar['smtp'].get('internal-relay-ip', grains['ip_interfaces'][pillar['ifassign']['internal']][pillar['ifassign'].get('internal-ip-index', 0)|int()])}}",
-        "port": 25
-        {# TODO: add service checks here? Or add haproxy in front? #}
-    }
-}
