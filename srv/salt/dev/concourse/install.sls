@@ -67,4 +67,20 @@ concourse-install:
             - file: concourse-keys-host_key-public
 
 
+# allow workers to talk to the server on port 2222 on the internal network
+concourse-tcp-out{{pillar.get('concourse-server', {}).get('tsa-port', 2222)}}-send:
+    iptables.append:
+        - table: filter
+        - chain: OUTPUT
+        - jump: ACCEPT
+        - out-interface: {{pillar['ifassign']['internal']}}
+        - dport: {{pillar.get('concourse-server', {}).get('tsa-port', 2222)}}
+        - match: state
+        - connstate: NEW
+        - proto: tcp
+        - save: True
+        - require:
+            - sls: iptables
+
+
 # vim: syntax=yaml

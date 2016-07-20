@@ -1,6 +1,6 @@
 {
     "service": {
-        "name": "concourse",
+        "name": "concourse-{{suffix}}",
         "tags": ["smartstack:internal", "smartstack:port:{{port}}"],
         "address": "{{ip}}",
         "port": {{port}}

@@ -68,7 +68,11 @@ concourse-server:
             arguments: >
                 --basic-auth-username sysop
                 --basic-auth-password {{pillar['dynamicpasswords']['concourse-sysop']}}
+                --bind-ip {{pillar.get('concourse-server', {}).get('atc-ip', grains['ip_interfaces'][pillar['ifassign']['internal']][pillar['ifassign'].get('internal-ip-index', 0)|int()])}}
+                --bind-port {{pillar.get('concourse-server', {}).get('atc-port', 8080)}}
                 --session-signing-key /etc/concourse/private/session_signing_key.pem
+                --tsa-bind-ip {{pillar.get('concourse-server', {}).get('tsa-internal-ip', grains['ip_interfaces'][pillar['ifassign']['internal']][pillar['ifassign'].get('internal-ip-index', 0)|int()])}}
+                --tsa-bind-port {{pillar.get('concourse-server', {}).get('tsa-port', 2222)}}
                 --tsa-host-key /etc/concourse/host_key.pem
                 --tsa-authorized-keys /etc/concourse/authorized_worker_keys
                 --postgres-data-source postgres://concourse:{{pillar['dynamicpasswords']['concourse-db']}}@127.0.0.1:5432/concourse
@@ -85,17 +89,83 @@ concourse-server:
             - file: concourse-server
 
 
-concourse-servicedef:
+concourse-servicedef-tsa:
     file.managed:
-        - name: /etc/consul/services.d/concourse.json
+        - name: /etc/consul/services.d/concourse-tsa.json
         - source: salt://concourse/consul/postgresql.jinja.json
         - mode: '0644'
         - template: jinja
         - context:
-            ip: {{pillar.get('concourse-server', {}).get('bind-ip', grains['ip_interfaces'][pillar['ifassign']['internal']][pillar['ifassign'].get('internal-ip-index', 0)|int()])}}
-            port: {{pillar.get('concourse-server', {}).get('bind-port', 2222)}}
+            suffix: tsa
+            ip: {{pillar.get('concourse-server', {}).get('tsa-internal-ip', grains['ip_interfaces'][pillar['ifassign']['internal']][pillar['ifassign'].get('internal-ip-index', 0)|int()])}}
+            port: {{pillar.get('concourse-server', {}).get('tsa-port', 2222)}}
         - require:
             - file: concourse-server
             - file: consul-service-dir
+
+
+concourse-servicedef-atc:
+    file.managed:
+        - name: /etc/consul/services.d/concourse-tsa.json
+        - source: salt://concourse/consul/postgresql.jinja.json
+        - mode: '0644'
+        - template: jinja
+        - context:
+            suffix: atc
+            ip: {{pillar.get('concourse-server', {}).get('atc-ip', grains['ip_interfaces'][pillar['ifassign']['internal']][pillar['ifassign'].get('internal-ip-index', 0)|int()])}}
+            port: {{pillar.get('concourse-server', {}).get('atc-port', 8080)}}
+        - require:
+            - file: concourse-server
+            - file: consul-service-dir
+
+
+concourse-tcp-in{{pillar.get('concourse-server', {}).get('tsa-port', 2222)}}-recv:
+    iptables.append:
+        - table: filter
+        - chain: INPUT
+        - jump: ACCEPT
+        - source: '0/0'
+        - destination: {{pillar.get('concourse-server', {}).get('tsa-internal-ip', grains['ip_interfaces'][pillar['ifassign']['internal']][pillar['ifassign'].get('internal-ip-index', 0)|int()])}}
+        - dport: {{pillar.get('concourse-server', {}).get('tsa-port', 2222)}}
+        - match: state
+        - connstate: NEW
+        - proto: tcp
+        - save: True
+        - require:
+            - sls: iptables
+
+
+concourse-tcp-in{{pillar.get('concourse-server', {}).get('atc-port', 8080)}}-recv:
+    iptables.append:
+        - table: filter
+        - chain: INPUT
+        - jump: ACCEPT
+        - source: '0/0'
+        - destination: {{pillar.get('concourse-server', {}).get('atc-ip', grains['ip_interfaces'][pillar['ifassign']['internal']][pillar['ifassign'].get('internal-ip-index', 0)|int()])}}
+        - dport: {{pillar.get('concourse-server', {}).get('atc-port', 8080)}}
+        - match: state
+        - connstate: NEW
+        - proto: tcp
+        - save: True
+        - require:
+            - sls: iptables
+
+
+# allow us to talk to others
+concourse-tcp-out{{pillar.get('concourse-server', {}).get('atc-port', 8080)}}-send:
+    iptables.append:
+        - table: filter
+        - chain: OUTPUT
+        - jump: ACCEPT
+        - source: {{pillar.get('concourse-server', {}).get('atc-ip', grains['ip_interfaces'][pillar['ifassign']['internal']][pillar['ifassign'].get('internal-ip-index', 0)|int()])}}
+        - sport: {{pillar.get('concourse-server', {}).get('atc-port', 8080)}}
+        - destination: '0/0'
+        - match: state
+        - connstate: NEW
+        - proto: tcp
+        - save: True
+        - require:
+            - sls: iptables
+
 
 # vim: syntax=yaml
