@@ -4,7 +4,7 @@ include:
 
 
 # ssh-keygen -t rsa -f session_signing_key -N ''
-{% for key in ["worker_key" "session_signing_key"] %}
+{% for key in ["worker_key", "session_signing_key"] %}
 concourse-keys-{{key}}:
     cmd.run:
         - name: ssh-keygen -t rsa -f /etc/concourse/private/{{key}}.pem -N ''
@@ -50,7 +50,7 @@ concourse-keys-host_key:
 require-concourse-keys:
     test.nop:
         - require:
-{% for key in ["host_key", "worker_key" "session_signing_key"] %}
+{% for key in ["host_key", "worker_key", "session_signing_key"] %}
             - file: concourse-keys-{{key}}
 {% endfor %}
 
