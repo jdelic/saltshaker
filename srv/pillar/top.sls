@@ -4,6 +4,7 @@ base:
     '*':
         - shared.global
         - shared.saltmine
+        - shared.ssl
 
     'roles:vault':
         - match: grain
