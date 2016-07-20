@@ -32,7 +32,7 @@ concourse-worker:
             - file: concourse-worker-dir
     service.running:
         - name: concourse-worker
-        - sig: /usr/local/bin/concourse web
+        - sig: /usr/local/bin/concourse worker
         - enable: True
         - require:
             - file: concourse-worker
