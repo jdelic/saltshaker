@@ -110,7 +110,7 @@ postgresql-servicedef:
             ip: {{pillar.get('postgresql-server', {}).get('bind-ip', grains['ip_interfaces'][pillar['ifassign']['internal']][pillar['ifassign'].get('internal-ip-index', 0)|int()])}}
             port: {{pillar.get('postgresql-server', {}).get('bind-port', 5432)}}
         - require:
-            - file: data-cluster
+            - cmd: data-cluster
             - file: consul-service-dir
 
 
