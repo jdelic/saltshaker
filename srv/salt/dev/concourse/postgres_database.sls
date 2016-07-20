@@ -12,7 +12,7 @@ concourse-db-role:
         - inherit: False
         - superuser: False
         - replication: False
-        - password: {{piller['dynamicpasswords']['concourse-db']}}
+        - password: {{pillar['dynamicpasswords']['concourse-db']}}
         - user: postgres
 
 
