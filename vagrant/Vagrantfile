@@ -154,7 +154,7 @@ SCRIPT
             salt.run_highstate = true
             salt.colorize = true
             salt.log_level = 'warning'
-            salt.verbose = false
+            salt.verbose = true
             salt.no_minion = false
             salt.always_install = false
             salt.install_master = false
