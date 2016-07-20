@@ -13,6 +13,8 @@ haproxy-config-template-internal:
         - source: salt://haproxy/haproxy-internal.jinja.cfg
         - require:
             - pkg: haproxy
+        - watch_in:
+            - service: consul-template-service
 
 
 smartstack-internal:

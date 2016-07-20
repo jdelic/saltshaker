@@ -74,7 +74,6 @@ consul-template-service:
 
 
 # https://github.com/hashicorp/consul-template/issues/408
-# this still doesn't seem to really work 2016-07-21
 #consul-template-service-reload:
 #    service.running:
 #        - name: consul-template
