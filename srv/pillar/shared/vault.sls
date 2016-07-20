@@ -5,9 +5,9 @@
 #
 
 vault:
-    # "mysql" or "consul" or "s3". Only "consul" supports redundancy (more than one vault server in the cluster
-    # with leader elections. However, "consul" is *only* a good choice if your consul nodes run on multiple
-    # physical machines.
+    # "mysql", "postgres" or "consul" or "s3". Only "consul" supports redundancy (more than one vault server
+    # in the cluster with leader elections. However, "consul" is *only* a good choice if your consul nodes run
+    # on multiple physical machines.
     backend: consul
     kvpath: 'vault/'  # see https://vaultproject.io/docs/config/index.html
 
@@ -16,6 +16,10 @@ vault:
 
     mysql:
         dbname: vault  # only needed for mysql backend
+        dbuser: vault  # the password is created via the dynamicpasswords ext_pillar
+
+    postgres:
+        dbname: vault  # only needed for postgres backend
         dbuser: vault  # the password is created via the dynamicpasswords ext_pillar
 
     s3:

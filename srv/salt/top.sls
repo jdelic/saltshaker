@@ -74,7 +74,7 @@ base:
     'roles:secure-database':
         - match: grain
         - postgresql.secure
-        - vault.mysql_database  # this state is empty if vault uses a different backend than "mysql"
+        - vault.database  # this state is empty if vault doesn't use a database backend
 
     'roles:mail':
         - match: grain
