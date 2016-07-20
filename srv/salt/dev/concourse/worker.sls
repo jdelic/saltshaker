@@ -22,6 +22,8 @@ concourse-worker:
         - group: root
         - context:
             type: worker
+            user: root  # worker must be run as root as it orchestrates containers (see concourse CI docs)
+            group: root
             # tsa-host on 127.0.0.1 works because there is haproxy@internal proxying it
             arguments: >
                 --work-dir /srv/concourse-worker

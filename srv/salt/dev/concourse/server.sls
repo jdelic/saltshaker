@@ -80,6 +80,8 @@ concourse-server:
         - group: root
         - context:
             type: web
+            user: concourse
+            group: concourse
             # postgresql on 127.0.0.1 works because there is haproxy@internal proxying it
             arguments: >
                 --basic-auth-username sysop
