@@ -68,7 +68,7 @@ data-cluster-config-hba:
 data-cluster-config-network:
     file.append:
         - name: /etc/postgresql/9.5/main/postgresql.conf
-        - text: listen_address = '{{pillar.get('postgresql-server', {}).get('bind-ip', grains['ip_interfaces'][pillar['ifassign']['internal']][pillar['ifassign'].get('internal-ip-index', 0)|int()])}}'
+        - text: listen_addresses = '{{pillar.get('postgresql-server', {}).get('bind-ip', grains['ip_interfaces'][pillar['ifassign']['internal']][pillar['ifassign'].get('internal-ip-index', 0)|int()])}}'
         - require:
             - cmd: data-cluster
 
