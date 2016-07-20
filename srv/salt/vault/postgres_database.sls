@@ -28,6 +28,7 @@ vault-postgres:
         - encoding: utf-8
         - owner: concourse
         - user: {{pillar['vault']['postgres']['dbuser']}}
+        - order: 10  # see ORDER.md
         - require:
             - postgres_user: vault-postgres
             - secure-tablespace

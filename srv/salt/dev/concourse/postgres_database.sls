@@ -22,6 +22,7 @@ concourse-db:
         - encoding: utf-8
         - owner: concourse
         - user: postgres
+        - order: 10  # see ORDER.md
         - require:
             - postgres_user: concourse-db-role
             - data-cluster
