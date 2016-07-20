@@ -11,6 +11,7 @@ concourse-user:
         - name: concourse
     user.present:
         - name: concourse
+        - gid: concourse
         - home: /etc/concourse
         - shell: /bin/false
         - createhome: False
