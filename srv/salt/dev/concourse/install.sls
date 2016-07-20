@@ -11,9 +11,9 @@ concourse-user:
         - name: concourse
     user.present:
         - name: concourse
-        - home: /srv/concourse
+        - home: /etc/concourse
         - shell: /bin/false
-        - createhome: True
+        - createhome: False
         - require:
             - group: concourse-user
 

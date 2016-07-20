@@ -70,6 +70,7 @@ base:
         - fstab.data
         - postgresql.fast
         - redis.cache
+        - dev.concouse.postgres_database
 
     'roles:secure-database':
         - match: grain
