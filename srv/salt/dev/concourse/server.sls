@@ -32,6 +32,8 @@ concourse-keys-host_key-public-copy:
         - group: concourse
         - mode: '0644'
         - replace: True
+        - require:
+            - user: concourse-user
 
 
 concourse-keys-host_key:
@@ -45,6 +47,7 @@ concourse-keys-host_key:
         - require:
             - file: concourse-keys-host_key-public-copy
             - file: concourse-keys-host_key-public
+            - user: concourse-user
 
 
 require-concourse-keys:
@@ -60,8 +63,12 @@ concourse-authorized-key-file:
     file.managed:
         - name: /etc/concourse/authorized_worker_keys
         - replace: False
+        - user: concourse
+        - group: concourse
         - mode: '0640'
         - create: True
+        - require:
+            - user: concourse-user
 
 
 concourse-server:
