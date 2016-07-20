@@ -27,7 +27,7 @@ secure-tablespace:
         - db_user: postgres
         - user: postgres
         - require:
-            - data-cluster
+            - data-cluster-service
             - secure-tablespace-dir
 
 

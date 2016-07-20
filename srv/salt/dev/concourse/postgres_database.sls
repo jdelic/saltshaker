@@ -25,4 +25,4 @@ concourse-db:
         - order: 10  # see ORDER.md
         - require:
             - postgres_user: concourse-db-role
-            - data-cluster
+            - data-cluster-service

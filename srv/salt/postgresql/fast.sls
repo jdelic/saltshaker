@@ -49,24 +49,38 @@ data-cluster:
     cmd.run:
         - name: >
             /usr/bin/pg_createcluster -d /data/postgres/9.5/main --locale=en_US.utf-8 -e utf-8 -p 5432
-            --pgoption listen_address="'{{pillar.get('postgresql-server', {}).get('bind-ip', grains['ip_interfaces'][pillar['ifassign']['internal']][pillar['ifassign'].get('internal-ip-index', 0)|int()])}}'"
             9.5 main
         - runas: root
         - unless: test -e /data/postgres/9.5/main
         - require:
             - postgresql-step2
             - data-base-dir
+
+
+data-cluster-config-hba:
     file.append:
         - name: /etc/postgresql/9.5/main/pg_hba.conf
         - text: host all all {{pillar.get('postgresql-server', {}).get('bind-ip', grains['ip_interfaces'][pillar['ifassign']['internal']][pillar['ifassign'].get('internal-ip-index', 0)|int()])}}/24 md5
         - require:
             - cmd: data-cluster
+
+
+data-cluster-config-network:
+    file.append:
+        - name: /etc/postgresql/9.5/main/postgresql.conf
+        - text: listen_address = '{{pillar.get('postgresql-server', {}).get('bind-ip', grains['ip_interfaces'][pillar['ifassign']['internal']][pillar['ifassign'].get('internal-ip-index', 0)|int()])}}'
+        - require:
+            - cmd: data-cluster
+
+
+data-cluster-service:
     service.running:
         - name: postgresql@9.5-main
         - sig: postgres
         - enable: True
         - require:
-            - file: data-cluster
+            - file: data-cluster-config-hba
+            - file: data-cluster-config-network
 
 
 postgresql-in{{pillar.get('postgresql-server', {}).get('bind-port', 5432)}}-recv:
