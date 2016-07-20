@@ -27,7 +27,7 @@ vault-postgres:
     postgres_database.present:
         - name: vault
         - tablespace: secure
-        - encoding: utf-8
+        - encoding: utf8  # postgresql spelling
         - owner: concourse
         - user: {{pillar['vault']['postgres']['dbuser']}}
         - order: 10  # see ORDER.md

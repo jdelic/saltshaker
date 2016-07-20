@@ -21,7 +21,7 @@ concourse-db-role:
 concourse-db:
     postgres_database.present:
         - name: concourse
-        - encoding: utf-8
+        - encoding: utf8  # postgresql spelling
         - owner: concourse
         - user: postgres
         - order: 10  # see ORDER.md
