@@ -128,6 +128,23 @@ concourse-servicedef-tsa:
             - file: consul-service-dir
 
 
+concourse-servicedef-atc-internal:
+    file.managed:
+        - name: /etc/consul/services.d/concourse-atc-internal.json
+        - source: salt://dev/concourse/consul/concourse.jinja.json
+        - mode: '0644'
+        - template: jinja
+        - context:
+            routing: internal
+            suffix: atc-internal
+            mode: http
+            ip: {{pillar.get('concourse-server', {}).get('atc-ip', grains['ip_interfaces'][pillar['ifassign']['internal']][pillar['ifassign'].get('internal-ip-index', 0)|int()])}}
+            port: {{pillar.get('concourse-server', {}).get('atc-port', 8080)}}
+        - require:
+            - file: concourse-server
+            - file: consul-service-dir
+
+
 concourse-servicedef-atc:
     file.managed:
         - name: /etc/consul/services.d/concourse-atc.json
