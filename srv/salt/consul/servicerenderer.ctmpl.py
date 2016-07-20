@@ -107,6 +107,15 @@ def parse_smartstack_tags(service):
             service["smartstack_mode"] = tag.split(":")[2]
 
 
+def group_services(services):
+    grouped = {}
+    for svc in services:
+        if svc["name"] not in grouped:
+            grouped[svc["name"]] = []
+        grouped[svc["name"]].append(svc)
+    return grouped
+
+
 def main():
     global _args
     parser = argparse.ArgumentParser(
@@ -139,8 +148,11 @@ def main():
     for sv in filtered:
         parse_smartstack_tags(sv)
 
+    servicegroups = group_services(filtered)
+
     context = {
         "services": filtered,
+        "servicegroups": servicegroups,
         "localip": _args.localip,
     }
 
