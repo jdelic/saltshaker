@@ -39,7 +39,7 @@ smartstack-external:
                 systemctl reload haproxy@external ||
                 systemctl restart haproxy@external
             parameters: --has smartstack:external
-            template: /etc/haproxy/haproxy.jinja.cfg
+            template: /etc/haproxy/haproxy-external.jinja.cfg
         - require:
             - file: haproxy-config-template-external
     service.enabled:  # haproxy will be started by the smartstack script rendered by consul-template (see command above)

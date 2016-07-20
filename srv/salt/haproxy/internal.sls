@@ -29,7 +29,7 @@ smartstack-internal:
                 systemctl reload haproxy@internal ||
                 systemctl restart haproxy@internal
             parameters: --has smartstack:internal
-            template: /etc/haproxy/haproxy.jinja.cfg
+            template: /etc/haproxy/haproxy-internal.jinja.cfg
         - require:
             - file: haproxy-config-template-internal
     service.enabled:  # haproxy will be started by the smartstack script rendered by consul-template (see command above)
