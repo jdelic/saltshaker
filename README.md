@@ -29,24 +29,22 @@ Using these salt formulae you can bring up:
     [smartstack](http://nerds.airbnb.com/smartstack-service-discovery-cloud/)
     implementation for service discovery
 
-  * a MySQL database configuration for a normal and an encrypted database
+  * a MySQL and/or PostgreSQL database configuration for a normal and an 
+    encrypted database
 
-  * a Jenkins build server environment for [GoPythonGo](http://gopythongo.com)
-    based builds and deployment
+  * a [Concourse.CI](http://concourse.ci/) build server environment for 
+    your projects
 
   * an HAProxy based HTTP reverse proxying load balancer for applications
-
-  * Apache2+php-fpm for my WordPress blog
 
 It also contains configuration for
 
   * a fully fledged PIM+Mail server with encrypted storage (based on
     [Sogo](http://sogo.nu), [Dovecot](http://dovecot.org) and
-    [Qmail](http://cr.yp.to/qmail.html) (with
-    [John Simpson's combined patch](http://qmail.jms1.net/)))
+    [OpenSMTPD](https://www.opensmtpd.org/)
 
-  * single-sign-on for Sogo, Dovecot and Qmail, other web applications and even
-    PAM using CAS
+  * single-sign-on for Sogo, Dovecot and OpenSMTPD, other web applications and 
+    even PAM using CAS
 
 The salt configuration is pretty modular, so you can easily just use this
 repository to bring up a GoPythonGo build and deployment environment without
@@ -91,7 +89,8 @@ Deploying this salt configuration requires you to:
      configuration for your environment (see *Networking* below) and assign
      it to your systems in `top.sls`. It's especially important to select
      a count of consul server instances (3 are recommended for a production
-     environment).
+     environment). You also **must** provide a `secrets` pillar that contains
+     SSL certificates and such things.
 
   6. Run `salt-call state.highstate -l debug` on your master to bring it up.
 
@@ -103,6 +102,59 @@ Deploying this salt configuration requires you to:
      together with `xen-create-image`.
 
 
+# The secrets pillar
+
+For these configurations to work, you **must** provide a `shared.secrets` 
+pillar in `srv/pillar/shared/secrets` that must contain the following pillars,
+unless you rework the salt states to use different ones. I use a wildcard
+certificate for my domains, but if you want to, you can `grep` for the pillars
+below and replace them with your own:
+
+In `shared.secrets.ssl`:
+  * `ssl:maincert:cert` - The public X.509 SSL certificate for your domain. 
+    You can replace these with cert pillars for your individual domain.
+  * `ssl:maincert:key:` - The private key for your SSL certificate without a
+    passphrase. You can replace this with key pillars for your individual 
+    domain.
+  * `ssl:maincert:certchain` - The X.509 certificates tying your CA to a 
+    browser-accredited CA, if necessary.
+  * `ssl:maincert:combined` - A concatenation of `:cert` and `:certchain`. 
+  * `ssl:maincert:combined-key` - A concatenation of `:cert`, `:certchain` and
+    `:key`.
+
+In `shared.secrets.vault`:
+  * `ssl:vault:cert` - the public X.509 SSL certificate used by the `vault`
+    role/server.
+  * `ssl:vault:key` - its private key
+  * `ssl:vault:certchain` - it's CA chain
+  * `ssl:vault:combined` - A concatenation of `:cert` and `:certchain`
+  * `ssl:vault:combined-key` - A concatenation of `:cert` and `:certchain` and
+    `:key`.
+
+In `shared.secrets.concourse`:
+  * `ssh:concourse:public` - A SSH2 public RSA key for the concourse.ci TSA SSH
+    host.
+  * `ssh:concourse:key` - The private key for the public host key.
+  
+I manage these pillars in a private Git repository that I clone to 
+`srv/pillar/shared/secrets` as a Git submodule. To keep the PEM encoded 
+certificates and keys in the pillar file, I use the following trick:
+
+```
+# pillar file
+{% set mycert = "
+-----BEGIN CERTIFICATE-----
+MIIFBDCCAuwCAQEwDQYJKoZIhvcNAQELBQAwgdgxCzAJBgNVBAYTAkRFMQ8wDQYD
+...
+-----END CERTIFICATE-----"|indent(12) %}
+
+# using the indent(12) template filter I can then do:
+ssl:
+    maincert:
+        cert: | {{mycert}}
+```
+
+                
 # Server configuration
 
 ## Networking
@@ -136,10 +188,10 @@ that seem to be "interwoven" in this repository. The whole setup is meant to
     discovered through consul and then automatically be registered with a
     server that has the "loadbalancer" role
 
-  * **but also** allow salt to install and configure services (like qmail,
-    dovecot or a PHP application that can not be easily packaged in a .deb)
-    and register that with consul to then make it available through a server
-    that has the "loadbalancer" role
+  * **but also** allow salt to install and configure services (like opensmtpd,
+    dovecot, concourse.ci or a PHP application that can not be easily packaged 
+    in a .deb) and register that with consul to then make it available through 
+    a server that has the "loadbalancer" role
 
 I generally, if in any way possible, would always prefer deploying an
 application **not through salt states**, but other means (for example: 
@@ -149,7 +201,8 @@ typically part of a Unix system like a mail server) you **totally can** use
 salt states for that. This way you don't have to repackage services which are 
 already set up for your system. No need to repackage dovecot in a Docker 
 container, for example, if the Debian Maintainers do such an awesome job of 
-already providing ready-to-run packages anyway!
+already providing ready-to-run packages anyway! (Also, repeat after me:
+"Salt, Puppet, Chef and Ansible are not deployment tools!")
 
 As I see it: use the best tool for the job. There is no dogma requiring you to
 run all services inside a container for example. And a container is not a VM,
@@ -189,7 +242,7 @@ smartstack:hostname:[hostname] | Route through haproxy on HTTP Host header
 ### Cross-datacenter services between two salt-controlled environments
 TODO: smartstack:cross-datacenter
 
-### Integrating external services
+### Integrating external services (not implemented yet)
 **Question: But I run my service X on Heroku/Amazon Elastic Beanstalk with
 autoscaling/Amazon Container Service/Microsoft Azure/Google Compute Engine/
 whatever... how do I plug this into this smartstack implementation?**
@@ -223,9 +276,9 @@ either the *consul* or *mysql* backend.
 
 ### Vault backend: mysql
 Generally, if you run on multiple VMs sharing a physical server, choose the
-`mysql` backend and choose backup intervals and Vault credential leases with
-a possible outage in mind. Such a persistent backend will not be highly
-available, but unless you distribute your VMs across multiple physical
+`mysql` or `postgres` backends and choose backup intervals and Vault credential
+leases with a possible outage in mind. Such a persistent backend will not be 
+highly available, but unless you distribute your VMs across multiple physical
 machines, your setup will not be HA anyway. So it's better to fail in a way
 that let's your restore service easily.
 
@@ -233,10 +286,11 @@ Running this setup from this Salt recipe requires at least one server in the
 local environment to have the `secure-database` role as it will host the
 Vault MySQL database. The Salt recipe will automatically set up a `vault`
 database on the `secure-database` role if the vault pillar has the backend
-set to "mysql".
+set to `mysql` or `postgres`, because the `top.sls` file shipped from this 
+repo assigns the `vault.database` state to the `secure-database` role.
 
 To enable this backend, set the Pillar `[server environment].vault.backend` to
-`mysql` and assign one server the role `secure-database` (this salt
+`mysql` or `postgres` and assign one server the role `secure-database` (this salt
 configuration doesn't support database replication) and at least one server the
 `vault` role.
 
