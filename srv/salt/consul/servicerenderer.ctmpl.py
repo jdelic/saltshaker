@@ -103,7 +103,8 @@ class SmartstackServiceContainer(object):
 
     def iter_services(self, all=False):
         if all:
-            return iter(self.all_services)
+            for ss in self.all_services:
+                yield ss
 
         if isinstance(self.services, dict):
             for sk in self.services.keys():
