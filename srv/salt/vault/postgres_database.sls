@@ -30,4 +30,5 @@ vault-postgres:
         - user: {{pillar['vault']['postgres']['dbuser']}}
         - require:
             - postgres_user: vault-postgres
+            - secure-tablespace
 {% endif %}

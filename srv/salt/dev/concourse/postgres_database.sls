@@ -24,3 +24,4 @@ concourse-db:
         - user: postgres
         - require:
             - postgres_user: concourse-db-role
+            - data-cluster
