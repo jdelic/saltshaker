@@ -27,7 +27,7 @@ concourse-keys-{{key}}:
 concourse-keys-host_key-public-copy:
     file.managed:
         - name: /etc/concourse/private/host_key.pem.pub
-        - contents_pillar: ssl:concourse:public
+        - contents_pillar: ssh:concourse:public
         - user: concourse
         - group: concourse
         - mode: '0644'
@@ -37,7 +37,7 @@ concourse-keys-host_key-public-copy:
 concourse-keys-host_key:
     file.managed:
         - name: /etc/concourse/private/host_key.pem
-        - contents_pillar: ssl:concourse:key
+        - contents_pillar: ssh:concourse:key
         - user: concourse
         - group: concourse
         - mode: '0640'
