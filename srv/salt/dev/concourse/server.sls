@@ -128,6 +128,7 @@ concourse-servicedef-tsa:
             - file: consul-service-dir
 
 
+# needed because of https://github.com/concourse/concourse/issues/549
 concourse-servicedef-atc-internal:
     file.managed:
         - name: /etc/consul/services.d/concourse-atc-internal.json
