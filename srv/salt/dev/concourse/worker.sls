@@ -40,6 +40,7 @@ concourse-worker:
             - file: concourse-worker
         - watch:
             - file: concourse-worker
+            - file: concourse-install  # restart on a change of the binary
 
 
 # vim: syntax=yaml

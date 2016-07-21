@@ -109,6 +109,7 @@ concourse-server:
             - file: concourse-server
         - watch:
             - file: concourse-server
+            - file: concourse-install  # restart on a change of the binary
 
 
 concourse-servicedef-tsa:

@@ -71,6 +71,7 @@ consul-template-service:
             - file: /etc/consul/consul-template.conf
             - file: consul-template-service
             - file: consul-template-servicerenderer
+            - file: consul-template  # restart on a change of the binary
 
 
 # https://github.com/hashicorp/consul-template/issues/408

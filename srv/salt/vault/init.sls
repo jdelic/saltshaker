@@ -136,6 +136,7 @@ vault-service:
             {% endif %}
         - watch:
             - file: vault-service
+            - file: vault  # restart on a change of the binary
 
 
 vault-service-reload:

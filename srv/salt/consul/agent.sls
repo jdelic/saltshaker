@@ -31,6 +31,7 @@ consul-agent-service:
             - file: consul-agent-service
         - watch:
             - file: consul-agent-service  # if consul.service changes we want to *restart* (reload: False)
+            - file: consul  # restart on a change of the binary
 
 
 consul-agent-service-reload:
