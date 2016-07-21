@@ -14,7 +14,24 @@
 #                -o /etc/haproxy/haproxy.conf
 #                test.tpl
 #
-
+# Inside the Jinja2 template you will have access to the "services" variable,
+# a nested dict-like structure that can be grouped and filtered by its
+# attributes and the service's tags defined in Consul.
+#
+# HAProxy example:
+# {# all services that have the "smartstack:protocol:http" tag in Consul #}
+# {% set http_services = services.group_by_tagvalue("smartstack:protocol:")["http"] %}
+# {# group the http subset of services by their "name" attribute, so we get
+#    services with the same name in a list under their name #}
+# {% for svcname, svclist in http_services.group_by("name").items() %}
+#     {# now create a set of each unique hostname tag mentioned the by services
+#        with each name #}
+#     {% for hostname in svclist.tagvalue_set("smartstack:hostname:") %}
+#         acl host_{{svcname}} hdr(host) -i {{hostname}}
+#     {% endfor %}
+#     use_backend backend-{{svcname}} if host_{{svcname}}
+# {% endfor %}
+#
 
 import re
 import sys
