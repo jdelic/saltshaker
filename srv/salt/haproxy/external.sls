@@ -26,7 +26,12 @@ smartstack-external:
                 ps awwfux | grep -v grep | grep -q 'haproxy -f /etc/haproxy/haproxy-external.cfg' &&
                 systemctl reload haproxy@external ||
                 systemctl restart haproxy@external
-            parameters: --has smartstack:external --smartstack-localip {{pillar.get('loadbalancer', {}).get('external-ip', grains['ip_interfaces'][pillar['ifassign']['external']][pillar['ifassign'].get('external-ip-index', 0)|int()])}}
+            parameters: >
+                --has smartstack:external
+                --smartstack-localip {{pillar.get('loadbalancer', {}).get('external-ip', grains['ip_interfaces'][pillar['ifassign']['external']][pillar['ifassign'].get('external-ip-index', 0)|int()])}}
+                {% if 'ssl' in pillar and 'maincert' in pillar['ssl'] -%}
+                -D maincert={{pillar['ssl']['default-cert-full']}}
+                {%- endif %}
             template: /etc/haproxy/haproxy-external.jinja.cfg
         - require:
             - file: haproxy-config-template-external
@@ -35,5 +40,8 @@ smartstack-external:
         - require:
             - file: haproxy-multi
             - file: smartstack-external
+            {% if 'ssl' in pillar and 'maincert' in pillar['ssl'] %}
+            - file: ssl-maincert
+            {% endif %}
 
 # vim: syntax=yaml

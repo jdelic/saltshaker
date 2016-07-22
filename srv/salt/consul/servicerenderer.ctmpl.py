@@ -316,8 +316,28 @@ def main():
                              "expressions.")
     parser.add_argument("--smartstack-localip", dest="localip", default="127.0.0.1",
                         help="Sets the local ip address all smartstack services should bind to. (Default: 127.0.0.1)")
+    parser.add_argument("-D", "--define", dest="defines", action="append", default=[],
+                        help="Define a template variable for the rendering in the form 'varname=value'. 'varname' will "
+                             "be added directly to the Jinja rendering context. Setting 'varname' multiple times will "
+                             "create a list.")
 
     _args = parser.parse_args()
+
+    add_params = {}
+    # convert defines from varname=value to a dict
+    for define in _args.defines:
+        if "=" not in define:
+            print("ERROR: No '=' in -D,--define. Must be in the form 'varname=value'.")
+            sys.exit(1)
+        varname = define.split("=", 1)[0]
+        value = define.split("=", 1)[1]
+        if varname in add_params:
+            if isinstance(add_params[varname], list):
+                add_params[varname].append(value)
+            else:
+                add_params[varname] = [add_params[varname], value]
+        else:
+            add_params[define.split("=", 1)[0]] = define.split("=", 1)[1]
 
     filtered = filter_services(_services)
     parsed = []
@@ -329,6 +349,8 @@ def main():
         "services": SmartstackServiceContainer(all_services=parsed),
         "localip": _args.localip,
     }
+
+    context.update(add_params)
 
     env = jinja2.Environment(extensions=['jinja2.ext.do'])
 
