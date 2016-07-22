@@ -44,6 +44,7 @@ basic-required-packages:
     pkg.installed:
         - pkgs:
             - less
+            - bash-completion
             - coreutils
             - patch
             - dnsutils
