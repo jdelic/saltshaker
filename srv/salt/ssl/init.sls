@@ -57,6 +57,19 @@ ssl-maincert-combined-key:
         - mode: '0440'
         - require:
             - file: ssl-key-location
+
+
+ssl-maincert:
+    file.managed:
+        - name: {{pillar['ssl']['default-cert']}}
+        - contents_pillar: ssl:maincert:cert
+        - user: root
+        - group: root
+        - mode: '0444'
+        - require:
+            - file: ssl-maincert-combined-certificate
+            - file: ssl-maincert-key
+            - file: ssl-maincert-combined-key
 {% endif %}
 
 maurusnet-ca-root-certificate:
