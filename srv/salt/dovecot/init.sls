@@ -24,10 +24,11 @@ dovecot:
             - file: sa-learn-pipe-script
 
 
+{% if pillar['imap']['sslcert'] != 'default' %}
 dovecot-ssl-cert:
     file.managed:
         - name: {{pillar['imap']['sslcert']}}
-        - contents_pillar: ssl:maincert:combined
+        - contents_pillar: {{pillar['imap']['sslcert-contents']}}
         - mode: 440
         - user: root
         - group: root
@@ -38,13 +39,13 @@ dovecot-ssl-cert:
 dovecot-ssl-key:
     file.managed:
         - name: {{pillar['imap']['sslkey']}}
-        - contents_pillar: ssl:maincert:key
+        - contents_pillar: {{pillar['imap']['sslkey-contents']}}
         - mode: 400
         - user: root
         - group: root
         - require:
             - file: ssl-key-location
-
+{% endif %}
 
 sa-learn-pipe-script:
     file.managed:
@@ -72,6 +73,19 @@ dovecot-config-{{file}}:
         - source: salt://dovecot/conf.d/{{file}}
         - mode: 644
         - template: jinja
+        - context:
+            sslcert: >
+                {% if pillar['imap']['sslcert'] == 'default' %}
+                    {{pillar['ssl']['default-cert-combined']}}
+                {% else %}
+                    {{pillar['imap']['sslcert']}}
+                {% endif %}
+            sslkey: >
+                {% if pillar['imap']['sslcert'] == 'default' %}
+                    {{pillar['ssl']['default-cert-key']}}
+                {% else %}
+                    {{pillar['imap']['sslkey']}}
+                {% endif %}
         - require:
             - pkg: dovecot
 {% endfor %}

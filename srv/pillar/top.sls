@@ -27,6 +27,10 @@ base:
         - match: grain
         - shared.secrets.ssl
 
+    'roles:loadbalancer':
+        - match: grain
+        - shared.secrets.ssl
+
     'roles:casserver':
         - match: grain
         - shared.casserver

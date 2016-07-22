@@ -12,7 +12,7 @@ ssl-cert-location:
         - name: {{pillar['ssl']['certificate-location']}}
         - user: root
         - group: root
-        - mode: 755
+        - mode: '0755'
         - makedirs: True
 
 
@@ -21,9 +21,43 @@ ssl-key-location:
         - name: {{pillar['ssl']['secret-key-location']}}
         - user: root
         - group: ssl-cert
-        - mode: 710
+        - mode: '0710'
         - makedirs: True
 
+
+{% if 'ssl' in pillar and 'maincert' in pillar['ssl'] %}
+ssl-maincert-combined-certificate:
+    file.managed:
+        - name: {{pillar['ssl']['default-cert-combined']}}
+        - contents_pillar: ssl:maincert:combined
+        - user: root
+        - group: root
+        - mode: '0444'
+        - require:
+            - file: ssl-cert-location
+
+
+ssl-maincert-key:
+    file.managed:
+        - name: {{pillar['ssl']['default-cert-key']}}
+        - contents_pillar: ssl:maincert:key
+        - user: root
+        - group: ssl-cert
+        - mode: '0440'
+        - require:
+            - file: ssl-key-location
+
+
+ssl-maincert-combined-key:
+    file.managed:
+        - name: {{pillar['ssl']['default-cert-full']}}
+        - contents_pillar: ssl:maincert:combined-key
+        - user: root
+        - group: ssl-cert
+        - mode: '0440'
+        - require:
+            - file: ssl-key-location
+{% endif %}
 
 maurusnet-ca-root-certificate:
     file.managed:

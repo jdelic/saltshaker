@@ -9,11 +9,15 @@ mail-scripts:
     install-dir: /usr/local/mail
 
 imap:
-    sslcert: /etc/ssl/local/dovecot.crt
-    sslkey: /etc/ssl/private/dovecot.key
+    sslcert: default  # special value "default" means: "use maincert from ssl.init"
+    sslkey: default
+    sslcert-contents: ""  # contents_pillar reference if imap should use a different cert
+    sslkey-content: ""
+
 
 smtp:
-    sslcert: /etc/ssl/private/qmail.combined.crt
+    sslcert: default  # see above
+    sslcert-contents: ""
     relay-service-link: /etc/service/qmail-smtpd-relay
     relay-service-dir: /var/qmail/service/smtpd-relay
     internal-relay-service-link: /etc/service/qmail-smtpd-internal-relay
