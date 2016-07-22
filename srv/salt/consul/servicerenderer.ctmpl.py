@@ -18,6 +18,8 @@
 # a nested dict-like structure that can be grouped and filtered by its
 # attributes and the service's tags defined in Consul.
 #
+# You can also add Jinja variables from the commandline using -D varname=value.
+#
 # HAProxy example: {{/*
 # {# all services that have the "smartstack:protocol:http" tag in Consul #}
 # {% set http_services = services.group_by_tagvalue("smartstack:protocol:")["http"] %}
