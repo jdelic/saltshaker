@@ -18,7 +18,7 @@
 # a nested dict-like structure that can be grouped and filtered by its
 # attributes and the service's tags defined in Consul.
 #
-# HAProxy example:
+# HAProxy example: {{/*
 # {# all services that have the "smartstack:protocol:http" tag in Consul #}
 # {% set http_services = services.group_by_tagvalue("smartstack:protocol:")["http"] %}
 # {# group the http subset of services by their "name" attribute, so we get
@@ -31,7 +31,7 @@
 #     {% endfor %}
 #     use_backend backend-{{svcname}} if host_{{svcname}}
 # {% endfor %}
-#
+# */}}
 
 import re
 import sys
