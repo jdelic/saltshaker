@@ -28,13 +28,7 @@ base:
     'roles:master':
         - match: grain
         - compilers
-        - djb
-        - djb.daemontools
-        - djb.ucspitcp
-        - djb.dns
         - salt-master
-# this needs network interface config
-#        - djb.dns.services
 
     'roles:vault':
         - match: grain
