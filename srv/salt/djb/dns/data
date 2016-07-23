@@ -1,4 +1,0 @@
-.maurusnet.internal:{{pillar['dns-internal']['ip']}}:a:3600
-
-+{{pillar['mn']['smtp-internal']}}:{{grains['ip_interfaces'][pillar['ifassign']['internal']][0]}}:600
-
