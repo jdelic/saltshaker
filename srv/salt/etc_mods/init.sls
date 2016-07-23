@@ -8,3 +8,8 @@ inputrc:
         - name: /etc/inputrc
         - source: salt://etc_mods/inputrc
 
+
+vault-hosts-alias:
+    file.append:
+        - name: /etc/hosts
+        - text: 127.0.0.1    vault.{{pillar["internal-domain"]}}
