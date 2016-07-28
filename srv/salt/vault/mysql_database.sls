@@ -42,6 +42,7 @@ vault-mysql:
         - connection_default_file: /etc/mysql/conf.d/secure.cnf
         #- connection_host: localhost
         #- connection_port: 3307
+        - order: 20  # see ORDER.md
         - require:
             - mysql_user: mysql-root-secure
     mysql_grants.present:

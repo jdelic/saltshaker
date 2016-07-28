@@ -8,11 +8,12 @@ executed in the correct order:
 # Tiers ("order:" values)
 
 Tier | Description
------|---------------------------------------------------
+-----|-----------------------------------------------------
  1   | Reserved for baseline iptables states
  2   | Reserved for baseline iptables states
  3   | Reserved for baseline iptables states
-10   | Pull database setup jobs to the front of the queue
+10   | Pull package install jobs to the front of the queue
+20   | Pull database setup jobs to the front of the queue
 
 `order: 10` allows you to make sure that a database exists for a subsequently
 installed state if **the database and state exist on the same server**. 

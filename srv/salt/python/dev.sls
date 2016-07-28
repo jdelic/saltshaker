@@ -23,6 +23,7 @@ python-dev-backports:
     pkg.installed:
         - pkgs:
             - libssl-dev
+        - order: 20  # see ORDER.md
         - install_recommends: False
         - fromrepo: jessie-backports
         - require:

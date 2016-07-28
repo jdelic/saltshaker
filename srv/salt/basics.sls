@@ -109,6 +109,8 @@ openssl:
              - openssl-blacklist
              - openssl-blacklist-extra
         - install_recommends: False
+        - order: 10  # see ORDER.md
+        - fromrepo: jessie-backports
 
 openssh:
     pkg.installed:
