@@ -16,6 +16,7 @@ postgresql-step1:
         - fromrepo: jessie-pgdg
         - require:
             - pkgrepo: postgresql-repo
+        - install_recommends: False
     file.managed:
         - name: /etc/postgresql-common/createcluster.conf
         - source: salt://postgresql/createcluster.conf
@@ -40,6 +41,7 @@ postgresql-step2:
             - postgresql-9.5
             - postgresql-client-9.5
             - libpq5
+        - install_recommends: False
         - fromrepo: jessie-pgdg
         - require:
             - postgresql-step1

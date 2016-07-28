@@ -15,6 +15,7 @@ python-dev-packages:
             - libxslt1-dev
             - libxml2-dev
             - libgd2-xpm-dev
+        - install_recommends: False
         - require:
             - pkg: build-essential
 
