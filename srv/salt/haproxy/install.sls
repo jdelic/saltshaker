@@ -1,9 +1,9 @@
 # install haproxy
 
 haproxy:
-    pkg:
-        - installed
+    pkg.installed:
         - fromrepo: jessie-backports
+        - install_recommends: False
     service.dead:
         - name: haproxy
         - enable: False

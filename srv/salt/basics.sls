@@ -108,6 +108,7 @@ openssl:
              - openssl
              - openssl-blacklist
              - openssl-blacklist-extra
+        - install_recommends: False
 
 openssh:
     pkg.installed:
@@ -118,6 +119,7 @@ openssh:
             - openssh-server
             - openssh-client
             - libssh2-1
+        - install_recommends: False
 
 
 # always allow ssh in
