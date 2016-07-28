@@ -6,7 +6,6 @@ python-dev-packages:
         - pkgs:
             - python2.7-dev
             - python3-dev
-            - libssl-dev
             - libcurl4-openssl-dev
             - libapt-pkg-dev
             - python-apt-dev
@@ -19,3 +18,12 @@ python-dev-packages:
         - require:
             - pkg: build-essential
 
+
+python-dev-backports:
+    pkg.installed:
+        - pkgs:
+            - libssl-dev
+        - install_recommends: False
+        - fromrepo: jessie-backports
+        - require:
+            - pkg: build-essential
