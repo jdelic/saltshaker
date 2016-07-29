@@ -75,6 +75,7 @@ vault:
         - user: {{vault_user}}
         - group: {{vault_user}}
         - mode: '0755'
+        - replace: False
         - require:
             - user: vault
             - file: vault-data-dir
