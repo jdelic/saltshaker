@@ -91,6 +91,18 @@ backports-org-jessie:
         - source: salt://etc_mods/jessie-backports
 
 
+fix-libssl-from-backports:
+    pkg.latest:
+        - name: libssl1.0.0  # this will upgrade the installed version from the basebox
+        - fromrepo: jessie-backports
+        - install_recommends: False
+        - order: 10  # see ORDER.md
+        - require:
+            - pkgrepo: backports-org-jessie
+        - require_in:
+            - pkg: openssl
+
+
 stretch:
     pkgrepo.managed:
         - humanname: Stretch Debian Testing
@@ -111,6 +123,8 @@ openssl:
         - install_recommends: False
         - order: 10  # see ORDER.md
         - fromrepo: jessie-backports
+        - require:
+            - pkgrepo: backports-org-jessie
 
 openssh:
     pkg.installed:
