@@ -1,5 +1,0 @@
-Package: *
-Pin: origin inverse.ca
-Pin-Priority: 50   # 50 will install sogo, but not upgrade already installed
-                   # debs
-
