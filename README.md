@@ -40,10 +40,10 @@ Using these salt formulae you can bring up:
 It also contains configuration for
 
   * a fully fledged PIM+Mail server with encrypted storage (based on
-    [Sogo](http://sogo.nu), [Dovecot](http://dovecot.org) and
+    [Baïkal](http://sabre.io/baikal/), [Dovecot](http://dovecot.org) and
     [OpenSMTPD](https://www.opensmtpd.org/)
 
-  * single-sign-on for Sogo, Dovecot and OpenSMTPD, other web applications and 
+  * single-sign-on for Baïkal, Dovecot and OpenSMTPD, other web applications and 
     even PAM using CAS
 
 The salt configuration is pretty modular, so you can easily just use this
@@ -153,6 +153,16 @@ ssl:
     maincert:
         cert: | {{mycert}}
 ```
+
+## The managed GPG keyring
+
+The salt config also contains states which manage a shared GPG keyring. All
+keys added to the dict pillar `gpg:keys` are iterated by the `crypto.gpg` 
+state and put into a GPG keyring accessible only by `root` and the user 
+group`gpg-access`. There is a parallel pillar called `gpg:fingerprints` 
+that is used to check whether a key has already been added. The file system
+location of the shared keyring is set by the `gpg:shared-keyring-location`
+pillar, which by default is `/etc/gpg-managed-keyring`.
 
                 
 # Server configuration
