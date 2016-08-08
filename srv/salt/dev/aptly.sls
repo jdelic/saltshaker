@@ -10,4 +10,5 @@ aptly:
     pkg.installed:
         - name: aptly
 
+
 # vim: syntax=yaml

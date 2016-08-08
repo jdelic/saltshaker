@@ -1,5 +1,5 @@
 #
-# BASICS: iptables is included by basics (which are installed as a baseline everywhere)
+# BASICS: crypto is included by basics (which are installed as a baseline everywhere)
 # Usually, you won't need to assign this state manually. Assign "basics" instead.
 #
 
@@ -25,6 +25,7 @@ ssl-key-location:
         - makedirs: True
 
 
+# install private certificates if they have been assigned to this node in the pillars
 {% if 'ssl' in pillar and 'maincert' in pillar['ssl'] %}
 ssl-maincert-combined-certificate:
     file.managed:

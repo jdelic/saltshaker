@@ -16,7 +16,7 @@ include:
     - python
     - python.apt
     - iptables  # forces "order: 1"
-    - ssl
+    - crypto
 
 
 # enforce that Debian packages can't launch daemons while salt runs
