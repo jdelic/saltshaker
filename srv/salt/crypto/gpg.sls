@@ -44,7 +44,7 @@ gpg-{{k}}:
             - file: gpg-shared-keyring-temp
     cmd.wait:
         - name: <
-            gpg
+            /usr/bin/gpg
             --no-default-keyring
             --keyring {{keyloc}}/pubring.gpg
             --secret-keyring {{keyloc}}/secring.gpg
