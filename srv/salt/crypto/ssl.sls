@@ -76,7 +76,7 @@ ssl-maincert:
 maurusnet-ca-root-certificate:
     file.managed:
         - name: /usr/share/ca-certificates/local/maurusnet-rootca.crt
-        - source: salt://ssl/maurusnet-rootca.crt
+        - source: salt://crypto/maurusnet-rootca.crt
         - user: root
         - group: root
         - mode: 755
@@ -86,7 +86,7 @@ maurusnet-ca-root-certificate:
 maurusnet-ca-intermediate-certificate:
     file.managed:
             - name: /usr/share/ca-certificates/local/maurusnet-minionca.crt
-            - source: salt://ssl/maurusnet-minionca.crt
+            - source: salt://crypto/maurusnet-minionca.crt
             - user: root
             - group: root
             - mode: 755
