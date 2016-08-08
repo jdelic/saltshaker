@@ -5,6 +5,7 @@ base:
         - shared.global
         - shared.saltmine
         - shared.ssl
+        - shared.gpg
 
     'roles:vault':
         - match: grain
@@ -18,6 +19,7 @@ base:
     'roles:dev':
         - match: grain
         - shared.secrets.concourse
+        - shared.secrets.gpg_package_signing
 
     'roles:apps':
         - match: grain
