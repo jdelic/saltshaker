@@ -43,7 +43,7 @@ gpg-{{k}}:
         - require:
             - file: gpg-shared-keyring-temp
     cmd.wait:
-        - name: <
+        - name: >
             /usr/bin/gpg
             --no-default-keyring
             --keyring {{keyloc}}/pubring.gpg
