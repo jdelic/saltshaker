@@ -42,7 +42,22 @@ gpg-{{k}}:
         - mode: '0400'
         - require:
             - file: gpg-shared-keyring-temp
+    {% if pillar['gpg'].get('fingerprints', {}).get(k, False) %}
+    # we have a fingerprint, so render a conditional cmd.run and check whether the key is in the keyring
+    cmd.run:
+        - unless: >
+            /usr/bin/gpg
+            --no-default-keyring
+            --keyring {{keyloc}}/pubring.gpg
+            --secret-keyring {{keyloc}}/secring.gpg
+            --trustdb {{keyloc}}/trustdb.gpg
+            --list-keys {{pillar['gpg']['fingerprints'][k]}}
+    {% else %}
+    # otherwise depend on the state change of the file state
     cmd.wait:
+        - watch:
+            - file: gpg-{{k}}
+    {% endif %}
         - name: >
             /usr/bin/gpg
             --no-default-keyring
@@ -50,8 +65,6 @@ gpg-{{k}}:
             --secret-keyring {{keyloc}}/secring.gpg
             --trustdb {{keyloc}}/trustdb.gpg
             --import {{keyloc}}/tmp/gpg-{{k}}.asc
-        - watch:
-            - file: gpg-{{k}}
 {% endfor %}
 
 # vim: syntax=yaml
