@@ -53,13 +53,13 @@ vault-config-dir:
 # set up vault command-line client configuration as a convenience in /etc/profile.d
 vault-envvar-config:
     file.managed:
-        - name: /etc/profile.d/vaultclient
+        - name: /etc/profile.d/vaultclient.sh
         - contents: |
             export VAULT_ADDR="https://{{pillar['vault']['hostname']}}:{{pillar.get('vault', {}).get('bind-port', 8200)}}/"
             export VAULT_CACERT="{{pillar['vault']['pinned-ca-cert']}}"
         - user: root
         - group: root
-        - mode: '0755'
+        - mode: '0644'
 
 
 vault:
@@ -150,6 +150,8 @@ vault-service:
         - watch:
             - file: vault-service
             - file: vault  # restart on a change of the binary
+            - file: vault-ssl-cert  # restart when the SSL cert changes
+            - file: vault-ssl-key
 
 
 vault-service-reload:
