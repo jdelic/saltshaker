@@ -169,6 +169,17 @@ pillar, which by default is `/etc/gpg-managed-keyring`.
 
 ## Networking
 
+This configuration relies on three internal reserved domain suffixes, which
+**must be replaced if they're ever brought up as a TLD on the global DNS**.
+Those are:
+  * `.local` which **must** resolve to any address in 127.0.0.1/24
+  * `.internal` which **must** only be used within the non-publically-routed 
+    network
+  * `.consul.service` which is the suffix used by Consul for DNS based 
+    "service discovery" (repeat after me: *DNS is not a service discovery 
+    protocol*! Use Smartstack instead.)
+
+
 ### Pillar overrides
 
 ## Disks
