@@ -286,14 +286,23 @@ This salt configuration also runs an instance of
 credentials. It's good practice to integrate your applications with that
 infrastructure.
 
-Vault will be made available on `localhost` as an internal smartstack service
-through haproxy via consul-template on port # TODO: PORT once it's been
+Vault will be made available on `127.0.0.1` as an internal smartstack service
+through haproxy via consul-template on port `8200` once it's been
 initialized (depending on the backend) and
 [unsealed](https://vaultproject.io/docs/concepts/seal.html).
 
+Services, however, **must** access Vault through a local alias installed in
+`/etc/hosts/` configured in the `shared.vault` pillar (default: vault.local),
+because Vault requires SSL and that in turn requires a valid SAN, so you have
+to configure Vault with a SSL certificate for a valid hostname. I use my own
+CA and give Vault a certificate for the SAN `vault.local` and then pin the CA
+certificate to my own CA's cert in the `shared.vault:pinned-ca-cert` pillar for
+added security (no other CA can issue such a certificate for any uncompromised
+host).
+
 ## Backends
 You can configure Vault through the `[hosting environment].vault` pillar to use
-either the *consul* or *mysql* backend.
+either the *consul*, *mysql*, *S3* or *PostgreSQL* backends.
 
 ### Vault backend: mysql
 Generally, if you run on multiple VMs sharing a physical server, choose the
