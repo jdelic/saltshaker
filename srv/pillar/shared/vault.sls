@@ -14,6 +14,7 @@ vault:
 
     sslcert: /etc/ssl/local/vault.crt
     sslkey: /etc/ssl/private/vault.key
+    pinned-ca-cert: /usr/share/ca-certificates/local/maurusnet-minionca.crt
 
     mysql:
         dbname: vault  # only needed for mysql backend
