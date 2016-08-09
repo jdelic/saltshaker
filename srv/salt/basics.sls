@@ -103,17 +103,6 @@ fix-libssl-from-backports:
             - pkg: openssl
 
 
-stretch:
-    pkgrepo.managed:
-        - humanname: Stretch Debian Testing
-        - name: {{pillar["repos"]["stretch-testing"]}}
-        - file: /etc/apt/sources.list.d/stretch-testing.list
-        - order: 2
-    file.managed:
-        - name: /etc/apt/preferences.d/stretch-testing
-        - source: salt://opensmtpd/preferences.d/stretch-testing
-
-
 openssl:
     pkg.installed:
         - pkgs:
@@ -125,6 +114,18 @@ openssl:
         - fromrepo: jessie-backports
         - require:
             - pkgrepo: backports-org-jessie
+
+
+stretch:
+    pkgrepo.managed:
+        - humanname: Stretch Debian Testing
+        - name: {{pillar["repos"]["stretch-testing"]}}
+        - file: /etc/apt/sources.list.d/stretch-testing.list
+        - order: 2
+    file.managed:
+        - name: /etc/apt/preferences.d/stretch-testing
+        - source: salt://opensmtpd/preferences.d/stretch-testing
+
 
 openssh:
     pkg.installed:
