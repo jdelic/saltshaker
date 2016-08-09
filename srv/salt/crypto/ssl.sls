@@ -73,14 +73,25 @@ ssl-maincert:
             - file: ssl-maincert-combined-key
 {% endif %}
 
+
+localca-location:
+    file.directory:
+        - name: /usr/share/ca-certificates/local/
+        - user: root
+        - group: root
+        - mode: '0755'
+        - makedirs: True
+
+
 maurusnet-ca-root-certificate:
     file.managed:
         - name: /usr/share/ca-certificates/local/maurusnet-rootca.crt
         - source: salt://crypto/maurusnet-rootca.crt
         - user: root
         - group: root
-        - mode: 755
-        - makedirs: True
+        - mode: '0644'
+        - require:
+            - file: localca-location
 
 
 maurusnet-ca-intermediate-certificate:
@@ -89,7 +100,24 @@ maurusnet-ca-intermediate-certificate:
             - source: salt://crypto/maurusnet-minionca.crt
             - user: root
             - group: root
-            - mode: 755
-            - makedirs: True
+            - mode: '0644'
+            - require:
+                - file: localca-location
+
+
+add-maurusnet-ca-certificates:
+    file.append:
+        - name: /etc/ca-certificates.conf
+        - text: |
+            local/maurusnet-minionca.crt
+            local/maurusnet-rootca.crt
+        - require:
+            - file: maurusnet-ca-intermediate-certificate
+            - file: maurusnet-ca-root-certificate
+    cmd.wait:
+        - name: /usr/sbin/update-ca-certificates
+        - watch:
+            - file: add-maurusnet-ca-certificates
+
 
 # vim: syntax=yaml
