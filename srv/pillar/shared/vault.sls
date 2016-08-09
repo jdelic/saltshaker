@@ -10,6 +10,7 @@ vault:
     # on multiple physical machines.
     backend: consul
     kvpath: 'vault/'  # see https://vaultproject.io/docs/config/index.html
+    hostname: vault.local
 
     sslcert: /etc/ssl/local/vault.crt
     sslkey: /etc/ssl/private/vault.key

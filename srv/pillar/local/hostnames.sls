@@ -4,6 +4,6 @@ hostnames:
         protocol: http
 
 
-internal-domain: maurusnet.test
+internal-domain: internal
 
 # vim: syntax=yaml

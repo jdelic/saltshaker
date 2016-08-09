@@ -3,7 +3,7 @@
 
 mn:
     # no-authentication email sender
-    smtp-internal: smtp.maurusnet.internal
+    smtp-internal: smtp-relay.service.consul
 
 # vim: syntax=yaml
 
