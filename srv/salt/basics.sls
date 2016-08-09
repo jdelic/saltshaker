@@ -91,24 +91,15 @@ backports-org-jessie:
         - source: salt://etc_mods/jessie-backports
 
 
-fix-libssl-from-backports:
-    pkg.latest:
-        - name: libssl1.0.0  # this will upgrade the installed version from the basebox
-        - fromrepo: jessie-backports
-        - install_recommends: False
-        - order: 10  # see ORDER.md
-        - require:
-            - pkgrepo: backports-org-jessie
-        - require_in:
-            - pkg: openssl
-
-
 openssl:
-    pkg.installed:
+    # this will upgrade the installed version from the basebox, because we currently must to have
+    # compatible versions
+    pkg.latest:
         - pkgs:
              - openssl
              - openssl-blacklist
              - openssl-blacklist-extra
+             - libssl1.0.0
         - install_recommends: False
         - order: 10  # see ORDER.md
         - fromrepo: jessie-backports
