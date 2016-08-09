@@ -50,18 +50,6 @@ vault-config-dir:
             - group: vault
 
 
-# set up vault command-line client configuration as a convenience in /etc/profile.d
-vault-envvar-config:
-    file.managed:
-        - name: /etc/profile.d/vaultclient.sh
-        - contents: |
-            export VAULT_ADDR="https://{{pillar['vault']['hostname']}}:{{pillar.get('vault', {}).get('bind-port', 8200)}}/"
-            export VAULT_CACERT="{{pillar['vault']['pinned-ca-cert']}}"
-        - user: root
-        - group: root
-        - mode: '0644'
-
-
 vault:
     group.present:
         - name: {{vault_group}}
