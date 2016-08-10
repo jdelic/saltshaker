@@ -92,9 +92,14 @@ maurusnet-ca-root-certificate:
         - mode: '0644'
         - require:
             - file: localca-location
+
+
+maurusnet-ca-root-certificate-symlink:
     file.symlink:
         - name: /etc/ssl/certs/maurusnet-rootca.crt
         - source: /usr/share/ca-certificates/local/maurusnet-rootca.crt
+        - require:
+            - file: maurusnet-ca-root-certificate
 
 
 maurusnet-ca-intermediate-certificate:
@@ -106,9 +111,15 @@ maurusnet-ca-intermediate-certificate:
         - mode: '0644'
         - require:
             - file: localca-location
+
+
+maurusnet-ca-intermediate-certificate-symlink:
     file.symlink:
         - name: /etc/ssl/certs/maurusnet-minionca.crt
         - target: /usr/share/ca-certificates/local/maurusnet-minionca.crt
+        - require:
+            - file: maurusnet-ca-intermediate-certificate
+
 
 add-maurusnet-ca-certificates:
     file.append:
