@@ -97,7 +97,7 @@ maurusnet-ca-root-certificate:
 maurusnet-ca-root-certificate-symlink:
     file.symlink:
         - name: /etc/ssl/certs/maurusnet-rootca.crt
-        - source: /usr/share/ca-certificates/local/maurusnet-rootca.crt
+        - target: /usr/share/ca-certificates/local/maurusnet-rootca.crt
         - require:
             - file: maurusnet-ca-root-certificate
 
