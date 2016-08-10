@@ -8,7 +8,7 @@ email:
 
 vault:
     hostname: vault.local
-    pinned-ca-cert: /usr/share/ca-certificates/local/maurusnet-minionca.crt
+    pinned-ca-cert: /usr/share/ca-certificates/local/maurusnet-rootca.crt
 
 # vim: syntax=yaml
 
