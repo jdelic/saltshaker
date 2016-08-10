@@ -92,18 +92,23 @@ maurusnet-ca-root-certificate:
         - mode: '0644'
         - require:
             - file: localca-location
+    file.symlink:
+        - name: /etc/ssl/certs/maurusnet-rootca.crt
+        - source: /usr/share/ca-certificates/local/maurusnet-rootca.crt
 
 
 maurusnet-ca-intermediate-certificate:
     file.managed:
-            - name: /usr/share/ca-certificates/local/maurusnet-minionca.crt
-            - source: salt://crypto/maurusnet-minionca.crt
-            - user: root
-            - group: root
-            - mode: '0644'
-            - require:
-                - file: localca-location
-
+        - name: /usr/share/ca-certificates/local/maurusnet-minionca.crt
+        - source: salt://crypto/maurusnet-minionca.crt
+        - user: root
+        - group: root
+        - mode: '0644'
+        - require:
+            - file: localca-location
+    file.symlink:
+        - name: /etc/ssl/certs/maurusnet-minionca.crt
+        - target: /usr/share/ca-certificates/local/maurusnet-minionca.crt
 
 add-maurusnet-ca-certificates:
     file.append:
