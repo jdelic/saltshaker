@@ -1,12 +1,10 @@
 # TODO
 
- * write docs for ssl pillar
- * add consul service defs to sogo, apache2
+ * add consul service defs to apache2
  * add health checks for services monitored through consul
  * write docs for placeholders in README.md
  * all PHP should run through php-fpm behind Apache2
  * add Nagios/Icinca/xyz monitoring via consul-template
- * clean up the MySQL state folder
  * add a consul-template cmd.wait watcher state for haproxy.internal that deletes the servicerenderer
    if the command-line parameters change, because consul-template will not do it by itself (has this 
    been fixed upstream?)
@@ -17,7 +15,7 @@
 
 # Ponder
 
- * front consul through dnscache and make /etc/resolv.conf point to local dnscache? What about IPv6?
+ * front consul through dnsmasq and make /etc/resolv.conf point to local dnsmasq? What about IPv6?
 
  * Docker containers should probably only expose HTTP to be reverse proxied through haproxy
      * how does consul discover docker services? -> docker registrator https://github.com/gliderlabs/registrator
