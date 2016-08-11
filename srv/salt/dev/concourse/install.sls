@@ -12,6 +12,8 @@ concourse-user:
     user.present:
         - name: concourse
         - gid: concourse
+        - groups:
+            - gpg-access
         - home: /etc/concourse
         - shell: /bin/false
         - createhome: False
