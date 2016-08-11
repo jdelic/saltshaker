@@ -54,8 +54,8 @@ gpg-{{k}}:
             --list-keys {{pillar['gpg']['fingerprints'][k]}}
     {% else %}
     # otherwise depend on the state change of the file state
-    cmd.wait:
-        - watch:
+    cmd.run:
+        - onchanges:
             - file: gpg-{{k}}
     {% endif %}
         - name: >
@@ -66,5 +66,7 @@ gpg-{{k}}:
             --trustdb {{keyloc}}/trustdb.gpg
             --import {{keyloc}}/tmp/gpg-{{k}}.asc
 {% endfor %}
+
+# FIXME: fix the gpg permissions to allow reads from the proper group at least
 
 # vim: syntax=yaml

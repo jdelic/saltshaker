@@ -130,9 +130,9 @@ add-maurusnet-ca-certificates:
         - require:
             - file: maurusnet-ca-intermediate-certificate
             - file: maurusnet-ca-root-certificate
-    cmd.wait:
+    cmd.run:
         - name: /usr/sbin/update-ca-certificates
-        - watch:
+        - onchanges:
             - file: add-maurusnet-ca-certificates
 
 
