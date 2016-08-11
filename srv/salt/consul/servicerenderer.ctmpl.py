@@ -34,7 +34,9 @@
 #     use_backend backend-{{svcname}} if host_{{svcname}}
 # {% endfor %}
 # */}}
+from __future__ import print_function
 
+import os
 import re
 import sys
 import jinja2
@@ -65,9 +67,10 @@ _args = None
 
 
 class SmartstackService(object):
-    def __init__(self, servicedict, protocol=None, port=None, host=None, mode=None):
+    def __init__(self, servicedict, protocol=None, port=None, extport=None, host=None, mode=None):
         self.protocol = protocol
         self._port = port
+        self.extport = extport
         self.host = host
         self.mode = mode
         self.svc = servicedict
@@ -283,6 +286,9 @@ def parse_smartstack_tags(service):
         if re.match("^smartstack:port:([0-9]+)$", tag):
             sv.port = int(tag.split(":")[2])
 
+        if re.match("^smartstack:extport:([0-9]+)$", tag):
+            sv.extport = int(tag.split(":")[2])
+
         if tag.startswith("smartstack:host:"):
             sv.host = tag.split(":")[2]
 
@@ -294,16 +300,78 @@ def parse_smartstack_tags(service):
     return sv
 
 
+def _setup_iptables(services, ip, mode):
+    for svc in services:
+        if svc.protocol == "udp":
+            prot = "udp"
+            mode = "plain"  # udp can't be used with -m state
+        elif svc.protocol == "http":
+            prot = "tcp"
+            if not svc.extport:
+                svc.extport = 80
+        elif svc.protocol == "https":
+            prot = "tcp"
+            if not svc.extport:
+                svc.extport = 443
+        else:
+            prot = "tcp"
+
+        if not svc.extport:
+            print("no external port (extport) for service %s, so not creating iptables rule" % svc.name,
+                  file=sys.stderr)
+            continue
+
+        input_rule = None
+        output_rule = None
+        if mode == "plain":
+            input_rule = ["INPUT", "-p", prot, "-m", prot, "-s", "0/0", "-d", "%s/32" % ip, "--dport",
+                          str(svc.extport), "-j", "ACCEPT"]
+            output_rule = ["OUTPUT", "-p", prot, "-m", prot, "-s", "%s/32" % ip, "-d", "0/0", "--sport",
+                           str(svc.extport), "-j", "ACCEPT"]
+        elif mode == "conntrack":
+            input_rule = ["INPUT", "-p", prot, "-m", "state", "--state", "NEW", "-m", prot, "-s", "0/0",
+                          "-d", "%s/32" % ip, "--dport", str(svc.extport), "-j", "ACCEPT"]
+            output_rule = None
+
+        if input_rule:
+            try:
+                # check if the rule exists first... iptables wille exit with 0 if it does
+                subprocess.check_call(["/sbin/iptables", "-C"] + input_rule)
+            except subprocess.CalledProcessError as e:
+                if e.returncode == 1:
+                    print("%s: %s" % (svc.name, " ".join(["/sbin/iptables", "-A"] + input_rule)))
+                    subprocess.call(["/sbin/iptables", "-A"] + input_rule)
+            else:
+                print("%s: INPUT rule exists" % svc.name, file=sys.stderr)
+        if output_rule:
+            try:
+                subprocess.check_call(["/sbin/iptables", "-C"] + output_rule)
+            except subprocess.CalledProcessError as e:
+                if e.returncode == 1:
+                    print("%s: %s" % (svc.name, " ".join(["/sbin/iptables", "-A"] + output_rule)))
+                    subprocess.call(["/sbin/iptables", "-A"] + output_rule)
+            else:
+                print("%s: OUTPUT rule exists" % svc.name, file=sys.stderr)
+
+
 def main():
     global _args
+    preparser = argparse.ArgumentParser()
+    preparser.add_argument("--only-iptables", dest="only_iptables", default=False, action="store_true")
+    args, _ = preparser.parse_known_args()
+
     parser = argparse.ArgumentParser(
         description="Don't invoke this directly. This script is meant to be a GO TEMPLATE that is "
                     "processed by consul-template and then invoked from consul-template."
     )
-    parser.add_argument("template",
-                        help="The Jinja2 template to render")
-    parser.add_argument("-c", "--command", dest="command", required=True,
-                        help="The command to invoke after rendering the template. Will be executed in a shell.")
+
+    if not args.only_iptables:
+        # only add required arguments if we actually need them
+        parser.add_argument("template",
+                            help="The Jinja2 template to render")
+        parser.add_argument("-c", "--command", dest="command", required=True,
+                            help="The command to invoke after rendering the template. Will be executed in a shell.")
+
     parser.add_argument("-o", "--output", dest="output", help="The target file. Renders to stdout if not specified.")
     parser.add_argument("--has", dest="include", action="append",
                         help="Only render services that have the (all of the) specified tag(s). This parameter "
@@ -318,12 +386,27 @@ def main():
                              "expressions.")
     parser.add_argument("--smartstack-localip", dest="localip", default="127.0.0.1",
                         help="Sets the local ip address all smartstack services should bind to. (Default: 127.0.0.1)")
+    parser.add_argument("--open-iptables", dest="open_iptables", default=None, choices=["conntrack", "plain"],
+                        help="When this is set, this program will append iptables rules to the INPUT and OUTPUT chains "
+                             "for all services it renders on the IP provided by --smartstack-localip. 'plain' will set "
+                             "up plain INPUT and OUTPUT rules from anywhere to everywhere and vice versa. 'conntrack' "
+                             "will only set up rules for NEW incoming conenctions, assuming that your default iptables "
+                             "ruleset allows RELATED incoming and outgoing traffic. The iptables rules will be set up "
+                             "before [command] is executed.")
+    parser.add_argument("--only-iptables", dest="only_iptables", default=False, action="store_true",
+                        help="Use this parameter to only set up iptables rules, and not do anything else. No templates "
+                             "will be rendered and no commands executed.")
     parser.add_argument("-D", "--define", dest="defines", action="append", default=[],
                         help="Define a template variable for the rendering in the form 'varname=value'. 'varname' will "
                              "be added directly to the Jinja rendering context. Setting 'varname' multiple times will "
                              "create a list.")
 
     _args = parser.parse_args()
+
+    if _args.open_iptables:
+        if os.getuid() != 0:
+            print("Must run as root if --open-iptables is used")
+            sys.exit(1)
 
     add_params = {}
     # convert defines from varname=value to a dict
@@ -354,12 +437,19 @@ def main():
 
     context.update(add_params)
 
+    if _args.open_iptables and _args.only_iptables:
+        _setup_iptables(context["services"], context["localip"], _args.open_iptables)
+        sys.exit(0)
+
     env = jinja2.Environment(extensions=['jinja2.ext.do'])
 
     with open(_args.template) as inf, file_or_stdout(_args.output) as outf:
         tplstr = inf.read()
         tpl = env.from_string(tplstr)
         outf.write(tpl.render(context))
+
+    if _args.open_iptables:
+        _setup_iptables(context["services"], context["localip"], _args.open_iptables)
 
     if _args.command:
         subprocess.call(_args.command, shell=True)
