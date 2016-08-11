@@ -38,8 +38,8 @@ gpg-{{k}}:
         - name: {{keyloc}}/tmp/gpg-{{k}}.asc
         - contents_pillar: gpg:keys:{{k}}
         - user: root
-        - group: root
-        - mode: '0400'
+        - group: gpg-access
+        - mode: '0640'
         - require:
             - file: gpg-shared-keyring-temp
     {% if pillar['gpg'].get('fingerprints', {}).get(k, False) %}
@@ -67,6 +67,22 @@ gpg-{{k}}:
             --import {{keyloc}}/tmp/gpg-{{k}}.asc
 {% endfor %}
 
-# FIXME: fix the gpg permissions to allow reads from the proper group at least
+enforce-chmod-on-managed-keyring:
+    file.directory:
+        - name: {{keyloc}}
+        - file_mode: '0640'
+        - user: root
+        - group: gpg-access
+        - recurse:
+            - user
+            - group
+            - mode
+            - ignore_dirs
+        - require:
+            - group: gpg-access
+            - file: gpg-shared-keyring-location
+            {% for k, v in pillar.get('gpg', {}).get('keys', {}).items() %}
+            - cmd: gpg-{{k}}:
+            {% endfor %}
 
 # vim: syntax=yaml
