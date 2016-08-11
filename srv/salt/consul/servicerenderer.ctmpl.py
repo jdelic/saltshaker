@@ -34,6 +34,11 @@
 #     use_backend backend-{{svcname}} if host_{{svcname}}
 # {% endfor %}
 # */}}
+#
+# If run as root, it can also call /sbin/iptables and create all necessary
+# INPUT and OUTPUT rules for incoming connections based of the
+# smartstack:protocol and smartstack:extport tags.
+#
 from __future__ import print_function
 
 import os
