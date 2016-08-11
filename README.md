@@ -256,6 +256,8 @@ smartstack:external            | Route through haproxy on loadbalancers (role)
 smartstack:cross-datacenter    | Route through haproxy on localhost remotely
 smartstack:port:[port]         | Route through haproxy on port [port]
 smartstack:hostname:[hostname] | Route through haproxy on HTTP Host header
+smartstack:protocol:[protocol] | protocol may be udp, tcp, http or https and affects iptables and haproxy modes
+smartstack:extport:[port]      | Route through haproxy on loadbalancers on port [port]
 
 
 ## Integrating SmartStack with remote services
