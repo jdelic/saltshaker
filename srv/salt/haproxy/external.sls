@@ -28,6 +28,7 @@ smartstack-external:
                 systemctl restart haproxy@external
             parameters: >
                 --has smartstack:external
+                --open-iptables=conntrack
                 --smartstack-localip {{pillar.get('loadbalancer', {}).get('external-ip', grains['ip_interfaces'][pillar['ifassign']['external']][pillar['ifassign'].get('external-ip-index', 0)|int()])}}
                 {% if 'ssl' in pillar and 'maincert' in pillar['ssl'] -%}
                 -D maincert={{pillar['ssl']['default-cert-full']}}
@@ -43,5 +44,17 @@ smartstack-external:
             {% if 'ssl' in pillar and 'maincert' in pillar['ssl'] %}
             - file: ssl-maincert
             {% endif %}
+
+
+smartstack-ensure-iptables-rules:
+    cmd.run:
+        - name: >
+            /etc/consul/renders/smartstack-external.py
+            --has smartstack:external
+            --open-iptables=conntrack
+            --smartstack-localip {{pillar.get('loadbalancer', {}).get('external-ip', grains['ip_interfaces'][pillar['ifassign']['external']][pillar['ifassign'].get('external-ip-index', 0)|int()])}}
+            --only-iptables
+        - require:
+            - file: smartstack-external
 
 # vim: syntax=yaml
