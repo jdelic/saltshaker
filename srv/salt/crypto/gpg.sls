@@ -82,7 +82,7 @@ enforce-chmod-on-managed-keyring:
             - group: gpg-access
             - file: gpg-shared-keyring-location
             {% for k, v in pillar.get('gpg', {}).get('keys', {}).items() %}
-            - cmd: gpg-{{k}}:
+            - cmd: gpg-{{k}}
             {% endfor %}
 
 # vim: syntax=yaml
