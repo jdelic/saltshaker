@@ -12,9 +12,11 @@ base:
         - shared.vault
         - shared.secrets.vault
 
-    'roles:secure-database':
+    'roles:database':
         - match: grain
         - shared.vault
+        - postgresql
+        - shared.secrets.postgresql
 
     'roles:dev':
         - match: grain
