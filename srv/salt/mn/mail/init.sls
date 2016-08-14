@@ -13,39 +13,6 @@ smtpgreeting:
         - template: jinja
         - makedirs: True
 
-
-nixspam:
-    file.managed:
-        - name: /secure/email/nixspam.skel
-        - source: salt://mn/mail/nixspam.skel
-        - require:
-            - file: email-storage
-
-
-nixspam-data-directory:
-    file.directory:
-        - name: /var/lib/nixspam
-        - user: virtmail
-        - group: mail
-        - dir_mode: '755'
-        - makedirs: True
-        - require:
-            - user: virtmail
-
-
-spamassassin:
-    pkg.installed:
-        - pkgs:
-            - spamassassin
-            - spamc
-            - procmail
-    service.running:
-        - sig: spamd
-        - enable: True
-        - require:
-            - pkg: spamassassin
-
-
 git:
     pkg.installed
 
@@ -87,25 +54,6 @@ checkdomainpasswd-script:
         - replace: False
         - require:
             - cmd: mn-mailsystem
-
-
-nixspam-crontab:
-    file.managed:
-        - name: /etc/cron.d/nixspam
-        - source: salt://mn/mail/cron/nixspam
-        - user: root
-        - group: root
-        - mode: '644'
-
-
-removespam-daily-cron:
-    file.managed:
-        - name: /etc/cron.daily/removespam
-        - source: salt://mn/mail/cron/removespam.tpl
-        - template: jinja
-        - user: root
-        - group: root
-        - mode: '750'
 
 
 checkvalidrcptto-daily-cron:

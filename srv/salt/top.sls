@@ -68,9 +68,11 @@ base:
 
     'roles:mail':
         - match: grain
-        - compilers
         - dovecot
         - mn.cas.client  # only use with casserver, otherwise comment out
+        - opensmtpd.install
+        - mn.mail.nixspam
+        - mn.mail.spamassassin
         - fstab.mailqueue
 
     'roles:pim':

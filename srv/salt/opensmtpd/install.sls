@@ -12,3 +12,7 @@ plusdashfilter:
         - name: opensmtpd-plusdashfilter
         - require:
             - pkgrepo: maurusnet-repo
+
+
+procmail:
+    pkg.installed
