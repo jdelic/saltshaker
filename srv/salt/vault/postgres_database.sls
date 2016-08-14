@@ -28,8 +28,8 @@ vault-postgres:
         - name: vault
         - tablespace: secure
         - encoding: utf8  # postgresql spelling
-        - owner: concourse
-        - user: {{pillar['vault']['postgres']['dbuser']}}
+        - owner: {{pillar['vault']['postgres']['dbuser']}}
+        - user: postgres
         - order: 20  # see ORDER.md
         - require:
             - postgres_user: vault-postgres
