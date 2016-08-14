@@ -1,7 +1,7 @@
 
 nixspam:
     file.managed:
-        - name: /secure/email/nixspam.skel
+        - name: {{pillar['emailstore']['path']}}/nixspam.skel
         - source: salt://mn/mail/nixspam.skel
         - require:
             - file: email-storage
