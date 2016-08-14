@@ -91,6 +91,14 @@ backports-org-jessie:
         - source: salt://etc_mods/jessie-backports
 
 
+maurusnet-repo:
+    pkgrepo.managed:
+        - humanname: repo.maurus.net
+        - name: {{pillar["repos"]["maurusnet"]}}
+        - file: /etc/apt/sources.list.d/maurusnet.list
+        - order: 2  # execute this state early!
+
+
 openssl:
     # this will upgrade the installed version from the basebox, because we currently must to have
     # compatible versions
