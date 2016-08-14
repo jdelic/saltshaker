@@ -5,10 +5,14 @@
 #
 
 vault:
-    # "mysql", "postgres" or "consul" or "s3". Only "consul" supports redundancy (more than one vault server
+    # "mysql", "postgresql" or "consul" or "s3". Only "consul" supports redundancy (more than one vault server
     # in the cluster with leader elections. However, "consul" is *only* a good choice if your consul nodes run
     # on multiple physical machines.
-    backend: consul
+    backend: postgresql
+
+    # possible values: "disable" and "verify-full"
+    verify-backend-ssl: verify-full
+
     kvpath: 'vault/'  # see https://vaultproject.io/docs/config/index.html
 
     sslcert: /etc/ssl/local/vault.crt
