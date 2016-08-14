@@ -12,10 +12,10 @@ repos:
     jessie-backports: deb http://fileserver.maurusnet.test/debian/ jessie-backports main
     jessie-security: deb http://fileserver.maurusnet.test/debian/security/ jessie-updates main
     jessie-updates: deb http://fileserver.maurusnet.test/debian/ jessie-updates main
+    maurusnet: deb http://fileserver.maurusnet.test/maurusnet/ jessie main
     postgresql: deb http://fileserver.maurusnet.test/postgresql/ jessie-pgdg main
     stretch-testing: deb http://fileserver.maurusnet.test/debian/ stretch main
     saltstack: deb http://fileserver.maurusnet.test/apt/debian/8/amd64/latest jessie main
-    sogo: deb http://fileserver.maurusnet.test/sogo/ jessie jessie
 
     pgpkey: salt://mn/fileserver_ACADBD6B.pgp.key
 

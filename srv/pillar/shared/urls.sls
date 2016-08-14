@@ -12,10 +12,10 @@ repos:
     jessie-backports: deb http://ftp-stud.hs-esslingen.de/debian/ jessie-backports main
     jessie-security: deb http://security.debian.org/ jessie/updates main
     jessie-updates: deb http://ftp-stud.hs-esslingen.de/debian/ jessie-updates main
+    maurusnet: deb http://repo.maurus.net/debian/ jessie main
     postgresql: deb http://apt.postgresql.org/pub/repos/apt/ jessie-pgdg main
     stretch-testing: deb http://ftp-stud.hs-esslingen.de/debian/ stretch main
     saltstack: deb http://repo.saltstack.com/apt/debian/8/amd64/latest jessie main
-    sogo: deb http://inverse.ca/debian-v3 jessie jessie
 
 #   pgpkey: Set this to a salt:// url if you need to deploy your own repo signing key
 #           If you need to deploy more than one key, you should really write your own
