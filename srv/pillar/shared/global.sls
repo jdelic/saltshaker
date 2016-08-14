@@ -11,7 +11,7 @@ vault:
     pinned-ca-cert: /usr/share/ca-certificates/local/maurusnet-rootca.crt
 
 
-postgres:
+postgresql:
     hostname: postgresql.local
 
 # vim: syntax=yaml

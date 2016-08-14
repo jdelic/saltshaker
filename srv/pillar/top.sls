@@ -15,7 +15,7 @@ base:
     'roles:database':
         - match: grain
         - shared.vault
-        - postgresql
+        - shared.postgresql
         - shared.secrets.postgresql
 
     'roles:dev':
