@@ -1,10 +1,10 @@
 
 opensmtpd:
     pkg.installed:
-        pkgs:
+        - pkgs:
             - opensmtpd
             - opensmtpd-extras
-        fromrepo: stretch-testing
+        - fromrepo: stretch-testing
 
 
 plusdashfilter:
