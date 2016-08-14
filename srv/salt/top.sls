@@ -73,6 +73,7 @@ base:
         - opensmtpd.install
         - mn.mail.nixspam
         - mn.mail.spamassassin
+        - mn.mail.storage
         - fstab.mailqueue
 
     'roles:pim':
