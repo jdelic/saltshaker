@@ -19,8 +19,10 @@ dovecot:
 {% for file in conffiles %}
             - file: /etc/dovecot/conf.d/{{file}}
 {% endfor %}
+{% if pillar['imap']['sslcert'] != 'default' %}
             - file: dovecot-ssl-cert
             - file: dovecot-ssl-key
+{% endif %}
             - file: sa-learn-pipe-script
 
 
