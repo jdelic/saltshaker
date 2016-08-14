@@ -4,6 +4,7 @@ spamassassin:
         - pkgs:
             - spamassassin
             - spamc
+        - install_recommends: False
     service.running:
         - sig: spamd
         - enable: True
