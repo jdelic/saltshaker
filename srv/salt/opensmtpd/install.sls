@@ -4,7 +4,7 @@ opensmtpd:
         - pkgs:
             - opensmtpd
             - opensmtpd-extras
-        - fromrepo: stretch-testing
+        - fromrepo: stretch
 
 
 plusdashfilter:
@@ -15,4 +15,9 @@ plusdashfilter:
 
 
 procmail:
-    pkg.installed
+    pkg.installed:
+        - install_recommends: False
+        # this would be a gratuitous requirement if procmail didn't pull in mail-transport-agent
+        # which means exim is installed if opensmtpd fails to install
+        - require:
+            - pkg: opensmtpd
