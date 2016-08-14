@@ -18,6 +18,12 @@ vault-hosts-alias:
         - text: 127.0.0.1    {{pillar['vault']['hostname']}}
 
 
+postgresql-hosts-alias:
+    file.append:
+        - name: /etc/hosts
+        - text: 127.0.0.1    {{pillar['postgresql']['hostname']}}
+
+
 # set up vault command-line client configuration as a convenience in /etc/profile.d
 vault-envvar-config:
     file.managed:
