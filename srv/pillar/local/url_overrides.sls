@@ -14,6 +14,7 @@ repos:
     jessie-updates: deb http://fileserver.maurusnet.test/debian/ jessie-updates main
     maurusnet: deb http://fileserver.maurusnet.test/maurusnet/ jessie main
     postgresql: deb http://fileserver.maurusnet.test/postgresql/ jessie-pgdg main
+    powerdns: deb http://fileserver.maurusnet.test/powerdns/ jessie-auth-40 main
     stretch-testing: deb http://fileserver.maurusnet.test/debian/ stretch main
     saltstack: deb http://fileserver.maurusnet.test/apt/debian/8/amd64/latest jessie main
 

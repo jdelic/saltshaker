@@ -14,6 +14,7 @@ repos:
     jessie-updates: deb http://ftp-stud.hs-esslingen.de/debian/ jessie-updates main
     maurusnet: deb http://repo.maurus.net/debian/ jessie main
     postgresql: deb http://apt.postgresql.org/pub/repos/apt/ jessie-pgdg main
+    powerdns: deb http://repo.powerdns.com/debian jessie-auth-40 main
     stretch-testing: deb http://ftp-stud.hs-esslingen.de/debian/ stretch main
     saltstack: deb http://repo.saltstack.com/apt/debian/8/amd64/latest jessie main
 

@@ -11,6 +11,7 @@
  * add ssmtp to all servers that don't run opensmtpd
  * integrate opensmtpd
  * switch Dovecot from maildir to sdbox
+ * add PowerDNS states to implement a fully owned DNSSEC zone (i.e. no trust delegation to third parties)
 
 
 # Ponder
