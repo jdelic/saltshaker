@@ -65,7 +65,7 @@ sa-learn-pipe-script:
 dovecot-pam:
     file.managed:
         - name: /etc/pam.d/dovecot
-        - source: salt://mn/mail/dovecot.pam
+        - source: salt://mail/dovecot.pam
 
 
 {% for file in conffiles %}

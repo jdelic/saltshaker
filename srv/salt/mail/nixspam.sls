@@ -1,10 +1,17 @@
 
+nixspam-procmail-include:
+    file.managed:
+        - name: {{pillar['emailstore']['path']}}/nixspam.global.procmailrc
+        - source: salt://mail/nixspam.global.procmailrc
+
+
 nixspam:
     file.managed:
         - name: {{pillar['emailstore']['path']}}/nixspam.skel
-        - source: salt://mn/mail/nixspam.skel
+        - source: salt://mail/nixspam.skel
         - require:
             - file: email-storage
+            - file: nixspam-procmail-include
             - pkg: procmail
 
 
@@ -22,7 +29,7 @@ nixspam-data-directory:
 nixspam-crontab:
     file.managed:
         - name: /etc/cron.d/nixspam
-        - source: salt://mn/mail/cron/nixspam
+        - source: salt://mail/cron/nixspam
         - user: root
         - group: root
         - mode: '644'
@@ -31,7 +38,7 @@ nixspam-crontab:
 removespam-daily-cron:
     file.managed:
         - name: /etc/cron.daily/removespam
-        - source: salt://mn/mail/cron/removespam.tpl
+        - source: salt://mail/cron/removespam.tpl
         - template: jinja
         - user: root
         - group: root

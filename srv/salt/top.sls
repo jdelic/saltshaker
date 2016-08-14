@@ -71,9 +71,9 @@ base:
         - dovecot
         - mn.cas.client  # only use with casserver, otherwise comment out
         - opensmtpd.install
-        - mn.mail.nixspam
-        - mn.mail.spamassassin
-        - mn.mail.storage
+        - mail.nixspam
+        - mail.spamassassin
+        - mail.storage
         - fstab.mailqueue
 
     'roles:pim':
