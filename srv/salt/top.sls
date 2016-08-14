@@ -57,12 +57,10 @@ base:
     'roles:database':
         - match: grain
         - fstab.data
+        - fstab.secure
         - postgresql.fast
         - redis.cache
         - dev.concourse.postgres_database
-
-    'roles:secure-database':
-        - match: grain
         - postgresql.secure
         - vault.database  # this state is empty if vault doesn't use a database backend
 
