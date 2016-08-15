@@ -140,6 +140,9 @@ vault-service:
             - file: vault  # restart on a change of the binary
             - file: vault-ssl-cert  # restart when the SSL cert changes
             - file: vault-ssl-key
+{% if pillar['vault'].get('backend', '') == 'postgresql' %}
+            - vault-postgres
+{% endif %}
 
 
 vault-service-reload:

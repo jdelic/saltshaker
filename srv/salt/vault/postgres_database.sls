@@ -25,7 +25,7 @@ vault-postgres:
         - require:
             - secure-tablespace
     postgres_database.present:
-        - name: vault
+        - name: {{pillar['vault']['postgres']['dbname']}}
         - tablespace: secure
         - encoding: utf8  # postgresql spelling
         - owner: {{pillar['vault']['postgres']['dbuser']}}
@@ -34,4 +34,12 @@ vault-postgres:
         - require:
             - postgres_user: vault-postgres
             - secure-tablespace
+    cmd.script:
+        - name: salt://vault/vault_postgresql_db.jinja.sh
+        - template: jinja
+        - use_vt: True
+        - env:
+            - PGPASSWORD: {{pillar['dynamicpasswords']['secure-vault']}}
+        - require:
+            - postgres_database: vault-postgres
 {% endif %}
