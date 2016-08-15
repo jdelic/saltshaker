@@ -117,7 +117,7 @@ data-cluster-config-sslkey:
 data-cluster-config-sslciphers:
     file.replace:
         - name: /etc/postgresql/9.5/main/postgresql.conf
-        - pattern: "#ssl_ciphers = 'HIGH:MEDIUM:+3DES:!aNULL'[^\n]*"
+        - pattern: "^#ssl_ciphers\\s+=\\s+'HIGH:MEDIUM:\\+3DES:!aNULL'[^\n]*$"
         - repl: ssl_ciphers = 'ECDHE-ECDSA-CHACHA20-POLY1305:ECDHE-RSA-CHACHA20-POLY1305:ECDHE-ECDSA-AES128-GCM-SHA256:ECDHE-RSA-AES128-GCM-SHA256:ECDHE-ECDSA-AES256-GCM-SHA384:ECDHE-RSA-AES256-GCM-SHA384:DHE-RSA-AES128-GCM-SHA256:DHE-RSA-AES256-GCM-SHA384:ECDHE-ECDSA-AES128-SHA256:ECDHE-RSA-AES128-SHA256:ECDHE-ECDSA-AES128-SHA:ECDHE-RSA-AES256-SHA384:ECDHE-RSA-AES128-SHA:ECDHE-ECDSA-AES256-SHA384:ECDHE-ECDSA-AES256-SHA:ECDHE-RSA-AES256-SHA:DHE-RSA-AES128-SHA256:DHE-RSA-AES128-SHA:DHE-RSA-AES256-SHA256:DHE-RSA-AES256-SHA:ECDHE-ECDSA-DES-CBC3-SHA:ECDHE-RSA-DES-CBC3-SHA:EDH-RSA-DES-CBC3-SHA:AES128-GCM-SHA256:AES256-GCM-SHA384:AES128-SHA256:AES256-SHA256:AES128-SHA:AES256-SHA:DES-CBC3-SHA:!DSS'
         - backup: False
 {% endif %}
@@ -127,7 +127,7 @@ data-cluster-service:
         - name: postgresql@9.5-main
         - sig: postgres
         - enable: True
-        - require:
+        - watch:
             - file: data-cluster-config-hba
             - file: data-cluster-config-network
 {% if pillar.get("ssl", {}).get("postgresql") %}
