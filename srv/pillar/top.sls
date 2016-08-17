@@ -7,8 +7,8 @@ base:
         - shared.ssl
         - shared.gpg
 
-    'roles:vault':
-        - match: grain
+    'saltmaster.*':
+        - match: pcre
         - shared.vault
         - shared.secrets.vault
 
