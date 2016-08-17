@@ -9,12 +9,16 @@ base:
 
     'saltmaster.*':
         - match: pcre
-        - shared.vault
         - shared.secrets.vault
+
+    'saltmaster.maurusnet.test':
+        - local.vault
+
+    'saltmaster.maurus.net':
+        - hetzner.vault
 
     'roles:database':
         - match: grain
-        - shared.vault
         - shared.postgresql
         - shared.secrets.postgresql
 
