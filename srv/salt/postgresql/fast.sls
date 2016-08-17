@@ -125,7 +125,7 @@ data-cluster-config-sslciphers:
 data-cluster-service:
     service.running:
         - name: postgresql@9.5-main
-        - sig: postgres
+        - sig: /usr/lib/postgresql/9.5/bin/postgres
         - enable: True
         - watch:
             - file: data-cluster-config-hba
