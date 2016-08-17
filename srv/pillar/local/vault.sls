@@ -27,10 +27,11 @@ vault:
         dbuser: vault  # the password is created via the dynamicpasswords ext_pillar
 
     s3:
-        bucket: vault
-        aws-region: us-east-1
-        aws-accesskey: 'AABC...'
-        aws-secretkey: 'AABC...'
+        bucket: vault-dev
+        aws-region: eu-central-1
+        # put these into your "secrets" pillar!
+        # aws-accesskey: 'AABC...'
+        # aws-secretkey: 'akaio13...'
 
     enable-telemetry: False  # if you set this to True then you need to uncomment and provide one the following:
     #telemetry:
