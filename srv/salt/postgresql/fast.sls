@@ -131,6 +131,8 @@ data-cluster-service:
             - file: data-cluster-config-hba
             - file: data-cluster-config-network
 {% if pillar.get("ssl", {}).get("postgresql") %}
+            - file: postgresql-ssl-cert
+            - file: postgresql-ssl-key
             - file: data-cluster-config-sslcert
             - file: data-cluster-config-sslkey
             - file: data-cluster-config-sslciphers
