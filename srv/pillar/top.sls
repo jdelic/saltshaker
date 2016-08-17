@@ -7,15 +7,13 @@ base:
         - shared.ssl
         - shared.gpg
 
-    'saltmaster.*':
-        - match: pcre
-        - shared.secrets.vault
-
     'saltmaster.maurusnet.test':
         - local.vault
+        - shared.secrets.vault-dev
 
     'saltmaster.maurus.net':
         - hetzner.vault
+        - shared.secrets.vault-live
 
     'roles:database':
         - match: grain
