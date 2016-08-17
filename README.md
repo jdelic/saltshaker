@@ -104,11 +104,15 @@ Deploying this salt configuration requires you to:
 
 # The secrets pillar
 
-For these configurations to work, you **must** provide a `shared.secrets` 
-pillar in `srv/pillar/shared/secrets` that must contain the following pillars,
-unless you rework the salt states to use different ones. I use a wildcard
-certificate for my domains, but if you want to, you can `grep` for the pillars
-below and replace them with your own:
+You should clone the saltshaker repository and then as a first step, replace
+the git submodule in `srv/pillar/shared/secrets` with your own **private Git
+repository**.
+
+For my salt states to work, you **must** provide your own`shared.secrets` 
+pillar in `srv/pillar/shared/secrets` that **must** contain the following 
+pillars, unless you rework the salt states to use different ones. I use a 
+wildcard certificate for my domains, but if you want to, you can `grep` for the
+pillars below and replace them with your own per-service certificates as well:
 
 In `shared.secrets.ssl`:
   * `ssl:maincert:cert` - The public X.509 SSL certificate for your domain. 
@@ -124,17 +128,29 @@ In `shared.secrets.ssl`:
 
 In `shared.secrets.vault`:
   * `ssl:vault:cert` - the public X.509 SSL certificate used by the `vault`
-    role/server.
+    role/server. Should contain SANs for `vault.local` resolving to `127.0.0.1`
+    (see notes on the `.local` and `.internal` domains under "Networking" 
+    below).
   * `ssl:vault:key` - its private key
   * `ssl:vault:certchain` - it's CA chain
   * `ssl:vault:combined` - A concatenation of `:cert` and `:certchain`
   * `ssl:vault:combined-key` - A concatenation of `:cert` and `:certchain` and
     `:key`.
+  * `vault:s3:aws-accesskey` - The access key for an IAM role that can be used
+    for the Vault S3 backend (if you want to use that). Must have read/write
+    access to a S3 bucket.
+  * `vault:s3:aws-secretkey` - the secret key corresponding to the access key
+    above.
 
 In `shared.secrets.concourse`:
   * `ssh:concourse:public` - A SSH2 public RSA key for the concourse.ci TSA SSH
     host.
   * `ssh:concourse:key` - The private key for the public host key.
+  
+In `shared.secrets.postgresql`:
+  * `ssl:postgresql:cert,key,certchain,combined,combined-key` in the same 
+    structure as the SSL certs mentioned above, containing a SSL cert used to
+    encrypt database traffic through `postgresql.local`.
   
 I manage these pillars in a private Git repository that I clone to 
 `srv/pillar/shared/secrets` as a Git submodule. To keep the PEM encoded 
@@ -148,13 +164,13 @@ MIIFBDCCAuwCAQEwDQYJKoZIhvcNAQELBQAwgdgxCzAJBgNVBAYTAkRFMQ8wDQYD
 ...
 -----END CERTIFICATE-----"|indent(12) %}
 
-# using the indent(12) template filter I can then do:
+# because we're using the indent(12) template filter we can then do:
 ssl:
     maincert:
         cert: | {{mycert}}
 ```
 
-## The managed GPG keyring
+## shared.secrets: The managed GPG keyring
 
 The salt config also contains states which manage a shared GPG keyring. All
 keys added to the dict pillar `gpg:keys` are iterated by the `crypto.gpg` 
