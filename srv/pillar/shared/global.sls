@@ -1,5 +1,5 @@
 
-# global states for all nodes
+# global shared pillars for all nodes
 
 email:
     # no-authentication email sender
