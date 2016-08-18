@@ -24,6 +24,8 @@
 
   * Fix consul to enable ACLs and then use ACL tokens to secure write access on the cluster from the agents?
     Does that make sense? Is it overkill? How can you bootstrap this from Salt?
+    
+  * should `postgresql.secure` be its own cluster on port 5433?
 
 
 # Whenever
