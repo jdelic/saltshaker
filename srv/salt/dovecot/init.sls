@@ -77,17 +77,17 @@ dovecot-config-{{file}}:
         - template: jinja
         - context:
             sslcert: >
-                {% if pillar['imap']['sslcert'] == 'default' %}
+                {%- if pillar['imap']['sslcert'] == 'default' %}
                     {{pillar['ssl']['default-cert-combined']}}
-                {% else %}
+                {%- else %}
                     {{pillar['imap']['sslcert']}}
-                {% endif %}
+                {%- endif %}
             sslkey: >
-                {% if pillar['imap']['sslcert'] == 'default' %}
+                {%- if pillar['imap']['sslcert'] == 'default' %}
                     {{pillar['ssl']['default-cert-key']}}
-                {% else %}
+                {%- else %}
                     {{pillar['imap']['sslkey']}}
-                {% endif %}
+                {%- endif %}
         - require:
             - pkg: dovecot
 {% endfor %}
