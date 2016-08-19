@@ -1,5 +1,8 @@
 
 casserver:
-    database_url: mysql://localhost:3306/casserver
+    dbtype: postgresql
+    dbname: mnusers
+    dbuser: mnusers
+
 
 # vim: syntax=yaml
