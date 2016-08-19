@@ -8,7 +8,7 @@
 
 {% if pillar['vault'].get('backend', '') == 'postgresql' %}
 
-# only create this if the MySQL backend is selected
+# only create this if the PostgreSQL backend is selected
 vault-postgres:
     postgres_user.present:
         - name: {{pillar['vault']['postgres']['dbuser']}}
