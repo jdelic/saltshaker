@@ -10,10 +10,12 @@ base:
     'saltmaster.maurusnet.test':
         - local.vault
         - shared.secrets.vault-dev
+        - shared.secrets.vault-ssl
 
     'saltmaster.maurus.net':
         - hetzner.vault
         - shared.secrets.vault-live
+        - shared.secrets.vault-ssl
 
     'roles:database':
         - match: grain
