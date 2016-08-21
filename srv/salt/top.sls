@@ -63,6 +63,7 @@ base:
         - dev.concourse.postgres_database
         - postgresql.secure
         - vault.database  # this state is empty if vault doesn't use a database backend
+        - vault.postgres_admin  # gives Vault admin rights for using the postgresql Vault secret backend
 
     'roles:mail':
         - match: grain
