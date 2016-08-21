@@ -1,0 +1,20 @@
+# creates a vaultadmin role that can be used to create dynamic credentials
+# from the Vault postgresql secret backend
+
+vaultadmin:
+    postgres_user.present:
+        - createdb: False
+        - createroles: True
+        - createuser: True
+        - encrypted: True
+        - login: True
+        - inherit: False
+        - superuser: False
+        - replication: False
+        - password: {{pillar['dynamicpasswords']['vault-db-credential-admin']}}
+        - user: postgres
+        - require:
+            - service: data-cluster-service
+
+
+# vim: syntax=yaml
