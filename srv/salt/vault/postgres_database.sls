@@ -13,8 +13,8 @@ vault-postgres:
     postgres_user.present:
         - name: {{pillar['vault']['postgres']['dbuser']}}
         - createdb: False
-        - createroles: True
-        - createuser: True
+        - createroles: False
+        - createuser: False
         - encrypted: True
         - login: True
         - inherit: False
@@ -38,6 +38,8 @@ vault-postgres:
         - name: salt://vault/vault_postgresql_db.jinja.sh
         - template: jinja
         - use_vt: True
+        - onchanges:
+            - postgres_database: vault-postgres
         - env:
             - PGPASSWORD: {{pillar['dynamicpasswords']['secure-vault']}}
         - require:
