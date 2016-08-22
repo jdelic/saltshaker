@@ -33,6 +33,7 @@ urls:
     pyrun34: https://downloads.egenix.com/python/egenix-pyrun-2.2.1-py3.4_ucs4-linux-x86_64.tgz
     pyrun35: https://downloads.egenix.com/python/egenix-pyrun-2.2.1-py3.5_ucs4-linux-x86_64.tgz
     qmail: http://cr.yp.to/software/qmail-1.03.tar.gz
+    terraform: https://releases.hashicorp.com/terraform/0.7.1/terraform_0.7.1_linux_amd64.zip
     vault: https://releases.hashicorp.com/vault/0.6.1/vault_0.6.1_linux_amd64.zip
 
 
@@ -47,4 +48,5 @@ hashes:
     pyrun34: sha256sum=9798f3cd00bb39ee07daddb253665f4e3777ab58ffb6b1d824e206d338017e71
     pyrun35: sha256sum=d20bd23b3e6485c0122d4752fb713f30229e7c522e4482cc9716afc05413b02e
     qmail: sha256=21ed6c562cbb55092a66197c35c8222b84115d1acab0854fdb1ad1f301626f88
+    terraform: sha256=133766ed558af04255490f135fed17f497b9ba1e277ff985224e1287726ab2dc
     vault: sha256=4f248214e4e71da68a166de60cc0c1485b194f4a2197da641187b745c8d5b8be
