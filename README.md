@@ -25,17 +25,18 @@ Using these salt formulae you can bring up:
 
   * a primarily Python/Django based application environment
 
-  * including a consul/consul-template based
-    [smartstack](http://nerds.airbnb.com/smartstack-service-discovery-cloud/)
-    implementation for service discovery
-
-  * a MySQL and/or PostgreSQL database configuration for a normal and an 
-    encrypted database
+  * a MySQL and/or PostgreSQL database configuration for a "fast" database 
+    and a separate tablespace on an encrypted partition
 
   * a [Concourse.CI](http://concourse.ci/) build server environment for 
     your projects
 
-  * an HAProxy based HTTP reverse proxying load balancer for applications
+  * including a consul/consul-template/haproxy based
+    [smartstack](http://nerds.airbnb.com/smartstack-service-discovery-cloud/)
+    implementation for service discovery
+
+  * an HAProxy based reverse proxying load balancer for applications based
+    around the same smartstack implementation
 
 It also contains configuration for
 
