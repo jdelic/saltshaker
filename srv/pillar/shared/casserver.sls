@@ -2,7 +2,7 @@
 casserver:
     dbtype: postgresql
     dbname: mnusers
-    dbuser: mnusers
-
+    vault-manages-database: True
+    dbuser: mnusers  # unused if vault-manages-database is True
 
 # vim: syntax=yaml

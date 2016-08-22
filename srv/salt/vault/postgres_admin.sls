@@ -3,6 +3,7 @@
 
 vaultadmin:
     postgres_user.present:
+        - name: {{pillar['vault']['managed-database-owner']}}
         - createdb: False
         - createroles: True
         - createuser: True
