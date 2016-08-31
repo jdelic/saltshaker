@@ -6,4 +6,5 @@
 .settings
 .eclipse
 /etc/salt-master/pki
-
+*.lock
+*.bak
