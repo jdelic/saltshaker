@@ -118,7 +118,6 @@ SCRIPT
         master.vm.synced_folder 'saltshaker/srv/reactor', '/srv/reactor'
         master.vm.synced_folder 'saltshaker/etc/salt-minion/minion.d', '/etc/salt/minion.d'
         master.vm.synced_folder 'saltshaker/etc/salt-master/master.d', '/etc/salt/master.d'
-        master.vm.synced_folder 'saltshaker/etc/salt-master/gpgkeys', '/etc/salt/gpgkeys'
 
         master.vm.provision :shell do |s|
             if $local_provision
