@@ -37,9 +37,8 @@ server*, so certificates can be easily revoked if a server gets
 compromised or just removed.
 
 ```
-                   +-------------+
-                   | myapp       |  manually managed
-                   | pathlen: 2  |  CA
+                   +-------------+  manually managed
+                   | myapp       |  CA pathlen: 2
                    +-------------+
                    /      |       \
           +---------+ +-------+ +---------+  manually managed
