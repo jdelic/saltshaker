@@ -22,10 +22,11 @@ The system of deployment relies on the following ideas:
      authentication), Vault instance, etc.
      
   6. If multiple environments are being serviced, they can share a root CA with
-     one intermediate CA per environment.
+     one Vault-managed intermediate CA per environment.
      
   7. Local development is easy since developers can just use a local 
-     environment that uses username/password auth instead
+     environment that uses username/password auth instead by setting the 
+     required environment variables.
      
   8. Since the dev/stage/production environments rely on Smartstack, all
      applications expect to find their required services on localhost anyway.
