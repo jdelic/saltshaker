@@ -141,8 +141,8 @@ you have two options:
 
 Why not make this a tidy tree and put a organization root CA at the top?
 ------------------------------------------------------------------------
-Because OpenSSL and by extension most software using it, will follow the trust
-path of a SSL client certificate to the "logical end of the trust chain",
+Because OpenSSL and by extension most software using `libssl`, will follow the
+trust path of a SSL client certificate to the "logical end of the trust chain",
 *a self-signed CA*. This means that you usually **can't terminate a trust chain
 at an intermediary CA**. In other words: Your services would trust every
 certificate signed by **any intermediary** under your root CA, not just the PKI
