@@ -84,7 +84,6 @@ you have two options:
 
   1. Don't use Vault and restructure the CA tree by putting the environment at
      the root(s).
-
      ```
              +--------+ +--------+ +--------+  manually managed CAs
              | Dev    | | Stage  | | Live   |  pathlen: 1
