@@ -1,7 +1,45 @@
-Application deployment and configuration
-========================================
+Application resources and configuration
+=======================================
 
-The system of deployment relies on the following ideas:
+The environments configured by this Salt repository configure a cluster that
+tries to avoid four common pitfalls of modern automated server configuration:
+
+  1. Your secret configuration (like database credentials) is in your shared
+     source code repository ("everyone on the dev team has it")
+
+  2. Your secret configuration is in your shared configuration management
+     repository ("everyone on the ops team has it")
+
+  3. Even if you use a deployment specific secrets database like the
+     `dynamicpasswords` pillar included in this repository, you commonly must
+     run the configuration management before deploying new applications so
+     their secrets are waiting for them.
+
+  4. Worst case scenario: hard-coded credentials are duplicated in your source
+     code and your configuration and reused between different deployment
+     environments so you don't have to do code changes before deploying.
+
+Generally speaking this also interferes with Continuous Delivery and also makes
+it really hard to rotate passwords and other secrets when people leave your
+company or you detected an attack.
+
+So the build model ingrained into this repository is based on
+[Hashicorp Vault](https://vaultproject.io/) and moving secret generation where
+it belongs: on the build server. The reasons for that are:
+
+  1. You must trust ans secure your build server anyway. If it's compromised the
+     attacker can deploy malicious code and can also read all of your hardcoded
+     secrets.
+
+  2. You can lock the build server down for your developers and ops people, but
+     you can't deny them access to source code and configuration management.
+
+  3. If you follow [12factor](https://12factor.net), as much configuration as
+     possible should be part of your release artifacts, since a release is
+     always code **plus** configuration. Most of the build and deployment ideas
+     in this repository are based on that concept.
+
+That said, this is what we do to reach that goal:
 
   1. have a build server that builds your applications for CI and CD.
 
@@ -12,14 +50,27 @@ The system of deployment relies on the following ideas:
 
   4. The build scripts (using GoPythonGo, for example) request a new
      certificate for each build and put them in the delivery artifact (i.e.
-     Docker container or .deb) together with environment variable sources (i.e.
-     a file in /etc/defaults loaded by systemd through `EnvironmentFile=`)
-     pointing to the file. The certificate has the app name in the `CN`
-     attribute.
+     Docker container or .deb/.rpm) together with environment variable sources
+     (i.e. a file in /etc/defaults loaded by systemd through
+     `EnvironmentFile=`) pointing to the file. The certificate has the app name
+     in the `CN` attribute or is issued by an application-specific CA.
 
   5. Each app uses its build certificate issued by the build server to access
      internal services like a local PostgreSQL database (`cert`
      authentication), Vault instance, etc.
+
+This way, **every** build gets it's own pair of credentials, is packaged up and
+sent off to be installed on your servers. Vault's PKI backend stores the CA key
+and has no way of exporting it short of reading it's allocated RAM. The keys to
+unseal the build server Vault can be easily distributed using Vault's built-in
+key management protocols. Finally, a distributed Vault storage backend like
+Amazon S3 makes it easy to deploy new build servers and only few people on your
+Ops team need to have access to the build server and/or the CAs used to certify
+the automated build server PKIs. Using internal policies, split passphrases
+and an airgapped box, Yubikey or full-blown HSM you can ensure that no new
+build CAs can be certified without your knowledge.
+
+Your configuration management only knows about the public CA certificates.
 
 Using Vault for resource management
 -----------------------------------
@@ -71,8 +122,8 @@ when Vault implements
 [#1823](https://github.com/hashicorp/vault/issues/1823), you can cut down
 the number of needed CAs even further.
 
-Using SSL authentication with individual resources
---------------------------------------------------
+Using SSL client authentication with individual resources
+---------------------------------------------------------
 The above works well if Vault issues database credentials to your application,
 because as mentioned, Vault assigns policies to *the issuing CA*.
 
