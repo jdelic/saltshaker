@@ -279,10 +279,10 @@ PKI secret backend).
 
 #### What about -CApath
 Instead of creating concatenated files, you could also use a folder containing
-all of the necessary certificates in individual files. However, that foler
-**must be in hashdir format**. See the OpenSSL verify manpage to find out what
-that is. If you don't provide it like that, OpenSSL will just silently fail
-certificate validation!
+all of the necessary certificates in individual files using the `-CApath`
+command-line parameter. However, that folder **must be in hashdir format**.
+See the OpenSSL verify manpage to find out what that is. If you don't provide
+it like that, OpenSSL will just silently fail certificate validation!
 
 
 Command cheatsheet
