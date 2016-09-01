@@ -213,6 +213,78 @@ require applications to use their "appcert" to request credentials for their
 database through their local Vault instance, thereby leaving an audit trail for
 the database credentials.
 
+Using cross-signed client certificates with different software
+--------------------------------------------------------------
+
+### Python requests
+You pass the correct bundle into the `cert=` keyword parameter. The file
+contains:
+
+  1. The client certificate issued by the build server intermediary
+  2. The application CA or environment CA cross-signature
+
+```python
+requests.get(url, cert=('cert_plus_intermediate_from_correct_root.pem', 'key.pem'))
+```
+
+### OpenSSL
+To test this setup you'll want to run `openssl s_server` and `openssl s_client`
+against each other:
+
+```
+# run a local TLS1.2 server on port 8443
+openssl s_server \
+    -cert server_cert.pem \
+    -key server_key.pem
+    -tls1_2
+    -Verify 3
+    -verify_return_error
+    -CAfile application_or_environment_root+server_intermediary(if_needed).pem
+    -accept 8443
+
+# connect to this server, if this works client *and* server have verified
+# correctly
+openssl s_client \
+    -cert client_cert.pem \
+    -key client_key.pem \
+    -CAfile application_or_environment_intermediary(x-signed)+server_root.pem \
+    -tls1_2 \
+    -showcerts \
+    -verify 3 \
+    -verify_return_error \
+    -connect localhost:8443
+```
+
+`server_cert.pem` and `server_key.pem` haven't been mentioned in this document,
+they are simply normal server-side SSL certificates. If you don't have any, you
+must create one.
+
+`application_or_environment_root+server_intermediary(if_needed).pem` is a
+concatenated text file containing whichever of your two client root CAs you
+want to use and if your server certificate was signed (as is commonly the
+case) by an intermediary CA itself, you must also include that certificate
+so the *client* can build a trust chain to the server certificate's CA.
+
+`application_or_environment_intermediary(x-signed)+server_root.pem` is a
+concatenated text file containing the cross-signature intermediary
+certificate that is right for the client root CA you chose for the server.
+Since OpenSSL *does not read the system certificate store*, you also **must**
+include the root CA for `server_cert.pem`, so your client can validate the
+server's certificate before presenting its client certificate.
+
+`client_cert.pem` and `client_key.pem` are the client certificate and its
+private key as issued by the cross-signed intermediary CA managed by Vault
+(see the Vault cheatsheet below on how to issue a client certificate using the
+PKI secret backend).
+
+#### What about -CApath
+Instead of creating concatenated files, you could also use a folder containing
+all of the necessary certificates in individual files. However, that foler
+**must be in hashdir format**. See the OpenSSL verify manpage to find out what
+that is. If you don't provide it like that, OpenSSL will just silently fail
+certificate validation!
+
+
 Command cheatsheet
 ------------------
 ```
