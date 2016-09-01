@@ -8,19 +8,24 @@ _sshkeys = {
 }
 
 
-def create_user(username, groups=[], keys=[], password=None, create_default_group=True, enable_byobu=True, set_bashrc=True):
+def create_user(username, groups=None, optional_groups=None, keys=None, password=None,
+                create_default_group=True, enable_byobu=True, set_bashrc=True):
+    _groups = groups or []
     if create_default_group and username not in groups:
-        groups.insert(0, username)
+        _groups.insert(0, username)
 
     st_group = state("groups-%s" % username).group
-    st_group.present(names=groups)
+    st_group.present(names=_groups)
 
     st_user = state(username).user
     st_user.require(st_group)
 
     st_user.present(
-        groups=groups, home='/home/%s' % username,
-        password=password, gid_from_name=create_default_group
+        groups=_groups,
+        optional_groups=optional_groups,
+        home='/home/%s' % username,
+        password=password,
+        gid_from_name=create_default_group
     )
 
     names = []
