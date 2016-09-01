@@ -27,7 +27,7 @@ So the build model ingrained into this repository is based on
 [Hashicorp Vault](https://vaultproject.io/) and moving secret generation where
 it belongs: on the build server. The reasons for that are:
 
-  1. You must trust ans secure your build server anyway. If it's compromised the
+  1. You must trust and secure your build server anyway. If it's compromised the
      attacker can deploy malicious code and can also read all of your hardcoded
      secrets.
 
