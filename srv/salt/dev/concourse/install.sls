@@ -14,6 +14,8 @@ concourse-user:
         - gid: concourse
         - groups:
             - gpg-access
+        - optional_groups:
+            - docker
         - home: /etc/concourse
         - shell: /bin/false
         - createhome: False
