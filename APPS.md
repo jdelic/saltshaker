@@ -82,8 +82,9 @@ that each of these services can only trust a single client certificate
 authority at a time. So unless you have only a single application,
 you have two options:
 
-  1. Don't use Vault and restructure the CA tree by putting the environment at
-     the root(s).
+  1. **Don't use Vault and restructure the CA tree by putting the environment at
+     the root(s).**
+
      ```
              +--------+ +--------+ +--------+  manually managed CAs
              | Dev    | | Stage  | | Live   |  pathlen: 1
@@ -100,7 +101,9 @@ you have two options:
      would be configured to trust the environment CA using `ssl_ca_file`, which
      can only take a single value.
 
-  2. Use multiple trust paths. What this means is that you create one
+  2. **Use multiple trust paths.**
+
+     What this means is that you create one
      environment CA and one application CA. You configure Vault to trust the
      application CA and non-Vault-managed services to trust the environment
      CA. Then you create the **one** intermediary CA, which one doesn't matter.
@@ -177,6 +180,9 @@ vault write pki-myapp-dev/intermediate/generate/internal \
 # Sign the intermediate CA using your private Myapp Dev CA
 # then write the certificate back to the Vault store
 vault write pki-dev/intermediate/set-signed certificate=-
+
+# Cross sign the certificate with your environment CA if you
+# want to follow the split model described above!
 
 # You can also use the root certificate with a trustchain
 # in the client certificate.
