@@ -10,7 +10,8 @@ fledged [SmartStack](http://nerds.airbnb.com/smartstack-service-discovery-cloud/
 implementation for internal, external and cross-datacenter services.
 
 It also builds on the principles I have documented in my
-[GoPythonGo](http://gopythongo.com) build and deployment process.
+[GoPythonGo](https://github.com/gopythongo/gopythongo) build and deployment
+process.
 
 It has full support for [Vagrant](http://vagrantup.com/), allowing easy
 testing of new functionality and different setups on your local machine before
