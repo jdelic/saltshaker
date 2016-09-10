@@ -14,6 +14,7 @@ python-dev-packages:
             - libxml2-dev
             - libgd2-xpm-dev
             - libffi-dev
+            - libpq-dev
         - install_recommends: False
         - require:
             - pkg: build-essential
