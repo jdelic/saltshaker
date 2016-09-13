@@ -127,6 +127,7 @@ data-cluster-service:
         - name: postgresql@9.5-main
         - sig: /usr/lib/postgresql/9.5/bin/postgres
         - enable: True
+        - order: 15  # see ORDER.md
         - watch:
             - file: data-cluster-config-hba
             - file: data-cluster-config-network
