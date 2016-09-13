@@ -3,7 +3,8 @@
 # This is *independent* from the Vault PostgreSQL secret backend that allows services to get
 # temporary PostgreSQL access credentials.
 #
-# This state is meant to be run on a server with the "secure-database" role.
+# This state is meant to be run on a server with the "secure-database" role, so it can connect
+# directly, side-stepping smartstack.
 #
 
 {% if pillar['vault'].get('backend', '') == 'postgresql' %}
@@ -22,6 +23,7 @@ vault-postgres:
         - replication: False
         - password: {{pillar['dynamicpasswords']['secure-vault']}}
         - user: postgres
+        - order: 20  # see ORDER.md
         - require:
             - secure-tablespace
     postgres_database.present:
@@ -37,7 +39,13 @@ vault-postgres:
     cmd.script:
         - name: salt://vault/vault_postgresql_db.jinja.sh
         - template: jinja
+        - context:
+            user: {{pillar['vault']['postgres']['dbuser']}}
+            db: {{pillar['vault']['postgres']['dbname']}}
+            ip: {{pillar.get('postgresql', {}).get('bind-ip', grains['ip_interfaces'][pillar['ifassign']['internal']][pillar['ifassign'].get('internal-ip-index', 0)|int()])}}
+            port: {{pillar.get('postgresql', {}).get('bind-port', 5432)}}
         - use_vt: True
+        - order: 20  # see ORDER.md
         - onchanges:
             - postgres_database: vault-postgres
         - env:

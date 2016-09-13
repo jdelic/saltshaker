@@ -1,10 +1,10 @@
 #!/bin/sh
 
 psql -w \
-    -U {{pillar['vault']['postgres']['dbuser']}} \
-    -h 127.0.0.1 \
-    -p 5432 \
-    {{pillar['vault']['postgres']['dbname']}} <<EOT
+    -U {{user}} \
+    -h {{ip}} \
+    -p {{port}} \
+     {{db}} <<EOT
 
 CREATE TABLE IF NOT EXISTS vault_kv_store (
   parent_path TEXT COLLATE "C" NOT NULL,
