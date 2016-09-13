@@ -28,14 +28,15 @@ redis-data-dir:
             - pkg: redis
 
 
-redis-data-dir-systemd:
-    file.managed:
-        - name: /usr/lib/tmpfiles.d/redis.conf
-        - source: salt://redis/redis.tmpfiles.conf
-        - user: root
-        - group: root
-        - mode: '0644'
-        - require:
-            - pkg: redis
+# this is now provided by the package
+#redis-data-dir-systemd:
+#    file.managed:
+#        - name: /usr/lib/tmpfiles.d/redis-server.conf
+#        - source: salt://redis/redis.tmpfiles.conf
+#        - user: root
+#        - group: root
+#        - mode: '0644'
+#        - require:
+#            - pkg: redis
 
 # vim: syntax=yaml
