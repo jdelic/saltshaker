@@ -29,7 +29,7 @@ fpm:
     {% endif %}
     cmd.run:
         {% if pillar["urls"].get("fpmdeps", None) %}
-        - name: gem install --local fpm-1.6.0.gem
+        - name: gem install --local fpm-1.6.2.gem
         - cwd: /usr/local/src/fpm
         - require:
             - archive: fpm
