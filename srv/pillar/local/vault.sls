@@ -38,3 +38,6 @@ vault:
     #    statsite:  # the address of a statsite instance
     #    statsd:    # a statsd endpoint
     #    disable_hostname: False  # whether Vault should prepend stats with the machine's hostname
+
+    # default_lease_ttl: (default: 30 days)
+    # max_lease_ttl: (default: 1 year)
