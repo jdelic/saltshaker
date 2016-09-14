@@ -9,6 +9,12 @@ aptly:
             - pkg: aptly
     pkg.installed:
         - name: aptly
+    file.managed:
+        - name: /etc/aptly/aptly.example.conf
+        - source: salt://dev/aptly.example.conf
+        - makedirs: True
+        - file_mode: '0644'
+        - dir_mode: '0755'
 
 
 # vim: syntax=yaml
