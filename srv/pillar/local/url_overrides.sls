@@ -22,9 +22,9 @@ repos:
 
 urls:
     concourse: http://fileserver.maurusnet.test/downloads/concourse/concourse_linux_amd64
-    consul: http://fileserver.maurusnet.test/downloads/consul/consul_0.6.4_linux_amd64.zip
+    consul: http://fileserver.maurusnet.test/downloads/consul/consul_0.7.0_linux_amd64.zip
     consul-template: http://fileserver.maurusnet.test/downloads/consul-template/consul-template_0.15.0_linux_amd64.zip
-    consul-webui: http://fileserver.maurusnet.test/downloads/consul/consul_0.6.4_web_ui.zip
+    consul-webui: http://fileserver.maurusnet.test/downloads/consul/consul_0.7.0_web_ui.zip
     djbdns: http://fileserver.maurusnet.test/downloads/djbdns/djbdns-1.05.tar.gz
     exxo: http://fileserver.maurusnet.test/downloads/exxo/exxo-0.0.5.tar.xz
     nomad: http://fileserver.maurusnet.test/downloads/nomad/nomad_0.4.1_linux_amd64.zip
@@ -37,9 +37,9 @@ urls:
 
 hashes:
     concourse: sha256=ee8f17cca506bcf7f40ed4c23823f98551a1d5e5961155d0c47785ff34978dde
-    consul: sha256=abdf0e1856292468e2c9971420d73b805e93888e006c76324ae39416edcf0627
+    consul: sha256=b350591af10d7d23514ebaa0565638539900cdb3aaa048f077217c4c46653dd8
     consul-template: sha256=b7561158d2074c3c68ff62ae6fc1eafe8db250894043382fb31f0c78150c513a
-    consul-webui: sha256sum=5f8841b51e0e3e2eb1f1dc66a47310ae42b0448e77df14c83bb49e0e0d5fa4b7
+    consul-webui: sha256sum=42212089c228a73a0881a5835079c8df58a4f31b5060a3b4ffd4c2497abe3aa8
     djbdns: sha256=3ccd826a02f3cde39be088e1fc6aed9fd57756b8f970de5dc99fcd2d92536b48
     exxo: sha256=3c8e7a9cbe2f88b7c67d4e970f60de7f63a9ce4206aaf214326ead49cc5a2396
     nomad: sha256sum=0cdb5dd95c918c6237dddeafe2e9d2049558fea79ed43eacdfcd247d5b093d67
