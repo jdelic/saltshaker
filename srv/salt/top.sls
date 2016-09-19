@@ -64,6 +64,7 @@ base:
         - postgresql.secure
         - vault.database  # this state is empty if vault doesn't use a database backend
         - vault.postgres_admin  # gives Vault admin rights for using the postgresql Vault secret backend
+        - mn.cas.postgres_database
 
     'roles:mail':
         - match: grain
