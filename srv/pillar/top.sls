@@ -21,6 +21,7 @@ base:
         - match: grain
         - shared.postgresql
         - shared.secrets.postgresql
+        - shared.authserver
 
     'roles:dev':
         - match: grain
@@ -39,9 +40,9 @@ base:
         - match: grain
         - shared.secrets.ssl
 
-    'roles:casserver':
+    'roles:authserver':
         - match: grain
-        - shared.casserver
+        - shared.authserver
 
     # every minion ID not ending in "test" is at Hetzner right now
     '(?!test)$':
@@ -57,7 +58,7 @@ base:
     'cic*':
         - shared.mailserver-private
         - shared.secrets.ssl
-        - shared.casserver
+        - shared.authserver
 
     # every minion ID ending in ".test" is a local dev environment
     '*.test':
@@ -73,6 +74,6 @@ base:
     # "shared.ssl" is omitted here, because it's already assigned by '*.test'
     'test*':
         - shared.mailserver-private
-        - shared.casserver
+        - shared.authserver
 
 # vim: syntax=yaml
