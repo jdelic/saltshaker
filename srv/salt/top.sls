@@ -51,9 +51,6 @@ base:
         - match: grain
         - docker
 
-    'roles:servicerunner':
-        - mn.services
-
     'roles:database':
         - match: grain
         - fstab.data
@@ -83,6 +80,7 @@ base:
     'roles:casserver':
         - match: grain
         - mn.cas.server
+        - mn.appconfig
 
     'roles:loadbalancer':
         - match: grain
