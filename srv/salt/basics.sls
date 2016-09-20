@@ -149,6 +149,7 @@ openssh-in22-recv:
         - dport: 22
         - match: state
         - connstate: NEW
+        - save: True
         - require:
             - sls: iptables
         - order: 2
