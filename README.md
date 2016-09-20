@@ -432,6 +432,11 @@ pillar.get('authserver', {}).get(
 }}
 ```
 
+**Please note that commonly external services meant to be reached by the
+internet listen to internal interfaces on their application servers and are
+routed to the internet through the smartstack routing built into this
+configuration.**.
+
 ## Reserved top-level domains
 
 This configuration relies on three internal reserved domain suffixes, which
