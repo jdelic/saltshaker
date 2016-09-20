@@ -15,4 +15,3 @@ PORT   | SMARTSTACK | ASSIGNED SERVICE
 `*` Only internal SMTP relays for transactional mail are routed through
 SmartStack. The mail servers meant for humans (SMTP relay and SMTP
 receiver) are not routed through SmartStack.
-

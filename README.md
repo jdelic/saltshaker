@@ -26,10 +26,10 @@ Using these salt formulae you can bring up:
 
   * a primarily Python/Django based application environment
 
-  * a MySQL and/or PostgreSQL database configuration for a "fast" database 
+  * a MySQL and/or PostgreSQL database configuration for a "fast" database
     and a separate tablespace on an encrypted partition
 
-  * a [Concourse.CI](http://concourse.ci/) build server environment for 
+  * a [Concourse.CI](http://concourse.ci/) build server environment for
     your projects
 
   * including a consul/consul-template/haproxy based
@@ -45,7 +45,7 @@ It also contains configuration for
     [Baïkal](http://sabre.io/baikal/), [Dovecot](http://dovecot.org) and
     [OpenSMTPD](https://www.opensmtpd.org/)
 
-  * single-sign-on for Baïkal, Dovecot and OpenSMTPD, other web applications and 
+  * single-sign-on for Baïkal, Dovecot and OpenSMTPD, other web applications and
     even PAM using CAS
 
 The salt configuration is pretty modular, so you can easily just use this
@@ -110,28 +110,28 @@ You should clone the saltshaker repository and then as a first step, replace
 the git submodule in `srv/pillar/shared/secrets` with your own **private Git
 repository**.
 
-For my salt states to work, you **must** provide your own`shared.secrets` 
-pillar in `srv/pillar/shared/secrets` that **must** contain the following 
-pillars, unless you rework the salt states to use different ones. I use a 
+For my salt states to work, you **must** provide your own`shared.secrets`
+pillar in `srv/pillar/shared/secrets` that **must** contain the following
+pillars, unless you rework the salt states to use different ones. I use a
 wildcard certificate for my domains, but if you want to, you can `grep` for the
 pillars below and replace them with your own per-service certificates as well:
 
 In `shared.secrets.ssl`:
-  * `ssl:maincert:cert` - The public X.509 SSL certificate for your domain. 
+  * `ssl:maincert:cert` - The public X.509 SSL certificate for your domain.
     You can replace these with cert pillars for your individual domain.
   * `ssl:maincert:key:` - The private key for your SSL certificate without a
-    passphrase. You can replace this with key pillars for your individual 
+    passphrase. You can replace this with key pillars for your individual
     domain.
-  * `ssl:maincert:certchain` - The X.509 certificates tying your CA to a 
+  * `ssl:maincert:certchain` - The X.509 certificates tying your CA to a
     browser-accredited CA, if necessary.
-  * `ssl:maincert:combined` - A concatenation of `:cert` and `:certchain`. 
+  * `ssl:maincert:combined` - A concatenation of `:cert` and `:certchain`.
   * `ssl:maincert:combined-key` - A concatenation of `:cert`, `:certchain` and
     `:key`.
 
 In `shared.secrets.vault`:
   * `ssl:vault:cert` - the public X.509 SSL certificate used by the `vault`
     role/server. Should contain SANs for `vault.local` resolving to `127.0.0.1`
-    (see notes on the `.local` and `.internal` domains under "Networking" 
+    (see notes on the `.local` and `.internal` domains under "Networking"
     below).
   * `ssl:vault:key` - its private key
   * `ssl:vault:certchain` - it's CA chain
@@ -148,14 +148,14 @@ In `shared.secrets.concourse`:
   * `ssh:concourse:public` - A SSH2 public RSA key for the concourse.ci TSA SSH
     host.
   * `ssh:concourse:key` - The private key for the public host key.
-  
+
 In `shared.secrets.postgresql`:
-  * `ssl:postgresql:cert,key,certchain,combined,combined-key` in the same 
+  * `ssl:postgresql:cert,key,certchain,combined,combined-key` in the same
     structure as the SSL certs mentioned above, containing a SSL cert used to
     encrypt database traffic through `postgresql.local`.
-  
-I manage these pillars in a private Git repository that I clone to 
-`srv/pillar/shared/secrets` as a Git submodule. To keep the PEM encoded 
+
+I manage these pillars in a private Git repository that I clone to
+`srv/pillar/shared/secrets` as a Git submodule. To keep the PEM encoded
 certificates and keys in the pillar file, I use the following trick:
 
 ```
@@ -175,28 +175,15 @@ ssl:
 ## shared.secrets: The managed GPG keyring
 
 The salt config also contains states which manage a shared GPG keyring. All
-keys added to the dict pillar `gpg:keys` are iterated by the `crypto.gpg` 
-state and put into a GPG keyring accessible only by `root` and the user 
-group`gpg-access`. There is a parallel pillar called `gpg:fingerprints` 
+keys added to the dict pillar `gpg:keys` are iterated by the `crypto.gpg`
+state and put into a GPG keyring accessible only by `root` and the user
+group`gpg-access`. There is a parallel pillar called `gpg:fingerprints`
 that is used to check whether a key has already been added. The file system
 location of the shared keyring is set by the `gpg:shared-keyring-location`
 pillar, which by default is `/etc/gpg-managed-keyring`.
 
-                
+
 # Server configuration
-
-## Networking
-
-This configuration relies on three internal reserved domain suffixes, which
-**must be replaced if they're ever brought up as a TLD on the global DNS**.
-Those are:
-  * `.local` which **must** resolve to any address in 127.0.0.1/24
-  * `.internal` which **must** only be used within the non-publically-routed 
-    network
-  * `.consul.service` which is the suffix used by Consul for DNS based 
-    "service discovery" (repeat after me: *DNS is not a service discovery 
-    protocol*! Use Smartstack instead.)
-
 
 ### Pillar overrides
 
@@ -216,6 +203,7 @@ Those are:
 
 ## The dynamicpasswords pillar
 
+
 # Deploying applications
 
 ## Service deployment "through" salt and "on" servers configured by salt
@@ -228,18 +216,18 @@ that seem to be "interwoven" in this repository. The whole setup is meant to
     server that has the "loadbalancer" role
 
   * **but also** allow salt to install and configure services (like opensmtpd,
-    dovecot, concourse.ci or a PHP application that can not be easily packaged 
-    in a .deb) and register that with consul to then make it available through 
+    dovecot, concourse.ci or a PHP application that can not be easily packaged
+    in a .deb) and register that with consul to then make it available through
     a server that has the "loadbalancer" role
 
 I generally, if in any way possible, would always prefer deploying an
-application **not through salt states**, but other means (for example: 
-installing a .deb package on all servers that have the role "apps" through the 
-salt CLI client), but if you have to (for example when configuring a service 
-typically part of a Unix system like a mail server) you **totally can** use 
-salt states for that. This way you don't have to repackage services which are 
-already set up for your system. No need to repackage dovecot in a Docker 
-container, for example, if the Debian Maintainers do such an awesome job of 
+application **not through salt states**, but other means (for example:
+installing a .deb package on all servers that have the role "apps" through the
+salt CLI client), but if you have to (for example when configuring a service
+typically part of a Unix system like a mail server) you **totally can** use
+salt states for that. This way you don't have to repackage services which are
+already set up for your system. No need to repackage dovecot in a Docker
+container, for example, if the Debian Maintainers do such an awesome job of
 already providing ready-to-run packages anyway! (Also, repeat after me:
 "Salt, Puppet, Chef and Ansible are not deployment tools!")
 
@@ -262,6 +250,7 @@ discovering metadata from environment variables in the container. Consul in
 turn will propagate the service information through `consul-template` to
 `haproxy` making the services accessible or even routing them from servers with
 the `loadbalancer` role.
+
 
 # SmartStack
 
@@ -299,6 +288,7 @@ definitions into `/etc/consul/services.d`, which might lead to strange behavior
 if different versions end up on multiple machines or better
 [use salt consul states](https://github.com/pravka/salt-consul).
 
+
 # Vault
 
 This salt configuration also runs an instance of
@@ -312,11 +302,11 @@ initialized (depending on the backend) and
 [unsealed](https://vaultproject.io/docs/concepts/seal.html).
 
 Services, however, **must** access Vault through a local alias installed in
-`/etc/hosts/` configured in the `shared.global:vault:hostname` pillar 
-(default: vault.local), because Vault requires SSL and that in turn requires 
-a valid SAN, so you have to configure Vault with a SSL certificate for a valid 
-hostname. I use my own CA and give Vault a certificate for the SAN 
-`vault.local` and then pin the CA certificate to my own CA's cert in the 
+`/etc/hosts/` configured in the `shared.global:vault:hostname` pillar
+(default: vault.local), because Vault requires SSL and that in turn requires
+a valid SAN, so you have to configure Vault with a SSL certificate for a valid
+hostname. I use my own CA and give Vault a certificate for the SAN
+`vault.local` and then pin the CA certificate to my own CA's cert in the
 `shared.global:vault:pinned-ca-cert` pillar for added security (no other CA can
 issue such a certificate for any uncompromised host).
 
@@ -326,9 +316,9 @@ either the *consul*, *mysql*, *S3* or *PostgreSQL* backends.
 
 ### Vault database backend
 Generally, if you run on multiple VMs sharing a physical server, choose the
-`mysql` or `postgresql` backends and choose backup intervals and Vault 
-credential leases with a possible outage in mind. Such a persistent backend 
-will not be highly available, but unless you distribute your VMs across 
+`mysql` or `postgresql` backends and choose backup intervals and Vault
+credential leases with a possible outage in mind. Such a persistent backend
+will not be highly available, but unless you distribute your VMs across
 multiple physical machines, your setup will not be HA anyway. So it's better to
 fail in a way that let's your restore service easily.
 
@@ -336,12 +326,12 @@ Running this setup from this Salt recipe requires at least one server in the
 local environment to have the `secure-database` role as it will host the
 Vault MySQL database. The Salt recipe will automatically set up a `vault`
 database on the `secure-database` role if the vault pillar has the backend
-set to `mysql` or `postgresql`, because the `top.sls` file shipped from this 
+set to `mysql` or `postgresql`, because the `top.sls` file shipped from this
 repo assigns the `vault.database` state to the `secure-database` role.
 
 To enable this backend, set the Pillar `[server environment].vault.backend` to
-`mysql` or `postgresql` and assign one server the role `secure-database` (this 
-salt configuration doesn't support database replication) and at least one 
+`mysql` or `postgresql` and assign one server the role `secure-database` (this
+salt configuration doesn't support database replication) and at least one
 server the `vault` role.
 
 [More information at the Vault website.](https://vaultproject.io/docs/config/index.html)
@@ -354,3 +344,102 @@ them across at least two servers though, otherwise a hardware failure might take
 down the whole Consul cluster and thereby also erase all of the data.
 
 [More information at the Vault website.](https://vaultproject.io/docs/config/index.html)
+
+
+# Networking
+
+## iptables states
+iptables is configured by the `basics` and `iptables` states to use the
+`connstate`/`conntrack` module to allow incoming and outgoing packets in the
+`RELATED` state. So to enable new TCP services in the firewall on each
+individual machine managed through this saltshaker, only the connection
+creation needs to be managed in the machine's states.
+
+The naming standard for states that enable ports that get contacted is:
+`(servicename)-tcp-in(port)-recv`. For example:
+
+```yaml
+openssh-in22-recv:
+    iptables.append:
+        - table: filter
+        - chain: INPUT
+        - jump: ACCEPT
+        - source: '0/0'
+        - proto: tcp
+        - dport: 22
+        - match: state
+        - connstate: NEW
+        - save: True
+        - require:
+            - sls: iptables
+```
+
+The naming standard for states that enable ports that initiate connections is:
+`(servicename)-tcp-out(port)-send`. For example:
+
+```yaml
+dns-tcp-out53-send:
+      iptables.append:
+          - table: filter
+          - chain: OUTPUT
+          - jump: ACCEPT
+          - destination: '0/0'
+          - dport: 53
+          - match: state
+          - connstate: NEW
+          - proto: tcp
+          - save: True
+```
+
+Connections *to* and *from* `localhost` are always allowed.
+
+## Address overrides and standard interfaces
+This saltshaker expects specific interfaces to be used for either internal or
+external (internet-facing) networking. The interface names are assigned in the
+`local|hetzner.network` pillar states in the `ifassign` states. Commonly the
+network assignments are this:
+
+  * `eth0` is either a local NAT interface (vagrant) or the lowest numbered
+    full network interface.
+  * The lowest numbered full network interface is commonly the "internal
+    interface". It's connected to a non-routed local network between the nodes.
+  * The next numbered full network interface is commonly the "external
+    interface". It's connected to the internet.
+
+Some configurations (like the mailserver states) can expect multiple external
+network interfaces or at least multiple IP addresses to work correctly.
+
+Therefor many states check a configuration pillar for themselves to figure out
+whether they should bind to a specific IP and if not, use the first IP assigned
+to the internal or external network interface. This is usually accomplished by
+the following Jinja2 recipe:
+
+```jinja2
+{{
+# first, check whether we have a configuration pillar for the service,
+# otherwise return an empty dictionary
+pillar.get('authserver', {}).get(
+    # check whether the configuration pillar has a configuration option
+    # 'bind-ip'. If not, return the first IP of the local internal interface
+    'bind-ip',
+    # query the machine's interfaces (ip_interfaces) and use the value returned
+    # by the interface assiged to be internal in the ifassign pillar
+    grains['ip_interfaces'][pillar['ifassign']['internal']][
+        # use the first IP or the IP designated in the network pillar
+        pillar['ifassign'].get('internal-ip-index', 0)|int()
+    ]
+)
+}}
+```
+
+## Reserved top-level domains
+
+This configuration relies on three internal reserved domain suffixes, which
+**must be replaced if they're ever brought up as a TLD on the global DNS**.
+Those are:
+  * `.local` which **must** resolve to an address in 127.0.0.1/24
+  * `.internal` which **must** only be used within the non-publically-routed
+    network (i.e. on an "internal" network interface)
+  * `.consul.service` which is the suffix used by Consul for DNS based
+    "service discovery" (repeat after me: *DNS is not a service discovery
+    protocol*! Use Smartstack instead.)
