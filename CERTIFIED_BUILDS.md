@@ -1,5 +1,5 @@
-Application resources and configuration
-=======================================
+Certifying builds
+=================
 
 The environments configured by this Salt repository configure a cluster that
 tries to avoid four common pitfalls of modern automated server configuration:
