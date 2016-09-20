@@ -38,5 +38,20 @@ authserver-config-{{loop.index}}:
             - file: authserver-config
 {% endfor %}
 
+authserver-tcp-in{{pillar.get('authserver', {}).get('bind-port', 8999)}}-recv:
+    iptables.append:
+        - table: filter
+        - chain: INPUT
+        - jump: ACCEPT
+        - source: '0/0'
+        - destination: {{pillar.get('authserver', {}).get('bind-ip', grains['ip_interfaces'][pillar['ifassign']['internal']][pillar['ifassign'].get('internal-ip-index', 0)|int()])}}
+        - dport: {{pillar.get('authserver', {}).get('bind-port', 8999)}}
+        - match: state
+        - connstate: NEW
+        - proto: tcp
+        - save: True
+        - require:
+            - sls: iptables
+
 # vim: syntax=yaml
 

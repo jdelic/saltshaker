@@ -10,8 +10,9 @@ PORT   | SMARTSTACK | ASSIGNED SERVICE
 6379   |      X     | Redis internal network (shared)
 6380   |            | Redis local cache (not shared)
 8200   |      X     | Vault
+8999   |      X     | authserver
 
-`*` Only internal SMTP relays for transactional mail are routed through 
-SmartStack. The mail servers meant for humans (SMTP relay and SMTP 
+`*` Only internal SMTP relays for transactional mail are routed through
+SmartStack. The mail servers meant for humans (SMTP relay and SMTP
 receiver) are not routed through SmartStack.
 
