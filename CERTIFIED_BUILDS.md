@@ -61,7 +61,7 @@ That said, this is what we do to reach that goal:
 
 This way, **every** build gets it's own pair of credentials, is packaged up and
 sent off to be installed on your servers. Vault's PKI backend stores the CA key
-and has no way of exporting it short of reading it's allocated RAM. The keys to
+and has no way of exporting it short of reading its allocated RAM. The keys to
 unseal the build server Vault can be easily distributed using Vault's built-in
 key management protocols. Finally, a distributed Vault storage backend like
 Amazon S3 makes it easy to deploy new build servers and only few people on your
@@ -71,6 +71,8 @@ and an airgapped box, Yubikey or full-blown HSM you can ensure that no new
 build CAs can be certified without your knowledge.
 
 Your configuration management only knows about the public CA certificates.
+Basically this works, because Vault makes running automated intermediate CAs
+easy and cheap.
 
 Using Vault for resource management
 -----------------------------------
