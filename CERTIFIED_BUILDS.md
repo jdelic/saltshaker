@@ -1,6 +1,10 @@
 Certifying builds
 =================
 
+> All of the ideas presented in this document are supported by the
+> `vaultgetcert` tool that is part of
+> [GoPythonGo](https://github.com/gopythongo/gopythongo).
+
 The environments configured by this Salt repository configure a cluster that
 tries to avoid four common pitfalls of modern automated server configuration:
 
