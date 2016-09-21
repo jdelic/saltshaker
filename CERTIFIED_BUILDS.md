@@ -87,7 +87,8 @@ resources.
 
 In any case it is good practice to also add intermediaries *for each build
 server*, so certificates can be easily revoked if a server gets
-compromised or just removed.
+compromised or just removed. It also automatically leaves an audit trail
+for which server the build was built on.
 
 ```
                    +-------------+  manually managed
