@@ -64,27 +64,27 @@ opensmtpd-config:
             receiver_ip: {{pillar.get('smtp-incoming', {}).get('bind-ip', grains['ip_interfaces'][pillar['ifassign']['external']][pillar['ifassign'].get('external-ip-index', 0)|int()])}}
             relay_ip: {{pillar.get('smtp-outgoing', {}).get('bind-ip', grains['ip_interfaces'][pillar['ifassign']['external-alt']][pillar['ifassign'].get('external-alt-ip-index', 0)|int()])}}
             receiver_certfile: >
-                {%- if pillar['smtp']['receiver']['sslcert'] == 'default' %}
+                {% if pillar['smtp']['receiver']['sslcert'] == 'default' -%}
                     {{pillar['ssl']['default-cert-combined']}}
-                {%- else %}
+                {%- else -%}
                     {{pillar['smtp']['receiver']['sslcert']}}
                 {%- endif %}
             receiver_keyfile: >
-                {%- if pillar['smtp']['receiver']['sslkey'] == 'default' %}
+                {% if pillar['smtp']['receiver']['sslkey'] == 'default' -%}
                     {{pillar['ssl']['default-cert-key']}}
-                {%- else %}
+                {%- else -%}
                     {{pillar['smtp']['receiver']['sslkey']}}
                 {%- endif %}
             relay_certfile: >
-                {%- if pillar['smtp']['relay']['sslcert'] == 'default' %}
+                {% if pillar['smtp']['relay']['sslcert'] == 'default' -%}
                     {{pillar['ssl']['default-cert-combined']}}
-                {%- else %}
+                {%- else -%}
                     {{pillar['smtp']['relay']['sslcert']}}
                 {%- endif %}
             relay_keyfile: >
-                {%- if pillar['smtp']['relay']['sslkey'] == 'default' %}
+                {% if pillar['smtp']['relay']['sslkey'] == 'default' -%}
                     {{pillar['ssl']['default-cert-key']}}
-                {%- else %}
+                {%- else -%}
                     {{pillar['ssl']['relay']['sslkey']}}
                 {%- endif %}
         - require:
