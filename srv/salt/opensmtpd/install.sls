@@ -89,6 +89,7 @@ opensmtpd-config:
                 {%- endif %}
         - require:
             - pkg: opensmtpd
+            - file: opensmtpd-authserver-config
             {% if pillar['smtp']['receiver']['sslcert'] != 'default' %}
             - file: opensmtpd-receiver-sslcert
             - file: opensmtpd-receiver-sslkey
@@ -114,6 +115,17 @@ plusdashfilter:
         - name: opensmtpd-extras-plusdash
         - require:
             - pkgrepo: maurusnet-repo
+
+
+opensmtpd-authserver-config:
+    file.managed:
+        name: /etc/smtpd/postgresql.table.conf
+        source: salt://opensmtpd/postgresql.table.jinja.conf
+        template: jinja
+        context:
+            dbname: {{pillar['authserver']['dbname']}}
+            dbuser: {{pillar['authserver']['dbuser']}}
+            dbpass: {{pillar['dynamicpasswords']['opensmtpd-authserver']}}
 
 
 procmail:
