@@ -119,10 +119,10 @@ plusdashfilter:
 
 opensmtpd-authserver-config:
     file.managed:
-        name: /etc/smtpd/postgresql.table.conf
-        source: salt://opensmtpd/postgresql.table.jinja.conf
-        template: jinja
-        context:
+        - name: /etc/smtpd/postgresql.table.conf
+        - source: salt://opensmtpd/postgresql.table.jinja.conf
+        - template: jinja
+        - context:
             dbname: {{pillar['authserver']['dbname']}}
             dbuser: {{pillar['authserver']['opensmtpd-dbuser']}}
             dbpass: {{pillar['dynamicpasswords']['opensmtpd-authserver']}}
