@@ -25,6 +25,7 @@ authserver-config:
     "BINDPORT": pillar.get('authserver', {}).get('bind-port', 8999),
     "DATABASE_NAME": pillar['authserver']['dbname'],
     "DATABASE_PARENTROLE": pillar['authserver']['dbuser'],
+    "OPENSMTPD_DBUSER": pillar['authserver']['opensmtpd-dbuser'],
 } %}
 
 
@@ -37,6 +38,7 @@ authserver-config-{{loop.index}}:
             - file: maurusnet-ca-root-certificate
             - file: authserver-config
 {% endfor %}
+
 
 authserver-tcp-in{{pillar.get('authserver', {}).get('bind-port', 8999)}}-recv:
     iptables.append:
@@ -54,4 +56,3 @@ authserver-tcp-in{{pillar.get('authserver', {}).get('bind-port', 8999)}}-recv:
             - sls: iptables
 
 # vim: syntax=yaml
-

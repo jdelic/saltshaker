@@ -124,7 +124,7 @@ opensmtpd-authserver-config:
         template: jinja
         context:
             dbname: {{pillar['authserver']['dbname']}}
-            dbuser: {{pillar['authserver']['dbuser']}}
+            dbuser: {{pillar['authserver']['opensmtpd-dbuser']}}
             dbpass: {{pillar['dynamicpasswords']['opensmtpd-authserver']}}
 
 
