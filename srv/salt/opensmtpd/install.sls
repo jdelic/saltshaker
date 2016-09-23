@@ -122,10 +122,16 @@ opensmtpd-authserver-config:
         - name: /etc/smtpd/postgresql.table.conf
         - source: salt://opensmtpd/postgresql.table.jinja.conf
         - template: jinja
+        - makedirs: True
+        - mode: '0600'
+        - user: opensmtpd
+        - group: opensmtpd
         - context:
             dbname: {{pillar['authserver']['dbname']}}
             dbuser: {{pillar['authserver']['opensmtpd-dbuser']}}
             dbpass: {{pillar['dynamicpasswords']['opensmtpd-authserver']}}
+        - require:
+            - pkg: opensmtpd
 
 
 procmail:
