@@ -36,7 +36,7 @@ urls:
     fpmdeps: http://fileserver.maurusnet.test/downloads/ruby/fpm+deps.zip
 
 hashes:
-    concourse: sha256=095be90b5f7baf0d32e72633b7f23dae5f372aa74751186cfb5dcd1b40abafff
+    concourse: sha256=1166d6b7923d54e97e07f8980a2b6a30da39d6120762f2fde65b62691956b5ea
     consul: sha256=b350591af10d7d23514ebaa0565638539900cdb3aaa048f077217c4c46653dd8
     consul-template: sha256=b7561158d2074c3c68ff62ae6fc1eafe8db250894043382fb31f0c78150c513a
     consul-webui: sha256sum=42212089c228a73a0881a5835079c8df58a4f31b5060a3b4ffd4c2497abe3aa8
