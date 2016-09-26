@@ -128,7 +128,8 @@ opensmtpd-authserver-config:
         - group: opensmtpd
         - context:
             dbname: {{pillar['authserver']['dbname']}}
-            dbuser: {{pillar['authserver']['opensmtpd-dbuser']}}
+            # this is difficult to dedupe since pillars can't easily reference other pillars
+            dbuser: opensmtpd-authserver
             dbpass: {{pillar['dynamicpasswords']['opensmtpd-authserver']}}
         - require:
             - pkg: opensmtpd
