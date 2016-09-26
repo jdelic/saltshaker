@@ -3,10 +3,11 @@
 # does not control the table creation / database schema.
 
 {% if pillar['authserver'].get('backend', '') == 'postgresql' %}
+    {% for rolename in pillar['authserver']['stored-procedure-api-users'] %}
 
-authserver-opensmtpd-access:
+authserver-{{rolename}}-spapi-access:
     postgres_user.present:
-            - name: {{pillar['authserver']['opensmtpd-dbuser']}}
+            - name: {{rolename}}
             - createdb: False
             - createroles: False
             - createuser: False
@@ -15,10 +16,11 @@ authserver-opensmtpd-access:
             - inherit: False
             - superuser: False
             - replication: False
-            - password: {{pillar['dynamicpasswords']['opensmtpd-authserver']}}
+            - password: {{pillar['dynamicpasswords'][rolename]}}
             - user: postgres
             - require:
                 - service: data-cluster-service
                 - postgres_database: authserver-postgres
 
+    {% endfor %}
 {% endif %}

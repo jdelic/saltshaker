@@ -62,7 +62,7 @@ base:
         - vault.database  # this state is empty if vault doesn't use a database backend
         - vault.postgres_admin  # gives Vault admin rights for using the postgresql Vault secret backend
         - mn.cas.postgres_database # this state is empty if authserver doesn't use a database backend
-        - mn.cas.postgres_opensmtpd_access # ^ ditto
+        - mn.cas.postgres_spapi_access # ^ ditto
 
     'roles:mail':
         - match: grain

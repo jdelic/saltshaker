@@ -25,7 +25,7 @@ authserver-config:
     "BINDPORT": pillar.get('authserver', {}).get('bind-port', 8999),
     "DATABASE_NAME": pillar['authserver']['dbname'],
     "DATABASE_PARENTROLE": pillar['authserver']['dbuser'],
-    "OPENSMTPD_DBUSER": pillar['authserver']['opensmtpd-dbuser'],
+    "SPAPI_DBUSERS": pillar['authserver']['stored-procedure-api-users'],
 } %}
 
 
