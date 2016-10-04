@@ -5,6 +5,7 @@ base:
         - shared.global
         - shared.saltmine
         - shared.ssl
+        - shared.ssh
         - shared.gpg
 
     'saltmaster.maurusnet.test':

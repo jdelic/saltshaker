@@ -1,14 +1,8 @@
 #!pydsl
 # vim: syntax=python
 
-_sshkeys = {
-    'vagrant': 'AAAAB3NzaC1yc2EAAAABIwAAAQEA6NF8iallvQVp22WDkTkyrtvp9eWW6A8YVr+kz4TjGYe7gHzIw+niNltGEFHzD8+v1I2YJ6oXevct1YeS0o9HZyN1Q9qgCgzUFtdOKLv6IedplqoPkcmF0aYet2PkEDo3MlTBckFXPITAMzF8dJSIFo9D8HfdOV0IAdx4O7PtixWKn5y2hMNG0zQPyUecp4pzC6kivAIhyfHilFR61RGL+GPXQ2MWZWFYbAGjyiYJnAmCP3NOTd0jMZEnDkbUvxhMmBYSdETk1rRgm+R4LOzFUGaHqHDLKLX+FIPKcF96hrucXzcWyLbIbEgE98OHlnVYCzRdK8jlqm8tehUc9c9WhQ== vagrant insecure public key',
-    'symbiont_laptop': 'AAAAB3NzaC1yc2EAAAABJQAAAQBxrpUR4YVj5YoM+uzz325dx90peHDVwv270V1gec5SiaBYKebdmNWbokr3ljvh2VUkuOIP9VWfbqLVrtMpu+mfD61SZI7IuIgS1kr3BCDYI7Oz1zYD04yisECyGb3OLWcmx3ibyhFrOUCYCiKVk78Ou0bydld1rP8EkU4gH/AjBdEFgjYJ7ITxkVCWsrFMEidjmP7u5e6DXPKeeYSDVSXlALaW/65xDZck4Q38iNX3lN3/cKvaPtJL8yBQu83eO4IEwJ1Gui/zKU5qV61A1vc6eUPzZh/XyP/rmZYytQMbyT9uxZiH8dDAlm2/iq9ZJNFnYIAlDbRzegq9iDYGq547 jm laptop key',
-    'symbiont_root': 'AAAAB3NzaC1yc2EAAAABJQAAAQEAjKMpzQVOi7ttoJrPrSZtsXmy2gAnoxQH/2vL6bQESkNe3V9gQmOyi/8RSzo7C8dIxlKkldcotld4FskxZ4M8IrLWOreCd90PZ4cei43TdlAvvSnobEiKw5JoNeyCeogp3jrANiLPx8ht16cCOvHVkBMcGDr4WnOzbzbc08swWUNifNR+wOQjSi1HX1/jXaN/5MJJIIZDuj6tMRa0EWHgkZGupFvkmjhAM9VjKU80ju7roAXivhYKf6gOqHxQbR8ip1JY70jv6A298CMwL6W8LODsilYG70cbn20lobmRHTthfm+muX5ohcCicJtSfYySfbhMaHoHWMjKyzKEFN/i0Q== symbiont root',
-}
 
-
-def create_user(username, groups=None, optional_groups=None, keys=None, password=None,
+def create_user(username, groups=None, optional_groups=None, key_pillars=None, password=None,
                 create_default_group=True, enable_byobu=True, set_bashrc=True):
     _groups = groups or []
     if create_default_group and username not in groups:
@@ -29,9 +23,9 @@ def create_user(username, groups=None, optional_groups=None, keys=None, password
     )
 
     names = []
-    for k in keys:
-        if k in _sshkeys:
-            names.append(_sshkeys[k])
+    for k in key_pillars:
+        if k in __pillar__['sshkeys']:
+            names.append(__pillar__['sshkeys'][k])
 
     if len(names) > 0:
         fn_auth = state(username).ssh_auth.present
