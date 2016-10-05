@@ -32,7 +32,7 @@ urls:
     pyrun35: http://fileserver.maurusnet.test/downloads/exxo/egenix-pyrun-2.2.1-py3.5_ucs4-linux-x86_64.tgz
     qmail: http://fileserver.maurusnet.test/downloads/qmail/qmail-1.03.tar.gz
     terraform: http://fileserver.maurusnet.test/downloads/terraform/terraform_0.7.1_linux_amd64.zip
-    vault: http://fileserver.maurusnet.test/downloads/vault/vault_0.6.1_linux_amd64.zip
+    vault: http://fileserver.maurusnet.test/downloads/vault/vault_0.6.2_linux_amd64.zip
     fpmdeps: http://fileserver.maurusnet.test/downloads/ruby/fpm+deps.zip
 
 hashes:
@@ -47,5 +47,5 @@ hashes:
     pyrun35: sha256sum=d20bd23b3e6485c0122d4752fb713f30229e7c522e4482cc9716afc05413b02e
     qmail: sha256=21ed6c562cbb55092a66197c35c8222b84115d1acab0854fdb1ad1f301626f88
     terraform: sha256=133766ed558af04255490f135fed17f497b9ba1e277ff985224e1287726ab2dc
-    vault: sha256=4f248214e4e71da68a166de60cc0c1485b194f4a2197da641187b745c8d5b8be
+    vault: sha256=f62340a33d8f4e6d71c2bd748ba279d88b5c63ab33a73a36dca402ecbf084f2f
     fpmdeps: sha256=e5fde6513911713c52a9b8833031bcea373809088e367f2ab5524c5a01719b02
