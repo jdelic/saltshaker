@@ -1,7 +1,10 @@
 {
     "service": {
         "name": "postgresql",
-        "tags": ["smartstack:internal", "smartstack:port:{{port}}"],
+        "tags": [
+            "smartstack:internal", "smartstack:port:{{port}}",
+            "haproxy:backend:option:pgsql-check user postgres"
+        ],
         "address": "{{ip}}",
         "port": {{port}}
     }
