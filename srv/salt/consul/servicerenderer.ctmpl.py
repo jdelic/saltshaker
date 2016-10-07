@@ -72,11 +72,8 @@ _args = None
 
 
 class SmartstackService(object):
-    def __init__(self, servicedict, protocol=None, port=None, extport=None, host=None, mode=None):
-        self.protocol = protocol
+    def __init__(self, servicedict, port=None, mode=None):
         self._port = port
-        self.extport = extport
-        self.host = host
         self.mode = mode
         self.svc = servicedict
 
@@ -291,17 +288,9 @@ def parse_smartstack_tags(service):
         if re.match("^smartstack:port:([0-9]+)$", tag):
             sv.port = int(tag.split(":")[2])
 
-        if re.match("^smartstack:extport:([0-9]+)$", tag):
-            sv.extport = int(tag.split(":")[2])
-
-        if tag.startswith("smartstack:host:"):
-            sv.host = tag.split(":")[2]
-
         if tag.startswith("smartstack:mode:"):
             sv.mode = tag.split(":")[2]
 
-        if tag.startswith("smartstack:protocol:"):
-            sv.protocol = tag.split(":")[2]
     return sv
 
 
@@ -390,7 +379,8 @@ def main():
                         help="Only render services that do NOT have tags which match the passed regular "
                              "expressions.")
     parser.add_argument("--smartstack-localip", dest="localip", default="127.0.0.1",
-                        help="Sets the local ip address all smartstack services should bind to. (Default: 127.0.0.1)")
+                        help="Sets the local ip address all smartstack services should bind to. This is passed to the"
+                             "template as the {{localip}} variable. (Default: 127.0.0.1)")
     parser.add_argument("--open-iptables", dest="open_iptables", default=None, choices=["conntrack", "plain"],
                         help="When this is set, this program will append iptables rules to the INPUT and OUTPUT chains "
                              "for all services it renders on the IP provided by --smartstack-localip. 'plain' will set "
