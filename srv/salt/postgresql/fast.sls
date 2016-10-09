@@ -38,8 +38,8 @@ postgresql-step2:
     pkg.installed:
         - pkgs:
             - postgresql
-            - postgresql-9.5
-            - postgresql-client-9.5
+            - postgresql-9.6
+            - postgresql-client-9.6
             - libpq5
         - install_recommends: False
         - fromrepo: jessie-pgdg
@@ -50,10 +50,10 @@ postgresql-step2:
 data-cluster:
     cmd.run:
         - name: >
-            /usr/bin/pg_createcluster -d /data/postgres/9.5/main --locale=en_US.utf-8 -e utf-8 -p 5432
-            9.5 main
+            /usr/bin/pg_createcluster -d /data/postgres/9.6/main --locale=en_US.utf-8 -e utf-8 -p 5432
+            9.6 main
         - runas: root
-        - unless: test -e /data/postgres/9.5/main
+        - unless: test -e /data/postgres/9.6/main
         - require:
             - postgresql-step2
             - data-base-dir
@@ -61,7 +61,7 @@ data-cluster:
 
 data-cluster-config-hba:
     file.append:
-        - name: /etc/postgresql/9.5/main/pg_hba.conf
+        - name: /etc/postgresql/9.6/main/pg_hba.conf
         - text: host all all {{pillar.get('postgresql', {}).get('bind-ip', grains['ip_interfaces'][pillar['ifassign']['internal']][pillar['ifassign'].get('internal-ip-index', 0)|int()])}}/24 md5
         - require:
             - cmd: data-cluster
@@ -69,7 +69,7 @@ data-cluster-config-hba:
 
 data-cluster-config-network:
     file.append:
-        - name: /etc/postgresql/9.5/main/postgresql.conf
+        - name: /etc/postgresql/9.6/main/postgresql.conf
         - text: listen_addresses = '{{pillar.get('postgresql', {}).get('bind-ip', grains['ip_interfaces'][pillar['ifassign']['internal']][pillar['ifassign'].get('internal-ip-index', 0)|int()])}}'
         - require:
             - cmd: data-cluster
@@ -100,7 +100,7 @@ postgresql-ssl-key:
 
 data-cluster-config-sslcert:
     file.replace:
-        - name: /etc/postgresql/9.5/main/postgresql.conf
+        - name: /etc/postgresql/9.6/main/postgresql.conf
         - pattern: ssl_cert_file = '/etc/ssl/certs/ssl-cert-snakeoil.pem'[^\n]*$
         - repl: ssl_cert_file = '{{pillar['postgresql']['sslcert']}}'
         - backup: False
@@ -108,7 +108,7 @@ data-cluster-config-sslcert:
 
 data-cluster-config-sslkey:
     file.replace:
-        - name: /etc/postgresql/9.5/main/postgresql.conf
+        - name: /etc/postgresql/9.6/main/postgresql.conf
         - pattern: ssl_key_file = '/etc/ssl/private/ssl-cert-snakeoil.key'[^\n]*$
         - repl: ssl_key_file = '{{pillar['postgresql']['sslkey']}}'
         - backup: False
@@ -116,7 +116,7 @@ data-cluster-config-sslkey:
 
 data-cluster-config-sslciphers:
     file.replace:
-        - name: /etc/postgresql/9.5/main/postgresql.conf
+        - name: /etc/postgresql/9.6/main/postgresql.conf
         - pattern: "^#ssl_ciphers\\s+=\\s+'HIGH:MEDIUM:\\+3DES:!aNULL'[^\n]*$"
         - repl: ssl_ciphers = 'ECDHE-ECDSA-CHACHA20-POLY1305:ECDHE-RSA-CHACHA20-POLY1305:ECDHE-ECDSA-AES128-GCM-SHA256:ECDHE-RSA-AES128-GCM-SHA256:ECDHE-ECDSA-AES256-GCM-SHA384:ECDHE-RSA-AES256-GCM-SHA384:DHE-RSA-AES128-GCM-SHA256:DHE-RSA-AES256-GCM-SHA384:ECDHE-ECDSA-AES128-SHA256:ECDHE-RSA-AES128-SHA256:ECDHE-ECDSA-AES128-SHA:ECDHE-RSA-AES256-SHA384:ECDHE-RSA-AES128-SHA:ECDHE-ECDSA-AES256-SHA384:ECDHE-ECDSA-AES256-SHA:ECDHE-RSA-AES256-SHA:DHE-RSA-AES128-SHA256:DHE-RSA-AES128-SHA:DHE-RSA-AES256-SHA256:DHE-RSA-AES256-SHA:ECDHE-ECDSA-DES-CBC3-SHA:ECDHE-RSA-DES-CBC3-SHA:EDH-RSA-DES-CBC3-SHA:AES128-GCM-SHA256:AES256-GCM-SHA384:AES128-SHA256:AES256-SHA256:AES128-SHA:AES256-SHA:DES-CBC3-SHA:!DSS'
         - backup: False
@@ -124,8 +124,8 @@ data-cluster-config-sslciphers:
 
 data-cluster-service:
     service.running:
-        - name: postgresql@9.5-main
-        - sig: /usr/lib/postgresql/9.5/bin/postgres
+        - name: postgresql@9.6-main
+        - sig: /usr/lib/postgresql/9.6/bin/postgres
         - enable: True
         - order: 15  # see ORDER.md
         - watch:
