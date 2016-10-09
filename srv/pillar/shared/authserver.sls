@@ -7,5 +7,6 @@ authserver:
 
     stored-procedure-api-users:
         - opensmtpd-authserver
+        - dovecot-authserver
 
 # vim: syntax=yaml
