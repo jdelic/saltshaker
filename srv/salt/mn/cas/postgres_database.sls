@@ -17,6 +17,12 @@ authserver-postgres:
         - user: postgres
         - require:
             - service: data-cluster-service
+    file.accumulated:
+        - name: postgresql-hba-md5users-accumulator
+        - filename: {{pillar['postgresql']['hbafile']}}
+        - text: {{pillar['authserver']['dbname']}} {{pillar['authserver']['dbuser']}}
+        - require_in:
+            - file: postgresql-hba-config
     postgres_database.present:
         - name: {{pillar['authserver']['dbname']}}
         - tablespace: secure
