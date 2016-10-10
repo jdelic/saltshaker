@@ -35,7 +35,7 @@ authserver-config-{{loop.index}}:
         - name: /etc/appconfig/authserver/env/{{envvar}}
         - contents: {{value}}
         - require:
-            - file: maurusnet-ca-root-certificate
+            - file: rootca-certificate
             - file: authserver-config
 {% endfor %}
 

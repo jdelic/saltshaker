@@ -76,17 +76,17 @@ ssl-maincert:
 
 localca-location:
     file.directory:
-        - name: /usr/share/ca-certificates/local/
+        - name: {{pillar['ssl']['localca-location']}}
         - user: root
         - group: root
         - mode: '0755'
         - makedirs: True
 
 
-maurusnet-ca-root-certificate:
+rootca-certificate:
     file.managed:
-        - name: /usr/share/ca-certificates/local/maurusnet-rootca.crt
-        - source: salt://crypto/maurusnet-rootca.crt
+        - name: {{pillar['ssl']['rootca-cert']}}
+        - source: {{pillar['ssl']['rootca-source']}}
         - user: root
         - group: root
         - mode: '0644'
@@ -94,17 +94,18 @@ maurusnet-ca-root-certificate:
             - file: localca-location
 
 
-maurusnet-ca-root-certificate-symlink:
+rootca-certificate-symlink:
     file.symlink:
-        - name: /etc/ssl/certs/maurusnet-rootca.crt
-        - target: /usr/share/ca-certificates/local/maurusnet-rootca.crt
+        - name: {{salt['file.join'](pillar['ssl']['localca-links-location'],
+                                    salt['file.basename'](pillar['ssl']['rootca-cert']))}}
+        - target: {{pillar['ssl']['rootca-cert']}}
         - require:
-            - file: maurusnet-ca-root-certificate
+            - file: rootca-certificate
 
 
 maurusnet-ca-intermediate-certificate:
     file.managed:
-        - name: /usr/share/ca-certificates/local/maurusnet-minionca.crt
+        - name: {{salt['file.join'](pillar['ssl']['localca-location'], 'maurusnet-minionca.crt')}}
         - source: salt://crypto/maurusnet-minionca.crt
         - user: root
         - group: root
@@ -115,25 +116,38 @@ maurusnet-ca-intermediate-certificate:
 
 maurusnet-ca-intermediate-certificate-symlink:
     file.symlink:
-        - name: /etc/ssl/certs/maurusnet-minionca.crt
-        - target: /usr/share/ca-certificates/local/maurusnet-minionca.crt
+        - name: {{salt['file.join'](pillar['ssl']['localca-links-location'], 'maurusnet-minionca.crt')}}
+        - target: {{salt['file.join'](pillar['ssl']['localca-location'], 'maurusnet-minionca.crt')}}
         - require:
             - file: maurusnet-ca-intermediate-certificate
 
 
-add-maurusnet-ca-certificates:
+add-maurusnet-ca-certificate:
     file.append:
         - name: /etc/ca-certificates.conf
         - text: |
-            local/maurusnet-minionca.crt
-            local/maurusnet-rootca.crt
+            {{salt['file.join'](salt['file.basename'](pillar['ssl']['localca-location']), 'maurusnet-minionca.crt')}}
         - require:
             - file: maurusnet-ca-intermediate-certificate
-            - file: maurusnet-ca-root-certificate
+        - onchanges_in:
+            - cmd: recompile-ca-certificates
+
+
+add-rootca-certificate:
+    file.append:
+        - name: /etc/ca-certificates.conf
+        - text: |
+            {{salt['file.join'](salt['file.basename'](pillar['ssl']['localca-location']),
+                                salt['file.basename'](pillar['ssl']['rootca-cert']))}}
+        - require:
+            - file: rootca-certificate
+        - onchanges_in:
+            - cmd: recompile-ca-certificates
+
+
+recompile-ca-certificates:
     cmd.run:
         - name: /usr/sbin/update-ca-certificates
-        - onchanges:
-            - file: add-maurusnet-ca-certificates
 
 
 # vim: syntax=yaml
