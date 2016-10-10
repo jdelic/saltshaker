@@ -16,7 +16,7 @@ ssl:
     # The root CA certificate of the PKI issuing service/SSL server certificates in this environment and where
     # it's stored on the nodes (i.e. where other software can find it). You probably want to issue the actual
     # SSL server certificates from an intermediate CA.
-    rootca-cert: /usr/share/ca-certificates/local/maurusnet-rootca.crt
+    service-rootca-cert: /usr/share/ca-certificates/local/maurusnet-rootca.crt
 
     # certificates listed here will be installed and symlinked in the locations configured above
     install-ca-certs:

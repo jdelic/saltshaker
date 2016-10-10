@@ -35,7 +35,7 @@ authserver-config-{{loop.index}}:
         - name: /etc/appconfig/authserver/env/{{envvar}}
         - contents: {{value}}
         - require:
-            - file: {{pillar['ssl']['rootca-cert']}}
+            - file: {{pillar['ssl']['service-rootca-cert']}}
             - file: authserver-config
 {% endfor %}
 
