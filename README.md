@@ -134,7 +134,7 @@ In `shared.secrets.vault`:
     (see notes on the `.local` and `.internal` domains under "Networking"
     below).
   * `ssl:vault:key` - its private key
-  * `ssl:vault:certchain` - it's CA chain
+  * `ssl:vault:certchain` - its CA chain
   * `ssl:vault:combined` - A concatenation of `:cert` and `:certchain`
   * `ssl:vault:combined-key` - A concatenation of `:cert` and `:certchain` and
     `:key`.
