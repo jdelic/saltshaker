@@ -22,3 +22,8 @@ ssl:
     install-ca-certs:
         - salt://crypto/maurusnet-rootca.crt
         - salt://crypto/maurusnet-minionca.crt
+
+    # Set the following list in a per-environment state
+    # environment-rootca-cert: /usr/share/ca-certificates/local/dev-ca.crt
+    # install-perenv-ca-certs:
+    #    - salt://.../dev-rootca.crt
