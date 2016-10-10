@@ -448,3 +448,28 @@ Those are:
   * `.consul.service` which is the suffix used by Consul for DNS based
     "service discovery" (repeat after me: *DNS is not a service discovery
     protocol*! Use Smartstack instead.)
+
+
+# Configuration
+
+## PostgreSQL
+
+### Accumulators
+
+The PostgreSQL configuration uses two accumulators that record `database user`
+pairs (separated by a single space) for the `pg_hba.conf` file. These
+accumulators are called:
+
+  * `postgresql-hba-md5users-accumulator` and
+  * `postgresql-hba-certusers-accumulator`
+
+Each line appended to them creates a line in `pg_hba.conf` that is hardcoded
+to start with `hostssl`, use the PostgreSQL server's internal network and
+has the authentication method `md5` or `cert`. These accumulators are meant for
+service configuration to automatically add login rights to the database after
+creating database roles for the service.
+
+The `filename` attribute for such `file.accumulated` states *must* be set to
+`{{pillar['postgresql']['hbafile']}}` which is the configuration pillar
+identifying the `pg_hba.conf` file for the installed version of PostgreSQL in
+the default cluster.

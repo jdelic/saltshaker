@@ -16,6 +16,12 @@ concourse-db-role:
         - user: postgres
         - require:
             - data-cluster-service
+    file.accumulated:
+        - name: postgresql-hba-md5users-accumulator
+        - filename: {{pillar['postgresql']['hbafile']}}
+        - text: concourse concourse
+        - require_in:
+            - file: postgresql-hba-config
 
 
 concourse-db:

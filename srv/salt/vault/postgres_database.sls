@@ -26,6 +26,12 @@ vault-postgres:
         - order: 20  # see ORDER.md
         - require:
             - secure-tablespace
+    file.accumulated:
+        - name: postgresql-hba-md5users-accumulator
+        - filename: {{pillar['postgresql']['hbafile']}}
+        - text: {{pillar['vault']['postgres']['dbname']}} {{pillar['vault']['postgres']['dbuser']}}
+        - require_in:
+            - file: postgresql-hba-config
     postgres_database.present:
         - name: {{pillar['vault']['postgres']['dbname']}}
         - tablespace: secure

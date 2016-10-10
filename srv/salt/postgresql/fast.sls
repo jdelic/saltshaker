@@ -59,10 +59,11 @@ data-cluster:
             - data-base-dir
 
 
-data-cluster-config-hba:
-    file.append:
-        - name: /etc/postgresql/9.6/main/pg_hba.conf
-        - text: host all all {{pillar.get('postgresql', {}).get('bind-ip', grains['ip_interfaces'][pillar['ifassign']['internal']][pillar['ifassign'].get('internal-ip-index', 0)|int()])}}/24 md5
+postgresql-hba-config:
+    file.managed:
+        - name: {{pillar['postgresql']['hbafile']}}
+        - source: salt://postgresql/pg_hba.jinja.conf
+        - template: jinja
         - require:
             - cmd: data-cluster
 
@@ -129,7 +130,7 @@ data-cluster-service:
         - enable: True
         - order: 15  # see ORDER.md
         - watch:
-            - file: data-cluster-config-hba
+            - file: postgresql-hba-config
             - file: data-cluster-config-network
 {% if pillar.get("ssl", {}).get("postgresql") %}
             - file: postgresql-ssl-cert
