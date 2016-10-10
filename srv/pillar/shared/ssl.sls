@@ -13,7 +13,12 @@ ssl:
     default-cert-key: /etc/ssl/private/wildcard.key
     default-cert-full: /etc/ssl/private/wildcard-combined-key.crt
 
-    # The root CA certificate of the CA issuing service certificates in this environment and where it's stored
-    # on the nodes (i.e. where other software can find it).
+    # The root CA certificate of the PKI issuing service/SSL server certificates in this environment and where
+    # it's stored on the nodes (i.e. where other software can find it). You probably want to issue the actual
+    # SSL server certificates from an intermediate CA.
     rootca-cert: /usr/share/ca-certificates/local/maurusnet-rootca.crt
-    rootca-source: salt://crypto/maurusnet-rootca.crt
+
+    # certificates listed here will be installed and symlinked in the locations configured above
+    install-ca-certs:
+        - salt://crypto/maurusnet-rootca.crt
+        - salt://crypto/maurusnet-minionca.crt
