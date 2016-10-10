@@ -88,8 +88,10 @@ dovecot-config-{{file}}:
                 {%- else %}
                     {{pillar['imap']['sslkey']}}
                 {%- endif %}
+            sslrootcert: {{pillar['ssl']['service-rootca-cert']}}
         - require:
             - pkg: dovecot
+            - file: {{pillar['ssl']['service-rootca-cert']}}
 {% endfor %}
 
 
