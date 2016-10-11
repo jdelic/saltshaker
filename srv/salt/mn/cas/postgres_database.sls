@@ -33,4 +33,14 @@ authserver-postgres:
         - require:
             - secure-tablespace
             - postgres_user: authserver-postgres
+
+
+authserver-vault:
+    file.accumulated:
+        - name: postgresql-hba-md5users-accumulator
+        - filename: {{pillar['postgresql']['hbafile']}}
+        - text: {{pillar['authserver']['dbname']}} {{pillar['vault']['managed-database-owner']}}
+        - require_in:
+            - file: postgresql-hba-config
+
 {% endif %}
