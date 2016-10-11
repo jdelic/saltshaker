@@ -1,0 +1,18 @@
+# Authentication for SQL users. Included from 10-auth.conf.
+#
+# <doc/wiki/AuthDatabase.SQL.txt>
+
+passdb {
+    driver = sql
+
+    # Path for SQL configuration file, see example-config/dovecot-sql.conf.ext
+    args = /etc/dovecot/dovecot-sql.conf.ext
+}
+
+# If you don't have any user-specific settings, you can avoid the user_query
+# by using userdb static instead of userdb sql
+# <doc/wiki/UserDatabase.Static.txt>
+userdb {
+    driver = static
+    args = uid=virtmail gid=mail home=/secure/email/%d/%u/
+}

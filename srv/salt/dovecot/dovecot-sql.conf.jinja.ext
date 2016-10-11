@@ -1,0 +1,57 @@
+# This file is commonly accessed via passdb {} or userdb {} section in
+# conf.d/auth-sql.conf.ext
+
+# This file is opened as root, so it should be owned by root and mode 0600.
+
+# Database driver: mysql, pgsql, sqlite
+driver = pgsql
+
+# Database connection string. This is driver-specific setting.
+#
+# HA / round-robin load-balancing is supported by giving multiple host
+# settings, like: host=sql1.host.org host=sql2.host.org
+#
+# pgsql:
+#   For available options, see the PostgreSQL documention for the
+#   PQconnectdb function of libpq.
+#   Use maxconns=n (default 5) to change how many connections Dovecot can
+#   create to pgsql.
+connect = host=postgresql.local port=5432 dbname={{dbname}} user={{dbuser}} sslmode=verify-full  \
+          sslrootcert={{sslrootcert}} password={{dbpassword}} \
+          client_encoding=utf8
+
+# Default password scheme.
+#
+# List of supported schemes is in
+# http://wiki2.dovecot.org/Authentication/PasswordSchemes
+#
+default_pass_scheme = SHA256-CRYPT
+
+# passdb query to retrieve the password. It can return fields:
+#   password - The user's password. This field must be returned.
+#   user - user@domain from the database. Needed with case-insensitive lookups.
+#   username and domain - An alternative way to represent the "user" field.
+#
+# The "user" field is often necessary with case-insensitive lookups to avoid
+# e.g. "name" and "nAme" logins creating two different mail directories. If
+# your user and domain names are in separate fields, you can return "username"
+# and "domain" fields instead of "user".
+#
+# The query can also return other fields which have a special meaning, see
+# http://wiki2.dovecot.org/PasswordDatabase/ExtraFields
+#
+# Commonly used available substitutions (see http://wiki2.dovecot.org/Variables
+# for full list):
+#   %u = entire user@domain
+#   %n = user part of user@domain
+#   %d = domain part of user@domain
+#
+# Note that these can be used only as input to SQL query. If the query outputs
+# any of these substitutions, they're not touched. Otherwise it would be
+# difficult to have eg. usernames containing '%' characters.
+#
+# Example:
+#   password_query = SELECT userid AS user, pw AS password \
+#     FROM users WHERE userid = '%u' AND active = 'Y'
+#
+password_query = SELECT user, password FROM authserver_get_credentials('%u');

@@ -1,5 +1,5 @@
 
-{% set conffiles = ['10-auth.conf', '10-ssl.conf', '10-master.conf', '90-plugin.conf', 'auth-mnetcheckpwd.conf.ext'] %}
+{% set conffiles = ['10-auth.conf', '10-ssl.conf', '10-master.conf', '90-plugin.conf', 'auth-sql.conf.ext'] %}
 
 # http://wiki2.dovecot.org/Plugins/Antispam
 dovecot:
@@ -8,6 +8,9 @@ dovecot:
             - dovecot-core
             - dovecot-imapd
             - dovecot-antispam
+            - dovecot-pgsql
+            - dovecot-sieve
+            - dovecot-managesieved
     service:
         - running
         - enable: True
@@ -15,14 +18,12 @@ dovecot:
 {% for file in conffiles %}
             - file: /etc/dovecot/conf.d/{{file}}
 {% endfor %}
-        - require:
-{% for file in conffiles %}
-            - file: /etc/dovecot/conf.d/{{file}}
-{% endfor %}
 {% if pillar['imap']['sslcert'] != 'default' %}
             - file: dovecot-ssl-cert
             - file: dovecot-ssl-key
 {% endif %}
+            - file: dovecot-sql-config
+        - require:
             - file: sa-learn-pipe-script
 
 
@@ -88,11 +89,25 @@ dovecot-config-{{file}}:
                 {%- else %}
                     {{pillar['imap']['sslkey']}}
                 {%- endif %}
-            sslrootcert: {{pillar['ssl']['service-rootca-cert']}}
         - require:
             - pkg: dovecot
             - file: {{pillar['ssl']['service-rootca-cert']}}
 {% endfor %}
+
+
+dovecot-sql-config:
+    file.managed:
+        - name: /etc/dovecot/dovecot-sql.conf.ext
+        - source: salt://dovecot/dovecot-sql.conf.jinja.ext
+        - template: jinja
+        - context:
+            dbname: {{pillar['authserver']['dbname']}}
+            sslrootcert: {{pillar['ssl']['service-rootca-cert']}}
+            dbuser: dovecot-authserver
+            dbpassword: {{pillar['dynamicpasswords']['dovecot-authserver']}}
+        - require:
+            - pkg: dovecot
+            - file: {{pillar['ssl']['service-rootca-cert']}}
 
 
 {% for port in ['143', '993'] %}
