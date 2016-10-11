@@ -296,14 +296,15 @@ def parse_smartstack_tags(service):
 
 def _setup_iptables(services, ip, mode):
     for svc in services:
-        if svc.protocol == "udp":
+        _protocol = svc.tagvalue("smartstack:protocol:")
+        if _protocol == "udp":
             prot = "udp"
             mode = "plain"  # udp can't be used with -m state
-        elif svc.protocol == "http":
+        elif _protocol == "http":
             prot = "tcp"
             if not svc.extport:
                 svc.extport = 80
-        elif svc.protocol == "https":
+        elif _protocol == "https":
             prot = "tcp"
             if not svc.extport:
                 svc.extport = 443
