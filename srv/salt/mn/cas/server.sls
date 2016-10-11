@@ -10,13 +10,9 @@
 #            - file: authserver-config
 
 
-authserver-config:
-    file.directory:
-        - name: /etc/appconfig/authserver
-        - mode: '0755'
-        - makedirs: True
-        - require:
-            - file: appconfig
+authserver-appconfig:
+    appconfig.present:
+        - name: authserver
 
 
 {% set config = {
@@ -36,7 +32,7 @@ authserver-config-{{loop.index}}:
         - contents: {{value}}
         - require:
             - file: {{pillar['ssl']['service-rootca-cert']}}
-            - file: authserver-config
+            - appconfig: authserver-appconfig
 {% endfor %}
 
 
