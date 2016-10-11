@@ -101,7 +101,7 @@ dovecot-sql-config:
         - template: jinja
         - context:
             dbname: {{pillar['authserver']['dbname']}}
-            dbsslrootcert: {{pillar['ssl']['service-rootca-cert']}}
+            sslrootcert: {{pillar['ssl']['service-rootca-cert']}}
             dbuser: dovecot-authserver
             dbpassword: {{pillar['dynamicpasswords']['dovecot-authserver']}}
         - require:
