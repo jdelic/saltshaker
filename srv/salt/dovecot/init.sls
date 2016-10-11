@@ -19,7 +19,7 @@ dovecot:
             - file: dovecot-ssl-cert
             - file: dovecot-ssl-key
 {% endif %}
-            - file: dovecot-sql-config:
+            - file: dovecot-sql-config
         - require:
             - file: sa-learn-pipe-script
 
