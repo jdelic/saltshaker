@@ -22,6 +22,7 @@ authserver-appconfig:
     "DATABASE_NAME": pillar['authserver']['dbname'],
     "DATABASE_PARENTROLE": pillar['authserver']['dbuser'],
     "SPAPI_DBUSERS": pillar['authserver']['stored-procedure-api-users'],
+    "POSTGRESQL_CA": pillar['ssl']['service-rootca-cert'] if pillar['postgresql'].get('issuing-ca-cert', 'default') == 'default' else pillar['postgresql']['issuing-ca-cert'],
 } %}
 
 
