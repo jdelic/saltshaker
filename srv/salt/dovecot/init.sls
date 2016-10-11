@@ -59,6 +59,7 @@ sa-learn-pipe-script:
         - mode: 755
         - require:
             - pkg: spamassassin
+            - pkg: dovecot
             - file: email-storage
 
 
