@@ -62,13 +62,6 @@ sa-learn-pipe-script:
             - file: email-storage
 
 
-# only used if casserver is available
-dovecot-pam:
-    file.managed:
-        - name: /etc/pam.d/dovecot
-        - source: salt://mail/dovecot.pam
-
-
 {% for file in conffiles %}
 dovecot-config-{{file}}:
     file.managed:

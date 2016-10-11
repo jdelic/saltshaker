@@ -67,7 +67,6 @@ base:
     'roles:mail':
         - match: grain
         - dovecot
-        - mn.cas.client  # only use with casserver, otherwise comment out
         - opensmtpd.install
         - mail.nixspam
         - mail.spamassassin
