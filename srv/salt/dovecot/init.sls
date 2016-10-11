@@ -8,6 +8,9 @@ dovecot:
             - dovecot-core
             - dovecot-imapd
             - dovecot-antispam
+            - dovecot-pgsql
+            - dovecot-sieve
+            - dovecot-managesieved
     service:
         - running
         - enable: True

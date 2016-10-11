@@ -18,7 +18,7 @@ driver = pgsql
 #   create to pgsql.
 connect = host=postgresql.local port=5432 dbname={{dbname}} user={{dbuser}} sslmode=verify-full  \
           sslrootcert={{sslrootcert}} password={{dbpassword}} \
-          client-encoding=utf8
+          client_encoding=utf8
 
 # Default password scheme.
 #
