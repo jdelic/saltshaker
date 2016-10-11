@@ -380,7 +380,7 @@ def main():
                              "expressions.")
     parser.add_argument("--smartstack-localip", dest="localip", default="127.0.0.1",
                         help="Sets the local ip address all smartstack services should bind to. This is passed to the"
-                             "template as the {{localip}} variable. (Default: 127.0.0.1)")
+                             "template as the 'localip' variable. (Default: 127.0.0.1)")
     parser.add_argument("--open-iptables", dest="open_iptables", default=None, choices=["conntrack", "plain"],
                         help="When this is set, this program will append iptables rules to the INPUT and OUTPUT chains "
                              "for all services it renders on the IP provided by --smartstack-localip. 'plain' will set "
