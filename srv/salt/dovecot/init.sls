@@ -88,11 +88,25 @@ dovecot-config-{{file}}:
                 {%- else %}
                     {{pillar['imap']['sslkey']}}
                 {%- endif %}
-            sslrootcert: {{pillar['ssl']['service-rootca-cert']}}
         - require:
             - pkg: dovecot
             - file: {{pillar['ssl']['service-rootca-cert']}}
 {% endfor %}
+
+
+dovecot-sql-config:
+    file.managed:
+        - name: /etc/dovecot/dovecot-sql.conf.ext
+        - source: salt://dovecot/dovecot-sql.conf.jinja.ext
+        - template: jinja
+        - context:
+            dbname: {{pillar['authserver']['dbname']}}
+            dbsslrootcert: {{pillar['ssl']['service-rootca-cert']}}
+            dbuser: dovecot-authserver
+            dbpassword: {{pillar['dynamicpasswords']['dovecot-authserver']}}
+        - require:
+            - pkg: dovecot
+            - file: {{pillar['ssl']['service-rootca-cert']}}
 
 
 {% for port in ['143', '993'] %}

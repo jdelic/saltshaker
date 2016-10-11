@@ -16,8 +16,8 @@ driver = pgsql
 #   PQconnectdb function of libpq.
 #   Use maxconns=n (default 5) to change how many connections Dovecot can
 #   create to pgsql.
-connect = host=postgresql.local port=5432 dbname={{dbname}} user={{user}} sslmode=verify-full  \
-          sslrootcert={{sslrootcert}} sslcert={{sslclientcert}} sskey={{sslclientkey}} \
+connect = host=postgresql.local port=5432 dbname={{dbname}} user={{dbuser}} sslmode=verify-full  \
+          sslrootcert={{sslrootcert}} password={{dbpassword}} \
           client-encoding=utf8
 
 # Default password scheme.
