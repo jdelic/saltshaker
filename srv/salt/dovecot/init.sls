@@ -50,6 +50,7 @@ dovecot-ssl-key:
             - file: ssl-key-location
 {% endif %}
 
+
 sa-learn-pipe-script:
     file.managed:
         - name: /usr/local/bin/sa-learn-pipe.sh
