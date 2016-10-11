@@ -472,4 +472,17 @@ creating database roles for the service.
 The `filename` attribute for such `file.accumulated` states *must* be set to
 `{{pillar['postgresql']['hbafile']}}` which is the configuration pillar
 identifying the `pg_hba.conf` file for the installed version of PostgreSQL in
-the default cluster.
+the default cluster. The accumulator must also have a `require_in` directive
+tying it to the `postgresql-hba-config` state delivering the `pg_hba.conf` file
+to the node.
+
+Example:
+
+```yaml
+file.accumulated:
+    - name: postgresql-hba-md5users-accumulator
+    - filename: {{pillar['postgresql']['hbafile']}}
+    - text: {{pillar['vault']['postgres']['dbname']}} {{pillar['vault']['postgres']['dbuser']}}
+    - require_in:
+        - file: postgresql-hba-config
+```
