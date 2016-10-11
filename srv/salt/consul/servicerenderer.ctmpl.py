@@ -296,23 +296,30 @@ def parse_smartstack_tags(service):
 
 def _setup_iptables(services, ip, mode):
     for svc in services:
+        _extport = None
+        if svc.tagvalue("smartstack:extport:"):
+            try:
+                _extport = int(svc.tagvalue("smartstack:extport:"))
+            except ValueError:
+                print("Port number for 'smartstack:extport:' must be an integer not %s" %
+                      svc.tagvalue("smartstack:extport:"), file=sys.stderr)
+                continue
+            
         _protocol = svc.tagvalue("smartstack:protocol:")
         if _protocol == "udp":
             prot = "udp"
             mode = "plain"  # udp can't be used with -m state
         elif _protocol == "http":
             prot = "tcp"
-            if not svc.extport:
-                svc.extport = 80
+            _extport = 80
         elif _protocol == "https":
             prot = "tcp"
-            if not svc.extport:
-                svc.extport = 443
+            _extport = 443
         else:
             prot = "tcp"
 
-        if not svc.extport:
-            print("no external port (extport) for service %s, so not creating iptables rule" % svc.name,
+        if not _extport:
+            print("no external port (smartstack:extport:) for service %s, so not creating iptables rule" % svc.name,
                   file=sys.stderr)
             continue
 
@@ -320,12 +327,12 @@ def _setup_iptables(services, ip, mode):
         output_rule = None
         if mode == "plain":
             input_rule = ["INPUT", "-p", prot, "-m", prot, "-s", "0/0", "-d", "%s/32" % ip, "--dport",
-                          str(svc.extport), "-j", "ACCEPT"]
+                          str(_extport), "-j", "ACCEPT"]
             output_rule = ["OUTPUT", "-p", prot, "-m", prot, "-s", "%s/32" % ip, "-d", "0/0", "--sport",
-                           str(svc.extport), "-j", "ACCEPT"]
+                           str(_extport), "-j", "ACCEPT"]
         elif mode == "conntrack":
             input_rule = ["INPUT", "-p", prot, "-m", "state", "--state", "NEW", "-m", prot, "-s", "0/0",
-                          "-d", "%s/32" % ip, "--dport", str(svc.extport), "-j", "ACCEPT"]
+                          "-d", "%s/32" % ip, "--dport", str(_extport), "-j", "ACCEPT"]
             output_rule = None
 
         if input_rule:
