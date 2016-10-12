@@ -137,4 +137,26 @@ procmail:
             - pkg: opensmtpd
 
 
+{% set spool = [
+    ('/var/spool/smtpd', ('root', 'root', '0755')),
+    ('/var/spool/smtpd/corrupt',  ('opensmtpq', 'root', '0700')),
+    ('/var/spool/smtpd/incoming', ('opensmtpq', 'root', '0700')),
+    ('/var/spool/smtpd/offline', ('root', 'opensmtpq', '0770')),
+    ('/var/spool/smtpd/purge', ('opensmtpq', 'root', '0700')),
+    ('/var/spool/smtpd/queue', ('opensmtpq', 'root', '0700')),
+    ('/var/spool/smtpd/temporary', ('opensmtpq', 'root', '0700')),
+] %}
+
+{% for dir in spool %}
+mailspool-{{dir[0]}}:
+    file.directory:
+        - name: {{dir[0]}}
+        - user: {{dir[1][0]}}
+        - group: {{dir[1][1]}}
+        - mode: {{dir[1][2]}}
+        - require:
+            - pkg: opensmtpd
+        #- require_in:
+        #    - service: opensmtpd-service
+{% endfor %}
 # TODO: add iptables states
