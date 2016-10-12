@@ -11,7 +11,7 @@ opensmtpd:
 opensmtpd-receiver-sslcert:
     file.managed:
         - name: {{pillar['smtp']['receiver']['sslcert']}}
-        - contents_pillar: {{pillar['smtp']['receiver']['sslcert-contents']}}
+        - contents_pillar: {{pillar['smtp']['receiver']['sslcert-content']}}
         - mode: 440
         - user: root
         - group: root
@@ -22,7 +22,7 @@ opensmtpd-receiver-sslcert:
 opensmtpd-receiver-sslkey:
     file.managed:
         - name: {{pillar['smtp']['receiver']['sslkey']}}
-        - contents_pillar: {{pillar['smtp']['receiver']['sslkey-contents']}}
+        - contents_pillar: {{pillar['smtp']['receiver']['sslkey-content']}}
         - mode: 400
         - user: root
         - group: root
@@ -30,11 +30,11 @@ opensmtpd-receiver-sslkey:
             - file: ssl-key-location
 {% endif %}
 
-{% if pillar['smtp']['receiver']['sslcert'] != 'default' %}
+{% if pillar['smtp']['relay']['sslcert'] != 'default' %}
 opensmtpd-relay-sslcert:
     file.managed:
         - name: {{pillar['smtp']['relay']['sslcert']}}
-        - contents_pillar: {{pillar['smtp']['relay']['sslcert-contents']}}
+        - contents_pillar: {{pillar['smtp']['relay']['sslcert-content']}}
         - mode: 440
         - user: root
         - group: root
@@ -45,7 +45,7 @@ opensmtpd-relay-sslcert:
 opensmtpd-relay-sslkey:
     file.managed:
         - name: {{pillar['smtp']['relay']['sslkey']}}
-        - contents_pillar: {{pillar['smtp']['relay']['sslkey-contents']}}
+        - contents_pillar: {{pillar['smtp']['relay']['sslkey-content']}}
         - mode: 400
         - user: root
         - group: root
