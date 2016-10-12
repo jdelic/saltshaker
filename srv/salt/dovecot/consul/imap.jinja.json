@@ -1,0 +1,18 @@
+{
+    "services": [
+         {
+            "name": "mail-imap",
+            "tags": [],
+            "address": "{{ip}}",
+            "port": {{port}}
+            {# TODO: add service checks here? Or add haproxy in front? #}
+        },
+        {
+            "name": "mail-imap-ssl",
+            "tags": [],
+            "address": "{{sslip}}",
+            "port": {{sslport}}
+            {# TODO: add service checks here? Or add haproxy in front? #}
+        }
+    ]
+}

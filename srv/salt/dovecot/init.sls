@@ -127,9 +127,14 @@ dovecot-in{{port}}-recv:
 dovecot-consul-servicedef:
     file.managed:
         - name: /etc/consul/services.d/imap.json
-        - source: salt://dovecot/consul/imap.json
+        - source: salt://dovecot/consul/imap.jinja.json
         - mode: '0644'
         - template: jinja
+        - context:
+            ip: {{pillar['imap'].get('ip', grains['ip_interfaces'][pillar['ifassign']['external']][pillar['ifassign'].get('external-ip-index', 0)|int()])}}
+            port: 143
+            sslip: {{pillar['imap'].get('ip', grains['ip_interfaces'][pillar['ifassign']['external']][pillar['ifassign'].get('external-ip-index', 0)|int()])}}
+            sslport: 993
         - require:
             - file: consul-service-dir
 
