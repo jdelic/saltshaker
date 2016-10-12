@@ -15,22 +15,22 @@ mail-scripts:
 imap:
     sslcert: default  # special value "default" means: "use maincert from ssl.init"
     sslkey: default
-    sslcert-content: ""  # contents_pillar reference if imap should use a different cert
-    sslkey-content: ""
+    sslcert-content: ''  # contents_pillar reference if imap should use a different cert
+    sslkey-content: ''
 
 
 smtp:
     receiver:
         sslcert: default  # see above
         sslkey: default
-        sslcert-content: ""
-        sslkey-content: ""
+        sslcert-content: ''
+        sslkey-content: ''
 
     relay:
         sslcert: default  # see above
         sslkey: default
-        sslcert-content: ""
-        sslkey-content: ""
+        sslcert-content: ''
+        sslkey-content: ''
 
     internal-relay:
         sslcert: {{salt['file.join'](certificate_location, "smtp.local-combined.crt")}}
