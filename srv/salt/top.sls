@@ -21,10 +21,6 @@ base:
         - match: grain
         - consul.server
 
-    'G@roles:secure-database or G@roles:mail':
-        - match: compound
-        - fstab.secure
-
     'roles:master':
         - match: grain
         - compilers
@@ -50,11 +46,12 @@ base:
     'roles:apps':
         - match: grain
         - docker
+        - mn.appconfig
 
     'roles:database':
         - match: grain
-        - fstab.data
         - fstab.secure
+        - fstab.data
         - postgresql.fast
         - redis.cache
         - dev.concourse.postgres_database
@@ -66,12 +63,12 @@ base:
 
     'roles:mail':
         - match: grain
+        - fstab.secure
         - dovecot
         - opensmtpd.install
         - mail.nixspam
         - mail.spamassassin
         - mail.storage
-        - fstab.mailqueue
 
     'roles:pim':
         - match: grain
