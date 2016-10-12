@@ -58,7 +58,7 @@ opensmtpd-relay-sslkey:
 opensmtpd-internal-relay-sslcert:
     file.managed:
         - name: {{pillar['smtp']['internal-relay']['sslcert']}}
-        - contents_piller: {{pillar['smtp']['internal-relay']['sslcert-content']}}
+        - contents_pillar: {{pillar['smtp']['internal-relay']['sslcert-content']}}
         - mode: 440
         - user: root
         - group: root
