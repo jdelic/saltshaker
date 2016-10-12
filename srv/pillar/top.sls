@@ -36,6 +36,7 @@ base:
     'roles:mail':
         - match: grain
         - shared.secrets.ssl
+        - shared.secrets.smtp
 
     'roles:loadbalancer':
         - match: grain
