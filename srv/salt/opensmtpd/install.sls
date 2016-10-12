@@ -177,7 +177,7 @@ procmail:
 
 
 {% set spool = [
-    ('/var/spool/smtpd', ('root', 'root', '0755')),
+    ('/var/spool/smtpd', ('root', 'root', '0711')),
     ('/var/spool/smtpd/corrupt',  ('opensmtpq', 'root', '0700')),
     ('/var/spool/smtpd/incoming', ('opensmtpq', 'root', '0700')),
     ('/var/spool/smtpd/offline', ('root', 'opensmtpq', '0770')),
