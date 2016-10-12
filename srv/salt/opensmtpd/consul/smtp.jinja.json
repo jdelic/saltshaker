@@ -1,0 +1,8 @@
+{
+    "service": {
+        "name": "mail-smtp",
+        "tags": ["smartstack:internal", "smartstack:port:{{relayport}}"],
+        "address": "{{relayip}}",
+        "port": {{relayport}}
+    }
+}

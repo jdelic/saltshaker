@@ -53,6 +53,31 @@ opensmtpd-relay-sslkey:
             - file: ssl-key-location
 {% endif %}
 
+
+{% if pillar['smtp']['internal-relay']['sslcert'] != 'default' %}
+opensmtpd-internal-relay-sslcert:
+    file.managed:
+        - name: {{pillar['smtp']['internal-relay']['sslcert']}}
+        - contents_piller: {{pillar['smtp']['internal-relay']['sslcert-content']}}
+        - mode: 440
+        - user: root
+        - group: root
+        - require:
+            - file: ssl-cert-location
+
+
+opensmtpd-internal-relay-sslkey:
+    file.managed:
+        - name: {{pillar['smtp']['internal-relay']['sslkey']}}
+        - contents_pillar: {{pillar['smtp']['internal-relay']['sslkey-content']}}
+        - mode: 400
+        - user: root
+        - group: root
+        - require:
+            - file: ssl-key-location
+{% endif %}
+
+
 opensmtpd-config:
     file.managed:
         - name: /etc/smtpd.conf
@@ -61,8 +86,10 @@ opensmtpd-config:
         - context:
             receiver_hostname: {{pillar['smtp-incoming']['hostname']}}
             relay_hostname: {{pillar['smtp-outgoing']['hostname']}}
+            internal_relay_hostname: {{pillar['smtp-local-relay']['hostname']}}
             receiver_ip: {{pillar.get('smtp-incoming', {}).get('bind-ip', grains['ip_interfaces'][pillar['ifassign']['external']][pillar['ifassign'].get('external-ip-index', 0)|int()])}}
             relay_ip: {{pillar.get('smtp-outgoing', {}).get('bind-ip', grains['ip_interfaces'][pillar['ifassign']['external-alt']][pillar['ifassign'].get('external-alt-ip-index', 0)|int()])}}
+            internal_relay_ip: {{pillar.get('smtp-local-relay', {}).get('bind-ip', grains['ip_interfaces'][pillar['ifassign']['internal']][pillar['ifassign'].get('internal-ip-index', 0)|int()])}}
             receiver_certfile: >
                 {% if pillar['smtp']['receiver']['sslcert'] == 'default' -%}
                     {{pillar['ssl']['default-cert-combined']}}
@@ -86,6 +113,18 @@ opensmtpd-config:
                     {{pillar['ssl']['default-cert-key']}}
                 {%- else -%}
                     {{pillar['ssl']['relay']['sslkey']}}
+                {%- endif %}
+            internal_relay_certificate: >
+                {% if pillar['smtp']['internal-relay']['sslcert'] == 'default' -%}
+                    {{pillar['ssl']['default-cert-combined']}}
+                {%- else -%}
+                    {{pillar['smtp']['internal-relay']['sslcert']}}
+                {%- endif %}
+            internal_relay_keyfile: >
+                {% if pillar['smtp']['relay']['sslkey'] == 'default' -%}
+                    {{pillar['ssl']['default-cert-key']}}
+                {%- else -%}
+                    {{pillar['ssl']['internal-relay']['sslkey']}}
                 {%- endif %}
         - require:
             - pkg: opensmtpd
@@ -159,4 +198,18 @@ mailspool-{{dir[0]}}:
         #- require_in:
         #    - service: opensmtpd-service
 {% endfor %}
+
+
+opensmtpd-consul:
+    file.managed:
+        - name: /etc/consul/services.d/smtp.json
+        - source: salt://opensmtpd/consul/smtp.jinja.json
+        - mode: '0644'
+        - template: jinja
+        - context:
+            relayip: {{pillar.get('smtp-local-relay', {}).get('bind-ip', grains['ip_interfaces'][pillar['ifassign']['internal']][pillar['ifassign'].get('internal-ip-index', 0)|int()])}}
+            relayport: 25
+        - require:
+            - file: consul-service-dir
+
 # TODO: add iptables states

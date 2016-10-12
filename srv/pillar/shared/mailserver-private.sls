@@ -1,3 +1,4 @@
+{% from "shared/ssl.sls" import certificate_location, secret_key_location %}
 
 emailstore:
     path: /secure/email
@@ -30,6 +31,13 @@ smtp:
         sslkey: default
         sslcert-content: ""
         sslkey-content: ""
+
+    internal-relay:
+        sslcert: {{salt['file.join'](certificate_location, "smtp.local-combined.crt")}}
+        sslkey: {{salt['file.join'](secret_key_location, "smtp.local.key")}}
+        sslcert-content: ssl:smtp-local:combined
+        sslkey-content: ssl:smtp-local:key
+
 
 # vim: syntax=yaml
 
