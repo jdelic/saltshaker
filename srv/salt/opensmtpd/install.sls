@@ -110,13 +110,6 @@ opensmtpd-config:
 #            - email-storage
 
 
-plusdashfilter:
-    pkg.installed:
-        - name: opensmtpd-extras-plusdash
-        - require:
-            - pkgrepo: maurusnet-repo
-
-
 opensmtpd-authserver-config:
     file.managed:
         - name: /etc/smtpd/postgresql.table.conf
