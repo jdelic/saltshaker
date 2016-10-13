@@ -188,6 +188,8 @@ procmail:
             - pkg: opensmtpd
 
 
+# ('/var/spool/smtpd/offline', ('root', 'root', '1777')),       <-- this is correct for opensmtpd 5.7.x
+# ('/var/spool/smtpd/offline', ('root', 'opensmtpq', '0770')),  <-- this is correct for opensmtpd 5.9.x
 {% set spool = [
     ('/var/spool/smtpd', ('root', 'root', '0711')),
     ('/var/spool/smtpd/corrupt',  ('opensmtpq', 'root', '0700')),
