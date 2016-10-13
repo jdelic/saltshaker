@@ -1,3 +1,5 @@
+{% from 'shared/network.sls' import local_domain %}
+
 # Configuration values that should be accessible to all nodes in all environments.
 # This should include configuration values that have no security impact and are widely required to run multiple
 # services and can be reasonably expected to remain constant across all deployments.
@@ -13,3 +15,19 @@ vault:
 postgresql:
     # "default" should be interpreted as "use the ssl:service-rootca-cert"
     pinned-ca-cert: default
+
+
+smtp:
+    # no-authentication email sender
+    smartstack-hostname: smtp.{{local_domain}}
+
+
+vault:
+    smartstack-hostname: vault.{{local_domain}}
+
+
+postgresql:
+    smartstack-hostname: postgresql.{{local_domain}}
+
+
+# vim: syntax=yaml

@@ -302,13 +302,13 @@ initialized (depending on the backend) and
 [unsealed](https://vaultproject.io/docs/concepts/seal.html).
 
 Services, however, **must** access Vault through a local alias installed in
-`/etc/hosts/` configured in the `shared.global:vault:hostname` pillar
-(default: vault.local), because Vault requires SSL and that in turn requires
-a valid SAN, so you have to configure Vault with a SSL certificate for a valid
-hostname. I use my own CA and give Vault a certificate for the SAN
+`/etc/hosts/` configured in the `allenvs.wellknown:vault:smartstack-hostname`
+pillar (default: vault.local), because Vault requires SSL and that in turn
+requires a valid SAN, so you have to configure Vault with a SSL certificate for
+a valid hostname. I use my own CA and give Vault a certificate for the SAN
 `vault.local` and then pin the CA certificate to my own CA's cert in the
-`shared.global:vault:pinned-ca-cert` pillar for added security (no other CA can
-issue such a certificate for any uncompromised host).
+`allenvs.wellknown:vault:pinned-ca-cert` pillar for added security (no other CA
+can issue such a certificate for any uncompromised host).
 
 ## Backends
 You can configure Vault through the `[hosting environment].vault` pillar to use

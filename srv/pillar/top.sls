@@ -3,7 +3,6 @@ base:
     # assign global shared config to every node
     '*':
         - allenvs.wellknown
-        - shared.smartstack
         - shared.saltmine
         - shared.ssl
         - shared.ssh
