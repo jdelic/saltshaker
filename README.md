@@ -502,7 +502,9 @@ development of this repository and is therefor needed to remain consistent.
   * If you find yourself repeating the same states over and over (like creating
     an entry in `/etc/appconfig/` for each deployed application, write a custom
     Salt state (see `srv/_states/` for examples)
-  * aside from MarkDown documentation, lines are up to 120 characters long.
+  * aside from MarkDown documentation, lines are up to 120 characters long
+    unless linebreaks are impossible for technical reasons (long URLs,
+    configuration files that don't support line breaks).
   * When breaking lines, search for "natural" points for well-readable line
     breaks. In natural language these usually are after punctuation. In code,
     they are usually found after parentheses in function calls or other code
@@ -514,12 +516,13 @@ development of this repository and is therefor needed to remain consistent.
   * `.sls` yaml files should end with a vim modeline `# vim: syntax=yaml`.
 
 ### Documentation style
-
 Use MarkDown formatted files.
 
   * formatted to 80 columns.
   * List markers are indented 2 spaces leading to a text indent of 4 (bullets)
     or 5 (numbers) on the first level.
+  * Text starts right below a headline unless it's a first level headline *or*
+    the paragraph starts off with a list.
 
 ## State structure
 
@@ -557,3 +560,10 @@ Use MarkDown formatted files.
     makes sense to only override specific values in the pillars for a specific
     environment), *but* is not assigned to all nodes because its contents may
     be security critical or simply only needed on a single role.
+
+### SSL configuration in Pillars
+SSL configuration should use the well-known keys `sslcert`, `sslkey` and if
+supported, clients should have access to a `pinned-ca-cert` pillar so the CA
+can be verified. `sslcert` and `sslkey` should support the magic value
+`default` which should make the states render configuration files referring to
+the pillars `ssl:default-cert(-combined)` and `ssl:default-cert-key`.

@@ -16,6 +16,8 @@ vault:
 
     kvpath: 'vault/'  # see https://vaultproject.io/docs/config/index.html
 
+    # 'default' should be interpreted as a reference to the default certificates in ssl.sls
+    # but Vault cannot operate without SSL
     sslcert: {{salt['file.join'](certificate_location, 'vault.crt')}}
     sslkey: {{salt['file.join'](secret_key_location, 'vault.key')}}
 

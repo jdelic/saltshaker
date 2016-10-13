@@ -71,7 +71,11 @@ postgresql-hba-config:
 data-cluster-config-network:
     file.append:
         - name: /etc/postgresql/9.6/main/postgresql.conf
-        - text: listen_addresses = '{{pillar.get('postgresql', {}).get('bind-ip', grains['ip_interfaces'][pillar['ifassign']['internal']][pillar['ifassign'].get('internal-ip-index', 0)|int()])}}'
+        - text: listen_addresses = '{{pillar.get('postgresql', {}).get(
+            'bind-ip', grains['ip_interfaces'][pillar['ifassign']['internal']][pillar['ifassign'].get(
+                'internal-ip-index', 0
+            )|int()]
+        )}}'
         - require:
             - cmd: data-cluster
 
@@ -97,13 +101,16 @@ postgresql-ssl-key:
         - contents_pillar: ssl:postgresql:key
         - require:
             - file: ssl-key-location
+{% endif %}
 
-
+{% if "sslcert" in pillar["postgresql"] %}
 data-cluster-config-sslcert:
     file.replace:
         - name: /etc/postgresql/9.6/main/postgresql.conf
         - pattern: ssl_cert_file = '/etc/ssl/certs/ssl-cert-snakeoil.pem'[^\n]*$
-        - repl: ssl_cert_file = '{{pillar['postgresql']['sslcert']}}'
+        - repl: ssl_cert_file = '{{pillar['postgresql']['sslcert']
+            if pillar['postgresql'].get('sslcert', 'default') != 'default' else
+                pillar['ssl']['default-cert-combined']}}'
         - backup: False
 
 
@@ -111,7 +118,8 @@ data-cluster-config-sslkey:
     file.replace:
         - name: /etc/postgresql/9.6/main/postgresql.conf
         - pattern: ssl_key_file = '/etc/ssl/private/ssl-cert-snakeoil.key'[^\n]*$
-        - repl: ssl_key_file = '{{pillar['postgresql']['sslkey']}}'
+        - repl: ssl_key_file = '{{pillar['postgresql']['sslkey']
+            if pillar['postgresql'].get('sslcert', 'default') != 'default' else pillar['ssl']['default-cert-key']}}'
         - backup: False
 
 
@@ -119,7 +127,14 @@ data-cluster-config-sslciphers:
     file.replace:
         - name: /etc/postgresql/9.6/main/postgresql.conf
         - pattern: "^#ssl_ciphers\\s+=\\s+'HIGH:MEDIUM:\\+3DES:!aNULL'[^\n]*$"
-        - repl: ssl_ciphers = 'ECDHE-ECDSA-CHACHA20-POLY1305:ECDHE-RSA-CHACHA20-POLY1305:ECDHE-ECDSA-AES128-GCM-SHA256:ECDHE-RSA-AES128-GCM-SHA256:ECDHE-ECDSA-AES256-GCM-SHA384:ECDHE-RSA-AES256-GCM-SHA384:DHE-RSA-AES128-GCM-SHA256:DHE-RSA-AES256-GCM-SHA384:ECDHE-ECDSA-AES128-SHA256:ECDHE-RSA-AES128-SHA256:ECDHE-ECDSA-AES128-SHA:ECDHE-RSA-AES256-SHA384:ECDHE-RSA-AES128-SHA:ECDHE-ECDSA-AES256-SHA384:ECDHE-ECDSA-AES256-SHA:ECDHE-RSA-AES256-SHA:DHE-RSA-AES128-SHA256:DHE-RSA-AES128-SHA:DHE-RSA-AES256-SHA256:DHE-RSA-AES256-SHA:ECDHE-ECDSA-DES-CBC3-SHA:ECDHE-RSA-DES-CBC3-SHA:EDH-RSA-DES-CBC3-SHA:AES128-GCM-SHA256:AES256-GCM-SHA384:AES128-SHA256:AES256-SHA256:AES128-SHA:AES256-SHA:DES-CBC3-SHA:!DSS'
+        - repl: >
+            ssl_ciphers = 'ECDHE-ECDSA-CHACHA20-POLY1305:ECDHE-RSA-CHACHA20-POLY1305:ECDHE-ECDSA-AES128-GCM-SHA256:
+            ECDHE-RSA-AES128-GCM-SHA256:ECDHE-ECDSA-AES256-GCM-SHA384:ECDHE-RSA-AES256-GCM-SHA384:
+            DHE-RSA-AES128-GCM-SHA256:DHE-RSA-AES256-GCM-SHA384:ECDHE-ECDSA-AES128-SHA256:ECDHE-RSA-AES128-SHA256:
+            ECDHE-ECDSA-AES128-SHA:ECDHE-RSA-AES256-SHA384:ECDHE-RSA-AES128-SHA:ECDHE-ECDSA-AES256-SHA384:
+            ECDHE-ECDSA-AES256-SHA:ECDHE-RSA-AES256-SHA:DHE-RSA-AES128-SHA256:DHE-RSA-AES128-SHA:DHE-RSA-AES256-SHA256:
+            DHE-RSA-AES256-SHA:ECDHE-ECDSA-DES-CBC3-SHA:ECDHE-RSA-DES-CBC3-SHA:EDH-RSA-DES-CBC3-SHA:AES128-GCM-SHA256:
+            AES256-GCM-SHA384:AES128-SHA256:AES256-SHA256:AES128-SHA:AES256-SHA:DES-CBC3-SHA:!DSS'
         - backup: False
 {% endif %}
 
@@ -149,7 +164,11 @@ postgresql-in{{pillar.get('postgresql', {}).get('bind-port', 5432)}}-recv:
         - proto: tcp
         - source: '0/0'
         - in-interface: {{pillar['ifassign']['internal']}}
-        - destination: {{pillar.get('postgresql', {}).get('bind-ip', grains['ip_interfaces'][pillar['ifassign']['internal']][pillar['ifassign'].get('internal-ip-index', 0)|int()])}}
+        - destination: {{pillar.get('postgresql', {}).get(
+            'bind-ip', grains['ip_interfaces'][pillar['ifassign']['internal']][pillar['ifassign'].get(
+                'internal-ip-index', 0
+            )|int()]
+        )}}
         - dport: {{pillar.get('postgresql', {}).get('bind-port', 5432)}}
         - match: state
         - connstate: NEW
@@ -165,7 +184,11 @@ postgresql-servicedef:
         - mode: '0644'
         - template: jinja
         - context:
-            ip: {{pillar.get('postgresql', {}).get('bind-ip', grains['ip_interfaces'][pillar['ifassign']['internal']][pillar['ifassign'].get('internal-ip-index', 0)|int()])}}
+            ip: {{pillar.get('postgresql', {}).get(
+                'bind-ip', grains['ip_interfaces'][pillar['ifassign']['internal']][pillar['ifassign'].get(
+                    'internal-ip-index', 0
+                )|int()]
+            )}}
             port: {{pillar.get('postgresql', {}).get('bind-port', 5432)}}
         - require:
             - cmd: data-cluster
