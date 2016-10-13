@@ -20,7 +20,7 @@ inputrc:
 smartstack-hostnames:
     file.append:
         - name: /etc/hosts
-        - text: 127.0.0.1    {% for alias in local_aliases %}alias {% endfor %}
+        - text: 127.0.0.1    {% for alias in local_aliases %}{{alias}} {% endfor %}
 
 
 # set up vault command-line client configuration as a convenience in /etc/profile.d
