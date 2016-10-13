@@ -1,5 +1,6 @@
 
-{% set conffiles = ['10-auth.conf', '10-ssl.conf', '10-master.conf', '90-plugin.conf', 'auth-sql.conf.ext'] %}
+{% set conffiles = ['10-auth.conf', '10-ssl.conf', '10-master.conf', '10-mail.conf', '90-plugin.conf',
+                    'auth-sql.conf.ext'] %}
 
 # http://wiki2.dovecot.org/Plugins/Antispam
 dovecot:
