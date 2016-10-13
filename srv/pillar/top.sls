@@ -2,11 +2,13 @@
 base:
     # assign global shared config to every node
     '*':
-        - shared.global
+        - allenvs.wellknown
+        - shared.smartstack
         - shared.saltmine
         - shared.ssl
         - shared.ssh
         - shared.gpg
+        - shared.network
 
     'saltmaster.maurusnet.test':
         - local.vault
@@ -53,7 +55,7 @@ base:
         - hetzner.dns
         - hetzner.network
         - hetzner.consul
-        - hetzner.hostnames
+        - hetzner.buildserver
         - shared.urls
 
     # the minion ID starting with "cic" is the main PIM and mail server at Hetzner
@@ -68,7 +70,7 @@ base:
         - local.dns
         - local.network
         - local.consul
-        - local.hostnames
+        - local.buildserver
         - local.url_overrides
         # - shared.urls
 

@@ -1,3 +1,4 @@
+# look at local.mailserver-config for a documented full-fledged example
 
 smtp-incoming:
     hostname: cic.maurus.net

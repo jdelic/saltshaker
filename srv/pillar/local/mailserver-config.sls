@@ -14,8 +14,8 @@ smtp-outgoing:
 
 
 # CAREFUL: This is an open relay. Never use 'bind-ip' to bind this to an internet-facing IP!
-smtp-local-relay:
-    hostname: smtp.local
+# By default, this is bound to the internal network interface from the ifassign pillar
+smtp-local-relay: {}
     # bind-ip: 123.123.123.123   # override interface bindings to bind to a specific IP
 
 

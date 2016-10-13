@@ -486,3 +486,74 @@ file.accumulated:
     - require_in:
         - file: postgresql-hba-config
 ```
+
+
+# Contributing
+
+The following style is extraced from what has informally followed during
+development of this repository and is therefor needed to remain consistent.
+
+## General code style
+
+  * Indents are 4 spaces
+  * Top-level `yaml` elements have two newlines between them (just like Python
+    PEP8)
+  * Each file has a newline at the end of its last line
+  * If you find yourself repeating the same states over and over (like creating
+    an entry in `/etc/appconfig/` for each deployed application, write a custom
+    Salt state (see `srv/_states/` for examples)
+  * aside from MarkDown documentation, lines are up to 120 characters long.
+  * When breaking lines, search for "natural" points for well-readable line
+    breaks. In natural language these usually are after punctuation. In code,
+    they are usually found after parentheses in function calls or other code
+    constructs, while indenting the next line, or at the end of statements.
+
+### yaml code style
+
+  * String values are in single quotes `'xyz'`
+  * `.sls` yaml files should end with a vim modeline `# vim: syntax=yaml`.
+
+### Documentation style
+
+Use MarkDown formatted files.
+
+  * formatted to 80 columns.
+  * List markers are indented 2 spaces leading to a text indent of 4 (bullets)
+    or 5 (numbers) on the first level.
+
+## State structure
+
+  * Jinja template files get the file extension `.jinja.[original extension]`
+  * Configuration files should be stored near the states configuring the
+    service
+  * Only use explicit state ordering when in line with [ORDER.md}(ORDER.md).
+  * Put states configuring services in the top-level `srv/salt/` folder then
+    create a single state namespace with configuration for specific
+    organizations (like the `mn` state).
+
+## Pillar structure
+
+  * Each state should get its configuration from a pillar.
+  * Reuse configuration values through Jinja's
+    `{% from 'file' import variable %}` since Salt does not support referencing
+    pillars from pillars yet.
+  * Use `{{salt['file.join'}(...)}}`, `{{salt['file.basename'}(...)}}`,
+    `{{salt['file.dirname'}(...)}}` to construct paths from imported variables.
+  * Pillars may import variables from things in `srv/pillars/shared/`,
+    `srv/pillar/allenvs/` or from their local environment. No cross-environment
+    imports.
+  * Each deployment environment ("vagrant", "hetzner", "digialocean", "ec2" are
+    all examples) get their own namespace in `srv/pillars/`.
+  * Each environment has a special state called `*/wellknown.sls` that is
+    assigned to *all* nodes in that environment for shared configuration values
+    that can reasonably be expected to stay the same across all nodes, are not
+    security critical and are needed or expected to be needed to run more than
+    one service or application.
+  * Pillars that are not security critical and are needed for multiple services
+    or applications and can reasonably be expected to stay the same across all
+    environments go into `allenvs.wellknown`.
+  * `srv/pillar/shared/` is the namespace for configuration that is shared
+    across environments (or can reasonably expected to be the same, so that it
+    makes sense to only override specific values in the pillars for a specific
+    environment), *but* is not assigned to all nodes because its contents may
+    be security critical or simply only needed on a single role.

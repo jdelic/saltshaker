@@ -1,7 +1,8 @@
+# importable variables for reuse
+{% set iface_internal = 'eth1' %}
+{% set iface_external = 'eth2' %}
+{% set iface_external2 = 'eth3' %}
 
-{% set iface_internal = "eth1" %}
-{% set iface_external = "eth2" %}
-{% set iface_external2 = "eth3" %}
 
 ifassign:
     internal: {{iface_internal}}
@@ -21,4 +22,3 @@ mine_functions:
 
 
 # vim: syntax=yaml
-

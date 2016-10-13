@@ -1,10 +1,11 @@
+{% from 'shared/ssl.sls' import localca_location, certificate_location, secret_key_location %}
 #
 # This pillar configures the Vault secret storage system which is installed on servers with the
 # "vaultserver" role.
 # https://vaultproject.io/docs/config/index.html
 #
 
-# look at local.vault for a full-fledged example config!
+# look at local.vault for a full-fledged example config pillar!
 
 vault:
     backend: s3
@@ -12,8 +13,8 @@ vault:
 
     kvpath: 'vault/'  # see https://vaultproject.io/docs/config/index.html
 
-    sslcert: /etc/ssl/local/vault.crt
-    sslkey: /etc/ssl/private/vault.key
+    sslcert: {{salt['file.join'](certificate_location, 'vault.crt')}}
+    sslkey: {{salt['file.join'](secret_key_location, 'vault.key')}}
 
     s3:
         bucket: vault

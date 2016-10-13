@@ -86,10 +86,22 @@ opensmtpd-config:
         - context:
             receiver_hostname: {{pillar['smtp-incoming']['hostname']}}
             relay_hostname: {{pillar['smtp-outgoing']['hostname']}}
-            internal_relay_hostname: {{pillar['smtp-local-relay']['hostname']}}
-            receiver_ip: {{pillar.get('smtp-incoming', {}).get('bind-ip', grains['ip_interfaces'][pillar['ifassign']['external']][pillar['ifassign'].get('external-ip-index', 0)|int()])}}
-            relay_ip: {{pillar.get('smtp-outgoing', {}).get('bind-ip', grains['ip_interfaces'][pillar['ifassign']['external-alt']][pillar['ifassign'].get('external-alt-ip-index', 0)|int()])}}
-            internal_relay_ip: {{pillar.get('smtp-local-relay', {}).get('bind-ip', grains['ip_interfaces'][pillar['ifassign']['internal']][pillar['ifassign'].get('internal-ip-index', 0)|int()])}}
+            internal_relay_hostname: {{pillar['smtp']['smartstack-hostname']}}
+            receiver_ip: {{pillar.get('smtp-incoming', {}).get(
+                'bind-ip', grains['ip_interfaces'][pillar['ifassign']['external']][pillar['ifassign'].get(
+                    'external-ip-index', 0
+                )|int()]
+            )}}
+            relay_ip: {{pillar.get('smtp-outgoing', {}).get(
+                'bind-ip', grains['ip_interfaces'][pillar['ifassign']['external-alt']][pillar['ifassign'].get(
+                    'external-alt-ip-index', 0
+                )|int()]
+            )}}
+            internal_relay_ip: {{pillar.get('smtp-local-relay', {}).get(
+                'bind-ip', grains['ip_interfaces'][pillar['ifassign']['internal']][pillar['ifassign'].get(
+                    'internal-ip-index', 0
+                )|int()]
+            )}}
             receiver_certfile: >
                 {% if pillar['smtp']['receiver']['sslcert'] == 'default' -%}
                     {{pillar['ssl']['default-cert-combined']}}
@@ -139,14 +151,14 @@ opensmtpd-config:
             {% endif %}
 
 
-#opensmtpd-service:
-#    service.running:
-#        - name: opensmtpd
-#        - sig: smtpd
-#        - enable: True
-#        - require:
-#            - file: opensmtpd-config
-#            - email-storage
+opensmtpd-service:
+    service.running:
+        - name: opensmtpd
+        - sig: smtpd
+        - enable: True
+        - require:
+            - file: opensmtpd-config
+            - email-storage
 
 
 opensmtpd-authserver-config:
@@ -195,8 +207,8 @@ mailspool-{{dir[0]}}:
         - mode: {{dir[1][2]}}
         - require:
             - pkg: opensmtpd
-        #- require_in:
-        #    - service: opensmtpd-service
+        - require_in:
+            - service: opensmtpd-service
 {% endfor %}
 
 
@@ -207,7 +219,11 @@ opensmtpd-consul:
         - mode: '0644'
         - template: jinja
         - context:
-            relayip: {{pillar.get('smtp-local-relay', {}).get('bind-ip', grains['ip_interfaces'][pillar['ifassign']['internal']][pillar['ifassign'].get('internal-ip-index', 0)|int()])}}
+            relayip: {{pillar.get('smtp-local-relay', {}).get(
+                'bind-ip', grains['ip_interfaces'][pillar['ifassign']['internal']][pillar['ifassign'].get(
+                    'internal-ip-index', 0
+                )|int()]
+            )}}
             relayport: 25
         - require:
             - file: consul-service-dir

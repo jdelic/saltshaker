@@ -1,9 +1,8 @@
-postgresql:
-    sslcert: /etc/ssl/local/postgresql.crt
-    sslkey: /etc/ssl/private/postgresql.key
+{% from 'shared/ssl.sls' import certificate_location, secret_key_location %}
 
-    # "default" should be interpreted as "use the ssl:service-rootca-cert"
-    issuing-ca-cert: default
+postgresql:
+    sslcert: {{salt['file.join'](certificate_location, 'postgresql.crt')}}
+    sslkey: {{salt['file.join'](secret_key_location, 'postgresql.key')}}
 
     hbafile: /etc/postgresql/9.6/main/pg_hba.conf
 

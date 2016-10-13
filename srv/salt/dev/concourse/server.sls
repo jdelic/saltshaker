@@ -94,7 +94,7 @@ concourse-server:
                 --tsa-host-key /etc/concourse/private/host_key.pem
                 --tsa-authorized-keys /etc/concourse/authorized_worker_keys
                 --postgres-data-source postgres://concourse:{{pillar['dynamicpasswords']['concourse-db']}}@127.0.0.1:5432/concourse
-                --external-url {{pillar['hostnames']['ci']['protocol']}}://{{pillar['hostnames']['ci']['domain']}}
+                --external-url {{pillar['ci']['protocol']}}://{{pillar['ci']['hostname']}}
                 --peer-url http://{{pillar.get('concourse-server', {}).get('atc-ip', grains['ip_interfaces'][pillar['ifassign']['internal']][pillar['ifassign'].get('internal-ip-index', 0)|int()])}}:{{pillar.get('concourse-server', {}).get('atc-port', 8080)}}
         - use:
             - require-concourse-keys
@@ -160,7 +160,7 @@ concourse-servicedef-atc:
             mode: http
             ip: {{pillar.get('concourse-server', {}).get('atc-ip', grains['ip_interfaces'][pillar['ifassign']['internal']][pillar['ifassign'].get('internal-ip-index', 0)|int()])}}
             port: {{pillar.get('concourse-server', {}).get('atc-port', 8080)}}
-            hostname: {{pillar['hostnames']['ci']['domain']}}
+            hostname: {{pillar['ci']['hostname']}}
         - require:
             - file: concourse-server
             - file: consul-service-dir

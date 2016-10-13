@@ -1,8 +1,8 @@
 # importable variables
-{% set certificate_location = "/etc/ssl/local" %}
-{% set secret_key_location = "/etc/ssl/private" %}
-{% set localca_links_location = "/etc/ssl/certs" %}
-{% set localca_location = "/usr/share/ca-certificates/local" %}
+{% set certificate_location = '/etc/ssl/local' %}
+{% set secret_key_location = '/etc/ssl/private' %}
+{% set localca_links_location = '/etc/ssl/certs' %}
+{% set localca_location = '/usr/share/ca-certificates/local' %}
 
 # common ssl path config
 # all certificate secrets are in the saltshaker-secrets git submodule
@@ -14,15 +14,15 @@ ssl:
 
     # the following defaults should be used by each service which doesn't
     # require or is configured with its own cert.
-    default-cert: /etc/ssl/local/wildcard.crt
-    default-cert-combined: /etc/ssl/local/wildcard-combined.crt
-    default-cert-key: /etc/ssl/private/wildcard.key
-    default-cert-full: /etc/ssl/private/wildcard-combined-key.crt
+    default-cert: {{salt['file.join'](certificate_location, 'wildcard.crt')}}
+    default-cert-combined: {{salt['file.join'](certificate_location, 'wildcard-combined.crt')}}
+    default-cert-key: {{salt['file.join'](secret_key_location, 'wildcard.key')}}
+    default-cert-full: {{salt['file.join'](secret_key_location, 'wildcard-combined-key.crt')}}
 
     # The root CA certificate of the PKI issuing service/SSL server certificates in this environment and where
     # it's stored on the nodes (i.e. where other software can find it). You probably want to issue the actual
     # SSL server certificates from an intermediate CA.
-    service-rootca-cert: /usr/share/ca-certificates/local/maurusnet-rootca.crt
+    service-rootca-cert: {{salt['file.join'](localca_location, 'maurusnet-rootca.crt')}}
 
     # certificates listed here will be installed and symlinked in the locations configured above
     install-ca-certs:

@@ -5,31 +5,29 @@
  * write docs for placeholders in README.md
  * all PHP should run through php-fpm behind Apache2
  * add Nagios/Icinca/xyz monitoring via consul-template
- * add a consul-template cmd.wait watcher state for haproxy.internal that deletes the servicerenderer
-   if the command-line parameters change, because consul-template will not do it by itself (has this 
-   been fixed upstream?)
+ * add a consul-template cmd.wait watcher state for haproxy.internal that
+   deletes the servicerenderer if the command-line parameters change, because
+   consul-template will not do it by itself (has this been fixed upstream?)
  * add ssmtp to all servers that don't run opensmtpd
- * integrate opensmtpd
  * switch Dovecot from maildir to sdbox
- * add PowerDNS states to implement a fully owned DNSSEC zone (i.e. no trust delegation to third parties)
+ * add PowerDNS states to implement a fully owned DNSSEC zone (i.e. no trust
+   delegation to third parties)
 
 
 # Ponder
 
- * front consul through dnsmasq and make /etc/resolv.conf point to local dnsmasq? What about IPv6?
+ * front consul through dnsmasq and make /etc/resolv.conf point to local
+   dnsmasq? What about IPv6?
 
- * Docker containers should probably only expose HTTP to be reverse proxied through haproxy
-     * how does consul discover docker services? -> docker registrator https://github.com/gliderlabs/registrator
-     * how do php-fpm applications gain a HTTP server inside of a docker container? multi-process?
+ * Docker containers should probably only expose HTTP to be reverse proxied
+   through haproxy
+     * how does consul discover docker services? -> docker registrator
+       https://github.com/gliderlabs/registrator
+     * how do php-fpm applications gain a HTTP server inside of a docker
+       container? multi-process?
 
-  * Fix consul to enable ACLs and then use ACL tokens to secure write access on the cluster from the agents?
-    Does that make sense? Is it overkill? How can you bootstrap this from Salt?
-    
+  * Fix consul to enable ACLs and then use ACL tokens to secure write access on
+    the cluster from the agents? Does that make sense? Is it overkill? How can
+    you bootstrap this from Salt?
+
   * should `postgresql.secure` be its own cluster on port 5433?
-
-
-# Whenever
-
- * Fix vault.mysql.database state to use salt.network.interface function to load the IP and netmask of the
-   internal interface and calculate the correct network string for the MySQL GRANT command so we don't allow
-   connections from just about anywhere.
