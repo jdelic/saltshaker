@@ -10,24 +10,18 @@ vault:
     managed-database-owner: vaultadmin
     # "default" should be interpreted as "use the ssl:service-rootca-cert"
     pinned-ca-cert: default
+    smartstack-hostname: vault.{{local_domain}}
 
 
 postgresql:
     # "default" should be interpreted as "use the ssl:service-rootca-cert"
     pinned-ca-cert: default
+    smartstack-hostname: postgresql.{{local_domain}}
 
 
 smtp:
     # no-authentication email sender
     smartstack-hostname: smtp.{{local_domain}}
-
-
-vault:
-    smartstack-hostname: vault.{{local_domain}}
-
-
-postgresql:
-    smartstack-hostname: postgresql.{{local_domain}}
 
 
 # vim: syntax=yaml
