@@ -104,7 +104,11 @@ vault-config:
         - user: {{vault_user}}
         - group: {{vault_group}}
         - context:
-            ip: {{pillar.get('vault', {}).get('bind-ip', grains['ip_interfaces'][pillar['ifassign']['internal']][pillar['ifassign'].get('internal-ip-index', 0)|int()])}}
+            ip: {{pillar.get('vault', {}).get('bind-ip',
+                    grains['ip_interfaces'][pillar['ifassign']['internal']][pillar['ifassign'].get(
+                        'internal-ip-index', 0
+                    )|int()]
+                )}}
             port: {{pillar.get('vault', {}).get('bind-port', 8200)}}
         - require:
             - file: vault-config-dir
@@ -164,7 +168,11 @@ vault-servicedef:
         - mode: '0644'
         - template: jinja
         - context:
-            ip: {{pillar.get('vault', {}).get('bind-ip', grains['ip_interfaces'][pillar['ifassign']['internal']][pillar['ifassign'].get('internal-ip-index', 0)|int()])}}
+            ip: {{pillar.get('vault', {}).get('bind-ip',
+                    grains['ip_interfaces'][pillar['ifassign']['internal']][pillar['ifassign'].get(
+                        'internal-ip-index', 0
+                    )|int()]
+                )}}
             port: {{pillar.get('vault', {}).get('bind-port', 8200)}}
         - require:
             - file: consul-service-dir
