@@ -29,7 +29,10 @@ vault-envvar-config:
         - name: /etc/profile.d/vaultclient.sh
         - contents: |
             export VAULT_ADDR="https://{{pillar['vault']['smartstack-hostname']}}:{{pillar['vault'].get('bind-port', 8200)}}/"
-            export VAULT_CACERT="{{pillar['vault']['pinned-ca-cert']}}"
+            export VAULT_CACERT="{{
+                pillar['ssl']['service-rootca-cert'] if pillar['vault']['pinned-ca-cert'] == 'default'
+                    else pillar['vault']['pinned-ca-cert']
+                }}"
         - user: root
         - group: root
         - mode: '0644'
