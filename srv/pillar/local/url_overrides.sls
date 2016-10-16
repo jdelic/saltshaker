@@ -20,6 +20,7 @@ repos:
 
     pgpkey: salt://mn/fileserver_ACADBD6B.pgp.key
 
+
 urls:
     concourse: http://fileserver.maurusnet.test/downloads/concourse/concourse_linux_amd64
     consul: http://fileserver.maurusnet.test/downloads/consul/consul_0.7.0_linux_amd64.zip
@@ -35,8 +36,9 @@ urls:
     vault: http://fileserver.maurusnet.test/downloads/vault/vault_0.6.2_linux_amd64.zip
     fpmdeps: http://fileserver.maurusnet.test/downloads/ruby/fpm+deps.zip
 
+
 hashes:
-    concourse: sha256=1166d6b7923d54e97e07f8980a2b6a30da39d6120762f2fde65b62691956b5ea
+    concourse: sha256=b35e7296dc28b1ce0fee408e85ee75cb35b80b98c6897d21d799f66cd992f137
     consul: sha256=b350591af10d7d23514ebaa0565638539900cdb3aaa048f077217c4c46653dd8
     consul-template: sha256=b7561158d2074c3c68ff62ae6fc1eafe8db250894043382fb31f0c78150c513a
     consul-webui: sha256sum=42212089c228a73a0881a5835079c8df58a4f31b5060a3b4ffd4c2497abe3aa8
