@@ -13,6 +13,7 @@ repos:
     jessie-security: deb http://security.debian.org/ jessie/updates main
     jessie-updates: deb http://ftp-stud.hs-esslingen.de/debian/ jessie-updates main
     maurusnet: deb http://repo.maurus.net/debian/ jessie main
+    maurusnet-opensmtpd: deb http://repo.maurus.net/opensmtpd/ mn-experimental main
     postgresql: deb http://apt.postgresql.org/pub/repos/apt/ jessie-pgdg main
     powerdns: deb http://repo.powerdns.com/debian jessie-auth-40 main
     stretch-testing: deb http://ftp-stud.hs-esslingen.de/debian/ stretch main
