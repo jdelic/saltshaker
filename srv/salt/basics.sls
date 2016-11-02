@@ -102,7 +102,7 @@ maurusnet-repo:
 maurusnet-opensmtpd:
     pkgrepo.managed:
         - humanname: repo.maurus.net-opensmtpd
-        - name: {{pillar['repos']['maurusnet-experimental']
+        - name: {{pillar['repos']['maurusnet-experimental']}}
         - file: /etc/apt/sources.list.d/opensmtpd.list
         - order: 2
 
