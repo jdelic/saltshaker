@@ -55,10 +55,10 @@ basic-required-packages:
 jessie:
     pkgrepo.managed:
         - humanname: Jessie Base
-        - name: {{pillar["repos"]["jessie"]}}
+        - name: {{pillar['repos']['jessie']}}
         - file: /etc/apt/sources.list
-        {% if pillar["repos"].get("pgpkey", None) %}
-        - key_url: {{pillar["repos"]["pgpkey"]}}
+        {% if pillar['repos'].get('pgpkey', None) %}
+        - key_url: {{pillar['repos']['pgpkey']}}
         {% endif %}
         - consolidate: True
         - order: 1  # execute this state early!
@@ -67,7 +67,7 @@ jessie:
 updates-jessie:
     pkgrepo.managed:
         - humanname: Jessie Updates
-        - name: {{pillar["repos"]["jessie-updates"]}}
+        - name: {{pillar['repos']['jessie-updates']}}
         - file: /etc/apt/sources.list.d/jessie-updates.list
         - order: 2  # execute this state early!
 
@@ -75,7 +75,7 @@ updates-jessie:
 security-updates-jessie:
     pkgrepo.managed:
         - humanname: Jessie Security Updates
-        - name: {{pillar["repos"]["jessie-security"]}}
+        - name: {{pillar['repos']['jessie-security']}}
         - file: /etc/apt/sources.list.d/jessie-security.list
         - order: 2  # execute this state early!
 
@@ -83,7 +83,7 @@ security-updates-jessie:
 backports-org-jessie:
     pkgrepo.managed:
         - humanname: Jessie Backports
-        - name: {{pillar["repos"]["jessie-backports"]}}
+        - name: {{pillar['repos']['jessie-backports']}}
         - file: /etc/apt/sources.list.d/jessie-backports.list
         - order: 2  # execute this state early!
     file.managed:
@@ -94,7 +94,7 @@ backports-org-jessie:
 maurusnet-repo:
     pkgrepo.managed:
         - humanname: repo.maurus.net
-        - name: {{pillar["repos"]["maurusnet"]}}
+        - name: {{pillar['repos']['maurusnet']}}
         - file: /etc/apt/sources.list.d/maurusnet.list
         - order: 2  # execute this state early!
 
@@ -118,7 +118,7 @@ openssl:
 stretch:
     pkgrepo.managed:
         - humanname: Stretch Debian Testing
-        - name: {{pillar["repos"]["stretch-testing"]}}
+        - name: {{pillar['repos']['stretch-testing']}}
         - file: /etc/apt/sources.list.d/stretch-testing.list
         - order: 2
     file.managed:
