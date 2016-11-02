@@ -99,6 +99,14 @@ maurusnet-repo:
         - order: 2  # execute this state early!
 
 
+maurusnet-opensmtpd:
+    pkgrepo.managed:
+        - humanname: repo.maurus.net-opensmtpd
+        - name: {{pillar['repos']['maurusnet-experimental']
+        - file: /etc/apt/sources.list.d/opensmtpd.list
+        - order: 2
+
+
 openssl:
     # this will upgrade the installed version from the basebox, because we currently must to have
     # compatible versions

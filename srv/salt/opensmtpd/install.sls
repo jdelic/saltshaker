@@ -4,7 +4,7 @@ opensmtpd:
         - pkgs:
             - opensmtpd
             - opensmtpd-extras
-        - fromrepo: stretch
+        - fromrepo: mn-experimental
 
 
 {% if pillar['smtp']['receiver']['sslcert'] != 'default' %}
