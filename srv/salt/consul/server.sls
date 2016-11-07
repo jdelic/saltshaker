@@ -54,8 +54,7 @@ consul-server-service-reload:
 consul-agent-absent:
     file.absent:
         - name: /etc/systemd/system/consul.service
-    process.absent:
-        - name: consul agent
+
 
 #consul-web-ui:
 #    archive.extracted:
