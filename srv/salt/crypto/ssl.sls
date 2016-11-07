@@ -29,8 +29,8 @@ ssl-key-location:
 {% if 'ssl' in pillar and 'maincert' in pillar['ssl'] %}
 ssl-maincert-combined-certificate:
     file.managed:
-        - name: {{pillar['ssl']['default-cert-combined']}}
-        - contents_pillar: ssl:maincert:combined
+        - name: {{pillar['ssl']['filenames']['default-cert-combined']}}
+        - contents_pillar: {{pillar['ssl']['sources']['default-cert-combined']}}
         - user: root
         - group: root
         - mode: '0444'
@@ -40,8 +40,8 @@ ssl-maincert-combined-certificate:
 
 ssl-maincert-key:
     file.managed:
-        - name: {{pillar['ssl']['default-cert-key']}}
-        - contents_pillar: ssl:maincert:key
+        - name: {{pillar['ssl']['filenames']['default-cert-key']}}
+        - contents_pillar: {{pillar['ssl']['sources']['default-cert-key']}}
         - user: root
         - group: ssl-cert
         - mode: '0440'
@@ -51,8 +51,8 @@ ssl-maincert-key:
 
 ssl-maincert-combined-key:
     file.managed:
-        - name: {{pillar['ssl']['default-cert-full']}}
-        - contents_pillar: ssl:maincert:combined-key
+        - name: {{pillar['ssl']['filenames']['default-cert-full']}}
+        - contents_pillar: {{pillar['ssl']['sources']['default-cert-full']}}
         - user: root
         - group: ssl-cert
         - mode: '0440'
@@ -62,8 +62,8 @@ ssl-maincert-combined-key:
 
 ssl-maincert:
     file.managed:
-        - name: {{pillar['ssl']['default-cert']}}
-        - contents_pillar: ssl:maincert:cert
+        - name: {{pillar['ssl']['filenames']['default-cert']}}
+        - contents_pillar: {{pillar['ssl']['sources']['default-cert']}}
         - user: root
         - group: root
         - mode: '0444'

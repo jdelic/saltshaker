@@ -75,13 +75,13 @@ dovecot-config-{{file}}:
         - context:
             sslcert: >
                 {%- if pillar['imap']['sslcert'] == 'default' %}
-                    {{pillar['ssl']['default-cert-combined']}}
+                    {{pillar['ssl']['filenames']['default-cert-combined']}}
                 {%- else %}
                     {{pillar['imap']['sslcert']}}
                 {%- endif %}
             sslkey: >
                 {%- if pillar['imap']['sslcert'] == 'default' %}
-                    {{pillar['ssl']['default-cert-key']}}
+                    {{pillar['ssl']['filenames']['default-cert-key']}}
                 {%- else %}
                     {{pillar['imap']['sslkey']}}
                 {%- endif %}

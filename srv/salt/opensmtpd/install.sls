@@ -104,37 +104,37 @@ opensmtpd-config:
             )}}
             receiver_certfile: >
                 {% if pillar['smtp']['receiver']['sslcert'] == 'default' -%}
-                    {{pillar['ssl']['default-cert-combined']}}
+                    {{pillar['ssl']['filenames']['default-cert-combined']}}
                 {%- else -%}
                     {{pillar['smtp']['receiver']['sslcert']}}
                 {%- endif %}
             receiver_keyfile: >
                 {% if pillar['smtp']['receiver']['sslkey'] == 'default' -%}
-                    {{pillar['ssl']['default-cert-key']}}
+                    {{pillar['ssl']['filenames']['default-cert-key']}}
                 {%- else -%}
                     {{pillar['smtp']['receiver']['sslkey']}}
                 {%- endif %}
             relay_certfile: >
                 {% if pillar['smtp']['relay']['sslcert'] == 'default' -%}
-                    {{pillar['ssl']['default-cert-combined']}}
+                    {{pillar['ssl']['filenames']['default-cert-combined']}}
                 {%- else -%}
                     {{pillar['smtp']['relay']['sslcert']}}
                 {%- endif %}
             relay_keyfile: >
                 {% if pillar['smtp']['relay']['sslkey'] == 'default' -%}
-                    {{pillar['ssl']['default-cert-key']}}
+                    {{pillar['ssl']['filenames']['default-cert-key']}}
                 {%- else -%}
                     {{pillar['ssl']['relay']['sslkey']}}
                 {%- endif %}
             internal_relay_certificate: >
                 {% if pillar['smtp']['internal-relay']['sslcert'] == 'default' -%}
-                    {{pillar['ssl']['default-cert-combined']}}
+                    {{pillar['ssl']['filenames']['default-cert-combined']}}
                 {%- else -%}
                     {{pillar['smtp']['internal-relay']['sslcert']}}
                 {%- endif %}
             internal_relay_keyfile: >
                 {% if pillar['smtp']['relay']['sslkey'] == 'default' -%}
-                    {{pillar['ssl']['default-cert-key']}}
+                    {{pillar['ssl']['filenames']['default-cert-key']}}
                 {%- else -%}
                     {{pillar['ssl']['internal-relay']['sslkey']}}
                 {%- endif %}

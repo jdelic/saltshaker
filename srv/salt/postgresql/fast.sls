@@ -109,8 +109,8 @@ data-cluster-config-sslcert:
         - name: /etc/postgresql/9.6/main/postgresql.conf
         - pattern: ssl_cert_file = '/etc/ssl/certs/ssl-cert-snakeoil.pem'[^\n]*$
         - repl: ssl_cert_file = '{{pillar['postgresql']['sslcert']
-            if pillar['postgresql'].get('sslcert', 'default') != 'default' else
-                pillar['ssl']['default-cert-combined']}}'
+            if pillar['postgresql'].get('sslcert', 'default') != 'default'
+            else pillar['ssl']['filenames']['default-cert-combined']}}'
         - backup: False
 
 
@@ -119,7 +119,8 @@ data-cluster-config-sslkey:
         - name: /etc/postgresql/9.6/main/postgresql.conf
         - pattern: ssl_key_file = '/etc/ssl/private/ssl-cert-snakeoil.key'[^\n]*$
         - repl: ssl_key_file = '{{pillar['postgresql']['sslkey']
-            if pillar['postgresql'].get('sslcert', 'default') != 'default' else pillar['ssl']['default-cert-key']}}'
+            if pillar['postgresql'].get('sslcert', 'default') != 'default'
+            else pillar['ssl']['filenames']['default-cert-key']}}'
         - backup: False
 
 
