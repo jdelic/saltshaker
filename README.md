@@ -42,10 +42,10 @@ Using these salt formulae you can bring up:
 It also contains configuration for
 
   * a fully fledged PIM+Mail server with encrypted storage (based on
-    [Baïkal](http://sabre.io/baikal/), [Dovecot](http://dovecot.org) and
+    [Radicale](http://radicale.org/), [Dovecot](http://dovecot.org) and
     [OpenSMTPD](https://www.opensmtpd.org/)
 
-  * single-sign-on for Baïkal, Dovecot and OpenSMTPD, other web applications and
+  * single-sign-on for Radicale, Dovecot and OpenSMTPD, other web applications and
     even PAM using CAS
 
 The salt configuration is pretty modular, so you can easily just use this
