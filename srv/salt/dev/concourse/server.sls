@@ -155,7 +155,7 @@ concourse-servicedef-atc:
         - template: jinja
         - context:
             routing: external
-            protocol: http
+            protocol: {{pillar['ci']['protocol']}}
             suffix: atc
             mode: http
             ip: {{pillar.get('concourse-server', {}).get('atc-ip', grains['ip_interfaces'][pillar['ifassign']['internal']][pillar['ifassign'].get('internal-ip-index', 0)|int()])}}
