@@ -49,6 +49,7 @@ basic-required-packages:
             - patch
             - dnsutils
             - unzip
+            - python-psutil  # required by salt's process.absent state
         -  order: 1  # execute this state early, because later states need unzip
 
 
