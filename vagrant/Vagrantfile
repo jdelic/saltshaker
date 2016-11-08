@@ -12,6 +12,7 @@ Vagrant.configure('2') do |config|
         wget -q -O - http://fileserver.maurusnet.test/dev_apt_signing.public.pgp | apt-key add -
         apt-get update
         sh -c 'apt-get install ca-certificates'
+        sh -c 'mkdir -p /usr/share/ca-certificates/local'
         sh -c 'if ! grep -q maurusnet-rootca /etc/ca-certificates.conf; then echo local/maurusnet-rootca.crt >> /etc/ca-certificates.conf; fi'
         sh -c 'cat > /usr/share/ca-certificates/local/maurusnet-rootca.crt << EOF
 -----BEGIN CERTIFICATE-----
