@@ -10,8 +10,6 @@
    consul-template will not do it by itself (has this been fixed upstream?)
  * add ssmtp to all servers that don't run opensmtpd
  * switch Dovecot from maildir to sdbox
- * Allow the replacement of the ssl:maincert pillar through pillar indirection
-   so that the test system can have a local wildcard cert.
 
 # Ponder
 
