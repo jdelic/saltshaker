@@ -30,18 +30,17 @@ base:
         - shared.secrets.concourse
         - shared.secrets.gpg_package_signing
 
-    'roles:apps':
-        - match: grain
-        - shared.secrets.ssl
+    'E@(?!test)$ and G@roles:apps or G@roles:loadbalancer or G@roles:mail':
+        - match: compound
+        - shared.secrets.live-ssl  # these are wildcard certificates for hostnames on the main domain
+
+    '*.test and G@roles:apps or G@roles:loadbalancer or G@roles:mail':
+        - match: compound
+        - shared.secrets.dev-ssl  # these are wildcard certificates for hostnames on the main test domain
 
     'roles:mail':
         - match: grain
-        - shared.secrets.ssl
         - shared.secrets.smtp
-
-    'roles:loadbalancer':
-        - match: grain
-        - shared.secrets.ssl
 
     'roles:authserver':
         - match: grain
@@ -55,6 +54,7 @@ base:
         - hetzner.network
         - hetzner.consul
         - hetzner.buildserver
+        - hetzner.ssl
         - shared.urls
 
     # the minion ID starting with "cic" is the main PIM and mail server at Hetzner
@@ -71,6 +71,7 @@ base:
         - local.consul
         - local.buildserver
         - local.url_overrides
+        - local.ssl
         # - shared.urls
 
     # the minion ID starting with "test" is currently the main test VM in my Vagrant environment

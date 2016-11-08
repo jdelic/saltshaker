@@ -20,12 +20,6 @@ ssl:
         default-cert-key: {{salt['file.join'](secret_key_location, 'wildcard.key')}}
         default-cert-full: {{salt['file.join'](secret_key_location, 'wildcard-combined-key.crt')}}
 
-    sources:
-        default-cert: ssl:maincert:cert
-        default-cert-combined: ssl:maincert:combined
-        default-cert-key: ssl:maincert:key
-        default-cert-full: ssl:maincert:combined-key
-
     # The root CA certificate of the PKI issuing service/SSL server certificates in this environment and where
     # it's stored on the nodes (i.e. where other software can find it). You probably want to issue the actual
     # SSL server certificates from an intermediate CA.
