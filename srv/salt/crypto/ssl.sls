@@ -105,7 +105,10 @@ symlink-certificates-{{salt['file.basename'](cert)}}:
 add-certificate-{{salt['file.basename'](cert)}}:
     file.append:
         - name: /etc/ca-certificates.conf
-        - text: {{salt['file.join'](pillar['ssl']['localca-location'], salt['file.basename'](cert))}}
+        - text: {{salt['file.join'](
+            salt['file.basename'](pillar['ssl']['localca-location']),
+            salt['file.basename'](cert)
+        )}}
         - require:
             - file: install-certificates-{{salt['file.basename'](cert)}}
         - onchanges_in:
