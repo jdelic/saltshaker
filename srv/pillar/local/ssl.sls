@@ -9,7 +9,7 @@ ssl:
         default-cert-full: ssl:testmaincert:combined-key
 
 
-    environment-rootca-cert: {{salt['file.join'](localca_location, 'dev-ca.crt')}}
+    environment-rootca-cert: {{salt['file.join'](localca_location, 'dev-ca.crt')}}`
 
 
     install-perenv-ca-certs:
