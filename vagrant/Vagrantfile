@@ -112,12 +112,39 @@ SCRIPT
             }
         end
 
-        # we have to restart salt-minion because the master's hostname is set in minion.d
-        # on a vboxsf mount
-        master.vm.provision :shell, run: 'always' do |s|
-            s.inline = 'systemctl restart salt-master;'
-            s.inline += 'systemctl restart salt-minion; sleep 1'
-        end
+        #master.vm.provision :salt do |salt|
+        #    salt.run_highstate = false
+        #    salt.colorize = true
+        #    salt.log_level = 'info'
+        #    salt.verbose = true
+        #    salt.no_minion = true
+        #    salt.always_install = true
+        #    salt.install_master = true
+        #    salt.install_syndic = false
+        #    salt.bootstrap_script = 'saltshaker/vagrant/bootstrap-salt.sh'
+        #    salt.master_pub = 'saltshaker/vagrant/preseed-keys/saltmaster.maurusnet.test.pub'
+        #    salt.master_key = 'saltshaker/vagrant/preseed-keys/saltmaster.maurusnet.test.pem'
+        #    salt.minion_pub = 'saltshaker/vagrant/preseed-keys/saltmaster.maurusnet.test.pub'
+        #    salt.minion_key = 'saltshaker/vagrant/preseed-keys/saltmaster.maurusnet.test.pem'
+        #    salt.seed_master = {
+        #        'saltmaster.maurusnet.test' => salt.minion_pub,
+        #        'test.maurusnet.test' => 'saltshaker/vagrant/preseed-keys/test.maurusnet.test.pub'
+        #    }
+        #end
+
+        #master.vm.provision :salt do |salt|
+        #    salt.run_highstate = true
+        #    salt.colorize = true
+        #    salt.log_level = 'info'
+        #    salt.verbose = true
+        #    salt.no_minion = false
+        #    salt.always_install = true
+        #    salt.install_master = false
+        #    salt.install_syndic = false
+        #    salt.bootstrap_script = 'saltshaker/vagrant/bootstrap-salt.sh'
+        #    salt.minion_pub = 'saltshaker/vagrant/preseed-keys/saltmaster.maurusnet.test.pub'
+        #    salt.minion_key = 'saltshaker/vagrant/preseed-keys/saltmaster.maurusnet.test.pem'
+        #end
     end
 
     config.vm.define :test do |test|
