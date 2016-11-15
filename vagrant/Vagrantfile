@@ -113,11 +113,11 @@ SCRIPT
         end
 
         #master.vm.provision :salt do |salt|
-        #    salt.run_highstate = false
+        #    salt.run_highstate = false  # run highstate in a second provision call below
         #    salt.colorize = true
         #    salt.log_level = 'info'
         #    salt.verbose = true
-        #    salt.no_minion = true
+        #    salt.no_minion = true  # install master first, then minion
         #    salt.always_install = true
         #    salt.install_master = true
         #    salt.install_syndic = false
@@ -133,11 +133,11 @@ SCRIPT
         #end
 
         #master.vm.provision :salt do |salt|
-        #    salt.run_highstate = true
+        #    salt.run_highstate = true  # install minion and run
         #    salt.colorize = true
         #    salt.log_level = 'info'
         #    salt.verbose = true
-        #    salt.no_minion = false
+        #    salt.no_minion = false  # now install the minion
         #    salt.always_install = true
         #    salt.install_master = false
         #    salt.install_syndic = false
