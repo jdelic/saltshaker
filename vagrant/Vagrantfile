@@ -124,6 +124,13 @@ SCRIPT
             salt.minion_pub = 'saltshaker/vagrant/preseed-keys/saltmaster.maurusnet.test.pub'
             salt.minion_key = 'saltshaker/vagrant/preseed-keys/saltmaster.maurusnet.test.pem'
         end
+
+        # we have to restart salt-minion because the master's hostname is set in minion.d
+        # on a vboxsf mount when we bring the box back up after a 'vagrant halt'
+        master.vm.provision :shell, run: 'always' do |s|
+            s.inline = 'systemctl restart salt-master;'
+            s.inline += 'systemctl restart salt-minion; sleep 1'
+        end
     end
 
     config.vm.define :test do |test|
@@ -172,6 +179,12 @@ SCRIPT
             salt.bootstrap_options = '-P -c /tmp'
             salt.minion_key = 'saltshaker/vagrant/preseed-keys/test.maurusnet.test.pem'
             salt.minion_pub = 'saltshaker/vagrant/preseed-keys/test.maurusnet.test.pub'
+        end
+
+        # we have to restart salt-minion because the master's hostname is set in minion.d
+        # on a vboxsf mount when we bring the box back up after a 'vagrant halt'
+        test.vm.provision :shell, run: 'always' do |s|
+            s.inline = 'systemctl restart salt-minion; sleep 1'
         end
     end
 
