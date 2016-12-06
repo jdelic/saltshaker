@@ -54,8 +54,12 @@ consul-agent-service-reload:
 consul-server-absent:
     file.absent:
         - name: /etc/systemd/system/consul-server.service
-    process.absent:
-        - name: consul server
+        - require:
+            - service: consul-server-absent
+    service.dead:
+        - name: consul-server
+        - sig: consul
+        - enable: False
 
 
 # vim: syntax=yaml
