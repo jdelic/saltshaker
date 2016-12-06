@@ -70,6 +70,7 @@ vault:
         - source_hash: {{pillar["hashes"]["vault"]}}
         - archive_format: zip
         - if_missing: /usr/local/bin/vault
+        - enforce_toplevel: False
     file.managed:
         - name: /usr/local/bin/vault
         - user: {{vault_user}}

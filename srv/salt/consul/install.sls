@@ -78,6 +78,7 @@ consul:
         - source_hash: {{pillar["hashes"]["consul"]}}
         - archive_format: zip
         - if_missing: /usr/local/bin/consul
+        - enforce_toplevel: False
     file.managed:
         - name: /usr/local/bin/consul
         - mode: '0755'

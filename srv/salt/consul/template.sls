@@ -6,6 +6,7 @@ consul-template:
         - source_hash: {{pillar["hashes"]["consul-template"]}}
         - archive_format: zip
         - if_missing: /usr/local/bin/consul-template
+        - enforce_toplevel: False
     file.managed:
         - name: /usr/local/bin/consul-template
         - mode: '0750'
