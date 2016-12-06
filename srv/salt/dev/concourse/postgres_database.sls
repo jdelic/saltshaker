@@ -4,7 +4,7 @@
 concourse-db-role:
     postgres_user.present:
         - name: concourse
-        - password: {{pillar['dynamicpasswords']['concourse-db']}}
+        - password: {{pillar['dynamicsecrets']['concourse-db']}}
         - createdb: False
         - createroles: False
         - createuser: False

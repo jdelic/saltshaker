@@ -201,7 +201,41 @@ pillar, which by default is `/etc/gpg-managed-keyring`.
 # Salt modules
 
 
-## The dynamicpasswords pillar
+## The dynamicsecrets pillar
+
+This is a pillar module that can be configured on the master to provide
+dynamically generated passwords and RSA keys across an environment managed by
+a Salt master. The secrets are stored in a single sqlite database file that can
+be easily backed up (default: `/etc/salt/dynamicsecrets.sqlite`). This should
+be used for non-critical secrets that must be shared between minions and/or 
+where a more secure solution like Hashicorp's Vault is not applicable.
+
+Secrets from the pillar are assigned to the "roles" grain or minion ids and 
+are therefor only rendered to assigned minions from the master.
+
+```yaml
+# Example configuration
+ext_pillar:
+    - dynamicsecrets:
+        - '*':  # render the following secrets to all minions
+            - consul-encryptionkey:
+                encode: base64
+                length: 16
+                type: password  # this is the default for all values
+        - database:  # render to minions with the database role
+            - postgres
+        - dev:  # render to minions with the dev role
+            - concourse-signingkey:
+                length: 2048
+                type: rsa  # generate a private key
+```
+
+For `type: password` the Pillar will simply contain the random password string.
+For `type: rsa` the Pillar will return a `dict` that has the following 
+properties:
+ * `public_pem` the public key in PEM encoding
+ * `public` the public key in `ssh-rsa` format
+ * `key` the private key in PEM encoding
 
 
 # Deploying applications

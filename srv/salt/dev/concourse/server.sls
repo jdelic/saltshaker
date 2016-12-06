@@ -4,7 +4,7 @@ include:
 
 
 # ssh-keygen -t rsa -f session_signing_key -N ''
-{% for key in ["worker_key", "session_signing_key"] %}
+{% for key in ["worker_key",] %}
 concourse-keys-{{key}}:
     cmd.run:
         - name: ssh-keygen -t rsa -f /etc/concourse/private/{{key}}.pem -N ''
@@ -24,10 +24,20 @@ concourse-keys-{{key}}:
 {% endfor %}
 
 
+concourse-keys-session_signing_key:
+    file.managed:
+        - name: /etc/concourse/private/session_signing_key.pem
+        - contents_pillar: dynamicsecrets:concourse-signingkey:key
+        - user: concourse
+        - group: concourse
+        - mode: '0640'
+        - replace: False
+
+
 concourse-keys-host_key-public-copy:
     file.managed:
         - name: /etc/concourse/private/host_key.pem.pub
-        - contents_pillar: ssh:concourse:public
+        - contents_pillar: dynamicsecrets:concourse-hostkey:public
         - user: concourse
         - group: concourse
         - mode: '0644'
@@ -39,7 +49,7 @@ concourse-keys-host_key-public-copy:
 concourse-keys-host_key:
     file.managed:
         - name: /etc/concourse/private/host_key.pem
-        - contents_pillar: ssh:concourse:key
+        - contents_pillar: dynamicsecrets:concourse-hostkey:key
         - user: concourse
         - group: concourse
         - mode: '0640'
@@ -85,7 +95,7 @@ concourse-server:
             # postgresql on 127.0.0.1 works because there is haproxy@internal proxying it
             arguments: >
                 --basic-auth-username sysop
-                --basic-auth-password {{pillar['dynamicpasswords']['concourse-sysop']}}
+                --basic-auth-password {{pillar['dynamicsecrets']['concourse-sysop']}}
                 --bind-ip {{pillar.get('concourse-server', {}).get('atc-ip', grains['ip_interfaces'][pillar['ifassign']['internal']][pillar['ifassign'].get('internal-ip-index', 0)|int()])}}
                 --bind-port {{pillar.get('concourse-server', {}).get('atc-port', 8080)}}
                 --session-signing-key /etc/concourse/private/session_signing_key.pem
@@ -93,7 +103,7 @@ concourse-server:
                 --tsa-bind-port {{pillar.get('concourse-server', {}).get('tsa-port', 2222)}}
                 --tsa-host-key /etc/concourse/private/host_key.pem
                 --tsa-authorized-keys /etc/concourse/authorized_worker_keys
-                --postgres-data-source postgres://concourse:{{pillar['dynamicpasswords']['concourse-db']}}@127.0.0.1:5432/concourse
+                --postgres-data-source postgres://concourse:{{pillar['dynamicsecrets']['concourse-db']}}@127.0.0.1:5432/concourse
                 --external-url {{pillar['ci']['protocol']}}://{{pillar['ci']['hostname']}}
                 --peer-url http://{{pillar.get('concourse-server', {}).get('atc-ip', grains['ip_interfaces'][pillar['ifassign']['internal']][pillar['ifassign'].get('internal-ip-index', 0)|int()])}}:{{pillar.get('concourse-server', {}).get('atc-port', 8080)}}
         - use:

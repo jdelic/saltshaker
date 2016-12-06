@@ -16,7 +16,7 @@ authserver-{{rolename}}-spapi-access:
             - inherit: False
             - superuser: False
             - replication: False
-            - password: {{pillar['dynamicpasswords'][rolename]}}
+            - password: {{pillar['dynamicsecrets'][rolename]}}
             - user: postgres
             - require:
                 - service: data-cluster-service

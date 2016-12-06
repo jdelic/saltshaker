@@ -13,7 +13,7 @@ authserver-postgres:
         - inherit: True
         - superuser: False
         - replication: False
-        - password: {{pillar['dynamicpasswords']['authserver']}}
+        - password: {{pillar['dynamicsecrets']['authserver']}}
         - user: postgres
         - require:
             - service: data-cluster-service

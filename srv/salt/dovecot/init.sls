@@ -100,7 +100,7 @@ dovecot-sql-config:
             dbname: {{pillar['authserver']['dbname']}}
             sslrootcert: {{pillar['ssl']['service-rootca-cert']}}
             dbuser: dovecot-authserver
-            dbpassword: {{pillar['dynamicpasswords']['dovecot-authserver']}}
+            dbpassword: {{pillar['dynamicsecrets']['dovecot-authserver']}}
         - require:
             - pkg: dovecot
             - file: {{pillar['ssl']['service-rootca-cert']}}

@@ -21,7 +21,7 @@ vault-postgres:
         - inherit: False
         - superuser: False
         - replication: False
-        - password: {{pillar['dynamicpasswords']['secure-vault']}}
+        - password: {{pillar['dynamicsecrets']['secure-vault']}}
         - user: postgres
         - order: 20  # see ORDER.md
         - require:
@@ -55,7 +55,7 @@ vault-postgres:
         - onchanges:
             - postgres_database: vault-postgres
         - env:
-            - PGPASSWORD: {{pillar['dynamicpasswords']['secure-vault']}}
+            - PGPASSWORD: {{pillar['dynamicsecrets']['secure-vault']}}
         - require:
             - postgres_database: vault-postgres
 {% endif %}

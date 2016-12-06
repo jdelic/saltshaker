@@ -15,7 +15,7 @@ tries to avoid four common pitfalls of modern automated server configuration:
      repository ("everyone on the ops team has it")
 
   3. Even if you use a deployment specific secrets database like the
-     `dynamicpasswords` pillar included in this repository, you commonly must
+     `dynamicsecrets` pillar included in this repository, you commonly must
      run the configuration management before deploying new applications so
      their secrets are waiting for them.
 

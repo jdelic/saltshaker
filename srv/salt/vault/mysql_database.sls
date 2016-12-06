@@ -15,12 +15,12 @@
 vault-mysql:
     mysql_user.present:
         - name: {{pillar['vault']['mysql']['dbuser']}}
-        - password: {{pillar['dynamicpasswords']['secure-vault']}}
+        - password: {{pillar['dynamicsecrets']['secure-vault']}}
         # FIXME: let iptables take care of limiting connectivity to the local network until I figure out how to
         #        calculate a MySQL network string (192.168.56.%) from an IP and a netmask inside Salt
         - host: '%'
         - connection_user: root
-        - connection_pass: {{pillar['dynamicpasswords']['secure-mysql-root']}}
+        - connection_pass: {{pillar['dynamicsecrets']['secure-mysql-root']}}
 
         # FIXME: either connect directly to the internal interface using the line below OR wait for consul-template
         #        ...localhost might not be available when this state runs otherwise. This might be an ideal use-case
@@ -38,7 +38,7 @@ vault-mysql:
     mysql_database.present:
         - name: vault
         - connection_user: root
-        - connection_pass: {{pillar['dynamicpasswords']['secure-mysql-root']}}
+        - connection_pass: {{pillar['dynamicsecrets']['secure-mysql-root']}}
         - connection_default_file: /etc/mysql/conf.d/secure.cnf
         #- connection_host: localhost
         #- connection_port: 3307
@@ -52,7 +52,7 @@ vault-mysql:
         - user: {{pillar['vault']['mysql']['dbuser']}}
         - host: '%'
         - connection_user: root
-        - connection_pass: {{pillar['dynamicpasswords']['secure-mysql-root']}}
+        - connection_pass: {{pillar['dynamicsecrets']['secure-mysql-root']}}
         - connection_default_file: /etc/mysql/conf.d/secure.cnf
         #- connection_host: localhost
         #- connection_port: 3307

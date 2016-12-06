@@ -12,7 +12,7 @@ vaultadmin:
         - inherit: False
         - superuser: False
         - replication: False
-        - password: {{pillar['dynamicpasswords']['vault-db-credential-admin']}}
+        - password: {{pillar['dynamicsecrets']['vault-db-credential-admin']}}
         - user: postgres
         - require:
             - service: data-cluster-service

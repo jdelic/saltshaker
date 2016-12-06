@@ -23,11 +23,11 @@ vault:
 
     mysql:
         dbname: vault  # only needed for mysql backend
-        dbuser: vault  # the password is created via the dynamicpasswords ext_pillar
+        dbuser: vault  # the password is created via the dynamicsecrets ext_pillar
 
     postgres:
         dbname: vault  # only needed for postgres backend
-        dbuser: vault  # the password is created via the dynamicpasswords ext_pillar
+        dbuser: vault  # the password is created via the dynamicsecrets ext_pillar
 
     s3:
         bucket: vault-dev
