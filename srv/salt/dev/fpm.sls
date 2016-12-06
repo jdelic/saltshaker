@@ -24,6 +24,7 @@ fpm:
         - source_hash: {{pillar["hashes"]["fpmdeps"]}}
         - archive_format: zip
         - if_missing: /usr/local/src/fpm/fpm-1.6.2.gem
+        - enforce_toplevel: False
         - require:
             - file: fpm-download-dir
     {% endif %}

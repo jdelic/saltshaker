@@ -17,6 +17,7 @@ exxo:
         - source_hash: {{pillar["hashes"]["exxo"]}}
         - archive_format: tar
         - if_missing: /usr/local/bin/exxo
+        - enforce_toplevel: False
     file.managed:
         - name: /usr/local/bin/exxo
         - mode: '0755'
