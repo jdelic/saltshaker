@@ -81,6 +81,18 @@ concourse-authorized-key-file:
             - user: concourse-user
 
 
+concourse-server-envvars:
+    file.managed:
+        - name: /etc/concourse/envvars  # read by concourse.service using systemd's `EnvironmentFile=`
+        - user: root
+        - group: root
+        - mode: '0600'
+        - contents: |
+            CONCOURSE_BASIC_AUTH_USERNAME="sysop"
+            CONCOURSE_BASIC_AUTH_PASSWORD="{{pillar['dynamicsecrets']['concourse-sysop']}}"
+            CONCOURSE_POSTGRES_DATA_SOURCE="postgres://concourse:{{pillar['dynamicsecrets']['concourse-db']}}@127.0.0.1:5432/concourse"
+
+
 concourse-server:
     file.managed:
         - name: /etc/systemd/system/concourse-web.service
@@ -94,8 +106,6 @@ concourse-server:
             group: concourse
             # postgresql on 127.0.0.1 works because there is haproxy@internal proxying it
             arguments: >
-                --basic-auth-username sysop
-                --basic-auth-password {{pillar['dynamicsecrets']['concourse-sysop']}}
                 --bind-ip {{pillar.get('concourse-server', {}).get('atc-ip', grains['ip_interfaces'][pillar['ifassign']['internal']][pillar['ifassign'].get('internal-ip-index', 0)|int()])}}
                 --bind-port {{pillar.get('concourse-server', {}).get('atc-port', 8080)}}
                 --session-signing-key /etc/concourse/private/session_signing_key.pem
@@ -103,7 +113,6 @@ concourse-server:
                 --tsa-bind-port {{pillar.get('concourse-server', {}).get('tsa-port', 2222)}}
                 --tsa-host-key /etc/concourse/private/host_key.pem
                 --tsa-authorized-keys /etc/concourse/authorized_worker_keys
-                --postgres-data-source postgres://concourse:{{pillar['dynamicsecrets']['concourse-db']}}@127.0.0.1:5432/concourse
                 --external-url {{pillar['ci']['protocol']}}://{{pillar['ci']['hostname']}}
                 --peer-url http://{{pillar.get('concourse-server', {}).get('atc-ip', grains['ip_interfaces'][pillar['ifassign']['internal']][pillar['ifassign'].get('internal-ip-index', 0)|int()])}}:{{pillar.get('concourse-server', {}).get('atc-port', 8080)}}
         - use:
@@ -111,15 +120,15 @@ concourse-server:
         - require:
             - file: concourse-install
             - file: concourse-authorized-key-file
+            - file: concourse-server-envvars
     service.running:
         - name: concourse-web
         - sig: /usr/local/bin/concourse web
         - enable: True
-        - require:
-            - file: concourse-server
         - watch:
             - file: concourse-server
             - file: concourse-install  # restart on a change of the binary
+            - file: concourse-server-envvars
 
 
 concourse-servicedef-tsa:
