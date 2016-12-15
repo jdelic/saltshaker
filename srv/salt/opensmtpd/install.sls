@@ -3,8 +3,39 @@ opensmtpd:
     pkg.installed:
         - pkgs:
             - opensmtpd
-            - opensmtpd-extras
         - fromrepo: stretch
+
+
+opensmtpd-extras:
+    pkg.installed:
+        - pkgs:
+            - opensmtpd-extras
+            - opensmtpd-extras-experimental
+            - opensmtpd-filter-greylistd
+        - fromrepo: mn-experimental
+        - require:
+            - pkg: greylistd
+
+
+# opensmtpd doesn't call initgroups() for filters so we can't put filter-greylistd
+# in the greylist group. Instead we just change greylistd to run in the right group.
+greylistd-initd:
+    file.replace:
+        - name: /etc/init.d/greylistd
+        - pattern: ^group=greylist$
+        - repl: group=opensmtpd
+        - backup: False
+
+
+greylistd:
+    pkg.installed:
+        - name: greylistd
+    service.running:
+        - name: greylistd
+        - enable: True
+        - require:
+            - pkg: greylistd
+            - file: greylistd-initd
 
 
 {% if pillar['smtp']['receiver']['sslcert'] != 'default' %}
