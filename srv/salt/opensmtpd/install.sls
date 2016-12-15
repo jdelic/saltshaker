@@ -238,6 +238,7 @@ mailspool-{{dir[0]}}:
         - user: {{dir[1][0]}}
         - group: {{dir[1][1]}}
         - mode: {{dir[1][2]}}
+        - makedirs: True
         - require:
             - pkg: opensmtpd
         - require_in:
