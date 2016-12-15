@@ -43,7 +43,7 @@ opensmtpd-receiver-sslcert:
     file.managed:
         - name: {{pillar['smtp']['receiver']['sslcert']}}
         - contents_pillar: {{pillar['smtp']['receiver']['sslcert-content']}}
-        - mode: 440
+        - mode: '0440'
         - user: root
         - group: root
         - require:
@@ -54,7 +54,7 @@ opensmtpd-receiver-sslkey:
     file.managed:
         - name: {{pillar['smtp']['receiver']['sslkey']}}
         - contents_pillar: {{pillar['smtp']['receiver']['sslkey-content']}}
-        - mode: 400
+        - mode: '0400'
         - user: root
         - group: root
         - require:
@@ -66,7 +66,7 @@ opensmtpd-relay-sslcert:
     file.managed:
         - name: {{pillar['smtp']['relay']['sslcert']}}
         - contents_pillar: {{pillar['smtp']['relay']['sslcert-content']}}
-        - mode: 440
+        - mode: '0440'
         - user: root
         - group: root
         - require:
@@ -77,7 +77,7 @@ opensmtpd-relay-sslkey:
     file.managed:
         - name: {{pillar['smtp']['relay']['sslkey']}}
         - contents_pillar: {{pillar['smtp']['relay']['sslkey-content']}}
-        - mode: 400
+        - mode: '0400'
         - user: root
         - group: root
         - require:
@@ -90,7 +90,7 @@ opensmtpd-internal-relay-sslcert:
     file.managed:
         - name: {{pillar['smtp']['internal-relay']['sslcert']}}
         - contents_pillar: {{pillar['smtp']['internal-relay']['sslcert-content']}}
-        - mode: 440
+        - mode: '0440'
         - user: root
         - group: root
         - require:
@@ -101,7 +101,7 @@ opensmtpd-internal-relay-sslkey:
     file.managed:
         - name: {{pillar['smtp']['internal-relay']['sslkey']}}
         - contents_pillar: {{pillar['smtp']['internal-relay']['sslkey-content']}}
-        - mode: 400
+        - mode: '0400'
         - user: root
         - group: root
         - require:
