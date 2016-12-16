@@ -1,0 +1,4 @@
+# amavisd configuration as set up by salt.
+
+@local_domains_acl = qw(.);
+$myhostname = "{{hostname}}";
