@@ -12,7 +12,7 @@ python-dev-packages:
             - libfreetype6-dev
             - libxslt1-dev
             - libxml2-dev
-            - libgd2-xpm-dev
+            - libgd-dev
             - libffi-dev
             - libpq-dev
         - install_recommends: False
