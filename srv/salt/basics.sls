@@ -96,6 +96,7 @@ maurusnet-repo:
         - humanname: repo.maurus.net
         - name: {{pillar['repos']['maurusnet']}}
         - file: /etc/apt/sources.list.d/maurusnet.list
+        - key_url: salt://mn/packaging_authority_A78049AF.pgp.key
         - order: 2  # execute this state early!
 
 
@@ -104,6 +105,7 @@ maurusnet-opensmtpd:
         - humanname: repo.maurus.net-opensmtpd
         - name: {{pillar['repos']['maurusnet-opensmtpd']}}
         - file: /etc/apt/sources.list.d/opensmtpd.list
+        - key_url: salt://mn/packaging_authority_A78049AF.pgp.key
         - order: 2
 
 

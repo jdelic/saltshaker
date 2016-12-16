@@ -70,9 +70,9 @@ base:
         - local.network
         - local.consul
         - local.buildserver
-        - local.url_overrides
         - local.ssl
-        # - shared.urls
+        # - local.url_overrides
+        - shared.urls
 
     # the minion ID starting with "test" is currently the main test VM in my Vagrant environment
     # "shared.ssl" is omitted here, because it's already assigned by '*.test'
