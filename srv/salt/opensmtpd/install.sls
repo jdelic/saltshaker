@@ -36,10 +36,31 @@ greylistd:
         - install_recommends: False
     service.running:
         - name: greylistd
+        - sig: greylistd
         - enable: True
         - require:
             - pkg: greylistd
             - file: greylistd-initd
+
+
+amavisd:
+    pkg.installed:
+        - pkgs:
+            - amavisd-new
+            - clamav
+        - install_recommends: False
+    file.managed:
+        - name: /etc/amavis/conf.d/51-salt
+        - source: salt://opensmtpd/51-salt
+        - template: jinja
+        - context:
+            receiver_hostname: {{pillar['smtp-incoming']['hostname']}}
+    service.running:
+        - name: amavisd-new
+        - sig: amavisd-new
+        - enable: True
+        - watch:
+            - file: amavisd
 
 
 {% if pillar['smtp']['receiver']['sslcert'] != 'default' %}
