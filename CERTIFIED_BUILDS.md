@@ -86,7 +86,7 @@ applications built for one environment can also be used in a different
 environment, which might be desirable if deployment artifacts are being
 "promoted" between environments.  Since Vault is currently
 binding policies *to CA certificates*, the application must be at the root
-of the CA tree so allow for separating applications access to Vault
+of the CA tree to allow for separating applications access to Vault
 resources.
 
 In any case it is good practice to also add intermediaries *for each build
