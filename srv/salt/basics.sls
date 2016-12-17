@@ -132,7 +132,7 @@ stretch:
         - file: /etc/apt/sources.list.d/stretch-testing.list
         - order: 2
         - require:
-            - file: stretch  # make sure pinning is in place
+            - file: stretch  # ensure pinning exists, so we don't pull anyting in we don't want
     file.managed:
         - name: /etc/apt/preferences.d/stretch-testing
         - source: salt://opensmtpd/preferences.d/stretch-testing
