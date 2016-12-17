@@ -63,6 +63,12 @@ amavisd:
             - file: amavisd
 
 
+dkimproxy:
+    pkg.installed:
+        - name: dkimproxy
+        - install_recommends: False
+
+
 {% if pillar['smtp']['receiver']['sslcert'] != 'default' %}
 opensmtpd-receiver-sslcert:
     file.managed:
