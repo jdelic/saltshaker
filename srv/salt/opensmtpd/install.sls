@@ -56,7 +56,7 @@ amavisd:
         - context:
             receiver_hostname: {{pillar['smtp-incoming']['hostname']}}
     service.running:
-        - name: amavisd-new
+        - name: amavis
         - sig: amavisd-new
         - enable: True
         - watch:
