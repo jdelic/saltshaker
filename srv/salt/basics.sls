@@ -49,7 +49,6 @@ basic-required-packages:
             - patch
             - dnsutils
             - unzip
-            - apt-transport-s3
         -  order: 1  # execute this state early, because later states need unzip
 
 
@@ -137,6 +136,13 @@ stretch:
     file.managed:
         - name: /etc/apt/preferences.d/stretch-testing
         - source: salt://opensmtpd/preferences.d/stretch-testing
+    pkg.installed:
+        - name: apt-transport-s3
+        - install_recommends: False
+        - fromrepo: stretch
+        - require:
+            - pkgrepo: stretch
+
 
 
 openssh:
