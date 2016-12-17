@@ -51,7 +51,7 @@ amavisd:
         - install_recommends: False
     file.managed:
         - name: /etc/amavis/conf.d/51-salt
-        - source: salt://opensmtpd/51-salt
+        - source: salt://opensmtpd/amavisd/51-salt
         - template: jinja
         - context:
             receiver_hostname: {{pillar['smtp-incoming']['hostname']}}
