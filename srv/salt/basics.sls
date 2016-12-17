@@ -49,6 +49,7 @@ basic-required-packages:
             - patch
             - dnsutils
             - unzip
+            - apt-transport-s3
         -  order: 1  # execute this state early, because later states need unzip
 
 
