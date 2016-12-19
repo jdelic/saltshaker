@@ -7,7 +7,7 @@ authserver:
         - name: maurusnet-authserver
         - fromrepo: maurusnet
         - require:
-            - file: authserver-config
+            - appconfig: authserver-appconfig
 
 
 authserver-appconfig:
