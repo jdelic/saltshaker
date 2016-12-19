@@ -109,6 +109,15 @@ maurusnet-opensmtpd:
         - order: 2
 
 
+maurusnet-authserver:
+    pkgrepo.managed:
+        - humanname: repo.maurus.net-nightly
+        - name: {{pillar['repos']['maurusnet-nightly']}}
+        - file: /etc/apt/sources.list.d/mn-nightly.list
+        - key_url: salt://mn/packaging_authority_A78049AF.pgp.key
+        - order: 2
+
+
 openssl:
     # this will upgrade the installed version from the basebox, because we currently must to have
     # compatible versions
