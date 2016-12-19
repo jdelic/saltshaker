@@ -2,12 +2,12 @@
 # these states set up and configure the mailsystem CAS server
 # and PAM for sogo.nu support
 
-#authserver:
-#    pkg.installed:
-#        - name: maurusnet-authserver
-#        - fromrepo: maurusnet
-#        - require:
-#            - file: authserver-config
+authserver:
+    pkg.installed:
+        - name: maurusnet-authserver
+        - fromrepo: maurusnet
+        - require:
+            - file: authserver-config
 
 
 authserver-appconfig:
