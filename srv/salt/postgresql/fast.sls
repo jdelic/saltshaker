@@ -139,6 +139,15 @@ data-cluster-config-sslciphers:
         - backup: False
 {% endif %}
 
+{% if pillar.get("ssl", {}).get("environment-rootca-cert", None) %}
+data-cluster-config-sslca:
+    file.replace:
+        - name: /etc/postgresql/9.6/main/postgresql.conf
+        - pattern: "^#ssl_ca_file = ''[^\n]*$"
+        - repl: ssl_ca_file = '{{pillar['ssl']['environment-rootca-cert']}}'
+        - backup: False
+{% endif %}
+
 data-cluster-service:
     service.running:
         - name: postgresql@9.6-main
