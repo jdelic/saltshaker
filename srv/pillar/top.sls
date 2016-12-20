@@ -55,6 +55,7 @@ base:
         - hetzner.consul
         - hetzner.buildserver
         - hetzner.ssl
+        - hetzner.authserver
         - shared.urls
 
     # the minion ID starting with "cic" is the main PIM and mail server at Hetzner
@@ -71,6 +72,7 @@ base:
         - local.consul
         - local.buildserver
         - local.ssl
+        - local.authserver
         # - local.url_overrides
         - shared.urls
 
