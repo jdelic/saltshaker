@@ -34,7 +34,7 @@ authserver-appconfig:
         else pillar['postgresql']['pinned-ca-cert'],
     "DATABASE_URL": 'postgresql://%s:@postgresql.local:5432/%s'|format(pillar['authserver']['dbuser'],
         pillar['authserver']['dbname']),
-    "ALLOWED_HOSTS": [pillar['authserver']['hostname'], pillar['authserver']['smartstack-hostname']]|join(', ')
+    "ALLOWED_HOSTS": "%s,%s"|format(pillar['authserver']['hostname'], pillar['authserver']['smartstack-hostname'])
 } %}
 
 
