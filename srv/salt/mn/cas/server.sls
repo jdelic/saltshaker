@@ -28,7 +28,7 @@ authserver-appconfig:
     "POSTGRESQL_CA": pillar['ssl']['service-rootca-cert'] if
         pillar['postgresql'].get('pinned-ca-cert', 'default') == 'default'
         else pillar['postgresql']['pinned-ca-cert'],
-    "DATABASE_URL": "postgresql://postgresql.local:5432/pillar['authserver']['dbname']",
+    "DATABASE_URL": "postgresql://%s:@postgresql.local:5432/%s"|format(pillar['authserver']['dbuser'], pillar['authserver']['dbname']),
 } %}
 
 
