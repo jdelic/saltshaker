@@ -1,6 +1,4 @@
-
 # these states set up and configure the mailsystem CAS server
-# and PAM for sogo.nu support
 
 authserver:
     pkg.installed:
