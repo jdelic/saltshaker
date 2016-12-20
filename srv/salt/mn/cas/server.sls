@@ -6,6 +6,10 @@ authserver:
         - fromrepo: mn-nightly
         - require:
             - appconfig: authserver-appconfig
+    service.running:
+        - name: authserver
+        - sig: authserver.wsgi
+        - enable: True
 
 
 authserver-appconfig:
@@ -40,6 +44,8 @@ authserver-config-{{loop.index}}:
         - require:
             - file: {{pillar['ssl']['service-rootca-cert']}}
             - appconfig: authserver-appconfig
+        - watch_in:
+            - service: authserver
 {% endfor %}
 
 
