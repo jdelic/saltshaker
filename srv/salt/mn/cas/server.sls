@@ -5,7 +5,7 @@
 authserver:
     pkg.installed:
         - name: maurusnet-authserver
-        - fromrepo: maurusnet
+        - fromrepo: mn-nightly
         - require:
             - appconfig: authserver-appconfig
 
