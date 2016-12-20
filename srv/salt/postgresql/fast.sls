@@ -140,7 +140,9 @@ data-cluster-config-sslciphers:
 {% endif %}
 
 {% if pillar.get("ssl", {}).get("environment-rootca-cert", None) %}
-data-cluster-config-sslca:
+# trust the installed per-environment CA to authenticate users for this database
+# that were collected in the postgresql-hba-certusers-accumulator accumulator
+data-cluster-config-ssl_client_ca:
     file.replace:
         - name: /etc/postgresql/9.6/main/postgresql.conf
         - pattern: "^#ssl_ca_file = ''[^\n]*$"
