@@ -10,6 +10,7 @@ authserver:
         - name: authserver
         - sig: authserver.wsgi
         - enable: True
+        - init_delay: 2
 
 
 authserver-appconfig:
