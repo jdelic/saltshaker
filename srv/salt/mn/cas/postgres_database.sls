@@ -33,8 +33,6 @@ authserver-postgres:
         - require:
             - secure-tablespace
             - postgres_user: authserver-postgres
-        - require_in:
-            - service: authserver  # make sure the database and user exist when we start the server
 
 
 authserver-vault-md5:
@@ -44,7 +42,6 @@ authserver-vault-md5:
         - text: {{pillar['authserver']['dbname']}} {{pillar['authserver']['dbuser']}}
         - require_in:
             - file: postgresql-hba-config
-            - service: authserver  # make sure the server can authenticate when it's started
 
 
 authserver-sslclient:
@@ -54,5 +51,4 @@ authserver-sslclient:
         - text: {{pillar['authserver']['dbname']}} {{pillar['authserver']['dbuser']}}
         - require_in:
             - file: postgresql-hba-config
-            - service: authserver  # make sure the server can authenticate when it's started
 {% endif %}
