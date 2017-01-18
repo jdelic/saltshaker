@@ -11,6 +11,8 @@ authserver:
         - sig: authserver.wsgi
         - enable: True
         - init_delay: 2
+        - require:
+            - pkg: authserver
 
 
 authserver-appconfig:
