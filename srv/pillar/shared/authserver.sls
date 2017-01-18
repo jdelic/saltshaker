@@ -9,4 +9,9 @@ authserver:
         - opensmtpd-authserver
         - dovecot-authserver
 
+
+dkimsigner:
+    dbuser: dkimsigner  # a read-only user for the mailauth_domains table
+
+
 # vim: syntax=yaml
