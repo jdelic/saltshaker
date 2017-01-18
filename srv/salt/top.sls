@@ -69,6 +69,7 @@ base:
         - mail.nixspam
         - mail.spamassassin
         - mail.storage
+        - mn.cas.dkimsigner
 
     'roles:pim':
         - match: grain
