@@ -59,15 +59,13 @@ authserver-servicedef-external:
         - mode: '0644'
         - template: jinja
         - context:
+            service: authserver
             routing: external
             protocol: {{pillar['authserver']['protocol']}}
             suffix: ext
             mode: http
-            ip: {{pillar.get('authserver', {}).get(
-                        'bind-ip', grains['ip_interfaces'][pillar['ifassign']['internal']][pillar['ifassign'].get(
-                            'internal-ip-index', 0
-                        )|int()])}}
-            port: {{pillar.get('authserver', {}).get('bind-port', 8999)}}
+            ip: {{config['BINDIP']}}
+            port: {{config['BINDPORT']}}
             hostname: {{pillar['authserver']['hostname']}}
         - require:
             - service: authserver
@@ -81,14 +79,12 @@ authserver-servicedef-internal:
         - mode: '0644'
         - template: jinja
         - context:
+            service: authserver
             routing: internal
             suffix: int
             mode: http
-            ip: {{pillar.get('authserver', {}).get(
-                        'bind-ip', grains['ip_interfaces'][pillar['ifassign']['internal']][pillar['ifassign'].get(
-                            'internal-ip-index', 0
-                        )|int()])}}
-            port: {{pillar.get('authserver', {}).get('bind-port', 8999)}}
+            ip: {{config['BINDIP']}}
+            port: {{config['BINDPORT']}}
         - require:
             - service: authserver
             - file: consul-service-dir
@@ -100,12 +96,8 @@ authserver-tcp-in{{pillar.get('authserver', {}).get('bind-port', 8999)}}-recv:
         - chain: INPUT
         - jump: ACCEPT
         - source: '0/0'
-        - destination: {{pillar.get('authserver', {}).get(
-            'bind-ip', grains['ip_interfaces'][pillar['ifassign']['internal']][pillar['ifassign'].get(
-                'internal-ip-index', 0
-            )|int()]
-        )}}
-        - dport: {{pillar.get('authserver', {}).get('bind-port', 8999)}}
+        - destination: {{config['BINDIP']}}
+        - dport: {{config['BINDPORT']}}
         - match: state
         - connstate: NEW
         - proto: tcp
