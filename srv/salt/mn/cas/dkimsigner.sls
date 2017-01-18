@@ -11,7 +11,7 @@ dkimsigner:
         - sig: dkimsigner
         - enable: True
         - require:
-            - pkg: authserver
+            - pkg: dkimsigner
 
 
 dkimsigner-appconfig:
