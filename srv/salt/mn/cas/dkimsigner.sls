@@ -30,7 +30,7 @@ dkimsigner-appconfig:
     "POSTGRESQL_CA": pillar['ssl']['service-rootca-cert'] if
         pillar['postgresql'].get('pinned-ca-cert', 'default') == 'default'
         else pillar['postgresql']['pinned-ca-cert'],
-    "DATABASE_URL": 'postgresql://%s:@postgresql.local:5432/%s'|format(pillar['authserver']['dbuser'],
+    "DATABASE_URL": 'postgresql://%s:@postgresql.local:5432/%s'|format(pillar['dkimsigner']['dbuser'],
         pillar['authserver']['dbname']),
     "ALLOWED_HOSTS": "%s,%s"|format(pillar['authserver']['hostname'], pillar['authserver']['smartstack-hostname'])
 } %}
