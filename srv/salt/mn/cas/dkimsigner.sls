@@ -23,9 +23,9 @@ dkimsigner-appconfig:
     "VAULT_CA": pillar['ssl']['service-rootca-cert'] if pillar['vault'].get('pinned-ca-cert', 'default') == 'default'
         else pillar['vault']['pinned-ca-cert'],
     "BINDIP": '127.0.0.1',
-    "BINDPORT": pillar.get('dkimsigner', {}).get('bind-port', 10035),
+    "BINDPORT": pillar.get('dkimsigner', {}).get('bind-port', 10036),
     "RELAYIP": '127.0.0.1',
-    "RELAYPORT": pillar.get('dkimsigner', {}).get('relay-port', 10036),
+    "RELAYPORT": pillar.get('dkimsigner', {}).get('relay-port', 10035),
     "DATABASE_NAME": pillar['authserver']['dbname'],
     "POSTGRESQL_CA": pillar['ssl']['service-rootca-cert'] if
         pillar['postgresql'].get('pinned-ca-cert', 'default') == 'default'
