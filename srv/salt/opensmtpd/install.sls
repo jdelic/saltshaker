@@ -12,7 +12,6 @@ opensmtpd-extras:
     pkg.installed:
         - pkgs:
             - opensmtpd-extras
-            - opensmtpd-extras-experimental
             - opensmtpd-filter-greylistd
         - fromrepo: mn-experimental
         - require:
