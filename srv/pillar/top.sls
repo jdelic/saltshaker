@@ -42,6 +42,10 @@ base:
         - match: grain
         - shared.secrets.smtp
 
+    'roles:pim':
+        - match: grain
+        - shared.calendar
+
     'roles:authserver':
         - match: grain
         - shared.authserver
@@ -50,6 +54,7 @@ base:
     '(?!test)$':
         - match: pcre
         - hetzner.mailserver-config
+        - hetzner.calendar
         - hetzner.dns
         - hetzner.network
         - hetzner.consul
@@ -59,7 +64,7 @@ base:
         - shared.urls
 
     # the minion ID starting with "cic" is the main PIM and mail server at Hetzner
-    'cic*':
+    'mail*':
         - shared.mailserver-private
         - shared.secrets.ssl
         - shared.authserver
@@ -67,6 +72,7 @@ base:
     # every minion ID ending in ".test" is a local dev environment
     '*.test':
         - local.mailserver-config
+        - local.calendar
         - local.dns
         - local.network
         - local.consul
