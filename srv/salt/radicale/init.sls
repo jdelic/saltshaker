@@ -44,9 +44,13 @@ radicale-config:
         - mode: '0640'
         - template: jinja
         - context:
-            bindip:
-            bindport:
-            storage_path: /secure/radicale/
+            bindip: {{pillar.get('calendar', {}).get(
+                'bind-ip', grains['ip_interfaces'][pillar['ifassign']['internal']][pillar['ifassign'].get(
+                    'internal-ip-index', 0
+                )|int()]
+            )}}
+            bindport: {{pillar.get('calendar', {}).get('bind-port', 8300)}}
+            storage_path: {{pillar['calendar']['storagepath']}}
             imap_host: {{pillar['imap-incoming']['hostname']}}
         - require:
             - file: radicale-secure-storage
