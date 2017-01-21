@@ -21,7 +21,18 @@ smartstack-hostnames:
     file.append:
         - name: /etc/hosts
         - text: 127.0.0.1    {% for alias in local_aliases %}{{alias}} {% endfor %}
+        - order: 2
 
+
+# If we're in a development environment, install a list of local well-known hosts in /etc/hosts
+# so we don't need a local DNS server.
+{% if pillar.get('wellknown_hosts'), None) %}
+wellknown-etc-hosts:
+    file.append:
+        - name: /etc/hosts
+        - text: {{pillar['wellknown_hosts']}}
+        - order: 2
+{% endif %}
 
 # set up vault command-line client configuration as a convenience in /etc/profile.d
 vault-envvar-config:
