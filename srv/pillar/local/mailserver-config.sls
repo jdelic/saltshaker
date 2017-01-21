@@ -16,7 +16,7 @@ smtp-local-relay: {}
 
 
 imap-incoming:
-    hostname: cic.maurusnet.test
+    hostname: mail.maurusnet.test
 
 # vim: syntax=yaml
 
