@@ -26,7 +26,7 @@ smartstack-hostnames:
 
 # If we're in a development environment, install a list of local well-known hosts in /etc/hosts
 # so we don't need a local DNS server.
-{% if pillar.get('wellknown_hosts'), None) %}
+{% if pillar.get('wellknown_hosts', None) %}
 wellknown-etc-hosts:
     file.append:
         - name: /etc/hosts
