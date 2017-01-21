@@ -85,6 +85,13 @@ dovecot-config-{{file}}:
                 {%- else %}
                     {{pillar['imap']['sslkey']}}
                 {%- endif %}
+            bindip: {{pillar['imap'].get(
+                    'bind-ip', grains['ip_interfaces'][pillar['ifassign']['external']][pillar['ifassign'].get(
+                        'external-ip-index', 0
+                    )|int()]
+                )}}
+            bindport: 143
+            ssl_bindport: 993
         - require:
             - pkg: dovecot
             - file: {{pillar['ssl']['service-rootca-cert']}}
@@ -114,7 +121,11 @@ dovecot-in{{port}}-recv:
         - chain: INPUT
         - jump: ACCEPT
         - source: '0/0'
-        - destination: {{pillar['imap'].get('ip', grains['ip_interfaces'][pillar['ifassign']['external']][pillar['ifassign'].get('external-ip-index', 0)|int()])}}
+        - destination: {{pillar['imap'].get(
+            'bind-ip', grains['ip_interfaces'][pillar['ifassign']['external']][pillar['ifassign'].get(
+                'external-ip-index', 0
+            )|int()]
+        )}}
         - dport: {{port}}
         - match: state
         - connstate: NEW
@@ -132,9 +143,17 @@ dovecot-consul-servicedef:
         - mode: '0644'
         - template: jinja
         - context:
-            ip: {{pillar['imap'].get('ip', grains['ip_interfaces'][pillar['ifassign']['external']][pillar['ifassign'].get('external-ip-index', 0)|int()])}}
+            ip: {{pillar['imap'].get(
+                'bind-ip', grains['ip_interfaces'][pillar['ifassign']['external']][pillar['ifassign'].get(
+                    'external-ip-index', 0
+                )|int()]
+            )}}
             port: 143
-            sslip: {{pillar['imap'].get('ip', grains['ip_interfaces'][pillar['ifassign']['external']][pillar['ifassign'].get('external-ip-index', 0)|int()])}}
+            sslip: {{pillar['imap'].get(
+                'bind-ip', grains['ip_interfaces'][pillar['ifassign']['external']][pillar['ifassign'].get(
+                    'external-ip-index', 0
+                )|int()]
+            )}}
             sslport: 993
         - require:
             - file: consul-service-dir
