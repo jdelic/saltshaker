@@ -69,7 +69,7 @@ radicale-rights:
 radicale-servicedef-external:
     file.managed:
         - name: /etc/consul/services.d/radicale-external.json
-        - source: salt://radicale/radicale.jinja.json
+        - source: salt://radicale/consul/radicale.jinja.json
         - mode: '0644'
         - template: jinja
         - context:
