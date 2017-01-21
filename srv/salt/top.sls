@@ -73,7 +73,7 @@ base:
 
     'roles:pim':
         - match: grain
-        - sogo
+        - radicale
 
     'roles:casserver':
         - match: grain
