@@ -4,14 +4,6 @@ emailstore:
     path: /secure/email
 
 
-filterstore:
-    path: /secure/webfilter
-
-
-mail-scripts:
-    install-dir: /usr/local/mail
-
-
 imap:
     sslcert: default  # special value "default" means: "use maincert from ssl.init"
     sslkey: default
