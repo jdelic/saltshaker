@@ -64,3 +64,25 @@ radicale-rights:
         - group: radicale
         - mode: '0640'
         - template: jinja
+
+
+radicale-servicedef-external:
+    file.managed:
+        - name: /etc/consul/services.d/radicale-external.json
+        - source: salt://radicale/radicale.jinja.json
+        - mode: '0644'
+        - template: jinja
+        - context:
+            routing: external
+            protocol: https
+            mode: http
+            ip: {{pillar.get('calendar', {}).get(
+                'bind-ip', grains['ip_interfaces'][pillar['ifassign']['internal']][pillar['ifassign'].get(
+                    'internal-ip-index', 0
+                )|int()]
+            )}}
+            port: {{pillar.get('calendar', {}).get('bind-port', 8300)}}
+            hostname: {{pillar['calendar']['hostname']}}
+        - require:
+            - service: radicale
+            - file: consul-service-dir
