@@ -30,7 +30,8 @@ smartstack-hostnames:
 wellknown-etc-hosts:
     file.append:
         - name: /etc/hosts
-        - text: {{pillar['wellknown_hosts']}}
+        - text: |
+            {{pillar['wellknown_hosts']|indent(12)}}
         - order: 2
 {% endif %}
 
