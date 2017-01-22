@@ -116,6 +116,14 @@ add-certificate-{{salt['file.basename'](cert)}}:
 {% endfor %}
 
 
+require-ssl-certificates:
+    test.nop:
+        - require:
+{% for cert in pillar['ssl'].get('install-ca-certs', []) + pillar['ssl'].get('install-perenv-ca-certs', []) %}
+            - file: install-certificates-{{salt['file.basename'](cert)}}
+{% endfor %}
+
+
 recompile-ca-certificates:
     cmd.run:
         - name: /usr/sbin/update-ca-certificates

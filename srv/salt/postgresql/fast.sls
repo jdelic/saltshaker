@@ -155,6 +155,8 @@ data-cluster-config-ssl_client_ca:
         - pattern: "^#ssl_ca_file = ''[^\n]*$"
         - repl: ssl_ca_file = '{{pillar['ssl']['environment-rootca-cert']}}'
         - backup: False
+        - use:
+            - require-ssl-certificates
         - require_in:
             # when pg_hba has sslcert users ssl_ca_cert must be set in postgresql.conf first
             - file: postgresql-hba-config
