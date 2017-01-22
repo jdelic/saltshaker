@@ -50,7 +50,7 @@ radicale-config:
                     'internal-ip-index', 0
                 )|int()]
             )}}
-            bindport: {{pillar.get('calendar', {}).get('bind-port', 8300)}}
+            bindport: {{pillar.get('calendar', {}).get('bind-port', 8990)}}
             storage_path: {{pillar['calendar']['storagepath']}}
             imap_host: {{pillar['imap-incoming']['hostname']}}
         - require:
@@ -82,14 +82,14 @@ radicale-servicedef-external:
                     'internal-ip-index', 0
                 )|int()]
             )}}
-            port: {{pillar.get('calendar', {}).get('bind-port', 8300)}}
+            port: {{pillar.get('calendar', {}).get('bind-port', 8990)}}
             hostname: {{pillar['calendar']['hostname']}}
         - require:
             - service: radicale
             - file: consul-service-dir
 
 
-radicale-tcp-in{{pillar.get('radicale', {}).get('bind-port', 8300)}}-recv:
+radicale-tcp-in{{pillar.get('radicale', {}).get('bind-port', 8990)}}-recv:
     iptables.append:
         - table: filter
         - chain: INPUT
@@ -100,7 +100,7 @@ radicale-tcp-in{{pillar.get('radicale', {}).get('bind-port', 8300)}}-recv:
                   'internal-ip-index', 0
               )|int()]
           )}}
-        - dport: {{pillar.get('calendar', {}).get('bind-port', 8300)}}
+        - dport: {{pillar.get('calendar', {}).get('bind-port', 8990)}}
         - match: state
         - connstate: NEW
         - proto: tcp
