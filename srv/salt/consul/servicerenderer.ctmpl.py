@@ -366,6 +366,8 @@ def main():
     preparser = argparse.ArgumentParser()
     preparser.add_argument("--only-iptables", dest="only_iptables", default=False, action="store_true",
                            help=argparse.SUPPRESS)
+    preparser.add_argument("--debug-iptables", dest="debug_iptables", default=False, action="store_true",
+                           help=argparse.SUPPRESS)
     args, _ = preparser.parse_known_args()
 
     parser = argparse.ArgumentParser(
@@ -373,7 +375,7 @@ def main():
                     "processed by consul-template and then invoked from consul-template."
     )
 
-    if not args.only_iptables:
+    if not args.only_iptables or args.debug_iptables:
         # only add required arguments if we actually need them
         parser.add_argument("template",
                             help="The Jinja2 template to render")
