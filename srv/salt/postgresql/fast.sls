@@ -160,6 +160,8 @@ data-cluster-config-ssl_client_ca:
         - require_in:
             # when pg_hba has sslcert users ssl_ca_cert must be set in postgresql.conf first
             - file: postgresql-hba-config
+        - watch_in:
+            - service: data-cluster-service
 {% endif %}
 
 data-cluster-service:
