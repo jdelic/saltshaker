@@ -375,7 +375,7 @@ def main():
                     "processed by consul-template and then invoked from consul-template."
     )
 
-    if not args.only_iptables or args.debug_iptables:
+    if not args.only_iptables and not args.debug_iptables:
         # only add required arguments if we actually need them
         parser.add_argument("template",
                             help="The Jinja2 template to render")
