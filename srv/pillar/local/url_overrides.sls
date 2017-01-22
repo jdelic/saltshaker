@@ -26,12 +26,12 @@ repos:
 
 urls:
     concourse: http://fileserver.maurusnet.test/downloads/concourse/concourse_linux_amd64
-    consul: http://fileserver.maurusnet.test/downloads/consul/consul_0.7.1_linux_amd64.zip
-    consul-template: http://fileserver.maurusnet.test/downloads/consul-template/consul-template_0.16.0_linux_amd64.zip
-    consul-webui: http://fileserver.maurusnet.test/downloads/consul/consul_0.7.1_web_ui.zip
+    consul: http://fileserver.maurusnet.test/downloads/consul/consul_0.7.2_linux_amd64.zip
+    consul-template: http://fileserver.maurusnet.test/downloads/consul-template/consul-template_0.18.0_linux_amd64.zip
+    consul-webui: http://fileserver.maurusnet.test/downloads/consul/consul_0.7.2_web_ui.zip
     djbdns: http://fileserver.maurusnet.test/downloads/djbdns/djbdns-1.05.tar.gz
     exxo: http://fileserver.maurusnet.test/downloads/exxo/exxo-0.0.5.tar.xz
-    nomad: http://fileserver.maurusnet.test/downloads/nomad/nomad_0.5.1_linux_amd64.zip
+    nomad: http://fileserver.maurusnet.test/downloads/nomad/nomad_0.5.2_linux_amd64.zip
     pyrun34: http://fileserver.maurusnet.test/downloads/exxo/egenix-pyrun-2.2.1-py3.4_ucs4-linux-x86_64.tgz
     pyrun35: http://fileserver.maurusnet.test/downloads/exxo/egenix-pyrun-2.2.1-py3.5_ucs4-linux-x86_64.tgz
     qmail: http://fileserver.maurusnet.test/downloads/qmail/qmail-1.03.tar.gz
@@ -42,14 +42,14 @@ urls:
 
 hashes:
     concourse: sha256=ba974aabc744e1c32f33a25720fdf3a40b176a040fb0ecdedb1d5862fa5ccb9c
-    consul: sha256=5dbfc555352bded8a39c7a8bf28b5d7cf47dec493bc0496e21603c84dfe41b4b
-    consul-template: sha256=064b0b492bb7ca3663811d297436a4bbf3226de706d2b76adade7021cd22e156
-    consul-webui: sha256sum=1b793c60e1af24cc470421d0411e13748f451b51d8a6ed5fcabc8d00bfb84264
+    consul: sha256=aa97f4e5a552d986b2a36d48fdc3a4a909463e7de5f726f3c5a89b8a1be74a58
+    consul-template: sha256=f7adf1f879389e7f4e881d63ef3b84bce5bc6e073eb7a64940785d32c997bc4b
+    consul-webui: sha256=c9d2a6e1d1bb6243e5fd23338d92f5c71cdf0a4077f7fcc95fd81800fa1f42a9
     djbdns: sha256=3ccd826a02f3cde39be088e1fc6aed9fd57756b8f970de5dc99fcd2d92536b48
     exxo: sha256=ce3d6ae10d364c5a0726cce127602fe6fa5d042b11afd21d79502f8216b42e1e
-    nomad: sha256sum=f93fc55d0c68883a28198c9fab93887f535c00193fce80b4be89cd09b6bbdb94
-    pyrun34: sha256sum=9798f3cd00bb39ee07daddb253665f4e3777ab58ffb6b1d824e206d338017e71
-    pyrun35: sha256sum=d20bd23b3e6485c0122d4752fb713f30229e7c522e4482cc9716afc05413b02e
+    nomad: sha256=7f23aa44686b2ae505ecfc5364a43f87c2a029ea03f6ab050384f2a2b32ac648
+    pyrun34: sha256=9798f3cd00bb39ee07daddb253665f4e3777ab58ffb6b1d824e206d338017e71
+    pyrun35: sha256=d20bd23b3e6485c0122d4752fb713f30229e7c522e4482cc9716afc05413b02e
     qmail: sha256=21ed6c562cbb55092a66197c35c8222b84115d1acab0854fdb1ad1f301626f88
     terraform: sha256=133766ed558af04255490f135fed17f497b9ba1e277ff985224e1287726ab2dc
     vault: sha256=04d87dd553aed59f3fe316222217a8d8777f40115a115dac4d88fac1611c51a6
