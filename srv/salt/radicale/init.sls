@@ -26,13 +26,14 @@ radicale:
 
 radicale-secure-storage:
     file.directory:
-        - name: /secure/radicale
+        - name: {{pillar['calendar']['storagepath']}}
         - user: radicale
         - group: radicale
         - mode: '0750'
         - makedirs: True
         - require:
             - secure-mount
+            - pkg: radicale
 
 
 radicale-config:
