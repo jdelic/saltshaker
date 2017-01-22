@@ -339,26 +339,28 @@ def _setup_iptables(services, ip, mode, debug=False):
             output_rule = None
 
         if input_rule:
-            try:
-                # check if the rule exists first... iptables wille exit with 0 if it does
-                subprocess.check_call(["/sbin/iptables", "-C"] + input_rule)
-            except subprocess.CalledProcessError as e:
-                if e.returncode == 1:
-                    if debug:
-                        print("%s: %s" % (svc.name, " ".join(["/sbin/iptables", "-A"] + input_rule)))
-                    subprocess.call(["/sbin/iptables", "-A"] + input_rule)
+            if debug:
+                print("%s: %s" % (svc.name, " ".join(["/sbin/iptables", "-A"] + input_rule)))
             else:
-                print("%s: INPUT rule exists" % svc.name, file=sys.stderr)
+                try:
+                    # check if the rule exists first... iptables wille exit with 0 if it does
+                    subprocess.check_call(["/sbin/iptables", "-C"] + input_rule)
+                except subprocess.CalledProcessError as e:
+                    if e.returncode == 1:
+                        subprocess.call(["/sbin/iptables", "-A"] + input_rule)
+                else:
+                    print("%s: INPUT rule exists" % svc.name, file=sys.stderr)
         if output_rule:
-            try:
-                subprocess.check_call(["/sbin/iptables", "-C"] + output_rule)
-            except subprocess.CalledProcessError as e:
-                if e.returncode == 1:
-                    if debug:
-                        print("%s: %s" % (svc.name, " ".join(["/sbin/iptables", "-A"] + output_rule)))
-                    subprocess.call(["/sbin/iptables", "-A"] + output_rule)
+            if debug:
+                print("%s: %s" % (svc.name, " ".join(["/sbin/iptables", "-A"] + output_rule)))
             else:
-                print("%s: OUTPUT rule exists" % svc.name, file=sys.stderr)
+                try:
+                    subprocess.check_call(["/sbin/iptables", "-C"] + output_rule)
+                except subprocess.CalledProcessError as e:
+                    if e.returncode == 1:
+                        subprocess.call(["/sbin/iptables", "-A"] + output_rule)
+                else:
+                    print("%s: OUTPUT rule exists" % svc.name, file=sys.stderr)
 
 
 def main():
