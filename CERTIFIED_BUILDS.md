@@ -309,20 +309,20 @@ vault write pki-myapp-dev/intermediate/generate/internal \
 
 # Sign the intermediate CA using your private Myapp Dev CA
 # then write the certificate back to the Vault store
-vault write pki-dev/intermediate/set-signed certificate=-
+vault write pki-myapp-dev/intermediate/set-signed certificate=-
 
 # Cross sign the certificate with your environment CA if you
 # want to follow the split model described above!
 
 # You can also use the root certificate with a trustchain
 # in the client certificate.
-vault write pki-dev/roles/build ttl=8760h allow_localhost=false \
+vault write pki-myapp-dev/roles/build ttl=8760h allow_localhost=false \
     allow_ip_sans=false server_flag=false client_flag=true \
     allow_any_name=true key_type=rsa
 
 # Request a build certificate for a build
 # We "hack" the git hash into a domain name SAN because Vault currently
 # doesn't support freetext SANs. This should run in your build scripts.
-vault write pki-dev/issue/build common_name="vaultadmin" \
+vault write pki-myapp-dev/issue/build common_name="vaultadmin" \
     alt_names="024572834273498734.git" exclude_cn_from_sans=true
 ```
