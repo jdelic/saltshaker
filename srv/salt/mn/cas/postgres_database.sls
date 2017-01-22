@@ -63,7 +63,7 @@ dkimsigner-postgres:
         - user: postgres
         - maintenance_db: {{pillar['authserver']['dbname']}}
         - require:
-            - postgres_user: {{pillar['dkimsigner']['dbuser']}}
+            - postgres_user: dkimsigner-postgres
 
 
 dkimsigner-drop-create:
@@ -76,7 +76,7 @@ dkimsigner-drop-create:
         - user: postgres
         - maintenance_db: {{pillar['authserver']['dbname']}}
         - require:
-            - postgres_user: {{pillar['dkimsigner']['dbuser']}}
+            - postgres_user: dkimsigner-postgres
 
 
 dkimsigner-usage-privileges:
@@ -88,7 +88,7 @@ dkimsigner-usage-privileges:
             - USAGE
         - maintenance_db: {{pillar['authserver']['dbname']}}
         - require:
-            - postgres_user: {{pillar['dkimsigner']['dbuser']}}
+            - postgres_user: dkimsigner-postgres
 
 
 dkimsigner-read-privileges:
@@ -100,7 +100,7 @@ dkimsigner-read-privileges:
             - SELECT
         - maintenance_db: {{pillar['authserver']['dbname']}}
         - require:
-            - postgres_user: {{pillar['dkimsigner']['dbuser']}}
+            - postgres_user: dkimsigner-postgres
 
 
 authserver-vault-md5:
