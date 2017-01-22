@@ -2,7 +2,7 @@
 
 dkimsigner:
     pkg.installed:
-        - name: maurusnet-authserver
+        - name: authserver
         - fromrepo: mn-nightly
         - require:
             - appconfig: dkimsigner-appconfig
