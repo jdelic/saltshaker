@@ -78,6 +78,8 @@ data-cluster-config-network:
         )}}'
         - require:
             - cmd: data-cluster
+        - require_in:
+            - file: postgresql-hba-config
 
 
 {% if pillar.get("ssl", {}).get("postgresql") %}
@@ -112,6 +114,8 @@ data-cluster-config-sslcert:
             if pillar['postgresql'].get('sslcert', 'default') != 'default'
             else pillar['ssl']['filenames']['default-cert-combined']}}'
         - backup: False
+        - require_in:
+            - file: postgresql-hba-config
 
 
 data-cluster-config-sslkey:
@@ -122,7 +126,8 @@ data-cluster-config-sslkey:
             if pillar['postgresql'].get('sslcert', 'default') != 'default'
             else pillar['ssl']['filenames']['default-cert-key']}}'
         - backup: False
-
+        - require_in:
+            - file: postgresql-hba-config
 
 data-cluster-config-sslciphers:
     file.replace:
@@ -137,6 +142,8 @@ data-cluster-config-sslciphers:
             DHE-RSA-AES256-SHA:ECDHE-ECDSA-DES-CBC3-SHA:ECDHE-RSA-DES-CBC3-SHA:EDH-RSA-DES-CBC3-SHA:AES128-GCM-SHA256:
             AES256-GCM-SHA384:AES128-SHA256:AES256-SHA256:AES128-SHA:AES256-SHA:DES-CBC3-SHA:!DSS'
         - backup: False
+        - require_in:
+            - file: postgresql-hba-config
 {% endif %}
 
 {% if pillar.get("ssl", {}).get("environment-rootca-cert", None) %}
@@ -148,6 +155,9 @@ data-cluster-config-ssl_client_ca:
         - pattern: "^#ssl_ca_file = ''[^\n]*$"
         - repl: ssl_ca_file = '{{pillar['ssl']['environment-rootca-cert']}}'
         - backup: False
+        - require_in:
+            # when pg_hba has sslcert users ssl_ca_cert must be set in postgresql.conf first
+            - file: postgresql-hba-config
 {% endif %}
 
 data-cluster-service:
