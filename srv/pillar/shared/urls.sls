@@ -15,7 +15,7 @@ repos:
     maurusnet: deb http://repo.maurus.net/debian/ jessie main
     maurusnet-nightly: deb http://repo.maurus.net/nightly/ mn-nightly main
     maurusnet-opensmtpd: deb http://repo.maurus.net/opensmtpd/ mn-experimental main
-    maurusnet-radicale: deb http://repo.maurus.net/radicale/ jessie main
+    maurusnet-radicale: deb http://repo.maurus.net/radicale/ mn-radicale main
     postgresql: deb http://apt.postgresql.org/pub/repos/apt/ jessie-pgdg main
     powerdns: deb http://repo.powerdns.com/debian jessie-auth-40 main
     stretch-testing: deb http://ftp-stud.hs-esslingen.de/debian/ stretch main
