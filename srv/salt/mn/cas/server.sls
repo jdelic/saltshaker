@@ -70,7 +70,6 @@ authserver-servicedef-external:
             port: {{config['BINDPORT']}}
             hostname: {{pillar['authserver']['hostname']}}
         - require:
-            - service: authserver
             - file: consul-service-dir
 
 
@@ -88,7 +87,6 @@ authserver-servicedef-internal:
             ip: {{config['BINDIP']}}
             port: {{config['BINDPORT']}}
         - require:
-            - service: authserver
             - file: consul-service-dir
 
 
