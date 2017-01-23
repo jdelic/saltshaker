@@ -276,7 +276,7 @@ mailspool-{{dir[0]}}:
 {% endfor %}
 
 
-opensmtpd-consul:
+opensmtpd-servicedef-internal:
     file.managed:
         - name: /etc/consul/services.d/smtp.json
         - source: salt://opensmtpd/consul/smtp.jinja.json
