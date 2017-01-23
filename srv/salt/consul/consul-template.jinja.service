@@ -9,7 +9,7 @@ Group=root
 Environment=GOMAXPROCS=2
 ExecStart=/usr/local/bin/consul-template -config /etc/consul/consul-template.conf -config /etc/consul/template.d
 ExecReload=/bin/kill -HUP $MAINPID
-PIDFile=/run/consul-template.pid
+PIDFile=/run/consul/consul-template.pid
 KillMode=process
 Restart=on-failure
 # StartLimitInterval: try to restart for unlimited times, because this is an essential service!
