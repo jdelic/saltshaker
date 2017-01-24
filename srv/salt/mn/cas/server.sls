@@ -10,7 +10,7 @@ authserver:
         - name: authserver
         - sig: authserver.wsgi
         - enable: True
-        - init_delay: 2
+        - init_delay: 3
         - require:
             - pkg: authserver
 

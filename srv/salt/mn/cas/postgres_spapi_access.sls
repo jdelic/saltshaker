@@ -18,6 +18,7 @@ authserver-{{rolename}}-spapi-access:
             - replication: False
             - password: {{pillar['dynamicsecrets'][rolename]}}
             - user: postgres
+            - order: 20  # see ORDER.md
             - require:
                 - service: data-cluster-service
                 - postgres_database: authserver-postgres

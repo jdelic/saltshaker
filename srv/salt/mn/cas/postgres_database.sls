@@ -99,8 +99,7 @@ dkimsigner-read-privileges:
         - privileges:
             - SELECT
         - maintenance_db: {{pillar['authserver']['dbname']}}
-        - require:
-            - postgres_user: dkimsigner-postgres
+        - order: last  # make sure this is ordered after authserver setup, when the database table exists
 
 
 authserver-vault-md5:
