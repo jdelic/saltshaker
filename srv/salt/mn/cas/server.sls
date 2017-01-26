@@ -96,7 +96,7 @@ authserver-tcp-in{{pillar.get('authserver', {}).get('bind-port', 8999)}}-recv:
         - chain: INPUT
         - jump: ACCEPT
         - source: '0/0'
-        - destination: {{config['BINDIP']}}
+        - destination: {{config['BINDIP']}}/32
         - dport: {{config['BINDPORT']}}
         - match: state
         - connstate: NEW
