@@ -45,6 +45,19 @@ greylistd-modify-rundir:
         - group: opensmtpd
         - mode: '0755'
         - makedirs: True
+        - recurse:
+            - user
+            - group
+
+
+greylistd-modify-libdir:
+    file.directory:
+        - name: /var/lib/greylistd
+        - user: opensmtpd
+        - group: opensmtpd
+        - recurse:
+            - user
+            - group
 
 
 greylistd:
@@ -60,6 +73,7 @@ greylistd:
             - file: greylistd-initd-user
             - file: greylistd-initd-group
             - file: greylistd-modify-rundir
+            - file: greylistd-modify-libdir
 
 
 amavisd:
