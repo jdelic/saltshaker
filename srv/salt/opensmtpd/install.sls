@@ -139,6 +139,23 @@ opensmtpd-internal-relay-sslkey:
 {% endif %}
 
 
+{% set opensmtpd_ips = {
+    "relay": pillar.get('smtp-outgoing', {}).get(
+                 'bind-ip', grains['ip_interfaces'][pillar['ifassign']['external-alt']][pillar['ifassign'].get(
+                     'external-alt-ip-index', 0
+                 )|int()]
+             ),
+    "receiver": pillar.get('smtp-incoming', {}).get(
+                    'bind-ip', grains['ip_interfaces'][pillar['ifassign']['external']][pillar['ifassign'].get(
+                        'external-ip-index', 0
+                    )|int()]
+                ),
+    "internal_relay": pillar.get('smtp-local-relay', {}).get(
+                          'bind-ip', grains['ip_interfaces'][pillar['ifassign']['internal']][pillar['ifassign'].get(
+                              'internal-ip-index', 0
+                          )|int()]
+                      ),
+} %}
 opensmtpd-config:
     file.managed:
         - name: /etc/smtpd.conf
@@ -148,21 +165,9 @@ opensmtpd-config:
             receiver_hostname: {{pillar['smtp-incoming']['hostname']}}
             relay_hostname: {{pillar['smtp-outgoing']['hostname']}}
             internal_relay_hostname: {{pillar['smtp']['smartstack-hostname']}}
-            receiver_ip: {{pillar.get('smtp-incoming', {}).get(
-                'bind-ip', grains['ip_interfaces'][pillar['ifassign']['external']][pillar['ifassign'].get(
-                    'external-ip-index', 0
-                )|int()]
-            )}}
-            relay_ip: {{pillar.get('smtp-outgoing', {}).get(
-                'bind-ip', grains['ip_interfaces'][pillar['ifassign']['external-alt']][pillar['ifassign'].get(
-                    'external-alt-ip-index', 0
-                )|int()]
-            )}}
-            internal_relay_ip: {{pillar.get('smtp-local-relay', {}).get(
-                'bind-ip', grains['ip_interfaces'][pillar['ifassign']['internal']][pillar['ifassign'].get(
-                    'internal-ip-index', 0
-                )|int()]
-            )}}
+            receiver_ip: {{opensmtpd_ips['receiver']}}
+            relay_ip: {{opensmtpd_ips['relay']}}
+            internal_relay_ip: {{opensmtpd_ips['internal_relay']}}
             receiver_certfile: >
                 {% if pillar['smtp']['receiver']['sslcert'] == 'default' -%}
                     {{pillar['ssl']['filenames']['default-cert-combined']}}
@@ -283,11 +288,7 @@ opensmtpd-servicedef-internal:
         - mode: '0644'
         - template: jinja
         - context:
-            relayip: {{pillar.get('smtp-local-relay', {}).get(
-                'bind-ip', grains['ip_interfaces'][pillar['ifassign']['internal']][pillar['ifassign'].get(
-                    'internal-ip-index', 0
-                )|int()]
-            )}}
+            relayip: {{opensmtpd_ips['internal_relay']}}
             relayport: 25
         - require:
             - file: consul-service-dir
