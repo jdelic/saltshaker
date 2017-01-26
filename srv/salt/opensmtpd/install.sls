@@ -38,6 +38,15 @@ greylistd-initd-group:
         - backup: False
 
 
+greylistd-modify-rundir:
+    file.directory:
+        - name: /run/greylistd
+        - user: opensmtpd
+        - group: opensmtpd
+        - mode: '0755'
+        - makedirs: True
+
+
 greylistd:
     pkg.installed:
         - name: greylistd
@@ -50,6 +59,7 @@ greylistd:
             - pkg: greylistd
             - file: greylistd-initd-user
             - file: greylistd-initd-group
+            - file: greylistd-modify-rundir
 
 
 amavisd:
