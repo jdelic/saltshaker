@@ -24,8 +24,8 @@ dockerd-systemd:
         - source: salt://docker/docker.jinja.service
         - template: jinja
         - context:
-            bridge_ip: {{pillar['docker']['bridge-ip']}}
-            bridge_cidr: {{pillar['docker']['container-cidr']}}
+            bridge_cidr: {{pillar['docker']['bridge-ip']}}
+            container_cidr: {{pillar['docker']['container-cidr']}}
         - require:
             - pkg: docker
 
