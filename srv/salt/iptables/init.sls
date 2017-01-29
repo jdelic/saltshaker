@@ -160,5 +160,17 @@ iptables-default-forward-drop:
             - pkg: iptables
 
 
+enable-ipv4-forwarding:
+    sysctl.present:
+        - name: net.ipv4.ip_forward
+        - value: 1
+
+
+enable-ipv4-nonlocalbind:
+    sysctl.present:
+        - name: net.ipv4.ip_nonlocal_bind
+        - value: 1
+
+
 # vim: syntax=yaml
 
