@@ -38,3 +38,7 @@ dockerd-service:
             - pkg: docker
         - watch:
             - file: dockerd-systemd
+
+
+# TODO: add a DROP rule to the FORWARD chain so not every container gets hooked up
+# to the internet
