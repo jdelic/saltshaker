@@ -6,32 +6,23 @@ include:
     - haproxy.install
 
 
-haproxy-config-template-docker:
-    file.managed:
-        - name: /etc/haproxy/haproxy-docker.jinja.cfg
-        - source: salt://haproxy/haproxy-internal.jinja.cfg
-        - require:
-            - pkg: haproxy
-        - watch_in:
-            - service: consul-template-service
-
-
 smartstack-docker:
     file.managed:
         - name: /etc/consul/template.d/smartstack-docker.conf
         - source: salt://consul/template-config.jinja.conf
         - template: jinja
         - context:
-            servicescript: /etc/consul/renders/smartstack-internal.py
+            servicescript: /etc/consul/renders/smartstack-docker.py
             target: /etc/haproxy/haproxy-docker.cfg
             # this (yaml folded) command-line will reload haproxy if it is running and restart it otherwise
             command: >
                 ps awwfux | grep -v grep | grep -q 'haproxy -f /etc/haproxy/haproxy-docker.cfg' &&
-                systemctl reload haproxy@internal ||
-                systemctl restart haproxy@internal
+                systemctl reload haproxy@docker ||
+                systemctl restart haproxy@docker
+            # the escaping of localip is necessary for the consul-template command="" stanza
             parameters: >
                 --has smartstack:internal
-                --smartstack-localip {{pillar.get('docker', {}).get('bridge-ip', grains['ip_interfaces']['docker0'])}}
+                --smartstack-localip \"{{pillar.get('docker', {}).get('bridge-ip', grains['ip_interfaces']['docker0'])}} transparent\"
             template: /etc/haproxy/haproxy-internal.jinja.cfg
         - require:
             - file: haproxy-config-template-internal
