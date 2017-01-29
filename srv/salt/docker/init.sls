@@ -36,4 +36,5 @@ dockerd-service:
         - enable: True
         - require:
             - pkg: docker
-            - file: docker-systemd
+        - watch:
+            - file: dockerd-systemd
