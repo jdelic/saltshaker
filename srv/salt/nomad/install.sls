@@ -11,6 +11,18 @@
 
 nomad-data-dir:
     file.directory:
+        - name: /var/lib/nomad
+        - makedirs: True
+        - user: {{nomad_user}}
+        - group: {{nomad_group}}
+        - mode: '0755'
+        - require:
+            - user: nomad
+            - group: nomad
+
+
+nomad-pidfile-dir:
+    file.directory:
         - name: /run/nomad
         - makedirs: True
         - user: {{nomad_user}}
@@ -21,7 +33,7 @@ nomad-data-dir:
             - group: nomad
 
 
-nomad-data-dir-systemd:
+nomad-pidfile-dir-systemd:
     file.managed:
         - name: /usr/lib/tmpfiles.d/nomad.conf
         - source: salt://nomad/nomad.tmpfiles.conf
@@ -79,8 +91,13 @@ nomad:
         - replace: False
         - require:
             - user: nomad
+            - file: nomad-pidfile-dir
             - file: nomad-data-dir
             - archive: nomad
+
+
+{% set internal_ip = grains['ip_interfaces'][pillar['ifassign']['internal']][
+                        pillar['ifassign'].get('internal-ip-index', 0)|int()] %}
 
 
 nomad-agent-config:
@@ -99,6 +116,19 @@ nomad-server-config:
         - name: /etc/nomad/server.hcl
         - source: salt://nomad/server.hcl
         - template: jinja
+        - context:
+            internal_ip: {{internal_ip}}
+        - require:
+            - file: nomad-service-dir
+
+
+nomad-common-config:
+    file.managed:
+        - name: /etc/nomad/common.hcl
+        - source: salt://nomad/common.hcl
+        - template: jinja
+        - context:
+            internal_ip: {{internal_ip}}
         - require:
             - file: nomad-service-dir
 
@@ -112,6 +142,7 @@ nomad-service:
             user: {{nomad_user}}
             group: {{nomad_group}}
             parameters: >
+                -config=/etc/nomad/common.hcl
                 {% if pillar.get('nomad-cluster', {}).get('is-server', False) -%}
                     -config=/etc/nomad/server.hcl
                 {% endif -%}
@@ -126,6 +157,7 @@ nomad-service:
             - file: nomad-service
             - file: nomad-server-config
             - file: nomad-agent-config
+            - file: nomad-common-config
         - watch:
             - file: nomad-service  # if consul.service changes we want to *restart* (reload: False)
             - file: nomad  # restart on a change of the binary
