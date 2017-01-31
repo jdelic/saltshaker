@@ -6,7 +6,7 @@ After=basic.target network.target
 [Service]
 User={{user}}
 Group={{group}}
-ExecStart=/usr/local/bin/nomad {{parameters}}
+ExecStart=/usr/local/bin/nomad agent {{parameters}}
 ExecReload=/bin/kill -HUP $MAINPID
 KillMode=process
 Restart=on-failure
