@@ -43,7 +43,7 @@ It also contains configuration for
 
   * a fully fledged PIM+Mail server with encrypted storage (based on
     [Radicale](http://radicale.org/), [Dovecot](http://dovecot.org) and
-    [OpenSMTPD](https://www.opensmtpd.org/)
+    [OpenSMTPD](https://www.opensmtpd.org/))
 
   * single-sign-on for Radicale, Dovecot and OpenSMTPD, other web applications and
     even PAM using CAS
@@ -113,8 +113,10 @@ repository**.
 For my salt states to work, you **must** provide your own`shared.secrets`
 pillar in `srv/pillar/shared/secrets` that **must** contain the following
 pillars, unless you rework the salt states to use different ones. I use a
-wildcard certificate for my domains, but if you want to, you can `grep` for the
-pillars below and replace them with your own per-service certificates as well:
+wildcard certificate for my domains and the configuration pillars for 
+individual servers allow you to specify pillar references to change what 
+certificates are used, but in the default configuration most services refer
+to the ``maincert``, which is the wildcard certificate:
 
 In `shared.secrets.ssl`:
   * `ssl:maincert:cert` - The public X.509 SSL certificate for your domain.
