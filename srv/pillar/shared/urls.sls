@@ -32,7 +32,7 @@ urls:
     consul-webui: https://releases.hashicorp.com/consul/0.7.2/consul_0.7.2_web_ui.zip
     djbdns: http://cr.yp.to/djbdns/djbdns-1.05.tar.gz
     exxo: https://bintray.com/artifact/download/mbachry/exxo/exxo-0.0.7.tar.xz
-    nomad: https://releases.hashicorp.com/nomad/0.5.2/nomad_0.5.2_linux_amd64.zip
+    nomad: https://releases.hashicorp.com/nomad/0.5.3/nomad_0.5.3_linux_amd64.zip
     pyrun34: https://downloads.egenix.com/python/egenix-pyrun-2.2.1-py3.4_ucs4-linux-x86_64.tgz
     pyrun35: https://downloads.egenix.com/python/egenix-pyrun-2.2.1-py3.5_ucs4-linux-x86_64.tgz
     qmail: http://cr.yp.to/software/qmail-1.03.tar.gz
@@ -47,7 +47,7 @@ hashes:
     consul-webui: sha256=c9d2a6e1d1bb6243e5fd23338d92f5c71cdf0a4077f7fcc95fd81800fa1f42a9
     djbdns: sha256=3ccd826a02f3cde39be088e1fc6aed9fd57756b8f970de5dc99fcd2d92536b48
     exxo: sha256=ce3d6ae10d364c5a0726cce127602fe6fa5d042b11afd21d79502f8216b42e1e
-    nomad: sha256=7f23aa44686b2ae505ecfc5364a43f87c2a029ea03f6ab050384f2a2b32ac648
+    nomad: sha256=0a81ecc1dff18ab07d6e8c8b99e3be9a7727e40efa53008919db851f34c2ae39
     pyrun34: sha256=9798f3cd00bb39ee07daddb253665f4e3777ab58ffb6b1d824e206d338017e71
     pyrun35: sha256=d20bd23b3e6485c0122d4752fb713f30229e7c522e4482cc9716afc05413b02e
     qmail: sha256=21ed6c562cbb55092a66197c35c8222b84115d1acab0854fdb1ad1f301626f88
