@@ -1,0 +1,19 @@
+[Unit]
+Description=Nomad Cluster
+Wants=basic.target
+After=basic.target network.target
+
+[Service]
+User={{user}}
+Group={{group}}
+ExecStart=/usr/local/bin/nomad {{parameters}}
+ExecReload=/bin/kill -HUP $MAINPID
+KillMode=process
+Restart=on-failure
+PIDFile=/run/nomad/nomad.pid
+# StartLimitInterval: try to restart for unlimited times, because this is an essential service!
+StartLimitInterval=0
+RestartSec=42s
+
+[Install]
+WantedBy=multi-user.target

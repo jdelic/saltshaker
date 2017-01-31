@@ -50,6 +50,10 @@ base:
         - match: grain
         - shared.authserver
 
+    'roles:nomadserver':
+        - match: grain
+        - allenvs.nomadserver
+
     # every minion ID not ending in "test" is at Hetzner right now
     '(?!test)$':
         - match: pcre
