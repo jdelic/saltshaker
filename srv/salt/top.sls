@@ -46,6 +46,7 @@ base:
     'roles:apps':
         - match: grain
         - docker
+        - nomad.install
         - mn.appconfig
 
     'roles:database':
