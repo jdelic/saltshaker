@@ -1,5 +1,5 @@
 
 server {
     enabled = true
-    bootstrap_expect = 3
+    bootstrap_expect = {{bootstrap_expect}}
 }

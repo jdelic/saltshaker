@@ -117,7 +117,7 @@ nomad-server-config:
         - source: salt://nomad/server.hcl
         - template: jinja
         - context:
-            internal_ip: {{internal_ip}}
+            bootstrap_expect: {{pillar['nomad-cluster']['number-of-servers']}}
         - require:
             - file: nomad-service-dir
 
