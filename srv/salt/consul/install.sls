@@ -31,6 +31,10 @@ consul-data-dir-systemd:
     file.managed:
         - name: /usr/lib/tmpfiles.d/consul.conf
         - source: salt://consul/consul.tmpfiles.conf
+        - template: jinja
+        - context:
+            user: {{consul_user}}
+            group: {{consul_group}}
         - user: root
         - group: root
         - mode: '0644'
