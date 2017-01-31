@@ -42,3 +42,108 @@ dockerd-service:
 
 # TODO: add a DROP rule to the FORWARD chain so not every container gets hooked up
 # to the internet
+
+
+# enable encryption for overlay nets
+docker-overlaynet-enable-protocol50-in:
+    iptables.append:
+        - table: filter
+        - chain: INPUT
+        - jump: ACCEPT
+        - in-interface: {{pillar['ifassign']['internal']}}
+        - proto: 50
+
+
+docker-overlaynet-enable-protocol50-out:
+    iptables.append:
+        - table: filter
+        - chain: OUTPUT
+        - jump: ACCEPT
+        - out-interface: {{pillar['ifassign']['internal']}}
+        - proto: 50
+
+
+docker-overlaynet-udp-in4789-recv:
+    iptables.append:
+        - table: filter
+        - chain: INPUT
+        - jump: ACCEPT
+        - in-interface: {{pillar['ifassign']['internal']}}
+        - dport: 4789
+        - proto: udp
+        - save: True
+        - require:
+            - sls: iptables
+
+
+docker-overlaynet-udp-in4789-send:
+    iptables.append:
+        - table: filter
+        - chain: OUTPUT
+        - jump: ACCEPT
+        - out-interface: {{pillar['ifassign']['internal']}}
+        - sport: 4789
+        - proto: udp
+        - save: True
+        - require:
+            - sls: iptables
+
+
+docker-tcp-in7946-recv:
+    iptables.append:
+        - table: filter
+        - chain: INPUT
+        - jump: ACCEPT
+        - in-interface: {{pillar['ifassign']['internal']}}
+        - dport: 7946
+        - match: state
+        - connstate: NEW
+        - proto: tcp
+        - save: True
+        - require:
+            - sls: iptables
+
+
+docker-tcp-out7946-send:
+    iptables.append:
+        - table: filter
+        - chain: OUTPUT
+        - jump: ACCEPT
+        - out-interface: {{pillar['ifassign']['internal']}}
+        - dport: 7946
+        - match: state
+        - connstate: NEW
+        - proto: tcp
+        - save: True
+        - require:
+            - sls: iptables
+
+
+docker-tcp-in2377-recv:
+    iptables.append:
+        - table: filter
+        - chain: INPUT
+        - jump: ACCEPT
+        - in-interface: {{pillar['ifassign']['internal']}}
+        - dport: 2377
+        - match: state
+        - connstate: NEW
+        - proto: tcp
+        - save: True
+        - require:
+            - sls: iptables
+
+
+docker-tcp-out2377-send:
+    iptables.append:
+        - table: filter
+        - chain: OUTPUT
+        - jump: ACCEPT
+        - out-interface: {{pillar['ifassign']['internal']}}
+        - dport: 2377
+        - match: state
+        - connstate: NEW
+        - proto: tcp
+        - save: True
+        - require:
+            - sls: iptables
