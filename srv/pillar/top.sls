@@ -62,6 +62,7 @@ base:
         - hetzner.dns
         - hetzner.network
         - hetzner.consul
+        - hetzner.nomad
         - hetzner.buildserver
         - hetzner.ssl
         - hetzner.authserver
@@ -80,6 +81,7 @@ base:
         - local.dns
         - local.network
         - local.consul
+        - local.nomad
         - local.buildserver
         - local.ssl
         - local.authserver
