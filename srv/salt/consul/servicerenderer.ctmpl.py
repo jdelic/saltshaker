@@ -294,7 +294,7 @@ def parse_smartstack_tags(service):
     return sv
 
 
-def _setup_iptables(services, ip, mode, debug=False):
+def _setup_iptables(services, ip, mode, debug=False, verbose=False):
     if debug:
         print("========= IPTABLES RULES DEBUG =========")
 
@@ -349,7 +349,8 @@ def _setup_iptables(services, ip, mode, debug=False):
                     if e.returncode == 1:
                         subprocess.call(["/sbin/iptables", "-A"] + input_rule)
                 else:
-                    print("%s: INPUT rule exists" % svc.name, file=sys.stderr)
+                    if verbose:
+                        print("%s: INPUT rule exists" % svc.name, file=sys.stderr)
         if output_rule:
             if debug:
                 print("%s: %s" % (svc.name, " ".join(["/sbin/iptables", "-A"] + output_rule)))
@@ -360,7 +361,8 @@ def _setup_iptables(services, ip, mode, debug=False):
                     if e.returncode == 1:
                         subprocess.call(["/sbin/iptables", "-A"] + output_rule)
                 else:
-                    print("%s: OUTPUT rule exists" % svc.name, file=sys.stderr)
+                    if verbose:
+                        print("%s: OUTPUT rule exists" % svc.name, file=sys.stderr)
 
 
 def main():
@@ -415,6 +417,8 @@ def main():
                         help="Define a template variable for the rendering in the form 'varname=value'. 'varname' will "
                              "be added directly to the Jinja rendering context. Setting 'varname' multiple times will "
                              "create a list.")
+    parser.add_argument("-v", "--verbose", dest="verbose", action="store_true", default=False,
+                        help="Provide additional output while executing.")
 
     _args = parser.parse_args()
 
@@ -452,8 +456,14 @@ def main():
 
     context.update(add_params)
 
+    if _args.verbose:
+        print("Jinja Context:")
+        for key, value in context.items():
+            print("    %s = %s" % (key, value))
+
     if (_args.open_iptables and _args.only_iptables) or _args.debug_iptables:
-        _setup_iptables(context["services"], context["localip"], _args.open_iptables, debug=_args.debug_iptables)
+        _setup_iptables(context["services"], context["localip"], _args.open_iptables, debug=_args.debug_iptables,
+                        verbose=_args.verbose)
         sys.exit(0)
 
     env = jinja2.Environment(extensions=['jinja2.ext.do'])
@@ -464,9 +474,11 @@ def main():
         outf.write(tpl.render(context))
 
     if _args.open_iptables:
-        _setup_iptables(context["services"], context["localip"], _args.open_iptables)
-
+        _setup_iptables(context["services"], context["localip"], _args.open_iptables, debug=_args.debug_iptables,
+                        verbose=_args.verbose)
     if _args.command:
+        if _args.verbose:
+            print("Executing command: %s" % _args.command)
         subprocess.call(_args.command, shell=True)
 
 
