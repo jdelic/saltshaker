@@ -99,7 +99,7 @@ class DynamicSecretsStore(dict):
 
 
 class DynamicSecretsPillar(DynamicSecretsStore):
-    _PWDICT = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!$"
+    _PWDICT = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789-$"
 
     def __init__(self, *args, **kwargs):
         super(DynamicSecretsPillar, self).__init__(*args, **kwargs)
