@@ -72,10 +72,18 @@ nomad-service-dir:
 
 
 nomad:
-    user.present:
-        - name: {{nomad_user}}
     group.present:
         - name: {{nomad_group}}
+    user.present:
+        - name: {{nomad_user}}
+        - gid: {{nomad_group}}
+        - groups:
+            - docker
+        - createhome: False
+        - home: /var/lib/nomad
+        - shell: /bin/sh
+        - require:
+             - group: nomad
     archive.extracted:
         - name: /usr/local/bin
         - source: {{pillar["urls"]["nomad"]}}
@@ -94,6 +102,7 @@ nomad:
             - file: nomad-pidfile-dir
             - file: nomad-data-dir
             - archive: nomad
+            - sls: docker
 
 
 {% set internal_ip = grains['ip_interfaces'][pillar['ifassign']['internal']][
