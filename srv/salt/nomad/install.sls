@@ -140,6 +140,14 @@ nomad-common-config:
         - template: jinja
         - context:
             internal_ip: {{internal_ip}}
+            # only enable the http update check if the value of the pillar is exactly 'true'
+            # it's always better to not leak usage data and IPs to Hashicorp.
+            disable_update_check: >
+                {% if pillar['nomad-cluster'].get('check-for-updates', 'false')|lower == 'true' -%}
+                    false
+                {%- else -%}
+                    true
+                {%- endif %}
         - require:
             - file: nomad-service-dir
 
