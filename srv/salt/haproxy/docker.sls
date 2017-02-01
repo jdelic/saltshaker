@@ -15,8 +15,10 @@ smartstack-docker:
             servicescript: /etc/consul/renders/smartstack-docker.py
             target: /etc/haproxy/haproxy-docker.cfg
             # this (yaml folded) command-line will reload haproxy if it is running and restart it otherwise
+            # don't use "grep -q" since it will lead to a "broken pipe" error when called through Python
+            # subprocess. Instead redirect unnecessary output into /dev/null.
             command: >
-                ps awwfux | grep -v grep | grep -q 'haproxy -f /etc/haproxy/haproxy-docker.cfg' &&
+                ps awwfux | grep -v grep | grep 'haproxy -f /etc/haproxy/haproxy-docker.cfg' >/dev/null &&
                 systemctl reload haproxy@docker ||
                 systemctl restart haproxy@docker
             # the escaping of localip is necessary for the consul-template command="" stanza

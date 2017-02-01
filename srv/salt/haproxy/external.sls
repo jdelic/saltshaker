@@ -22,8 +22,10 @@ smartstack-external:
             servicescript: /etc/consul/renders/smartstack-external.py
             target: /etc/haproxy/haproxy-external.cfg
             # this (yaml folded) command-line will reload haproxy if it is running and restart it otherwise
+            # don't use "grep -q" since it will lead to a "broken pipe" error when called through Python
+            # subprocess. Instead redirect unnecessary output into /dev/null.
             command: >
-                ps awwfux | grep -v grep | grep -q 'haproxy -f /etc/haproxy/haproxy-external.cfg' &&
+                ps awwfux | grep -v grep | grep 'haproxy -f /etc/haproxy/haproxy-external.cfg' >/dev/null &&
                 systemctl reload haproxy@external ||
                 systemctl restart haproxy@external
             parameters: >

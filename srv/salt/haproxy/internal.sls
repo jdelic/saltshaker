@@ -26,8 +26,10 @@ smartstack-internal:
             servicescript: /etc/consul/renders/smartstack-internal.py
             target: /etc/haproxy/haproxy-internal.cfg
             # this (yaml folded) command-line will reload haproxy if it is running and restart it otherwise
+            # don't use "grep -q" since it will lead to a "broken pipe" error when called through Python
+            # subprocess. Instead redirect unnecessary output into /dev/null.
             command: >
-                ps awwfux | grep -v grep | grep -q 'haproxy -f /etc/haproxy/haproxy-internal.cfg' &&
+                ps awwfux | grep -v grep | grep 'haproxy -f /etc/haproxy/haproxy-internal.cfg' >/dev/null &&
                 systemctl reload haproxy@internal ||
                 systemctl restart haproxy@internal
             parameters: --has smartstack:internal
