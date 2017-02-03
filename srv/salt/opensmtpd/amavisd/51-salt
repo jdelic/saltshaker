@@ -2,3 +2,6 @@
 
 @local_domains_acl = qw(.);
 $myhostname = "{{receiver_hostname}}";
+
+$inet_socket_port = 10026;
+$forward_method = "smtp:[127.0.0.1]:10025";
