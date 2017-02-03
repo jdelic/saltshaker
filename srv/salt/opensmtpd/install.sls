@@ -93,7 +93,7 @@ amavisd:
         - sig: amavisd-new
         - enable: True
         - watch:
-            - file: amavisd
+            - file: /etc/amavis/conf.d*
 
 
 dkimproxy:
@@ -257,8 +257,9 @@ opensmtpd-service:
         - sig: smtpd
         - enable: True
         - require:
-            - file: opensmtpd-config
             - email-storage
+        - watch:
+            - file: opensmtpd-config
 
 
 opensmtpd-authserver-config:
