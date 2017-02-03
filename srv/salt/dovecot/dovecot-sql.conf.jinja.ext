@@ -56,7 +56,9 @@ default_pass_scheme = SHA256-CRYPT
 #
 # because OpenSMTPD wants a system user as 'final result' of the alias lookup,
 # Dovecot must lookup the primary email alias again, before lookup up the password.
-password_query = SELECT password AS password, primary_alias AS user FROM authserver_get_credentials(authserver_resolve_alias('%u', FALSE));
+# The query must be implemented like this, as authserver_resolve_alias returns a
+# table and not a single value, so we must select the single-line result first.
+password_query = SELECT creds.primary_alias AS user, creds.password AS password FROM authserver_resolve_alias('%u', FALSE) AS res, authserver_get_credentials(res.alias) AS creds;
 
 # userdb information
 # iterate_query = SELECT * FROM authserver_iterate_users();
