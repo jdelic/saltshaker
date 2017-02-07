@@ -17,6 +17,7 @@ include:
     - python.apt
     - iptables  # forces "order: 1"
     - crypto
+    - crypto.ssh
 
 
 # enforce that Debian packages can't launch daemons while salt runs
@@ -151,19 +152,6 @@ stretch:
         - fromrepo: stretch
         - require:
             - pkgrepo: stretch
-
-
-
-openssh:
-    pkg.installed:
-        - pkgs:
-            - ssh
-            - openssh-blacklist
-            - openssh-blacklist-extra
-            - openssh-server
-            - openssh-client
-            - libssh2-1
-        - install_recommends: False
 
 
 # always allow ssh in
