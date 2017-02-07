@@ -11,6 +11,7 @@ ExecStart=/usr/local/bin/consul agent \
     -bind={{pillar.get('consul-instance', {}).get('bind-ip', grains['ip_interfaces'][pillar['ifassign']['internal']][pillar['ifassign'].get('internal-ip-index', 0)|int()])}} \
     -datacenter={{pillar['consul-cluster']['datacenter']}} \
     -encrypt={{pillar['dynamicsecrets']['consul-encryptionkey']}} \
+    -config-file=/etc/consul/common-config.json \
     -config-dir=/etc/consul/services.d -data-dir=/run/consul \
     -pid-file=/run/consul/consul.pid {% if extra_parameters is defined %}{{extra_parameters}}{% endif %}
     {%- for server, addr in salt['mine.get']('roles:consulserver', 'internal_ip', expr_form='grain').items() -%}

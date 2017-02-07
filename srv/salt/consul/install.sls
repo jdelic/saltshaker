@@ -65,6 +65,25 @@ consul-service-dir:
             - file: consul-basedir
 
 
+consul-common-config:
+    file.managed:
+        - name: /etc/consul/common-config.json
+        - source: salt://consul/common-config.jinja.json
+        - user: {{consul_user}}
+        - group: {{consul_group}}
+        - mode: '0755'
+        - template: jinja
+        - context:
+            disable_update_check: >
+                {% if pillar['nomad-cluster'].get('check-for-updates', 'false')|lower == 'true' -%}
+                    false
+                {%- else -%}
+                    true
+                {%- endif %}
+        - require:
+            - file: consul-basedir
+
+
 consul:
     group.present:
         - name: {{consul_group}}

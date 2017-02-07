@@ -49,6 +49,7 @@ consul-agent-service-reload:
             # is no other state that matches "/etc/consul/services.d/*" whereas "/etc/consul/services.d*" will match the
             # consul.install.consul-service-dir state.
             - file: /etc/consul/services.d*
+            - file: consul-common-config
 
 
 consul-server-absent:
