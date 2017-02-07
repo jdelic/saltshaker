@@ -27,9 +27,9 @@ repos:
 
 urls:
     concourse: https://github.com/concourse/concourse/releases/download/v2.6.0/concourse_linux_amd64
-    consul: https://releases.hashicorp.com/consul/0.7.2/consul_0.7.2_linux_amd64.zip
+    consul: https://releases.hashicorp.com/consul/0.7.4/consul_0.7.4_linux_amd64.zip
     consul-template: https://releases.hashicorp.com/consul-template/0.18.0/consul-template_0.18.0_linux_amd64.zip
-    consul-webui: https://releases.hashicorp.com/consul/0.7.2/consul_0.7.2_web_ui.zip
+    consul-webui: https://releases.hashicorp.com/consul/0.7.4/consul_0.7.4_web_ui.zip
     djbdns: http://cr.yp.to/djbdns/djbdns-1.05.tar.gz
     exxo: https://bintray.com/artifact/download/mbachry/exxo/exxo-0.0.7.tar.xz
     nomad: https://releases.hashicorp.com/nomad/0.5.4/nomad_0.5.4_linux_amd64.zip
@@ -42,7 +42,7 @@ urls:
 
 hashes:
     concourse: sha256=ba974aabc744e1c32f33a25720fdf3a40b176a040fb0ecdedb1d5862fa5ccb9c
-    consul: sha256=aa97f4e5a552d986b2a36d48fdc3a4a909463e7de5f726f3c5a89b8a1be74a58
+    consul: sha256=23a61773bee9b29198cc1f8fe2e62c320f82f95006ff70840c15c1e58eead73b
     consul-template: sha256=f7adf1f879389e7f4e881d63ef3b84bce5bc6e073eb7a64940785d32c997bc4b
     consul-webui: sha256=c9d2a6e1d1bb6243e5fd23338d92f5c71cdf0a4077f7fcc95fd81800fa1f42a9
     djbdns: sha256=3ccd826a02f3cde39be088e1fc6aed9fd57756b8f970de5dc99fcd2d92536b48
