@@ -24,12 +24,29 @@ haproxy-multi:
         - group: root
         - mode: '0644'
         # note that there is NO dependency to pkg: haproxy here! This is because we declare haproxy to be
-        # a prereq of haproxy-multi
+        # a prereq of service:haproxy-multi
+        - require:
+            - file: haproxy-dhparams
 
 
 haproxy-remove-packaged-config:
     file.absent:
         - name: /etc/haproxy/haproxy.cfg
+
+
+# create our own dhparams for more SSL security
+haproxy-dhparams:
+    file.directory:
+        - name: /etc/haproxy
+        - user: root
+        - group: root
+        - mode: '0755'
+        - makedirs: True
+    cmd.run:
+        - name: openssl dhparam -out /etc/haproxy/dhparams.pem 2048
+        - creates: /etc/haproxy/dhparams.pem
+        - require:
+            - file: haproxy-dhparams
 
 
 haproxy-data-dir:
