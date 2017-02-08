@@ -38,7 +38,9 @@ Using these salt formulae you can bring up:
 
   * including a consul/consul-template/haproxy based
     [smartstack](http://nerds.airbnb.com/smartstack-service-discovery-cloud/)
-    implementation for service discovery
+    implementation for service discovery (you can find an extracted stand-
+    alone version of that in my
+    [consul-smartstack repository](https://github.com/jdelic/consul-smartstack).
 
   * an HAProxy based reverse proxying load balancer for applications based
     around the same smartstack implementation
