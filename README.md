@@ -26,6 +26,10 @@ Using these salt formulae you can bring up:
 
   * a primarily Python/Django based application environment
 
+* a [Hashicorp Nomad](https://nomadproject.io/) based Docker/application
+    cluster that integrates with the Consul-Smartstack implementation and
+    provides easy application deployment.
+
   * a MySQL and/or PostgreSQL database configuration for a "fast" database
     and a separate tablespace on an encrypted partition
 
@@ -45,8 +49,9 @@ It also contains configuration for
     [Radicale](http://radicale.org/), [Dovecot](http://dovecot.org) and
     [OpenSMTPD](https://www.opensmtpd.org/))
 
-  * single-sign-on for Radicale, Dovecot and OpenSMTPD, other web applications and
-    even PAM using CAS
+  * single-sign-on for Radicale, Dovecot and OpenSMTPD, other web applications 
+    and even PAM using a single database for authentication and providing 
+    OAuth2, CAS and SAML (through Dovecot).
 
 The salt configuration is pretty modular, so you can easily just use this
 repository to bring up a GoPythonGo build and deployment environment without
