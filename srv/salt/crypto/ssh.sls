@@ -45,6 +45,8 @@ openssh-filter-moduli:
     cmd.run:
         - name: ssh-keygen -T /etc/ssh/moduli.safe -f /etc/ssh/moduli.tmp && rm /etc/ssh/moduli.tmp
         - onlyif: test -e /etc/ssh/moduli.tmp
+        - require:
+            - cmd: openssh-generate-moduli
 
 
 openssh-replace-moduli:
@@ -57,10 +59,3 @@ openssh-replace-moduli:
 
 
 # IPTABLES setup is performed with other core services in basics
-
-# Create a unique 2048 Diffie Hellman group
-# https://weakdh.org
-#/etc/ssl/dhparams.pem:
-#  cmd.run:
-#    - name: openssl dhparam -out /etc/ssl/dhparams.pem 2048
-#    - creates: /etc/ssl/dhparams.pem
