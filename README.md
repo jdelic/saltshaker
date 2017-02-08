@@ -26,7 +26,7 @@ Using these salt formulae you can bring up:
 
   * a primarily Python/Django based application environment
 
-* a [Hashicorp Nomad](https://nomadproject.io/) based Docker/application
+  * a [Hashicorp Nomad](https://nomadproject.io/) based Docker/application
     cluster that integrates with the Consul-Smartstack implementation and
     provides easy application deployment.
 
