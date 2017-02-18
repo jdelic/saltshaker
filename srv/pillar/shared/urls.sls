@@ -26,7 +26,7 @@ repos:
 #           state for that!
 
 urls:
-    concourse: https://github.com/concourse/concourse/releases/download/v2.6.0/concourse_linux_amd64
+    concourse: https://github.com/concourse/concourse/releases/download/v2.7.0/concourse_linux_amd64
     consul: https://releases.hashicorp.com/consul/0.7.4/consul_0.7.4_linux_amd64.zip
     consul-template: https://releases.hashicorp.com/consul-template/0.18.0/consul-template_0.18.0_linux_amd64.zip
     consul-webui: https://releases.hashicorp.com/consul/0.7.4/consul_0.7.4_web_ui.zip
@@ -41,7 +41,7 @@ urls:
 
 
 hashes:
-    concourse: sha256=ba974aabc744e1c32f33a25720fdf3a40b176a040fb0ecdedb1d5862fa5ccb9c
+    concourse: sha256=315f9efce095b2f0fa98059f99ef28d76bd845940322eb2d312d047747f59365
     consul: sha256=23a61773bee9b29198cc1f8fe2e62c320f82f95006ff70840c15c1e58eead73b
     consul-template: sha256=f7adf1f879389e7f4e881d63ef3b84bce5bc6e073eb7a64940785d32c997bc4b
     consul-webui: sha256=c9d2a6e1d1bb6243e5fd23338d92f5c71cdf0a4077f7fcc95fd81800fa1f42a9
