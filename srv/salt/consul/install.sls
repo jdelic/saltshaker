@@ -71,7 +71,7 @@ consul-common-config:
         - source: salt://consul/common-config.jinja.json
         - user: {{consul_user}}
         - group: {{consul_group}}
-        - mode: '0755'
+        - mode: '0644'
         - template: jinja
         - context:
             disable_update_check: >
