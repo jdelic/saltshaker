@@ -241,3 +241,13 @@ nomad-udp-in4648-send:
         - save: True
         - require:
             - sls: iptables
+
+
+nomad-envvar-config:
+    file.managed:
+        - name: /etc/profile.d/nomadclient.sh
+        - contents: |
+            export NOMAD_ADDR="http://{{internal_ip}}:4646/"
+        - user: root
+        - group: root
+        - mode: '0644'
