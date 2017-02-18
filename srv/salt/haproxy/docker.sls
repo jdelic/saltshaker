@@ -23,7 +23,7 @@ smartstack-docker:
                 systemctl restart haproxy@docker
             # the escaping of localip is necessary for the consul-template command="" stanza
             parameters: >
-                --has smartstack:internal
+                --include tags=smartstack:internal
                 --smartstack-localip {{pillar.get('docker', {}).get('bridge-ip', grains['ip_interfaces']['docker0'])}}
                 -D transparent_bind=1
             template: /etc/haproxy/haproxy-internal.jinja.cfg

@@ -49,6 +49,8 @@ import argparse
 import subprocess
 import contextlib
 
+from collections import Iterable
+
 
 # The Go template is in the comments (yes, this works and therefor keeps
 # IntelliJ's Python plugin from freaking out)
@@ -60,7 +62,7 @@ _services = [
         "ip": "{{.Address}}",
         "port": int("{{.Port}}"),
         "tags": [  # {{ range .Tags}}
-             "{{.}}",  # {{ end }}
+            "{{.}}",  # {{ end }}
         ]
     },
     #    {{ end }}
@@ -160,9 +162,9 @@ class SmartstackServiceContainer(object):
     def __repr__(self):
         return "SmartstackServiceContainer<%s services of %s known services, grouped: %s, group_by_type: %s, " \
                "filtered_to: %s>" % (len(list(self.iter_services())), len(self.all_services),
-                                    ".".join(self.grouped_by) if self.grouped_by is not None else "None",
-                                    ".".join(self.group_by_type) if self.group_by_type is not None else "None",
-                                    ".".join(self.filtered_to if self.filtered_to is not None else "None"))
+                                     ".".join(self.grouped_by) if self.grouped_by is not None else "None",
+                                     ".".join(self.group_by_type) if self.group_by_type is not None else "None",
+                                     ".".join(self.filtered_to if self.filtered_to is not None else "None"))
 
     def keys(self):
         res = self.services.keys()
@@ -246,38 +248,83 @@ def file_or_stdout(filename=None):
             fh.close()
 
 
+def parse_queries(queries):
+    result = []
+    for query in queries:
+        parsed_query = []
+        if "," in query:
+            subquery = query.split(",")
+        else:
+            subquery = [query]
+
+        for part in subquery:
+            if "=" in part:
+                key, value = part.split("=", 1)
+                if value.startswith("regex="):
+                    value = re.compile(value[6:])
+            else:
+                print("query must be in the form key=[regex=]value. %s doesn't match that form" % part, file=sys.stderr)
+                sys.exit(1)
+            parsed_query.append({"key": key, "value": value})
+
+        result.append(parsed_query)
+    return result
+
+
+def query_match(haystack, needle):
+    if hasattr(needle, "match"):
+        if isinstance(haystack, Iterable):
+            for h in haystack:
+                if needle.match(h):
+                    return True
+            return False
+    else:
+        return needle in haystack
+
+
 def filter_services(svcs):
-    filtered = []
+    if _args.add_all:
+        filtered = list(_services)
+    else:
+        filtered = []
+
+    include_queries = parse_queries(_args.include_queries)
+    exclude_queries = parse_queries(_args.exclude_queries)
 
     # filter includes
-    if _args.include:
+    if include_queries:
         for sv in svcs:
-            for inc in _args.include:
-                if inc in sv["tags"] and sv not in filtered:
+            for query in include_queries:
+                match = True
+                for part in query:
+                    if part["key"] not in sv:
+                        print("key %s not in service dictionary" % part["key"], file=sys.stderr)
+                        sys.exit(1)
+
+                    if not query_match(sv[part["key"]], part["value"]):
+                        match = False
+
+                if match:
                     filtered.append(sv)
 
-    if _args.match:
-        for sv in svcs:
-            for regex in _args.match:
-                for tag in sv["tags"]:
-                    if re.match(regex, tag) and sv not in filtered:
-                        filtered.append(sv)
-
-    if not filtered and not _args.include and not _args.match:
-        filtered = svcs
-
-    if _args.exclude:
+    # filter excludes
+    if exclude_queries:
         for sv in list(filtered):  # operate on a copy, otherwise .remove would change the list under our feet
-            for exc in _args.exclude:
-                if exc in sv["tags"]:
-                    filtered.remove(sv)
+            for query in exclude_queries:
+                match = True
+                for part in query:
+                    if part["key"] not in sv:
+                        print("key %s not in service dictionary" % part["key"], file=sys.stderr)
+                        sys.exit(1)
 
-    if _args.nomatch:
-        for sv in list(filtered):
-            for regex in _args.nomatch:
-                for tag in sv["tags"]:
-                    if re.match(regex, tag):
+                    if not query_match(sv[part["key"]], part["value"]):
+                        match = False
+
+                if match:
+                    try:
                         filtered.remove(sv)
+                    except ValueError:
+                        pass  # Ignore if the service was in the filtered set in the first place
 
     return filtered
 
@@ -374,30 +421,38 @@ def main():
                            help=argparse.SUPPRESS)
     args, _ = preparser.parse_known_args()
 
+    if len(_services) == 1:
+        description = ("Don't invoke this directly. This script is meant to be a GO TEMPLATE that is "
+                       "processed by consul-template and then invoked from consul-template.")
+    else:
+        description = ("This script is (re)generated automatically by consul-template. It operates on "
+                       "the Consul service catalog.")
+
     parser = argparse.ArgumentParser(
-        description="Don't invoke this directly. This script is meant to be a GO TEMPLATE that is "
-                    "processed by consul-template and then invoked from consul-template."
+        description=description
     )
 
     if not args.only_iptables and not args.debug_iptables:
         # only add required arguments if we actually need them
         parser.add_argument("template",
-                            help="The Jinja2 template to render")
+                            help="The Jinja2 template to render. This template is passed a set of services selected "
+                                 "using the command-line parameters.")
         parser.add_argument("-c", "--command", dest="command", required=True,
                             help="The command to invoke after rendering the template. Will be executed in a shell.")
 
     parser.add_argument("-o", "--output", dest="output", help="The target file. Renders to stdout if not specified.")
-    parser.add_argument("--has", dest="include", action="append",
-                        help="Only render services that have the (all of the) specified tag(s). This parameter "
-                             "can be specified multiple times.")
-    parser.add_argument("--match", dest="match", action="append",
-                        help="Only render services that have tags which match the passed regular expressions.")
-    parser.add_argument("--has-not", dest="exclude", action="append",
-                        help="Only render services that do NOT have (any of the) specified tag(s). This parameter "
-                             "can be specified multiple times.")
-    parser.add_argument("--no-match", dest="nomatch",  action="append",
-                        help="Only render services that do NOT have tags which match the passed regular "
-                             "expressions.")
+    parser.add_argument("--add-all", dest="add_all", default=False, action="store_true",
+                        help="Add all known services to the selected set. Use this if you just want to exclude "
+                             "services.")
+    parser.add_argument("--include", dest="include_queries", action="append", default=[],
+                        help="Takes a comma-seperated list of 'key=value' pairs as argument. Valid keys are all "
+                             "service catalog fields (e.g. 'name', 'ip', 'port', 'tags'). When value starts with "
+                             "'regex=', it's treated like a regular expression. If all 'value's exists in 'key's (or "
+                             "the regular expession matches), the service is added to the selected set. Comma-"
+                             "separated values are treated as boolean AND. Pass this parameter multiple times to get "
+                             "boolean OR semantics.")
+    parser.add_argument("--exclude", dest="exclude_queries", action="append", default=[],
+                        help="The opposite of --include-query.")
     parser.add_argument("--smartstack-localip", dest="localip", default="127.0.0.1",
                         help="Sets the local ip address all smartstack services should bind to. This is passed to the"
                              "template as the 'localip' variable. (Default: 127.0.0.1)")

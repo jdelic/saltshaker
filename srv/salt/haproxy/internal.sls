@@ -32,7 +32,7 @@ smartstack-internal:
                 ps awwfux | grep -v grep | grep 'haproxy -f /etc/haproxy/haproxy-internal.cfg' >/dev/null &&
                 systemctl reload haproxy@internal ||
                 systemctl restart haproxy@internal
-            parameters: --has smartstack:internal
+            parameters: --include tags=smartstack:internal --include name=nomad,tags=http
             template: /etc/haproxy/haproxy-internal.jinja.cfg
         - require:
             - file: haproxy-config-template-internal
