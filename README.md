@@ -2,7 +2,8 @@
 
 This is a collection of saltstack formulae designed to bring up an small
 hosting environment for multiple applications and services. The hosting
-environment is reusable, the services are primarily there to fulfill my needs.
+environment is reusable, the services are primarily there to fulfill my needs
+and allow experimentation with different DevOps setups.
 
 Cloning this repository is a good basis for your own Salt setup as it
 implements a number of best practices I discovered and includes a fully
@@ -30,17 +31,17 @@ Using these salt formulae you can bring up:
     cluster that integrates with the Consul-Smartstack implementation and
     provides easy application deployment.
 
-  * a MySQL and/or PostgreSQL database configuration for a "fast" database
-    and a separate tablespace on an encrypted partition
-
-  * a [Concourse.CI](http://concourse.ci/) build server environment for
-    your projects
-
   * including a consul/consul-template/haproxy based
     [smartstack](http://nerds.airbnb.com/smartstack-service-discovery-cloud/)
     implementation for service discovery (you can find an extracted stand-
     alone version of that in my
     [consul-smartstack repository](https://github.com/jdelic/consul-smartstack).
+
+  * a PostgreSQL database configuration for a "fast" database and a separate
+    tablespace on an encrypted partition
+
+  * a [Concourse.CI](http://concourse.ci/) build server environment for
+    your projects
 
   * an HAProxy based reverse proxying load balancer for applications based
     around the same smartstack implementation
@@ -51,9 +52,10 @@ It also contains configuration for
     [Radicale](http://radicale.org/), [Dovecot](http://dovecot.org) and
     [OpenSMTPD](https://www.opensmtpd.org/))
 
-  * single-sign-on for Radicale, Dovecot and OpenSMTPD, other web applications 
-    and even PAM using a single database for authentication and providing 
-    OAuth2, CAS and SAML (through Dovecot).
+  * single-sign-on for Radicale, Dovecot and OpenSMTPD, other web applications
+    and even PAM using a single database for authentication and providing
+    OAuth2, CAS and SAML (through Dovecot). This is provided through
+    authserver, a Django separate Django application written by me.
 
 The salt configuration is pretty modular, so you can easily just use this
 repository to bring up a GoPythonGo build and deployment environment without
@@ -120,8 +122,8 @@ repository**.
 For my salt states to work, you **must** provide your own`shared.secrets`
 pillar in `srv/pillar/shared/secrets` that **must** contain the following
 pillars, unless you rework the salt states to use different ones. I use a
-wildcard certificate for my domains and the configuration pillars for 
-individual servers allow you to specify pillar references to change what 
+wildcard certificate for my domains and the configuration pillars for
+individual servers allow you to specify pillar references to change what
 certificates are used, but in the default configuration most services refer
 to the ``maincert``, which is the wildcard certificate:
 
@@ -216,10 +218,10 @@ This is a pillar module that can be configured on the master to provide
 dynamically generated passwords and RSA keys across an environment managed by
 a Salt master. The secrets are stored in a single sqlite database file that can
 be easily backed up (default: `/etc/salt/dynamicsecrets.sqlite`). This should
-be used for non-critical secrets that must be shared between minions and/or 
+be used for non-critical secrets that must be shared between minions and/or
 where a more secure solution like Hashicorp's Vault is not applicable.
 
-Secrets from the pillar are assigned to the "roles" grain or minion ids and 
+Secrets from the pillar are assigned to the "roles" grain or minion ids and
 are therefor only rendered to assigned minions from the master.
 
 ```yaml
@@ -240,7 +242,7 @@ ext_pillar:
 ```
 
 For `type: password` the Pillar will simply contain the random password string.
-For `type: rsa` the Pillar will return a `dict` that has the following 
+For `type: rsa` the Pillar will return a `dict` that has the following
 properties:
  * `public_pem` the public key in PEM encoding
  * `public` the public key in `ssh-rsa` format
@@ -266,8 +268,9 @@ that seem to be "interwoven" in this repository. The whole setup is meant to
 I generally, if in any way possible, would always prefer deploying an
 application **not through salt states**, but other means (for example:
 installing a .deb package on all servers that have the role "apps" through the
-salt CLI client), but if you have to (for example when configuring a service
-typically part of a Unix system like a mail server) you **totally can** use
+salt CLI client) or better yet, push Docker containers to Nomad / Kubernetes /
+Docker Swarm. But if you have to (for example when configuring a service, which
+is typically part of a Unix system like a mail server) you **totally can** use
 salt states for that. This way you don't have to repackage services which are
 already set up for your system. No need to repackage dovecot in a Docker
 container, for example, if the Debian Maintainers do such an awesome job of
@@ -285,35 +288,32 @@ enough to accommodate all of these options.
 ## Deploying packaged services from .debs (GoPythonGo applications, for example)
 
 ## Deploying containerized services
-Easy: every application server runs a
-[docker registrator](https://github.com/gliderlabs/registrator) instance which
-does the same job as including consul service definitions with your deployable
-releases. It registers services run from docker container with consul,
-discovering metadata from environment variables in the container. Consul in
-turn will propagate the service information through `consul-template` to
-`haproxy` making the services accessible or even routing them from servers with
-the `loadbalancer` role.
+Using servers with the `nomadserver` and `apps` roles, you have two options:
+
+  1. Use Docker Swarm, which is built into Docker
+  2. Use Hashicorp Nomad
+
+They have different pros and cons, but Nomad supports scheduling jobs what are
+not containerized (as in plain binaries and Java applications). Nomad also
+directly integrates with Consul clusters *outside* of the Nomad cluster. So it
+makes service discovery between applications living inside and outside of the
+cluster painless.
+
+For plain Docker or Docker Swarm, you will have to run a
+[docker registrator](https://github.com/gliderlabs/registrator) instance on
+each cluster node, which does the same job as including consul service
+definitions in Nomad jobs. It registers services run from a docker container
+with consul, discovering metadata from environment variables in the container.
+
+Consul in turn will propagate the service information through `consul-template`
+to `haproxy` making the services accessible or even routing them from servers
+with the `loadbalancer` role. So Salt minions with the `loadbalancer` role are
+your ingress and egress routers.
 
 
 # SmartStack
 
-## Tags
-
-Tag                            | Description
--------------------------------|-----------------------------------------------
-smartstack:internal            | Route through haproxy on localhost
-smartstack:external            | Route through haproxy on loadbalancers (role)
-smartstack:cross-datacenter    | Route through haproxy on localhost remotely
-smartstack:port:[port]         | Route through haproxy on port [port]
-smartstack:hostname:[hostname] | Route through haproxy on HTTP Host header
-smartstack:protocol:[protocol] | protocol may be udp, tcp, http or https and affects iptables and haproxy modes
-smartstack:extport:[port]      | Route through haproxy on loadbalancers on port [port]
-
-
-## Integrating SmartStack with remote services
-
-### Cross-datacenter services between two salt-controlled environments
-TODO: smartstack:cross-datacenter
+See [consul-smartstack](https://github.com/jdelic/consul-smartstack).
 
 ### Integrating external services (not implemented yet)
 **Question: But I run my service X on Heroku/Amazon Elastic Beanstalk with
@@ -321,15 +321,21 @@ autoscaling/Amazon Container Service/Microsoft Azure/Google Compute Engine/
 whatever... how do I plug this into this smartstack implementation?**
 
 **Answer:** You create a Salt state that registers these services as
-*cross-datacenter internal* services using the tag `smartstack:cross-datacenter`
-and assign them a port in your [port map](PORTS.md). This will cause
+`smartstack:internal` services, assign them a port in your [port map](PORTS.md)
+and make sure haproxy instances can route to it.This will cause
 `consul-template` instances on your machines to pick them up and make them
 available on `localhost:[port]`. The ideal machines to assign these states to
 in my opinion are all machines that have the `consulserver` role. Registering
 services with consul that way can either be done by dropping service
-definitions into `/etc/consul/services.d`, which might lead to strange behavior
-if different versions end up on multiple machines or better
+definitions into `/etc/consul/services.d` or perhaps use
 [use salt consul states](https://github.com/pravka/salt-consul).
+
+A better idea security-wise is to create an "egress router" role that runs a
+specialized version of haproxy-external that sends traffic from its internal IP
+to your external services. Then announce the internal IP+Port as an internal
+smartstack service. The external services can then still be registered with the
+local Consul cluster, but you also have a defined exit point for traffic to
+the external network.
 
 
 # Vault
