@@ -391,7 +391,10 @@ def _setup_iptables(services, ip, mode, debug=False, verbose=False):
             else:
                 try:
                     # check if the rule exists first... iptables wille exit with 0 if it does
-                    subprocess.check_call(["/sbin/iptables", "-C"] + input_rule)
+                    # also, suppress output (if the rule doesn't exist iptables will print "bad rule", which is
+                    # pretty confusing
+                    with open(os.devnull, "w") as devnull:
+                        subprocess.check_call(["/sbin/iptables", "-C"] + input_rule, stdout=devnull, stderr=devnull)
                 except subprocess.CalledProcessError as e:
                     if e.returncode == 1:
                         subprocess.call(["/sbin/iptables", "-A"] + input_rule)
