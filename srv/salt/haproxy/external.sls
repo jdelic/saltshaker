@@ -48,15 +48,16 @@ smartstack-external:
             {% endif %}
 
 
-smartstack-ensure-iptables-rules:
-    cmd.run:
-        - name: >
-            /etc/consul/renders/smartstack-external.py
-            --include tags=smartstack:external
-            --open-iptables=conntrack
-            --smartstack-localip {{pillar.get('loadbalancer', {}).get('external-ip', grains['ip_interfaces'][pillar['ifassign']['external']][pillar['ifassign'].get('external-ip-index', 0)|int()])}}
-            --only-iptables
-        - require:
-            - file: smartstack-external
+# This is probably overkill, since consul-template already runs the smartstack script with --open-iptables=conntrack
+#smartstack-ensure-iptables-rules:
+#    cmd.run:
+#        - name: >
+#            /etc/consul/renders/smartstack-external.py
+#            --include tags=smartstack:external
+#            --open-iptables=conntrack
+#            --smartstack-localip {{pillar.get('loadbalancer', {}).get('external-ip', grains['ip_interfaces'][pillar['ifassign']['external']][pillar['ifassign'].get('external-ip-index', 0)|int()])}}
+#            --only-iptables
+#        - require:
+#            - file: smartstack-external
 
 # vim: syntax=yaml
