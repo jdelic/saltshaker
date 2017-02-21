@@ -120,8 +120,7 @@ maurusnet-authserver:
 
 
 openssl:
-    # this will upgrade the installed version from the basebox, because we currently must to have
-    # compatible versions
+    # this will upgrade the installed version from the basebox
     pkg.latest:
         - pkgs:
              - openssl
