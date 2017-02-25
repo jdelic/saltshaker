@@ -23,7 +23,7 @@ redis-data-dir:
         - makedirs: True
         - user: redis
         - group: redis
-        - mode: '0755'
+        - mode: '2755'
         - require:
             - pkg: redis
 
