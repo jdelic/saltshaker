@@ -13,6 +13,9 @@ authserver:
         - init_delay: 3
         - require:
             - pkg: authserver
+{% if pillar['authserver'].get('backend', '') == 'postgresql' %}
+            - postgres_database: authserver-postgres
+{% endif %}
 
 
 authserver-appconfig:
