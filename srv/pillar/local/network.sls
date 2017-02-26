@@ -25,7 +25,7 @@ mine_functions:
 # You shouldn't use this outside of a LOCAL VAGRANT NETWORK. This configuration
 # saves you from setting up a DNS server by replicating it in all nodes' /etc/hosts files.
 wellknown_hosts: |
-    192.168.56.163   auth.maurusnet.test mail.maurusnet.test calendar.maurusnet.test
+    192.168.56.163   auth.maurusnet.test mail.maurusnet.test calendar.maurusnet.test ci.maurusnet.test
     192.168.56.164   smtp.maurusnet.test
 
 # vim: syntax=yaml
