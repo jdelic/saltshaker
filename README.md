@@ -297,18 +297,29 @@ They have different pros and cons, but Nomad supports scheduling jobs what are
 not containerized (as in plain binaries and Java applications). Nomad also
 directly integrates with Consul clusters *outside* of the Nomad cluster. So it
 makes service discovery between applications living inside and outside of the
-cluster painless.
+cluster painless. Using the smartstack implementation built into this
+repository, you can just add `smartstack:*` tags to the `service {}` stanza in
+your [Nomad job configuration](https://www.nomadproject.io/docs/job-specification/service.html)
+and service discovery as well as linking services to the loadbalancer will be
+taken care of.
 
 For plain Docker or Docker Swarm, you will have to run a
 [docker registrator](https://github.com/gliderlabs/registrator) instance on
 each cluster node, which does the same job as including consul service
 definitions in Nomad jobs. It registers services run from a docker container
 with consul, discovering metadata from environment variables in the container.
+Docker Swarm however, at least until Nomad 0.6 arrives, will have the benefit
+of supporting VXLAN Overlay networks that can easily be configured to use
+IPSEC encryption. This gives you a whole new primitive for separating logical
+networks between your conainerized applications and is something to think
+about.
 
-Consul in turn will propagate the service information through `consul-template`
-to `haproxy` making the services accessible or even routing them from servers
-with the `loadbalancer` role. So Salt minions with the `loadbalancer` role are
-your ingress and egress routers.
+Regardless of how the services get registered in Consul, it will in turn
+propagate the service information through `consul-template` to `haproxy` making
+the services accessible through localhost/docker-bridge based smartstack
+routers, or even setting up routing to them from nodes with the `loadbalancer`
+role, giving you fully automated service deployment for internal and external
+services.
 
 
 # SmartStack
