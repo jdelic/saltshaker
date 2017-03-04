@@ -5,8 +5,8 @@ Certifying builds
 > `vaultgetcert` tool that is part of
 > [GoPythonGo](https://github.com/gopythongo/gopythongo).
 
-The environments configured by this Salt repository configure a cluster that
-tries to avoid four common pitfalls of modern automated server configuration:
+There are four common pitfalls of secret management in modern automated server
+configuration:
 
   1. Your secret configuration (like database credentials) is in your shared
      source code repository ("everyone on the dev team has it")
@@ -25,18 +25,33 @@ tries to avoid four common pitfalls of modern automated server configuration:
 
 Generally speaking this also interferes with Continuous Delivery and also makes
 it really hard to rotate passwords and other secrets when people leave your
-company or you detected an attack.
+company or you detected an attack. Many security standards and best practices
+like PCIDSS also require secrets to be rotated regularly.
 
 So the build model ingrained into this repository is based on
 [Hashicorp Vault](https://vaultproject.io/) and moving secret generation where
-it belongs: on the build server. The reasons for that are:
+it belongs: on the build server. Vault's "PKI" secret management backend
+creates a world where managing your own organization's certificate authorities
+is cheap and easily automated. This allows us to think about infrastructure
+where each service is authenticating clients through its own CA, even having
+per-environment CAs is easy to implement. This enables secret generation on the
+build server at scale and gives us interesting properties, like for example,
+easy tracking of secret propagation (what build server created the certificates
+used by a build at what exact time and what was the git commit hash the build
+was based on). By using Vault for credential management inside deployment
+environments we can then solve additional issues, like ensuring fine-grained
+audit logs.
+
+Moving secret management to the build server in a continuous delivery
+environment makes sense, because:
 
   1. You must trust and secure your build server anyway. If it's compromised the
      attacker can deploy malicious code and can also read all of your hardcoded
      secrets.
 
   2. You can lock the build server down for your developers and ops people, but
-     you can't deny them access to source code and configuration management.
+     you can't deny them access to source code and configuration management, so
+     this limits secret exposure throughout your organization.
 
   3. If you follow [12factor](https://12factor.net), as much configuration as
      possible should be part of your release artifacts, since a release is
@@ -131,12 +146,13 @@ the number of needed CAs even further.
 
 Using SSL client authentication with individual resources
 ---------------------------------------------------------
-The above works well if Vault issues database credentials to your application,
-because as mentioned, Vault assigns policies to *the issuing CA*.
+The above works well if you use Vault inside your environments *and* on the
+build server, so that it also issues limited database credentials to your
+application, because as mentioned, Vault assigns policies to *the issuing CA*.
 
 However, if you want to use the build-issued certificates to authenticate to
-services directly, like OpenSMTPD and PostgreSQL, you will run into the problem
-that each of these services can only trust a single client certificate
+services directly, for example OpenSMTPD and PostgreSQL, you will run into the
+problem that each of these services can only trust a single client certificate
 authority at a time. So unless you have only a single application,
 you have two options:
 
@@ -195,7 +211,10 @@ you have two options:
 
      Unfortunately this requires a bit more logic on the application's side as
      it has to present the correct certificate chain when it talks to a
-     service.
+     service. In GoPythonGo's toolchain, `vaultgetcert` supports this through
+     its `--xsign-cacert` and `--output-bundle-envvar` parameters, which create
+     12factor environment variable settings in [appconfig](ETC_APPCONFIG.md)
+     format to make selecting the right trust-path easy.
 
 Why not make this a tidy tree and put a organization root CA at the top?
 ------------------------------------------------------------------------
