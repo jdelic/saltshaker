@@ -72,6 +72,15 @@ concourse-install:
             - file: concourse-keys-host_key-public
 
 
+concourse-rsyslog:
+    file.managed:
+        - name: /etc/rsyslog.d/50-concourse.rsyslog.conf
+        - source: salt://mn/cas/50-concourse.rsyslog.conf
+        - user: root
+        - group: root
+        - mode: '0644'
+
+
 # allow workers to talk to the server on port 2222 on the internal network
 concourse-tcp-out{{pillar.get('concourse-server', {}).get('tsa-port', 2222)}}-send:
     iptables.append:

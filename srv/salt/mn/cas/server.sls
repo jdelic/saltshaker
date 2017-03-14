@@ -20,6 +20,15 @@ authserver-appconfig:
         - name: authserver
 
 
+authserver-rsyslog:
+    file.managed:
+        - name: /etc/rsyslog.d/50-authserver.rsyslog.conf
+        - source: salt://mn/cas/50-authserver.rsyslog.conf
+        - user: root
+        - group: root
+        - mode: '0644'
+
+
 {% set config = {
     "VAULT_CA": pillar['ssl']['service-rootca-cert'] if pillar['vault'].get('pinned-ca-cert', 'default') == 'default'
         else pillar['vault']['pinned-ca-cert'],
