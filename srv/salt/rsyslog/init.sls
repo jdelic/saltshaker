@@ -5,4 +5,4 @@ rsyslog:
         - enable: True
         - reload: True
         - watch:
-            file: /etc/rsyslog.d*
+            - file: /etc/rsyslog.d*
