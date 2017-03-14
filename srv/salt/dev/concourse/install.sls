@@ -75,7 +75,7 @@ concourse-install:
 concourse-rsyslog:
     file.managed:
         - name: /etc/rsyslog.d/50-concourse.rsyslog.conf
-        - source: salt://mn/cas/50-concourse.rsyslog.conf
+        - source: salt://dev/concourse/50-concourse.rsyslog.conf
         - user: root
         - group: root
         - mode: '0644'
