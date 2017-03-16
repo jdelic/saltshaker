@@ -59,7 +59,6 @@ base:
         - match: pcre
         - hetzner.mailserver-config
         - hetzner.calendar
-        - hetzner.dns
         - hetzner.network
         - hetzner.consul
         - hetzner.nomad
@@ -78,7 +77,6 @@ base:
     '*.test':
         - local.mailserver-config
         - local.calendar
-        - local.dns
         - local.network
         - local.consul
         - local.nomad
