@@ -34,6 +34,7 @@ haproxy-remove-packaged-config:
         - name: /etc/haproxy/haproxy.cfg
 
 
+{% if pillar.get("crypto", {}).get("generate-secure-dhparams", True) %}
 # create our own dhparams for more SSL security
 haproxy-dhparams:
     file.directory:
@@ -47,6 +48,7 @@ haproxy-dhparams:
         - creates: /etc/haproxy/dhparams.pem
         - require:
             - file: haproxy-dhparams
+{% endif %}
 
 
 haproxy-data-dir:

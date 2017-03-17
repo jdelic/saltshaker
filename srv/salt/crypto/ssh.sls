@@ -22,7 +22,9 @@ openssh-reload:
         - reload: True
         - watch:
             - file: openssh-config
+{% if pillar.get("crypto", {}).get("generate-secure-dhparams", True) %}
             - file: openssh-replace-moduli
+{% endif %}
 
 
 openssh-config:
@@ -34,6 +36,7 @@ openssh-config:
             - pkg: openssh
 
 
+{% if pillar.get("crypto", {}).get("generate-secure-dhparams", True) %}
 openssh-generate-moduli:
     cmd.run:
         - name: ssh-keygen -G /etc/ssh/moduli.tmp -b 2048
@@ -56,6 +59,7 @@ openssh-replace-moduli:
         - force: True
         - watch:
             - cmd: openssh-filter-moduli
+{% endif %}
 
 
 # IPTABLES setup is performed with other core services in basics

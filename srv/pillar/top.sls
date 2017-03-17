@@ -63,6 +63,7 @@ base:
         - hetzner.consul
         - hetzner.nomad
         - hetzner.buildserver
+        - hetzner.crypto
         - hetzner.ssl
         - hetzner.authserver
         - shared.urls
@@ -81,6 +82,7 @@ base:
         - local.consul
         - local.nomad
         - local.buildserver
+        - local.crypto
         - local.ssl
         - local.authserver
         # - local.url_overrides
