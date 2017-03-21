@@ -11,6 +11,4 @@ python-apt-packages:
         - pkgs:
             - python-apt
             - debconf-utils
-            - python-software-properties
             - python-pycurl
-

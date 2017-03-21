@@ -1,5 +1,5 @@
 # aptly repositories don't contain "NotAutomatic: yes" and "ButAutomaticUpgrades: yes"
 # so we pin backports explicitly
 Package: *
-Pin: release n=jessie-backports
+Pin: release n=stretch-backports
 Pin-Priority: 100

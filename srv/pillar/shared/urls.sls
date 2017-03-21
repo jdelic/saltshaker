@@ -6,19 +6,17 @@
 repos:
     aptly: deb http://repo.aptly.info/ squeeze main
     aptly-nightly: deb http://repo.aptly.info/ nightly main
-    docker: deb https://apt.dockerproject.org/repo debian-jessie main
+    docker: deb https://apt.dockerproject.org/repo debian-stretch main
     jenkins: deb http://pkg.jenkins-ci.org/debian binary/
-    jessie: deb http://ftp-stud.hs-esslingen.de/debian/ jessie main contrib
-    jessie-backports: deb http://ftp-stud.hs-esslingen.de/debian/ jessie-backports main
-    jessie-security: deb http://security.debian.org/ jessie/updates main
-    jessie-updates: deb http://ftp-stud.hs-esslingen.de/debian/ jessie-updates main
+    stretch: deb http://ftp-stud.hs-esslingen.de/debian/ stretch main contrib
+    stretch-backports: deb http://ftp-stud.hs-esslingen.de/debian/ stretch-backports main
+    stretch-security: deb http://security.debian.org/ stretch/updates main
+    stretch-updates: deb http://ftp-stud.hs-esslingen.de/debian/ stretch-updates main
     maurusnet: deb http://repo.maurus.net/debian/ jessie main
     maurusnet-nightly: deb http://repo.maurus.net/nightly/ mn-nightly main
     maurusnet-opensmtpd: deb http://repo.maurus.net/opensmtpd/ mn-experimental main
     maurusnet-radicale: deb http://repo.maurus.net/radicale/ mn-radicale main
-    postgresql: deb http://apt.postgresql.org/pub/repos/apt/ jessie-pgdg main
-    powerdns: deb http://repo.powerdns.com/debian jessie-auth-40 main
-    stretch-testing: deb http://ftp-stud.hs-esslingen.de/debian/ stretch main
+    postgresql: deb http://apt.postgresql.org/pub/repos/apt/ stretch-pgdg main
     saltstack: deb http://repo.saltstack.com/apt/debian/8/amd64/latest jessie main
 
 #   pgpkey: Set this to a salt:// url if you need to deploy your own repo signing key

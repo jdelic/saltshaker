@@ -51,13 +51,13 @@ basic-required-packages:
             - dnsutils
             - unzip
             - net-tools
+            - libcap2-bin
         -  order: 1  # execute this state early, because later states need unzip
 
 
-jessie:
+stretch:
     pkgrepo.managed:
-        - humanname: Jessie Base
-        - name: {{pillar['repos']['jessie']}}
+        - name: {{pillar['repos']['stretch']}}
         - file: /etc/apt/sources.list
         {% if pillar['repos'].get('pgpkey', None) %}
         - key_url: {{pillar['repos']['pgpkey']}}
@@ -66,31 +66,28 @@ jessie:
         - order: 1  # execute this state early!
 
 
-updates-jessie:
+updates-stretch:
     pkgrepo.managed:
-        - humanname: Jessie Updates
-        - name: {{pillar['repos']['jessie-updates']}}
-        - file: /etc/apt/sources.list.d/jessie-updates.list
+        - name: {{pillar['repos']['stretch-updates']}}
+        - file: /etc/apt/sources.list.d/stretch-updates.list
         - order: 2  # execute this state early!
 
 
-security-updates-jessie:
+security-updates-stretch:
     pkgrepo.managed:
-        - humanname: Jessie Security Updates
-        - name: {{pillar['repos']['jessie-security']}}
-        - file: /etc/apt/sources.list.d/jessie-security.list
+        - name: {{pillar['repos']['stretch-security']}}
+        - file: /etc/apt/sources.list.d/stretch-security.list
         - order: 2  # execute this state early!
 
 
-backports-org-jessie:
-    pkgrepo.managed:
-        - humanname: Jessie Backports
-        - name: {{pillar['repos']['jessie-backports']}}
-        - file: /etc/apt/sources.list.d/jessie-backports.list
-        - order: 2  # execute this state early!
-    file.managed:
-        - name: /etc/apt/preferences.d/jessie-backports
-        - source: salt://etc_mods/jessie-backports
+#backports-org-stretch:
+#    pkgrepo.managed:
+#        - name: {{pillar['repos']['stretch-backports']}}
+#        - file: /etc/apt/sources.list.d/stretch-backports.list
+#        - order: 2  # execute this state early!
+#    file.managed:
+#        - name: /etc/apt/preferences.d/stretch-backports
+#        - source: salt://etc_mods/stretch-backports
 
 
 maurusnet-repo:
@@ -120,38 +117,19 @@ maurusnet-authserver:
         - order: 2
 
 
-openssl:
-    # this will upgrade the installed version from the basebox
-    pkg.latest:
-        - pkgs:
-             - openssl
-             - openssl-blacklist
-             - openssl-blacklist-extra
-             - libssl1.0.0
-        - install_recommends: False
-        - order: 10  # see ORDER.md
-        - fromrepo: jessie-backports
-        - require:
-            - pkgrepo: backports-org-jessie
-
-
-stretch:
-    pkgrepo.managed:
-        - humanname: Stretch Debian Testing
-        - name: {{pillar['repos']['stretch-testing']}}
-        - file: /etc/apt/sources.list.d/stretch-testing.list
-        - order: 2
-        - require:
-            - file: stretch  # ensure pinning exists, so we don't pull anyting in we don't want
-    file.managed:
-        - name: /etc/apt/preferences.d/stretch-testing
-        - source: salt://opensmtpd/preferences.d/stretch-testing
-    pkg.installed:
-        - name: apt-transport-s3
-        - install_recommends: False
-        - fromrepo: stretch
-        - require:
-            - pkgrepo: stretch
+#openssl:
+#    # this will upgrade the installed version from the basebox
+#    pkg.latest:
+#        - pkgs:
+#             - openssl
+#             - openssl-blacklist
+#             - openssl-blacklist-extra
+#             - libssl1.0.0
+#        - install_recommends: False
+#        - order: 10  # see ORDER.md
+#        - fromrepo: stretch-backports
+#        - require:
+#            - pkgrepo: backports-org-stretch
 
 
 # always allow ssh in

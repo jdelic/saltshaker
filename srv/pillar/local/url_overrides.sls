@@ -6,19 +6,17 @@
 repos:
     aptly: deb http://fileserver.maurusnet.test/aptly/ squeeze main
     aptly-nightly: deb http://fileserver.maurusnet.test/aptly-nightly/ nightly main
-    docker: deb http://fileserver.maurusnet.test/repo/ debian-jessie main
+    docker: deb http://fileserver.maurusnet.test/repo/ debian-stretch main
     jenkins: deb http://fileserver.maurusnet.test/jenkins/ jenkins main
-    jessie: deb http://fileserver.maurusnet.test/debian/ jessie main
-    jessie-backports: deb http://fileserver.maurusnet.test/debian/ jessie-backports main
-    jessie-security: deb http://fileserver.maurusnet.test/debian/security/ jessie-updates main
-    jessie-updates: deb http://fileserver.maurusnet.test/debian/ jessie-updates main
+    stretch: deb http://fileserver.maurusnet.test/debian/ stretch main
+    stretch-backports: deb http://fileserver.maurusnet.test/debian/ stretch-backports main
+    stretch-security: deb http://fileserver.maurusnet.test/debian/security/ stretch-updates main
+    stretch-updates: deb http://fileserver.maurusnet.test/debian/ stretch-updates main
     maurusnet: deb http://fileserver.maurusnet.test/maurusnet/ jessie main
     maurusnet-nightly: deb http://fileserver.maurusnet.test/mn-nightly/ mn-nightly main
     maurusnet-opensmtpd: deb http://fileserver.maurusnet.test/opensmtpd/ mn-experimental main
     maurusnet-radicale: deb http://fileserver.maurusnet.test/mn-radicale/ mn-radicale main
-    postgresql: deb http://fileserver.maurusnet.test/postgresql/ jessie-pgdg main
-    powerdns: deb http://fileserver.maurusnet.test/powerdns/ jessie-auth-40 main
-    stretch-testing: deb http://fileserver.maurusnet.test/debian/ stretch main
+    postgresql: deb http://fileserver.maurusnet.test/postgresql/ stretch-pgdg main
     saltstack: deb http://fileserver.maurusnet.test/apt/debian/8/amd64/latest jessie main
 
     pgpkey: salt://mn/fileserver_ACADBD6B.pgp.key

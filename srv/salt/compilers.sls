@@ -8,5 +8,4 @@ make:
     pkg.installed
 
 libssl-dev:
-    pkg.installed:
-        - fromrepo: jessie-backports
+    pkg.installed
