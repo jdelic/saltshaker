@@ -50,6 +50,7 @@ basic-required-packages:
             - patch
             - dnsutils
             - unzip
+            - net-tools
         -  order: 1  # execute this state early, because later states need unzip
 
 
