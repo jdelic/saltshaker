@@ -2,7 +2,6 @@
 
 haproxy:
     pkg.installed:
-        - fromrepo: jessie-backports
         - install_recommends: False
     service.dead:
         - name: haproxy
