@@ -1,15 +1,28 @@
-redis:
+redis-install:
     pkg.installed:
         - pkgs:
             - redis-server
             - redis-tools
-    service.running:
+
+
+debian-redis-remove:
+    service.dead:
         - name: redis-server
-        - enable: True
+        - enable: False
+        - prereq:
+            - file: redis-multi
         - require:
-            - pkg: redis
-        - watch:
-            - file: redis-config
+            - pkg: redis-install
+
+
+# set up a systemd config that supports multiple redis instances on one machine
+redis-multi:
+    file.managed:
+        - name: /etc/systemd/system/redis@.service
+        - source: salt://redis/redis@.service
+        - user: root
+        - group: root
+        - mode: '0644'
 
 
 remove-stale-redis-log-file:
@@ -25,7 +38,7 @@ redis-data-dir:
         - group: redis
         - mode: '2755'
         - require:
-            - pkg: redis
+            - pkg: redis-install
 
 
 # this is now provided by the package

@@ -5,7 +5,7 @@ include:
 
 redis-config:
     file.managed:
-        - name: /etc/redis/redis.conf
+        - name: /etc/redis/redis-local.conf
         - source: salt://redis/redis.jinja.conf
         - template: jinja
         - context:
@@ -13,6 +13,11 @@ redis-config:
             port: {{pillar.get('redis-local', {}).get('bind-port', 6380)}}
             instance: local
         - require:
-            - pkg: redis
-        - unless:
-            - sls: redis.cache
+            - pkg: redis-multi
+    service.running:
+        - name: redis@local
+        - enable: True
+        - require:
+            - file: redis-multi
+        - watch:
+            - file: redis-config
