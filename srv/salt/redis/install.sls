@@ -13,6 +13,17 @@ debian-redis-remove:
             - file: redis-multi
         - require:
             - pkg: redis-install
+    file.absent:
+        - name: /lib/systemd/system/redis-server.service
+        - require:
+            - service: debian-redis-remove
+
+
+debian-config-remove:
+    file.absent:
+        - name: /etc/redis/redis.conf
+        - require:
+            - service: debian-redis-remove
 
 
 # set up a systemd config that supports multiple redis instances on one machine
