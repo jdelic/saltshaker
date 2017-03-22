@@ -35,6 +35,7 @@ wellknown-etc-hosts:
         - order: 2
 {% endif %}
 
+
 # set up vault command-line client configuration as a convenience in /etc/profile.d
 vault-envvar-config:
     file.managed:
