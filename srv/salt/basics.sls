@@ -52,6 +52,7 @@ basic-required-packages:
             - unzip
             - net-tools
             - libcap2-bin
+            - apt-transport-https
         -  order: 1  # execute this state early, because later states need unzip
 
 
