@@ -51,7 +51,7 @@ set shiftwidth=4
 set expandtab
 set modeline
 
-let skip_defaults_vim=1  # make vim8.0 f*cking stupid mouse defaults eat it
+let skip_defaults_vim=1  " make vim8.0 f*cking stupid mouse defaults eat it
 
 autocmd FileType sls,py,c,cpp,java,php autocmd BufWritePre <buffer> :%s/\s\+$//e
 
