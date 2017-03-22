@@ -48,3 +48,12 @@ vault-envvar-config:
         - user: root
         - group: root
         - mode: '0644'
+
+
+sudoers-config:
+    file.managed:
+        - name: /etc/sudoers.d/salt-sudoers
+        - source: salt://etc_mods/salt-sudoers
+        - user: root
+        - group: root
+        - mode: '0440'
