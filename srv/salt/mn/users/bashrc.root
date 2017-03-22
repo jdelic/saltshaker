@@ -96,6 +96,7 @@ fi
 #alias la='ls -A'
 #alias l='ls -CF'
 alias systemctl="systemctl --no-pager"
+export SYSTEMD_PAGER=
 
 # Alias definitions.
 # You may want to put all your additions into a separate file like
