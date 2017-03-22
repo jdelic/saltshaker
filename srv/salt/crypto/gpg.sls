@@ -74,6 +74,7 @@ gpg-{{k}}:
             --keyring {{keyloc}}/pubring.gpg
             --secret-keyring {{keyloc}}/secring.gpg
             --trustdb {{keyloc}}/trustdb.gpg
+            --batch
             --import {{keyloc}}/tmp/gpg-{{k}}.asc
 {% endfor %}
 
