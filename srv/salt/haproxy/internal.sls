@@ -35,7 +35,7 @@ smartstack-internal:
             parameters: >
                 --include tags=smartstack:internal
                 {% if pillar.get("crypto", {}).get("generate-secure-dhparams", True) -%}
-                    -D load-dhparams=True
+                    -D load_dhparams=True
                 {%- endif %}
             template: /etc/haproxy/haproxy-internal.jinja.cfg
         - require:
