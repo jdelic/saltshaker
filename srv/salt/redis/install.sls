@@ -19,7 +19,7 @@ debian-redis-remove:
             - service: debian-redis-remove
 
 
-debian-config-remove:
+debian-redis-config-remove:
     file.absent:
         - name: /etc/redis/redis.conf
         - require:
