@@ -13,7 +13,7 @@ repos:
     stretch-security: deb http://security.debian.org/ stretch/updates main
     stretch-updates: deb http://ftp-stud.hs-esslingen.de/debian/ stretch-updates main
     maurusnet: deb http://repo.maurus.net/debian/ jessie main
-    maurusnet-nightly: deb http://repo.maurus.net/nightly/ mn-nightly main
+    maurusnet-nightly: deb http://repo.maurus.net/nightly/stretch/ mn-nightly main
     maurusnet-opensmtpd: deb http://repo.maurus.net/opensmtpd/ mn-experimental main
     maurusnet-radicale: deb http://repo.maurus.net/radicale/ mn-radicale main
     postgresql: deb http://apt.postgresql.org/pub/repos/apt/ stretch-pgdg main
