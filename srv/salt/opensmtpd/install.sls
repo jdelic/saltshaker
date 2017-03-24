@@ -13,7 +13,7 @@ opensmtpd-extras:
         - pkgs:
             - opensmtpd-extras
             - opensmtpd-filter-greylistd
-        - fromrepo: mn-experimental
+        - fromrepo: mn-opensmtpd
         - require:
             - pkg: opensmtpd
             - pkg: greylistd
