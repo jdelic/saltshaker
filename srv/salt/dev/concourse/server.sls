@@ -76,8 +76,8 @@ concourse-authorized-key-consul-template-watcher:
             template {
                 source = "/etc/concourse/authorized_worker_keys.ctmpl"
                 destination = "/etc/concourse/authorized_worker_keys"
-                command = "systemctl reload concourse-web"
-                perms = 0640
+                command = "systemctl restart concourse-web"
+                perms = 0644
             }
         - user: root
         - group: root
