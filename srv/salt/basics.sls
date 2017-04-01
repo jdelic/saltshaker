@@ -18,6 +18,7 @@ include:
     - iptables  # forces "order: 1"
     - crypto
     - crypto.ssh
+    - rsyslog
 
 
 # enforce that Debian packages can't launch daemons while salt runs
