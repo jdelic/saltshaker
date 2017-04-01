@@ -27,6 +27,7 @@ base:
 
     'roles:dev':
         - match: grain
+        - shared.buildserver
         - shared.secrets.gpg-package-signing
 
     'E@(?!test)$ and G@roles:apps or G@roles:loadbalancer or G@roles:mail':
