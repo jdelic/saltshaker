@@ -129,7 +129,8 @@ iptables-default-allow-related-established-output:
 
 iptables-default-allow-related-established-forward:
     iptables.insert:
-        - position: 2
+        # insert this right at the top, since we don't have preceding appends on the forward chain
+        - position: 1
         - table: filter
         - chain: FORWARD
         - jump: ACCEPT
