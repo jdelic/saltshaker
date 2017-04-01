@@ -26,6 +26,9 @@ smartstack-docker:
                 --include tags=smartstack:internal
                 --smartstack-localip {{pillar.get('docker', {}).get('bridge-ip', grains['ip_interfaces']['docker0'])}}
                 -D transparent_bind=1
+                {% if pillar.get("crypto", {}).get("generate-secure-dhparams", True) -%}
+                    -D load_dhparams=True
+                {%- endif %}
             template: /etc/haproxy/haproxy-internal.jinja.cfg
         - require:
             - file: haproxy-config-template-internal

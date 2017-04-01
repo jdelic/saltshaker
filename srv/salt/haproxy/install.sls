@@ -2,7 +2,6 @@
 
 haproxy:
     pkg.installed:
-        - fromrepo: jessie-backports
         - install_recommends: False
     service.dead:
         - name: haproxy
@@ -25,9 +24,10 @@ haproxy-multi:
         - mode: '0644'
         # note that there is NO dependency to pkg: haproxy here! This is because we declare haproxy to be
         # a prereq of service:haproxy-multi
+{% if pillar.get("crypto", {}).get("generate-secure-dhparams", True) %}
         - require:
-            - file: haproxy-dhparams
-
+            - cmd: haproxy-dhparams
+{% endif %}
 
 haproxy-remove-packaged-config:
     file.absent:

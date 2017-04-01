@@ -127,6 +127,21 @@ iptables-default-allow-related-established-output:
             - pkg: iptables
 
 
+iptables-default-allow-related-established-forward:
+    iptables.insert:
+        - position: 2
+        - table: filter
+        - chain: FORWARD
+        - jump: ACCEPT
+        - match: state
+        - connstate: ESTABLISHED,RELATED
+        - order: 2  # this is order "2" so it executes together with basics.sls
+        - save: True
+        - require:
+            - pkg: iptables
+
+
+
 iptables-default-input-drop:
     iptables.set_policy:
         - policy: DROP

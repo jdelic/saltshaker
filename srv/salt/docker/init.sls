@@ -12,7 +12,7 @@ docker:
             - pkg: docker
     pkg.installed:
         - name: docker-engine
-        - fromrepo: debian-jessie
+        - fromrepo: debian-stretch
 
 
 # we install a modified docker.service to

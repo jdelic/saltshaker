@@ -9,6 +9,16 @@ gpg-access:
     group.present
 
 
+# this folder is needed by many commands and gpg fails in unexpected ways when it doesn't exist
+gpg-root-home:
+    file.directory:
+        - name: /root/.gnupg
+        - makedirs: True
+        - user: root
+        - group: root
+        - mode: '0700'
+
+
 gpg-shared-keyring-location:
     file.directory:
         - name: {{keyloc}}
@@ -64,6 +74,7 @@ gpg-{{k}}:
             --keyring {{keyloc}}/pubring.gpg
             --secret-keyring {{keyloc}}/secring.gpg
             --trustdb {{keyloc}}/trustdb.gpg
+            --batch
             --import {{keyloc}}/tmp/gpg-{{k}}.asc
 {% endfor %}
 

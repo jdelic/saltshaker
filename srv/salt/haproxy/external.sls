@@ -36,7 +36,7 @@ smartstack-external:
                     -D maincert={{pillar['ssl']['filenames']['default-cert-full']}}
                 {%- endif %}
                 {% if pillar.get("crypto", {}).get("generate-secure-dhparams", True) -%}
-                    -D load-dhparams=True
+                    -D load_dhparams=True
                 {%- endif %}
             template: /etc/haproxy/haproxy-external.jinja.cfg
         - require:

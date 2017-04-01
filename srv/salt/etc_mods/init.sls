@@ -35,6 +35,7 @@ wellknown-etc-hosts:
         - order: 2
 {% endif %}
 
+
 # set up vault command-line client configuration as a convenience in /etc/profile.d
 vault-envvar-config:
     file.managed:
@@ -48,3 +49,12 @@ vault-envvar-config:
         - user: root
         - group: root
         - mode: '0644'
+
+
+sudoers-config:
+    file.managed:
+        - name: /etc/sudoers.d/salt-sudoers
+        - source: salt://etc_mods/salt-sudoers
+        - user: root
+        - group: root
+        - mode: '0440'

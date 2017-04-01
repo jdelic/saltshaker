@@ -5,7 +5,6 @@ opensmtpd:
             - opensmtpd
             - libmariadbclient18  # dependency of opensmtpd-extras
         - install_recommends: False
-        - fromrepo: stretch
 
 
 opensmtpd-extras:
@@ -13,7 +12,7 @@ opensmtpd-extras:
         - pkgs:
             - opensmtpd-extras
             - opensmtpd-filter-greylistd
-        - fromrepo: mn-experimental
+        - fromrepo: mn-opensmtpd
         - require:
             - pkg: opensmtpd
             - pkg: greylistd

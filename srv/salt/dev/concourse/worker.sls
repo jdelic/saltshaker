@@ -3,6 +3,34 @@ include:
     - dev.concourse.install
 
 
+concourse-keys-worker_key:
+    cmd.run:
+        - name: ssh-keygen -t rsa -f /etc/concourse/private/worker_key.pem -N ''
+        - runas: concourse
+        - creates:
+            - /etc/concourse/private/worker_key.pem
+            - /etc/concourse/private/worker_key.pem.pub
+        - require:
+            - file: concourse-private-config-folder
+            - user: concourse-user
+    file.managed:
+        - name: /etc/concourse/private/worker_key.pem
+        - user: concourse
+        - group: concourse
+        - mode: '0640'
+        - replace: False
+        - require:
+            - cmd: concourse-keys-worker_key
+
+
+# register the worker for the server
+concourse-worker_key-consul-submit:
+    cmd.run:
+        - name: consul kv put concourse/workers/sshpub/{{grains['id']}} @/etc/concourse/private/worker_key.pem.pub
+        - onchanges:
+            - cmd: concourse-keys-worker_key
+
+
 concourse-worker-dir:
     file.directory:
         - name: /srv/concourse-worker/
@@ -29,6 +57,9 @@ concourse-worker:
                 --work-dir /srv/concourse-worker
                 --tsa-host 127.0.0.1
                 --tsa-public-key /etc/concourse/host_key.pub
+                --tsa-worker-private-key /etc/concourse/private/worker_key.pem
+                --garden-network-pool {{pillar.get('ci', {}).get('garden-network-pool', '10.254.0.0/22')}}
+                --garden-docker-registry {{pillar.get('ci', {}).get('garden-docker-registry', 'registry-1.docker.io')}}
         - require:
             - file: concourse-install
             - file: concourse-worker-dir
@@ -41,6 +72,39 @@ concourse-worker:
         - watch:
             - file: concourse-worker
             - file: concourse-install  # restart on a change of the binary
+
+
+# allow forwarding of outgoing dns/http/https traffic to the internet from concourse.ci/garden containers
+{% for port in ['53', '80', '443'] %}
+concourse-worker-tcp-out{{port}}-forward:
+    iptables.append:
+        - table: filter
+        - chain: FORWARD
+        - jump: ACCEPT
+        - source: {{pillar.get('ci', {}).get('garden-network-pool', '10.254.0.0/22')}}
+        - destination: 0/0
+        - match: state
+        - connstate: NEW
+        - proto: tcp
+        - save: True
+        - require:
+            - sls: iptables
+{% endfor %}
+
+
+concourse-worker-udp-out53-forward:
+    iptables.append:
+        - table: filter
+        - chain: FORWARD
+        - jump: ACCEPT
+        - source: {{pillar.get('ci', {}).get('garden-network-pool', '10.254.0.0/22')}}
+        - destination: 0/0
+        - match: state
+        - connstate: NEW
+        - proto: udp
+        - save: True
+        - require:
+            - sls: iptables
 
 
 # vim: syntax=yaml
