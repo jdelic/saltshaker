@@ -36,13 +36,19 @@ base:
         - dev.pbuilder
         - dev.aptly
         - dev.fpm
-        - dev.concourse.server
-        - dev.concourse.worker
 #        - dev.pypi
 #        - sentry
         - compilers
         - python.dev
         - docker
+
+    'roles:buildserver':
+        - match: grain
+        - dev.concourse.server
+
+    'roles:buildworker':
+        - match: grain
+        - dev.concourse.worker
 
     'roles:apps':
         - match: grain

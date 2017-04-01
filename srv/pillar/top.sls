@@ -25,8 +25,8 @@ base:
         - shared.secrets.postgresql
         - shared.authserver
 
-    'roles:dev':
-        - match: grain
+    'G@roles:buildserver or G@roles:buildworker':
+        - match: compound
         - shared.buildserver
         - shared.secrets.gpg-package-signing
 
