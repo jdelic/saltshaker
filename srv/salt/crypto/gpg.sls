@@ -57,6 +57,7 @@ gpg-{{k}}:
     cmd.run:
         - unless: >
             /usr/bin/gpg
+            --homedir {{keyloc}}
             --no-default-keyring
             --keyring {{keyloc}}/pubring.gpg
             --secret-keyring {{keyloc}}/secring.gpg
@@ -70,6 +71,7 @@ gpg-{{k}}:
     {% endif %}
         - name: >
             /usr/bin/gpg
+            --homedir {{keyloc}}
             --no-default-keyring
             --keyring {{keyloc}}/pubring.gpg
             --secret-keyring {{keyloc}}/secring.gpg
