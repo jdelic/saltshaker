@@ -47,17 +47,43 @@ require-concourse-keys:
 {% endfor %}
 
 
-# concourse requires this file to at least exist, even if empty
-concourse-authorized-key-file:
+authorized_worker_keys-must-exist:
     file.managed:
         - name: /etc/concourse/authorized_worker_keys
-        - replace: False
-        - user: concourse
-        - group: concourse
-        - mode: '0640'
         - create: True
+        - replace: False
+        - allow_empty: True
         - require:
-            - user: concourse-user
+            - file: concourse-config-folder
+
+
+authorized_worker_keys-template:
+    file.managed:
+        - name: /etc/concourse/authorized_worker_keys.ctmpl
+        - source: salt://dev/concourse/authorized_worker_keys.ctmpl
+        - user: root
+        - group: root
+        - mode: '0644'
+        - require:
+            - file: concourse-config-folder
+
+
+# create a consul template watch for authorized_worker_keys to populate it from the consul KV store
+concourse-authorized-key-consul-template-watcher:
+    file.managed:
+        - name: /etc/consul/template.d/concourse-worker-registration.conf
+        - contents: >
+            template {
+                source = "/etc/concourse/authorized_worker_keys.ctmpl"
+                destination = "/etc/concourse/authorized_worker_keys"
+                command = "systemctl reload concourse-web"
+                perms = 0640
+            }
+        - user: root
+        - group: root
+        - mode: '0644'
+        - require:
+            - file: authorized_worker_keys-template
 
 
 concourse-server-envvars:
@@ -98,7 +124,7 @@ concourse-server:
             - require-concourse-keys
         - require:
             - file: concourse-install
-            - file: concourse-authorized-key-file
+            - file: authorized_worker_keys-must-exist
             - file: concourse-server-envvars
     service.running:
         - name: concourse-web

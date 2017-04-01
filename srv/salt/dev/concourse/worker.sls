@@ -9,6 +9,7 @@ concourse-keys-worker_key:
         - runas: concourse
         - creates:
             - /etc/concourse/private/worker_key.pem
+            - /etc/concourse/private/worker_key.pem.pub
         - require:
             - file: concourse-private-config-folder
             - user: concourse-user
@@ -19,6 +20,14 @@ concourse-keys-worker_key:
         - mode: '0640'
         - replace: False
         - require:
+            - cmd: concourse-keys-worker_key
+
+
+# register the worker for the server
+concourse-worker_key-consul-submit:
+    cmd.run:
+        - name: consul kv put concourse/workers/sshpub/{{grains['id']}} @/etc/concourse/private/worker_key.pem.pub
+        - onchanges:
             - cmd: concourse-keys-worker_key
 
 
