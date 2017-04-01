@@ -3,27 +3,6 @@ include:
     - dev.concourse.install
 
 
-# ssh-keygen -t rsa -f session_signing_key -N ''
-{% for key in ["worker_key",] %}
-concourse-keys-{{key}}:
-    cmd.run:
-        - name: ssh-keygen -t rsa -f /etc/concourse/private/{{key}}.pem -N ''
-        - runas: concourse
-        - unless: test -f /etc/concourse/private/{{key}}.pem
-        - require:
-            - file: concourse-private-config-folder
-            - user: concourse-user
-    file.managed:
-        - name: /etc/concourse/private/{{key}}.pem
-        - user: concourse
-        - group: concourse
-        - mode: '0640'
-        - replace: False
-        - require:
-            - cmd: concourse-keys-{{key}}
-{% endfor %}
-
-
 concourse-keys-session_signing_key:
     file.managed:
         - name: /etc/concourse/private/session_signing_key.pem

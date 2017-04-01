@@ -3,6 +3,25 @@ include:
     - dev.concourse.install
 
 
+concourse-keys-worker_key:
+    cmd.run:
+        - name: ssh-keygen -t rsa -f /etc/concourse/private/worker_key.pem -N ''
+        - runas: concourse
+        - creates:
+            - /etc/concourse/private/worker_key.pem
+        - require:
+            - file: concourse-private-config-folder
+            - user: concourse-user
+    file.managed:
+        - name: /etc/concourse/private/worker_key.pem
+        - user: concourse
+        - group: concourse
+        - mode: '0640'
+        - replace: False
+        - require:
+            - cmd: concourse-keys-worker_key
+
+
 concourse-worker-dir:
     file.directory:
         - name: /srv/concourse-worker/
@@ -29,6 +48,7 @@ concourse-worker:
                 --work-dir /srv/concourse-worker
                 --tsa-host 127.0.0.1
                 --tsa-public-key /etc/concourse/host_key.pub
+                --tsa-worker-private-key /etc/concourse/private/worker_key.pem
                 --garden-network-pool {{pillar.get('ci', {}).get('garden-network-pool', '10.254.0.0/22')}}
                 --garden-docker-registry {{pillar.get('ci', {}).get('garden-docker-registry', 'registry-1.docker.io')}}
         - require:

@@ -49,7 +49,7 @@ concourse-private-config-folder:
 concourse-keys-host_key-public:
     file.managed:
         - name: /etc/concourse/host_key.pub
-        - contents_pillar: ssh:concourse:public
+        - contents_pillar: dynamicsecrets:concourse-hostkey:public
         - user: concourse
         - group: concourse
         - mode: '0644'
