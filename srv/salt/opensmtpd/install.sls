@@ -5,7 +5,6 @@ opensmtpd:
             - opensmtpd
             - libmariadbclient18  # dependency of opensmtpd-extras
         - install_recommends: False
-        - fromrepo: stretch
 
 
 opensmtpd-extras:
