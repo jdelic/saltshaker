@@ -12,9 +12,8 @@ repos:
     stretch-backports: deb http://fileserver.maurusnet.test/debian/ stretch-backports main
     stretch-security: deb http://fileserver.maurusnet.test/debian/security/ stretch-updates main
     stretch-updates: deb http://fileserver.maurusnet.test/debian/ stretch-updates main
-    maurusnet: deb http://fileserver.maurusnet.test/maurusnet/ jessie main
     maurusnet-nightly: deb http://fileserver.maurusnet.test/mn-nightly/ mn-nightly main
-    maurusnet-opensmtpd: deb http://fileserver.maurusnet.test/opensmtpd/ mn-experimental main
+    maurusnet-opensmtpd: deb http://fileserver.maurusnet.test/mn-opensmtpd/ mn-opensmtpd main
     maurusnet-radicale: deb http://fileserver.maurusnet.test/mn-radicale/ mn-radicale main
     postgresql: deb http://fileserver.maurusnet.test/postgresql/ stretch-pgdg main
     saltstack: deb http://fileserver.maurusnet.test/apt/debian/8/amd64/latest jessie main

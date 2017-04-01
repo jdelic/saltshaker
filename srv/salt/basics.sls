@@ -92,15 +92,6 @@ security-updates-stretch:
 #        - source: salt://etc_mods/stretch-backports
 
 
-maurusnet-repo:
-    pkgrepo.managed:
-        - humanname: repo.maurus.net
-        - name: {{pillar['repos']['maurusnet']}}
-        - file: /etc/apt/sources.list.d/maurusnet.list
-        - key_url: salt://mn/packaging_authority_A78049AF.pgp.key
-        - order: 2  # execute this state early!
-
-
 maurusnet-opensmtpd:
     pkgrepo.managed:
         - humanname: repo.maurus.net-opensmtpd
