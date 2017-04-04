@@ -1,3 +1,6 @@
 {
-    "disable_update_check": {{ disable_update_check }}
+    "disable_update_check": {{disable_update_check}},
+    "encrypt": "{{encryption_key}}",
+    "datacenter": "{{datacenter}}",
+    "bind_addr": "{{local_ip}}"
 }
