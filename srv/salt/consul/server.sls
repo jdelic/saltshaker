@@ -17,7 +17,7 @@ consul-server-service:
         - context:
             user: {{consul_user}}
             group: {{consul_group}}
-            extra_parameters: -server -bootstrap-expect={{pillar['consul-cluster']['number-of-nodes']}}
+            extra_parameters: -server -bootstrap-expect={{pillar['consul-cluster']['number-of-nodes']}} -ui
         - require:
             - file: consul
             - file: consul-agent-absent
