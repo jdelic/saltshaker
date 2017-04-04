@@ -1,5 +1,7 @@
 # -* encoding: utf-8 *-
+
 import os
+import uuid
 import base64
 import logging
 import sqlite3
@@ -130,6 +132,9 @@ class DynamicSecretsPillar(DynamicSecretsStore):
             key = RSA.generate(keylen)
             # Save only the private key to the database, we calculate the public key on read
             self[secret_name] = key.exportKey("PEM")
+        elif secret_type == "uuid":
+            # uuid.uuid4() uses os.urandom(), so this should be reasonably unguessable
+            self[secret_name] = uuid.uuid4()
 
 
 def ext_pillar(minion_id, pillar, *roledefs):
