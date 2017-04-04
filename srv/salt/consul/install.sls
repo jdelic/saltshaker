@@ -71,7 +71,7 @@ consul-common-config:
         - source: salt://consul/common-config.jinja.json
         - user: {{consul_user}}
         - group: {{consul_group}}
-        - mode: '0644'
+        - mode: '0600'
         - template: jinja
         - context:
             disable_update_check: >
@@ -80,6 +80,14 @@ consul-common-config:
                 {%- else -%}
                     true
                 {%- endif %}
+            local_ip: {{pillar.get('consul-instance', {}).get(
+                            'bind-ip', grains['ip_interfaces'][pillar['ifassign']['internal']][pillar['ifassign'].get(
+                                'internal-ip-index', 0
+                            )|int()]
+                        )
+                      }}
+            datacenter: {{pillar['consul-cluster']['datacenter']}}
+            encryption_key: {{pillar['dynamicsecrets']['consul-encryptionkey']}}
         - require:
             - file: consul-basedir
 
