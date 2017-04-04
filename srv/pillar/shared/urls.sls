@@ -30,8 +30,7 @@ urls:
     djbdns: http://cr.yp.to/djbdns/djbdns-1.05.tar.gz
     exxo: https://bintray.com/artifact/download/mbachry/exxo/exxo-0.0.7.tar.xz
     nomad: https://releases.hashicorp.com/nomad/0.5.5/nomad_0.5.5_linux_amd64.zip
-    pyrun34: https://downloads.egenix.com/python/egenix-pyrun-2.2.1-py3.4_ucs4-linux-x86_64.tgz
-    pyrun35: https://downloads.egenix.com/python/egenix-pyrun-2.2.1-py3.5_ucs4-linux-x86_64.tgz
+    pyrun35: https://downloads.egenix.com/python/egenix-pyrun-2.2.3-py3.5_ucs4-linux-x86_64.tgz
     qmail: http://cr.yp.to/software/qmail-1.03.tar.gz
     terraform: https://releases.hashicorp.com/terraform/0.8.8/terraform_0.8.8_linux_amd64.zip
     vault: https://releases.hashicorp.com/vault/0.7.0/vault_0.7.0_linux_amd64.zip
@@ -45,8 +44,7 @@ hashes:
     djbdns: sha256=3ccd826a02f3cde39be088e1fc6aed9fd57756b8f970de5dc99fcd2d92536b48
     exxo: sha256=ce3d6ae10d364c5a0726cce127602fe6fa5d042b11afd21d79502f8216b42e1e
     nomad: sha256=13ecd22bbbffab5b8261c2146af54fdf96a22c46c6618d6b5fd0f61938b95068
-    pyrun34: sha256=9798f3cd00bb39ee07daddb253665f4e3777ab58ffb6b1d824e206d338017e71
-    pyrun35: sha256=d20bd23b3e6485c0122d4752fb713f30229e7c522e4482cc9716afc05413b02e
+    pyrun35: sha256=8bf8b374f582bb53600dd846a0cdb38e18586bbda06261321d48df69ddbf730e
     qmail: sha256=21ed6c562cbb55092a66197c35c8222b84115d1acab0854fdb1ad1f301626f88
     terraform: sha256=403d65b8a728b8dffcdd829262b57949bce9748b91f2e82dfd6d61692236b376
     vault: sha256=c6d97220e75335f75bd6f603bb23f1f16fe8e2a9d850ba59599b1a0e4d067aaa
