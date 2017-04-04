@@ -212,14 +212,23 @@ pillar, which by default is `/etc/gpg-managed-keyring`.
 # Salt modules
 
 
-## The dynamicsecrets pillar
+## The dynamicsecrets Pillar
 
-This is a pillar module that can be configured on the master to provide
+This is a Pillar module that can be configured on the master to provide
 dynamically generated passwords and RSA keys across an environment managed by
-a Salt master. The secrets are stored in a single sqlite database file that can
-be easily backed up (default: `/etc/salt/dynamicsecrets.sqlite`). This should
-be used for non-critical secrets that must be shared between minions and/or
-where a more secure solution like Hashicorp's Vault is not applicable.
+a Salt master. The secrets are stored in a single **unencrypted** sqlite 
+database file that can (and should) be easily backed up (default path: 
+`/etc/salt/dynamicsecrets.sqlite`). This should be used for non-critical 
+secrets that must be shared between minions and/or where a more secure solution
+like Hashicorp's Vault is not yet applicable.
+
+**To be clear:** The purpose of `dynamicsecrets` is to help bootstrap a cluster 
+of servers where a number of initial secrets must be set and "remembered" 
+across multiple nodes that are configured with Salt. This solution is *better*
+than putting hardcoded secrets in your configuration management, but you should
+really only rely on it to bootstrap your way to an installation of Hashicorp
+Vault or another solution that solves the secret introduction problem 
+comprehensively!
 
 Secrets from the pillar are assigned to the "roles" grain or minion ids and
 are therefor only rendered to assigned minions from the master.
@@ -233,6 +242,8 @@ ext_pillar:
                 encode: base64
                 length: 16
                 type: password  # this is the default for all values
+            - consul-initialacl:
+                type: uuid  # returns a UUID4 built from a secure random source
         - database:  # render to minions with the database role
             - postgres
         - dev:  # render to minions with the dev role
@@ -242,6 +253,8 @@ ext_pillar:
 ```
 
 For `type: password` the Pillar will simply contain the random password string.
+For `type: uuid` the Pilar will return a UUID4 built from a secure random 
+source (as long as the OS provides one).
 For `type: rsa` the Pillar will return a `dict` that has the following
 properties:
  * `public_pem` the public key in PEM encoding
