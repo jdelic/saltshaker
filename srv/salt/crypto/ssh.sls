@@ -3,7 +3,7 @@ openssh:
         - pkgs:
             - ssh
             - openssh-blacklist
-            - openssh-blacklist-extra
+            # - openssh-blacklist-extra  for some reason this only exists on some Stretch mirrors atm
             - openssh-server
             - openssh-client
             - libssh2-1
