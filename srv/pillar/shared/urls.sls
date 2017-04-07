@@ -31,6 +31,7 @@ urls:
     pyrun35: https://downloads.egenix.com/python/egenix-pyrun-2.2.3-py3.5_ucs4-linux-x86_64.tgz
     terraform: https://releases.hashicorp.com/terraform/0.9.2/terraform_0.9.2_linux_amd64.zip
     vault: https://releases.hashicorp.com/vault/0.7.0/vault_0.7.0_linux_amd64.zip
+    vault-ssh-helper: https://releases.hashicorp.com/vault-ssh-helper/0.1.3/vault-ssh-helper_0.1.3_linux_amd64.zip
 
 
 hashes:
@@ -42,3 +43,4 @@ hashes:
     pyrun35: sha256=8bf8b374f582bb53600dd846a0cdb38e18586bbda06261321d48df69ddbf730e
     terraform: sha256=a916228ea4c19c91c9a5dee2905885f517eb7c31ba4dbf5d79f9f36606973313
     vault: sha256=c6d97220e75335f75bd6f603bb23f1f16fe8e2a9d850ba59599b1a0e4d067aaa
+    vault-ssh-helper: sha256=212eb6f98cfc28f201e4dc3106a1bfb82799eacb31e4b380e7c17a0457732cc0
