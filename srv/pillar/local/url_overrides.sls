@@ -25,8 +25,6 @@ urls:
     concourse: http://fileserver.maurusnet.test/downloads/concourse/concourse_linux_amd64
     consul: http://fileserver.maurusnet.test/downloads/consul/consul_0.8.0_linux_amd64.zip
     consul-template: http://fileserver.maurusnet.test/downloads/consul-template/consul-template_0.18.2_linux_amd64.zip
-    consul-webui: http://fileserver.maurusnet.test/downloads/consul/consul_0.7.5_web_ui.zip
-    djbdns: http://fileserver.maurusnet.test/downloads/djbdns/djbdns-1.05.tar.gz
     exxo: http://fileserver.maurusnet.test/downloads/exxo/exxo-0.0.5.tar.xz
     nomad: http://fileserver.maurusnet.test/downloads/nomad/nomad_0.5.5_linux_amd64.zip
     pyrun35: http://fileserver.maurusnet.test/downloads/exxo/egenix-pyrun-2.2.3-py3.5_ucs4-linux-x86_64.tgz
@@ -40,8 +38,6 @@ hashes:
     concourse: sha256=315f9efce095b2f0fa98059f99ef28d76bd845940322eb2d312d047747f59365
     consul: sha256=f4051c2cab9220be3c0ca22054ee4233f1396c7138ffd97a38ffbcea44377f47
     consul-template: sha256=6fee6ab68108298b5c10e01357ea2a8e4821302df1ff9dd70dd9896b5c37217c
-    consul-webui: sha256=a7803e7ba2872035a7e1db35c8a2186ad238bf0f90eb441ee4663a872b598af4
-    djbdns: sha256=3ccd826a02f3cde39be088e1fc6aed9fd57756b8f970de5dc99fcd2d92536b48
     exxo: sha256=ce3d6ae10d364c5a0726cce127602fe6fa5d042b11afd21d79502f8216b42e1e
     nomad: sha256=13ecd22bbbffab5b8261c2146af54fdf96a22c46c6618d6b5fd0f61938b95068
     pyrun35: sha256=8bf8b374f582bb53600dd846a0cdb38e18586bbda06261321d48df69ddbf730e
