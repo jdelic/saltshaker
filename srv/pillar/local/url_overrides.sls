@@ -25,7 +25,7 @@ urls:
     concourse: http://fileserver.maurusnet.test/downloads/concourse/concourse_linux_amd64
     consul: http://fileserver.maurusnet.test/downloads/consul/consul_0.8.0_linux_amd64.zip
     consul-template: http://fileserver.maurusnet.test/downloads/consul-template/consul-template_0.18.2_linux_amd64.zip
-    exxo: http://fileserver.maurusnet.test/downloads/exxo/exxo-0.0.5.tar.xz
+    exxo: http://fileserver.maurusnet.test/downloads/exxo/exxo-0.0.7.tar.xz
     nomad: http://fileserver.maurusnet.test/downloads/nomad/nomad_0.5.5_linux_amd64.zip
     pyrun35: http://fileserver.maurusnet.test/downloads/exxo/egenix-pyrun-2.2.3-py3.5_ucs4-linux-x86_64.tgz
     qmail: http://fileserver.maurusnet.test/downloads/qmail/qmail-1.03.tar.gz
