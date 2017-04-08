@@ -63,12 +63,4 @@ consul-agent-absent:
         - enable: False
 
 
-#consul-web-ui:
-#    archive.extracted:
-#        - name: /srv/consul-web-ui
-#        - source: {{pillar["urls"]["consul-webui"]}}
-#        - source_hash: {{pillar["hashes"]["consul-webui"]}}
-#        - archive_format: zip
-#        - if_missing: /srv/consul-web-ui/dist
-
 # vim: syntax=yaml
