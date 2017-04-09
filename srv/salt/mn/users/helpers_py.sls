@@ -41,8 +41,8 @@ def create_user(username, groups=None, optional_groups=None, key_pillars=None, p
             unless='grep -q byobu /home/%s/.profile' % username
         )
 
-        st_byobu_config = state('byobu-%s-config' % username).file
-        sbcm = st_byobu_config.managed(
+        st_byobu_tmux_config = state('byobu-%s-tmux-config' % username).file
+        sbcm = st_byobu_tmux_config.managed(
             '/home/%s/.byobu/.tmux.conf' % username,
             source='salt://mn/users/tmux-user.conf',
             user=username,
@@ -50,7 +50,16 @@ def create_user(username, groups=None, optional_groups=None, key_pillars=None, p
             mode='644'
         )
         sbcm.require(cmd='byobu-%s' % username)
-        sbcm.watch(cmd='byobu-%s' % username)
+
+        st_byobu_status_config = state('byobu-%s-status-config' % username).file
+        sbsc = st_byobu_status_config.managed(
+            '/home/%s/.byobu/status' % username,
+            source='salt://mn/users/status',
+            user=username,
+            group=username,
+            mode='644'
+        )
+        sbsc.require(cmd='byobu-%s' % username)
 
     if set_bashrc:
         file_bashrc = state('/home/%s/.bashrc' % username).file
