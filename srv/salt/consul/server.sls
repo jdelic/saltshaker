@@ -9,6 +9,21 @@ include:
 {% from 'consul/install.sls' import consul_user, consul_group %}
 
 
+consul-acl-config:
+    file.managed:
+        - name: /etc/consul/conf.d/acl.json
+        - source: salt://consul/acl/acl.jinja.json
+        - user: {{consul_user}}
+        - group: {{consul_group}}
+        - mode: '0600'
+        - template: jinja
+        - context:
+            # make sure to change this for multi-datacenter deployments
+            main_datacenter: {{pillar['consul-cluster']['datacenter']}}
+        - require:
+            - file: consul-conf-dir
+
+
 consul-server-service:
     file.managed:
         - name: /etc/systemd/system/consul-server.service
@@ -50,6 +65,7 @@ consul-server-service-reload:
             # consul.install.consul-service-dir state.
             - file: /etc/consul/services.d*
             - file: consul-common-config
+            - file: consul-acl-config
 
 
 consul-agent-absent:

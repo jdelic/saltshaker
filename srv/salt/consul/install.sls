@@ -65,6 +65,19 @@ consul-service-dir:
             - file: consul-basedir
 
 
+consul-conf-dir:
+    file.directory:
+        - name: /etc/consul/conf.d
+        - makedirs: True
+        - user: {{consul_user}}
+        - group: {{consul_group}}
+        - mode: '0755'
+        - require:
+            - user: consul
+            - group: consul
+            - file: consul-basedir
+
+
 consul-common-config:
     file.managed:
         - name: /etc/consul/common-config.json
