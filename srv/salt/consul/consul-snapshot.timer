@@ -1,0 +1,8 @@
+[Unit]
+Description=Take regular consul snapshots for single-node development clusters
+
+[Timer]
+OnCalendar=* * * 10 0
+
+[Install]
+WantedBy=timers.target

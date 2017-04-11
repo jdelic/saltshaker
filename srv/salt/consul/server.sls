@@ -33,6 +33,7 @@ consul-server-service:
             user: {{consul_user}}
             group: {{consul_group}}
             extra_parameters: -server -bootstrap-expect={{pillar['consul-cluster']['number-of-nodes']}} -ui
+            single_node_cluster: {% if pillar['consul-cluster']['number-of-nodes'] == 1 %}True{% else %}False{% endif %}
         - require:
             - file: consul
             - file: consul-agent-absent
@@ -42,11 +43,29 @@ consul-server-service:
         - name: consul-server
         - sig: consul
         - enable: True
-        - require:
-            - file: consul-server-service
         - watch:
             - file: consul-server-service  # if consul.service changes we want to *restart* (reload: False)
             - file: consul  # restart on a change of the binary
+
+
+{% if pillar['consul-cluster']['number-of-nodes'] == 1 %}
+consul-singlenode-snapshot-timer:
+    file.managed:
+        - name: /etc/systemd/system/consul-snapshot.timer
+        - source: salt://consul/consul-snapshot.timer
+
+
+consul-singlenode-snapshort-service:
+    file.managed:
+        - name: /etc/systemd/system/consul-snapshot.service
+        - source: salt://consul/consul-snapshot.service
+    service.enabled:
+        - name: consul-snapshot
+        - require:
+            - file: consul-singlenode-snapshot-timer
+            - file: consul-singlenode-snapshort-service
+            - service: consul-server-service
+{% endif %}
 
 
 consul-server-service-reload:
