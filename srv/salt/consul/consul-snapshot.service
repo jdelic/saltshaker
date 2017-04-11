@@ -4,3 +4,6 @@ Description=Take regular consul snapshots for single-node development clusters
 [Service]
 Type=oneshot
 ExecStart=/usr/local/bin/consul snapshot create /run/consul/singlenode-backup.snap
+
+[Install]
+WantedBy=timers.target
