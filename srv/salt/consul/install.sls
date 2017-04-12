@@ -138,7 +138,7 @@ consul:
 consul-rsyslog:
     file.managed:
         - name: /etc/rsyslog.d/50-consul.rsyslog.conf
-        - source: salt://dev/concourse/50-consul.rsyslog.conf
+        - source: salt://consul/50-consul.rsyslog.conf
         - user: root
         - group: root
         - mode: '0644'
