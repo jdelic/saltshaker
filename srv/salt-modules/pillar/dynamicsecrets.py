@@ -174,7 +174,7 @@ def ext_pillar(minion_id, pillar, *roledefs):
                             _log.error("Not a valid length specification: %s", u[secret_name]["length"])
                             continue
                     if "type" in u[secret_name]:
-                        if u[secret_name]["type"] in ["password", "rsa"]:
+                        if u[secret_name]["type"] in ["password", "rsa", "uuid"]:
                             secret_type = u[secret_name]["type"]
                         else:
                             _log.error("Not a valid secret type: %s", u[secret_name]["type"])

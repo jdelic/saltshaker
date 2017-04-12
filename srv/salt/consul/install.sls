@@ -65,6 +65,19 @@ consul-service-dir:
             - file: consul-basedir
 
 
+consul-conf-dir:
+    file.directory:
+        - name: /etc/consul/conf.d
+        - makedirs: True
+        - user: {{consul_user}}
+        - group: {{consul_group}}
+        - mode: '0755'
+        - require:
+            - user: consul
+            - group: consul
+            - file: consul-basedir
+
+
 consul-common-config:
     file.managed:
         - name: /etc/consul/common-config.json
@@ -120,6 +133,15 @@ consul:
             - user: consul
             - file: consul-data-dir
             - archive: consul
+
+
+consul-rsyslog:
+    file.managed:
+        - name: /etc/rsyslog.d/50-consul.rsyslog.conf
+        - source: salt://consul/50-consul.rsyslog.conf
+        - user: root
+        - group: root
+        - mode: '0644'
 
 
 # open consul ports TCP
