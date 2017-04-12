@@ -25,6 +25,18 @@ consul-acl-config:
             - file: consul-conf-dir
 
 
+consul-acl-token-envvar:
+    file.managed:
+        - name: /etc/consul/operator_token_envvar
+        - contents: |
+            CONSUL_HTTP_TOKEN="{{pillar['dynamicsecrets']['consul-master-token']}}"
+        - user: root
+        - group: root
+        - mode: '0640'
+        - require:
+            - file: consul-basedir
+
+
 consul-server-service:
     file.managed:
         - name: /etc/systemd/system/consul-server.service

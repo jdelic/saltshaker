@@ -2,5 +2,7 @@
     "disable_update_check": {{disable_update_check}},
     "encrypt": "{{encryption_key}}",
     "datacenter": "{{datacenter}}",
-    "bind_addr": "{{local_ip}}"
+    "bind_addr": "{{local_ip}}",
+    "raft_protocol": 3,
+    "enable_syslog": true
 }

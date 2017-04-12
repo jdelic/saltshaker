@@ -11,12 +11,14 @@ ExecStart=/usr/local/bin/consul agent \
     -config-file=/etc/consul/common-config.json \
     -config-dir=/etc/consul/services.d -config-dir=/etc/consul/conf.d -data-dir=/run/consul \
     -pid-file=/run/consul/consul.pid {% if extra_parameters is defined %}{{extra_parameters}}{% endif %}
-    {%- for server, addr in salt['mine.get']('roles:consulserver', 'internal_ip', expr_form='grain').items() -%}
-        {%- if loop.first -%}
-            {{" "}}\{{"\n"}}
-        {%- endif -%}
-        {{"    "}}-retry-join={{addr}}{{" "}}
-    {%- endfor %}
+    {%- if not single_node_cluster -%}
+        {%- for server, addr in salt['mine.get']('roles:consulserver', 'internal_ip', expr_form='grain').items() -%}
+            {%- if loop.first -%}
+                {{" "}}\{{"\n"}}
+            {%- endif -%}
+            {{"    "}}-retry-join={{addr}}{{" "}}
+        {%- endfor -%}
+    {%- endif %}
 ExecReload=/bin/kill -HUP $MAINPID
 {% if single_node_cluster %}
 ExecStartPost=-/usr/local/bin/consul snapshot restore /run/consul/singlenode-backup.snap
