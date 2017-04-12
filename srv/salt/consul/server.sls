@@ -25,6 +25,30 @@ consul-acl-config:
             - file: consul-conf-dir
 
 
+consul-policy-dir:
+    file.directory:
+        - name: /etc/consul/policies.d
+        - user: {{consul_user}}
+        - group: {{consul_user}}
+        - mode: '0750'
+        - require:
+            - file: consul-basedir
+
+
+{% for fn in ["anonymous.jinja.json"] %}
+consul-policy-{{loop.index}}:
+    file.managed:
+        - name: /etc/consul/policies.d/{{fn|replace('.jinja', '')}}
+        - source: salt://consul/acl/{{fn}}
+        - template: jinja
+        - user: {{consul_user}}
+        - group: {{consul_group}}
+        - mode: '0640'
+        - require:
+            - file: consul-policy-dir
+{% endfor %}
+
+
 consul-acl-token-envvar:
     file.managed:
         - name: /etc/consul/operator_token_envvar

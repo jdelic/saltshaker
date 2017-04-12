@@ -1,0 +1,27 @@
+{
+    "ID": "anonymous",
+    "Type": "client",
+    "Rules": "{{"
+key \"\" {
+    policy = \"deny\"
+}
+
+key \"oauth2-clients\" {
+    policy = \"write\"
+}
+
+key \"concourse/workers/sshpub\" {
+    policy = \"write\"
+}
+node \"\" {
+    policy = \"read\"
+}
+
+service \"\" {
+    policy = \"write\"
+}
+
+/* we configure a master token for this stuff */
+operator = \"deny\"
+"|replace('\n', '')|replace('"', '\\"')}}"
+}
