@@ -135,6 +135,15 @@ consul:
             - archive: consul
 
 
+consul-rsyslog:
+    file.managed:
+        - name: /etc/rsyslog.d/50-consul.rsyslog.conf
+        - source: salt://dev/concourse/50-consul.rsyslog.conf
+        - user: root
+        - group: root
+        - mode: '0644'
+
+
 # open consul ports TCP
 {% for port in ['8300', '8301', '8400', '8500', '8600'] %}
 # allow others to talk to us
