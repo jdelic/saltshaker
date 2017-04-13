@@ -389,23 +389,23 @@ either the *consul*, *mysql*, *S3* or *PostgreSQL* backends.
 
 ### Vault database backend
 Generally, if you run on multiple VMs sharing a physical server, choose the
-`mysql` or `postgresql` backends and choose backup intervals and Vault
-credential leases with a possible outage in mind. Such a persistent backend
-will not be highly available, but unless you distribute your VMs across
-multiple physical machines, your setup will not be HA anyway. So it's better to
-fail in a way that let's your restore service easily.
+`postgresql` backend and choose backup intervals and Vault credential leases
+with a possible outage in mind. Such a persistent backend will not be highly
+available, but unless you distribute your VMs across multiple physical
+machines, your setup will not be HA anyway. So it's better to fail in a way 
+that let's your restore service easily.
 
 Running this setup from this Salt recipe requires at least one server in the
-local environment to have the `secure-database` role as it will host the
-Vault MySQL database. The Salt recipe will automatically set up a `vault`
-database on the `secure-database` role if the vault pillar has the backend
-set to `mysql` or `postgresql`, because the `top.sls` file shipped from this
-repo assigns the `vault.database` state to the `secure-database` role.
+local environment to have the `database` role as it will host the Vault
+PostgresSQL database. The Salt recipe will automatically set up a `vault`
+database on the `database` role if the vault pillar has the backend
+set  `postgresql`, because the `top.sls` file shipped from this repo assigns
+the `vault.database` state to the `database` role.
 
-To enable this backend, set the Pillar `[server environment].vault.backend` to
-`mysql` or `postgresql` and assign one server the role `secure-database` (this
-salt configuration doesn't support database replication) and at least one
-server the `vault` role.
+To sum up: To enable this backend, set the Pillar
+`[server environment].vault.backend` to `postgresql` and assign exactly one
+server the `database` role (this salt configuration doesn't support database
+replication) and at least one server the `vault` role.
 
 [More information at the Vault website.](https://vaultproject.io/docs/config/index.html)
 
