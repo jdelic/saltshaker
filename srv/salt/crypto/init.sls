@@ -6,6 +6,7 @@
 include:
     - crypto.ssl
     - crypto.gpg
+    - crypto.ssh
 
 
 # vim: syntax=yaml

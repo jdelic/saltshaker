@@ -17,7 +17,6 @@ include:
     - python.apt
     - iptables  # forces "order: 1"
     - crypto
-    - crypto.ssh
     - rsyslog
 
 
