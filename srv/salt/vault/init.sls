@@ -150,6 +150,25 @@ vault-service:
 {% endif %}
 
 
+{% if pillar['vault'].get('initialize', False) %}
+vault-init:
+    cmd.run:
+        {% if pillar['vault'].get('encrypt-vault-keys-with-gpg', False) %}
+            {% set long_id = pillar['vault']['encrypt-vault-keys-with-gpg'][:-16] %}
+        # use process substitution in Bash to encrypt the Vault keys on the fly
+        - name: >
+            vault init | tee
+                >(gpg --batch --trusted-key {{long_id}} -a -r {{pillar['vault']['encrypt-vault-keys-with-gpg']}} > /root/vault_keys.txt.gpg)
+                | grep "Unseal Key" | cut -f2 -d':' | tail -n 3 | xargs -n 1 vault unseal
+        {% else %}
+        - name: vault init | tee /root/vault_keys.txt | grep "Unseal Key" | cut -f2 -d':' | tail -n 3 | xargs -n 1 vault unseal
+        {% endif %}
+        - unless: vault init -check >/dev/null
+        - env:
+            - VAULT_ADDR: "https://{{pillar['vault']['smartstack-hostname']}}:8200/"
+{% endif %}
+
+
 vault-service-reload:
     service.running:
         - name: vault
