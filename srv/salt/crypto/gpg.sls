@@ -73,14 +73,16 @@ gpg-{{k}}:
             /usr/bin/gpg
             --homedir {{keyloc}}
             --no-default-keyring
-            --keyring {{keyloc}}/pubring.gpg
-            --secret-keyring {{keyloc}}/secring.gpg
-            --trustdb {{keyloc}}/trustdb.gpg
+            --keyring {{salt['file.join'](keyloc, "pubring.gpg")}}
+            --secret-keyring {{salt['file.join'](keyloc, "secring.gpg")}}
+            --trustdb {{salt['file.join'](keyloc, "trustdb.gpg")}}
             --batch
             --import {{keyloc}}/tmp/gpg-{{k}}.asc
 {% endfor %}
 
-enforce-chmod-on-managed-keyring:
+
+# require this state to make sure the GPG keyring is fully configured
+managed-keyring:
     file.directory:
         - name: {{keyloc}}
         - file_mode: '0640'
