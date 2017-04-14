@@ -59,9 +59,9 @@ gpg-{{k}}:
             /usr/bin/gpg
             --homedir {{keyloc}}
             --no-default-keyring
-            --keyring {{keyloc}}/pubring.gpg
-            --secret-keyring {{keyloc}}/secring.gpg
-            --trustdb {{keyloc}}/trustdb.gpg
+            --keyring {{salt['file.join'](keyloc, "pubring.gpg")}}
+            --secret-keyring {{salt['file.join'](keyloc, "secring.gpg")}}
+            --trustdb {{salt['file.join'](keyloc, "trustdb.gpg")}}
             --list-keys {{pillar['gpg']['fingerprints'][k]}}
     {% else %}
     # otherwise depend on the state change of the file state
