@@ -11,6 +11,7 @@ base:
 
     'saltmaster.maurusnet.test':
         - local.vault
+        - shared.vault
         - shared.secrets.vault-dev
         - shared.secrets.vault-ssl
 

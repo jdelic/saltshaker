@@ -154,23 +154,61 @@ vault-service:
 vault-init:
     cmd.run:
         {% if pillar['vault'].get('encrypt-vault-keys-with-gpg', False) %}
-            {% set long_id = pillar['vault']['encrypt-vault-keys-with-gpg'][:-16] %}
-        # use process substitution in Bash to encrypt the Vault keys on the fly
-        - name: >
-            vault init | tee
-                >(gpg --batch --trusted-key {{long_id}} -a -r {{pillar['vault']['encrypt-vault-keys-with-gpg']}} > /root/vault_keys.txt.gpg)
-                >(grep "Initial Root Token" | cut -f2 -d':' | tr -d '[:space:]' >/root/.vault_token)
-                | grep "Unseal Key" | cut -f2 -d':' | tail -n 3 | xargs -n 1 vault unseal
+            {% set long_id = pillar['vault']['encrypt-vault-keys-with-gpg'][-16:] %}
+            {% set keyloc = pillar['gpg']['shared-keyring-location'] %}
+        # use Bash process groups and fd pipes to send vault init's output into three separate
+        # pipes:
+        #   1. encrypt the output for the administrator
+        #   2. save the initial root token to a file in /root
+        #   3. unseal Vault
+        - name: >-
+            {
+                {
+                    {
+                        vault init |
+                        tee /dev/fd/5 /dev/fd/6 |
+                        gpg --homedir {{keyloc}} \
+                            --no-default-keyring \
+                            --keyring {{salt['file.join'](keyloc, "pubring.gpg")}} \
+                            --secret-keyring {{salt['file.join'](keyloc, "secring.gpg")}} \
+                            --trustdb {{salt['file.join'](keyloc, "trustdb.gpg")}} \
+                            --batch \
+                            --trusted-key {{long_id}} -a -e \
+                            -r {{pillar['vault']['encrypt-vault-keys-with-gpg']}} >/root/vault_keys.txt.gpg;
+                    } 5>&1 |
+                    grep "Initial Root Token" |
+                    cut -f2 -d":" |
+                    tr -d " " >/root/.vault_token;
+                } 6>&1 |
+                grep "Unseal Key" |
+                cut -f2 -d":" |
+                tail -n 3 |
+                xargs -n 1 vault unseal;
+            }
         {% else %}
-        - name: >
-            vault init | tee
-                /root/vault_keys.txt
-                >(grep "Initial Root Token" | cut -f2 -d':' | tr -d '[:space:]' >/root/.vault_token)
-                | grep "Unseal Key" | cut -f2 -d':' | tail -n 3 | xargs -n 1 vault unseal
+        - name: >-
+            {
+                {
+                    {
+                        vault init |
+                        tee /dev/fd/5 /dev/fd/6 >/root/vault_keys.txt;
+                    } 5>&1 |
+                    grep "Initial Root Token" |
+                    cut -f2 -d":" |
+                    tr -d "[:space:]" >/root/.vault_token;
+                } 6>&1 |
+                grep "Unseal Key" |
+                cut -f2 -d':' |
+                tail -n 3 |
+                xargs -n 1 vault unseal;
+            }
         {% endif %}
         - unless: vault init -check >/dev/null
         - env:
             - VAULT_ADDR: "https://{{pillar['vault']['smartstack-hostname']}}:8200/"
+        - require:
+            - file: managed-keyring
+            - service: vault-service
 {% endif %}
 
 
