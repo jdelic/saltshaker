@@ -159,9 +159,14 @@ vault-init:
         - name: >
             vault init | tee
                 >(gpg --batch --trusted-key {{long_id}} -a -r {{pillar['vault']['encrypt-vault-keys-with-gpg']}} > /root/vault_keys.txt.gpg)
+                >(grep "Initial Root Token" | cut -f2 -d':' | tr -d '[:space:]' >/root/.vault_token)
                 | grep "Unseal Key" | cut -f2 -d':' | tail -n 3 | xargs -n 1 vault unseal
         {% else %}
-        - name: vault init | tee /root/vault_keys.txt | grep "Unseal Key" | cut -f2 -d':' | tail -n 3 | xargs -n 1 vault unseal
+        - name: >
+            vault init | tee
+                /root/vault_keys.txt
+                >(grep "Initial Root Token" | cut -f2 -d':' | tr -d '[:space:]' >/root/.vault_token)
+                | grep "Unseal Key" | cut -f2 -d':' | tail -n 3 | xargs -n 1 vault unseal
         {% endif %}
         - unless: vault init -check >/dev/null
         - env:
