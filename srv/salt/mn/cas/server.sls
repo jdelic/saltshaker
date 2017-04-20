@@ -44,12 +44,17 @@ authserver-rsyslog:
     "POSTGRESQL_CA": pillar['ssl']['service-rootca-cert'] if
         pillar['postgresql'].get('pinned-ca-cert', 'default') == 'default'
         else pillar['postgresql']['pinned-ca-cert'],
-    "DATABASE_URL": 'postgresql://%s:@postgresql.local:5432/%s'|format(pillar['authserver']['dbuser'],
-        pillar['authserver']['dbname']),
     "ALLOWED_HOSTS": "%s,%s"|format(pillar['authserver']['hostname'], pillar['authserver']['smartstack-hostname']),
     "CORS_ORIGIN_REGEX_WHITELIST": "^https://(\w+\.)?(maurusnet\.test|maurus\.net)$",
 } %}
 
+{# because we don't have jinja2.ext.do, we have to use the following work-around to set dict items #}
+{% if pillar['authserver'].get('use-vault', False) %}
+    {% set x = config.__setitem__("VAULT_DATABASE_PATH", 'postgresql_authserver/creds/fullaccess') %}
+{% else %}
+    {% set x = config.__setitem__("DATABASE_URL", 'postgresql://%s:@postgresql.local:5432/%s'|format(pillar['authserver']['dbuser'],
+        pillar['authserver']['dbname'])) %}
+{% endif %}
 
 {% for envvar, value in config.items() %}
 authserver-config-{{loop.index}}:

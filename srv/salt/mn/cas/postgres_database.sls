@@ -6,8 +6,11 @@ authserver-postgres:
     postgres_user.present:
         - name: {{pillar['authserver']['dbuser']}}
         - createdb: False
+{% if pillar['authserver'].get('use-vault', False) %}
+        - createroles: True
+{% else %}
         - createroles: False
-        - createuser: False
+{% endif %}
         - encrypted: True
         - login: True
         - inherit: True
@@ -101,19 +104,10 @@ dkimsigner-read-privileges:
         - maintenance_db: {{pillar['authserver']['dbname']}}
         - order: last  # make sure this is ordered after authserver setup, when the database table exists
 
-
+{% if pillar['authserver'].get('use-vault', False) %}
 authserver-vault-md5:
     file.accumulated:
         - name: postgresql-hba-md5users-accumulator
-        - filename: {{pillar['postgresql']['hbafile']}}
-        - text: {{pillar['authserver']['dbname']}} {{pillar['authserver']['dbuser']}}
-        - require_in:
-            - file: postgresql-hba-config
-
-
-authserver-sslclient:
-    file.accumulated:
-        - name: postgresql-hba-certusers-accumulator
         - filename: {{pillar['postgresql']['hbafile']}}
         - text: {{pillar['authserver']['dbname']}} {{pillar['authserver']['dbuser']}}
         - require_in:
@@ -127,6 +121,14 @@ dkimsigner-vault-md5:
       - text: {{pillar['authserver']['dbname']}} {{pillar['dkimsigner']['dbuser']}}
       - require_in:
           - file: postgresql-hba-config
+{% else %}
+authserver-sslclient:
+    file.accumulated:
+        - name: postgresql-hba-certusers-accumulator
+        - filename: {{pillar['postgresql']['hbafile']}}
+        - text: {{pillar['authserver']['dbname']}} {{pillar['authserver']['dbuser']}}
+        - require_in:
+            - file: postgresql-hba-config
 
 
 dkimsigner-sslclient:
@@ -136,4 +138,6 @@ dkimsigner-sslclient:
         - text: {{pillar['authserver']['dbname']}} {{pillar['dkimsigner']['dbuser']}}
         - require_in:
             - file: postgresql-hba-config
+{% endif %}
+
 {% endif %}

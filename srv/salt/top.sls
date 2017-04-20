@@ -29,6 +29,7 @@ base:
     'roles:vault':
         - match: grain
         - vault
+        - mn.cas.vault_database
 
     'roles:dev':
         - match: grain
