@@ -5,7 +5,7 @@ authserver-vault-ssl-cert:
     cmd.run:
         - name: >-
             /usr/local/bin/vault write auth/cert/certs/authserver_database \
-                display_name="AuthServer PostgreSQL database" \
+                display_name="authserver" \
                 policies=postgresql_authserver_fullaccess \
                 certificate=@{{pillar['authserver']['vault-application-ca']}} \
                 ttl=3600
@@ -35,6 +35,14 @@ authserver-vault-postgresql-connection:
                 connection_url="postgresql://{{pillar['authserver']['dbuser']}}:{{pillar['dynamicsecrets']['authserver']}}@postgresql.local:5432/{{pillar['authserver']['dbname']}}"
         - onchanges:
             - cmd: authserver-vault-postgresql-backend
+
+
+authserver-vault-postgresql-lease:
+    cmd.run:
+        - name: >-
+            /usr/local/bin/vault write postgresql_authserver/config/lease lease=10m lease_max=1h
+        - onchanges:
+            - cmd: authserver-vault-postgresql-connection
 
 
 authserver-vault-postgresql-role:
