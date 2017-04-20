@@ -1,6 +1,7 @@
 
 authserver:
     backend: postgresql
+    use-vault: True
     dbname: authserver
     dbuser: authserver  # unused if vault-manages-database is True
 
