@@ -165,7 +165,7 @@ vault-init:
             {
                 {
                     {
-                        vault init |
+                        /usr/local/bin/vault init |
                         tee /dev/fd/5 /dev/fd/6 |
                         gpg --homedir {{keyloc}} \
                             --no-default-keyring \
@@ -178,19 +178,20 @@ vault-init:
                     } 5>&1 |
                     grep "Initial Root Token" |
                     cut -f2 -d":" |
-                    tr -d " " >/root/.vault_token;
+                    tr -d "[:space:]" >/root/.vault_token;
                 } 6>&1 |
                 grep "Unseal Key" |
                 cut -f2 -d":" |
                 tail -n 3 |
                 xargs -n 1 vault unseal;
+                cat /root/.vault_token | /usr/local/bin/vault auth -;
             }
         {% else %}
         - name: >-
             {
                 {
                     {
-                        vault init |
+                        /usr/local/bin/vault init |
                         tee /dev/fd/5 /dev/fd/6 >/root/vault_keys.txt;
                     } 5>&1 |
                     grep "Initial Root Token" |
@@ -201,14 +202,28 @@ vault-init:
                 cut -f2 -d':' |
                 tail -n 3 |
                 xargs -n 1 vault unseal;
+                cat /root/.vault_token | /usr/local/bin/vault auth -;
             }
         {% endif %}
-        - unless: vault init -check >/dev/null
+        - unless: /usr/local/bin/vault init -check >/dev/null
         - env:
             - VAULT_ADDR: "https://{{pillar['vault']['smartstack-hostname']}}:8200/"
         - require:
             - file: managed-keyring
             - service: vault-service
+
+
+# Vault clients configured by Salt should watch for this state using cmd.run:onchanges'
+# and set up their CA certificate and policies
+vault-cert-auth-enabled:
+    cmd.run:
+        - name: /usr/local/bin/vault auth-enable cert
+        - unless: /usr/local/bin/vault auth -methods | grep cert >/dev/null
+        - env:
+            - VAULT_ADDR: "https://{{pillar['vault']['smartstack-hostname']}}:8200/"
+        - require:
+            - service: vault-service
+            - cmd: vault-init
 {% endif %}
 
 
