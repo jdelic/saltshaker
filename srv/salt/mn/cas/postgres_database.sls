@@ -89,6 +89,7 @@ dkimsigner-usage-privileges:
         - object_type: schema
         - privileges:
             - USAGE
+        - user: postgres
         - maintenance_db: {{pillar['authserver']['dbname']}}
         - require:
             - postgres_user: dkimsigner-postgres
@@ -101,6 +102,7 @@ dkimsigner-read-privileges:
         - object_type: table
         - privileges:
             - SELECT
+        - user: postgres
         - maintenance_db: {{pillar['authserver']['dbname']}}
         - order: last  # make sure this is ordered after authserver setup, when the database table exists
 
