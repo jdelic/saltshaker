@@ -11,7 +11,7 @@ ExecStart=/usr/local/bin/consul agent \
     -config-file=/etc/consul/common-config.json \
     -config-dir=/etc/consul/services.d -config-dir=/etc/consul/conf.d -data-dir=/run/consul \
     -pid-file=/run/consul/consul.pid {% if extra_parameters is defined %}{{extra_parameters}}{% endif %}
-    {%- if not single_node_cluster -%}
+    {%- if single_node_cluster is defined and not single_node_cluster -%}
         {%- for server, addr in salt['mine.get']('roles:consulserver', 'internal_ip', expr_form='grain').items() -%}
             {%- if loop.first -%}
                 {{" "}}\{{"\n"}}
