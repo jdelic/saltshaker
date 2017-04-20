@@ -23,14 +23,14 @@ fpm:
         - source: {{pillar["urls"]["fpmdeps"]}}
         - source_hash: {{pillar["hashes"]["fpmdeps"]}}
         - archive_format: zip
-        - if_missing: /usr/local/src/fpm/fpm-1.7.0.gem
+        - if_missing: /usr/local/src/fpm/fpm-1.8.1.gem
         - enforce_toplevel: False
         - require:
             - file: fpm-download-dir
     {% endif %}
     cmd.run:
         {% if pillar["urls"].get("fpmdeps", None) %}
-        - name: gem install --local fpm-1.7.0.gem
+        - name: gem install --local fpm-1.8.1.gem
         - cwd: /usr/local/src/fpm
         - require:
             - archive: fpm
