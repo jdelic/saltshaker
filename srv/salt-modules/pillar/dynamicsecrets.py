@@ -134,7 +134,7 @@ class DynamicSecretsPillar(DynamicSecretsStore):
             self[secret_name] = key.exportKey("PEM")
         elif secret_type == "uuid":
             # uuid.uuid4() uses os.urandom(), so this should be reasonably unguessable
-            self[secret_name] = uuid.uuid4()
+            self[secret_name] = str(uuid.uuid4())
 
 
 def ext_pillar(minion_id, pillar, *roledefs):
