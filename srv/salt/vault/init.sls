@@ -163,7 +163,7 @@ vault-init:
         # use Bash process groups and fd pipes to send vault init's output into three separate
         # pipes:
         #   1. encrypt the output for the administrator
-        #   2. save the initial root token to a file in /root
+        #   2. save the initial root token to a file in /root and authenticate root as Vault root
         #   3. unseal Vault
         - name: >-
             {
