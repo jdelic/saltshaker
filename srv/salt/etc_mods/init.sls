@@ -10,7 +10,7 @@ inputrc:
 
 
 # Add hostnames for services proxied through the local smartstack-internal HAProxy.
-# Some services must have a hostname for SSL to work, so thes aliases can just be added
+# Some services must have a hostname for SSL to work, so these aliases can just be added
 # to every /etc/hosts
 {% set local_aliases = [
     pillar['vault']['smartstack-hostname'],
