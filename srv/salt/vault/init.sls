@@ -92,7 +92,7 @@ vault-setcap:
         - name: setcap cap_ipc_lock=+ep /usr/local/bin/vault
         - cwd: /usr/local/bin
         - runas: root
-        - unless: getcap /usr/local/bin/vault | grep -q cap_ipc_lock
+        - unless: getcap /usr/local/bin/vault | grep cap_ipc_lock >/dev/null
         - require:
             - file: vault
 
