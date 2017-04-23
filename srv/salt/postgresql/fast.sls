@@ -217,8 +217,9 @@ postgresql-servicedef:
                 )}}
             port: {{pillar.get('postgresql', {}).get('bind-port', 5432)}}
         - require:
-            - cmd: data-cluster
             - file: consul-service-dir
+        - require_in:
+            - service: data-cluster-service
 
 
 # vim: syntax=yaml
