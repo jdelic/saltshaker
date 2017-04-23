@@ -135,20 +135,23 @@ vault-service:
         - enable: True
         - require:
             - file: vault-service
-            # if vault runs on MySQL or AWS those services are external. Consul runs always local.
             {% if 'consulserver' in grains['roles'] and pillar['vault']['backend'] == 'consul' %}
             - service: consul-server-service
             {% elif 'consulserver' not in grains['roles'] and pillar['vault']['backend'] == 'consul' %}
             - service: consul-agent-service
+            {% endif %}
+            {% if 'database' in grains['roles'] and pillar['vault']['backend'] == 'postgresql' %}
+                {# when we're on the same machine as the PostgreSQL database, wait for it to come up and the #}
+                {# database to be configured #}
+            - service: data-cluster-service
+            - vault-postgres
             {% endif %}
         - watch:
             - file: vault-service
             - file: vault  # restart on a change of the binary
             - file: vault-ssl-cert  # restart when the SSL cert changes
             - file: vault-ssl-key
-{% if pillar['vault'].get('backend', '') == 'postgresql' %}
-            - vault-postgres
-{% endif %}
+            - service: smartstack-internal
 
 
 {% if pillar['vault'].get('initialize', False) %}
