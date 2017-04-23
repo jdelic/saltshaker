@@ -104,6 +104,7 @@ vault-config:
         - template: jinja
         - user: {{vault_user}}
         - group: {{vault_group}}
+        - mode: '0640'
         - context:
             ip: {{pillar.get('vault', {}).get('bind-ip',
                     grains['ip_interfaces'][pillar['ifassign']['internal']][pillar['ifassign'].get(
