@@ -72,10 +72,10 @@ data-cluster-config-network:
     file.append:
         - name: /etc/postgresql/9.6/main/postgresql.conf
         - text: listen_addresses = '{{pillar.get('postgresql', {}).get(
-            'bind-ip', grains['ip_interfaces'][pillar['ifassign']['internal']][pillar['ifassign'].get(
-                'internal-ip-index', 0
-            )|int()]
-        )}}'
+                'bind-ip', grains['ip_interfaces'][pillar['ifassign']['internal']][pillar['ifassign'].get(
+                    'internal-ip-index', 0
+                )|int()]
+            )}}'
         - require:
             - cmd: data-cluster
         - require_in:
@@ -191,10 +191,10 @@ postgresql-in{{pillar.get('postgresql', {}).get('bind-port', 5432)}}-recv:
         - source: '0/0'
         - in-interface: {{pillar['ifassign']['internal']}}
         - destination: {{pillar.get('postgresql', {}).get(
-            'bind-ip', grains['ip_interfaces'][pillar['ifassign']['internal']][pillar['ifassign'].get(
-                'internal-ip-index', 0
-            )|int()]
-        )}}
+                'bind-ip', grains['ip_interfaces'][pillar['ifassign']['internal']][pillar['ifassign'].get(
+                    'internal-ip-index', 0
+                )|int()]
+            )}}
         - dport: {{pillar.get('postgresql', {}).get('bind-port', 5432)}}
         - match: state
         - connstate: NEW
@@ -211,10 +211,10 @@ postgresql-servicedef:
         - template: jinja
         - context:
             ip: {{pillar.get('postgresql', {}).get(
-                'bind-ip', grains['ip_interfaces'][pillar['ifassign']['internal']][pillar['ifassign'].get(
-                    'internal-ip-index', 0
-                )|int()]
-            )}}
+                    'bind-ip', grains['ip_interfaces'][pillar['ifassign']['internal']][pillar['ifassign'].get(
+                        'internal-ip-index', 0
+                    )|int()]
+                )}}
             port: {{pillar.get('postgresql', {}).get('bind-port', 5432)}}
         - require:
             - cmd: data-cluster
