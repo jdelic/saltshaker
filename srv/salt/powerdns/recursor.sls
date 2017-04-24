@@ -29,7 +29,7 @@ pdns-recursor-lua-config:
         - mode: '0644'
 
 
-pnds-override-resolv.conf:
+pnds-recursor-override-resolv.conf:
     file.managed:
         - name: /etc/resolv.conf
         - contents: |
@@ -45,7 +45,7 @@ pnds-override-resolv.conf:
             - file: pnds-override-resolv.conf
 
 
-pdns-service:
+pdns-recursor-service:
     service.running:
         - name: pdns-recursor
         - sig: /usr/sbin/pdns_recursor
