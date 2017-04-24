@@ -50,7 +50,10 @@ pdns-recursor-service:
         - name: pdns-recursor
         - sig: /usr/sbin/pdns_recursor
         - enable: True
+        - order: 10  # see ORDER.md
         - watch:
             - file: pnds-override-resolv.conf
             - file: pdns-recursor-config
             - file: pdns-recursor-lua-config
+        - require:
+            - pkg: pdns-recursor
