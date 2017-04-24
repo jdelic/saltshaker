@@ -10,6 +10,7 @@ base:
         - roles
         - consul.template  # everything needs consul-template in smartstack
         - haproxy.internal  # everything needs local proxies in smartstack
+        - powerdns.recursor
 
     # leading "not" is not supported http://docs.saltstack.com/en/latest/topics/targeting/compound.html
     # everything that is not a consul server has a consul agent
