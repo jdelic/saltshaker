@@ -145,8 +145,12 @@ vault-service:
                 {# database to be configured #}
             - service: data-cluster-service
             - service: pdns-recursor
-            - service: consul-agent-service
             - vault-postgres
+                {% if 'consulserver' in grains['roles'] %}
+            - service: consul-server-service
+                {% elif 'consulserver' not in grains['roles'] %}
+            - service: consul-agent-service
+                {% endif %}
             {% endif %}
         - watch:
             - file: vault-service
