@@ -216,8 +216,11 @@ vault-init:
             }
         {% endif %}
         - unless: /usr/local/bin/vault init -check >/dev/null
+        # we use Vault's Consul DNS API name here, because we can't rely on SmartStack being available
+        # when the node has just been brought up. It doesn't matter here though, because Vault is
+        # by definition local to this node when this state runs.
         - env:
-            - VAULT_ADDR: "https://{{pillar['vault']['smartstack-hostname']}}:8200/"
+            - VAULT_ADDR: "https://vault.service.consul:8200/"
         - require:
             - file: managed-keyring
             - service: vault-service
@@ -229,8 +232,11 @@ vault-cert-auth-enabled:
     cmd.run:
         - name: /usr/local/bin/vault auth-enable cert
         - unless: /usr/local/bin/vault auth -methods | grep cert >/dev/null
+        # we use Vault's Consul DNS API name here, because we can't rely on SmartStack being available
+        # when the node has just been brought up. It doesn't matter here though, because Vault is
+        # by definition local to this node when this state runs.
         - env:
-            - VAULT_ADDR: "https://{{pillar['vault']['smartstack-hostname']}}:8200/"
+            - VAULT_ADDR: "https://vault.service.consul:8200/"
         - require:
             - service: vault-service
             - cmd: vault-init
