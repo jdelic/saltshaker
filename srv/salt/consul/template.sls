@@ -47,6 +47,10 @@ consul-template-config:
         - user: root
         - group: root
         - mode: '0644'
+        - context:
+            cacert: {{pillar['ssl']['service-rootca-cert']
+                        if pillar['vault'].get('pinned-ca-cert', 'default') == 'default'
+                        else pillar['vault']['pinned-ca-cert']}}
         - require:
             - file: consul-basedir
 
