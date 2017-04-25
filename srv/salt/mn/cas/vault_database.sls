@@ -37,7 +37,7 @@ authserver-vault-postgresql-connection:
     cmd.run:
         - name: >-
             /usr/local/bin/vault write postgresql_authserver/config/connection \
-                connection_url="postgresql://{{pillar['authserver']['dbuser']}}:{{pillar['dynamicsecrets']['authserver']}}@postgresql.local:5432/{{pillar['authserver']['dbname']}}"
+                connection_url="postgresql://{{pillar['authserver']['dbuser']}}:{{pillar['dynamicsecrets']['authserver']}}@postgresql.service.consul:5432/{{pillar['authserver']['dbname']}}"
         - onchanges:
             - cmd: authserver-vault-postgresql-backend
         - env:
