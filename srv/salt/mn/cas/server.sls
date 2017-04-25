@@ -13,6 +13,8 @@ authserver:
         - init_delay: 3
         - require:
             - pkg: authserver
+            - service: smartstack-internal
+            - service: consul-template-service
 
 
 authserver-appconfig:
