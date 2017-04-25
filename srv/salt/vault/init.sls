@@ -224,6 +224,7 @@ vault-init:
         - require:
             - file: managed-keyring
             - service: vault-service
+            - file: vault-servicedef
 
 
 # Vault clients configured by Salt should watch for this state using cmd.run:onchanges'
