@@ -144,6 +144,8 @@ vault-service:
                 {# when we're on the same machine as the PostgreSQL database, wait for it to come up and the #}
                 {# database to be configured #}
             - service: data-cluster-service
+            - service: pdns-recursor
+            - service: consul-agent-service
             - vault-postgres
             {% endif %}
         - watch:
