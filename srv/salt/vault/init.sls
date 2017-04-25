@@ -227,7 +227,7 @@ vault-init:
             - file: vault-servicedef
 
 
-# Vault clients configured by Salt should watch for this state using cmd.run:onchanges'
+# Vault clients configured by Salt should watch for this state using cmd.run:onchanges
 # and set up their CA certificate and policies
 vault-cert-auth-enabled:
     cmd.run:
