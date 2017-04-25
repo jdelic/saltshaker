@@ -68,6 +68,7 @@ consul-template-service:
         - sig: consul-template
         - enable: True
         - require:
+            - file: consul-data-dir
             - file: consul-template-config
             - file: consul-template-dir
             - file: consul-template
