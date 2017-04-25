@@ -61,6 +61,8 @@ authserver-vault-postgresql-role:
                 "sql": "CREATE ROLE \"{{'{{'}}name{{'}}'}}\" WITH LOGIN ENCRYPTED PASSWORD '{{'{{'}}password{{'}}'}}' VALID UNTIL '{{'{{'}}expiration{{'}}'}}' IN ROLE \"{{pillar['authserver']['dbuser']}}\" INHERIT NOCREATEROLE NOCREATEDB NOSUPERUSER NOREPLICATION NOBYPASSRLS;",
                 "revocation_sql": "DROP ROLE \"{{'{{'}}name{{'}}'}}\";"
             }
+        - require:
+            - appconfig: authserver-appconfig
     cmd.run:
         - name: cat /etc/appconfig/authserver/vault_role.json | /usr/local/bin/vault write postgresql_authserver/roles/fullaccess -
         - env:
