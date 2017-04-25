@@ -40,9 +40,9 @@ pnds-recursor-override-resolv.conf:
     cmd.run:
         - name: chattr +i /etc/resolv.conf
         - onchanges:
-            - file: pnds-override-resolv.conf
+            - file: pnds-recursor-override-resolv.conf
         - require:
-            - file: pnds-override-resolv.conf
+            - file: pnds-recursor-override-resolv.conf
 
 
 pdns-recursor-service:
@@ -52,7 +52,7 @@ pdns-recursor-service:
         - enable: True
         - order: 10  # see ORDER.md
         - watch:
-            - file: pnds-override-resolv.conf
+            - file: pnds-recursor-override-resolv.conf
             - file: pdns-recursor-config
             - file: pdns-recursor-lua-config
         - require:
