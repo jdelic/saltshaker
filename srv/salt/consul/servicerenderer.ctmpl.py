@@ -108,6 +108,13 @@ class SmartstackService(object):
                 return tag[len(tagpart):]
         return None
 
+    def tagvalue_set(self, tagpart):
+        res = set()
+        for tag in self.svc["tags"]:
+            if tag.startswith(tagpart):
+                res.add(tag[len(tagpart):])
+        return res
+
 
 class SmartstackServiceContainer(object):
     def __init__(self, services=None, all_services=None, grouped_by=None, group_by_type=None,
@@ -346,10 +353,10 @@ def _setup_iptables(services, ip, mode, debug=False, verbose=False):
         print("========= IPTABLES RULES DEBUG =========")
 
     for svc in services:
-        _extport = None
-        if svc.tagvalue("smartstack:extport:"):
+        _extports = []
+        for port in svc.tagvalue_set("smartstack:extport:"):
             try:
-                _extport = int(svc.tagvalue("smartstack:extport:"))
+                _extports.append(int(port))
             except ValueError:
                 print("Port number for 'smartstack:extport:' must be an integer not %s" %
                       svc.tagvalue("smartstack:extport:"), file=sys.stderr)
@@ -359,60 +366,61 @@ def _setup_iptables(services, ip, mode, debug=False, verbose=False):
         if _protocol == "udp":
             prot = "udp"
             mode = "plain"  # udp can't be used with -m state
-        elif _protocol == "http":
+        elif _protocol == "http" or "https-redirect" in svc.tagvalue_set("smartstack:"):
             prot = "tcp"
-            _extport = 80
+            _extports.append(80)
         elif _protocol == "https":
             prot = "tcp"
-            _extport = 443
+            _extports.append(443)
         else:
             prot = "tcp"
 
-        if not _extport:
+        if not _extports:
             print("no external port (smartstack:extport:) for service %s, so not creating iptables rule" % svc.name,
                   file=sys.stderr)
             continue
 
         input_rule = None
         output_rule = None
-        if mode == "plain":
-            input_rule = ["INPUT", "-p", prot, "-m", prot, "-s", "0/0", "-d", "%s/32" % ip, "--dport",
-                          str(_extport), "-j", "ACCEPT"]
-            output_rule = ["OUTPUT", "-p", prot, "-m", prot, "-s", "%s/32" % ip, "-d", "0/0", "--sport",
-                           str(_extport), "-j", "ACCEPT"]
-        elif mode == "conntrack":
-            input_rule = ["INPUT", "-p", prot, "-m", "state", "--state", "NEW", "-m", prot, "-s", "0/0",
-                          "-d", "%s/32" % ip, "--dport", str(_extport), "-j", "ACCEPT"]
-            output_rule = None
+        for ruleport in _extports:
+            if mode == "plain":
+                input_rule = ["INPUT", "-p", prot, "-m", prot, "-s", "0/0", "-d", "%s/32" % ip, "--dport",
+                              str(ruleport), "-j", "ACCEPT"]
+                output_rule = ["OUTPUT", "-p", prot, "-m", prot, "-s", "%s/32" % ip, "-d", "0/0", "--sport",
+                               str(ruleport), "-j", "ACCEPT"]
+            elif mode == "conntrack":
+                input_rule = ["INPUT", "-p", prot, "-m", "state", "--state", "NEW", "-m", prot, "-s", "0/0",
+                              "-d", "%s/32" % ip, "--dport", str(ruleport), "-j", "ACCEPT"]
+                output_rule = None
 
-        if input_rule:
-            if debug:
-                print("%s: %s" % (svc.name, " ".join(["/sbin/iptables", "-A"] + input_rule)))
-            else:
-                try:
-                    # check if the rule exists first... iptables wille exit with 0 if it does
-                    # also, suppress output (if the rule doesn't exist iptables will print "bad rule", which is
-                    # pretty confusing
-                    with open(os.devnull, "w") as devnull:
-                        subprocess.check_call(["/sbin/iptables", "-C"] + input_rule, stdout=devnull, stderr=devnull)
-                except subprocess.CalledProcessError as e:
-                    if e.returncode == 1:
-                        subprocess.call(["/sbin/iptables", "-A"] + input_rule)
+            if input_rule:
+                if debug:
+                    print("%s: %s" % (svc.name, " ".join(["/sbin/iptables", "-A"] + input_rule)))
                 else:
-                    if verbose:
-                        print("%s: INPUT rule exists" % svc.name, file=sys.stderr)
-        if output_rule:
-            if debug:
-                print("%s: %s" % (svc.name, " ".join(["/sbin/iptables", "-A"] + output_rule)))
-            else:
-                try:
-                    subprocess.check_call(["/sbin/iptables", "-C"] + output_rule)
-                except subprocess.CalledProcessError as e:
-                    if e.returncode == 1:
-                        subprocess.call(["/sbin/iptables", "-A"] + output_rule)
+                    try:
+                        # check if the rule exists first... iptables wille exit with 0 if it does
+                        # also, suppress output (if the rule doesn't exist iptables will print "bad rule", which is
+                        # pretty confusing
+                        with open(os.devnull, "w") as devnull:
+                            subprocess.check_call(["/sbin/iptables", "-C"] + input_rule, stdout=devnull, stderr=devnull)
+                    except subprocess.CalledProcessError as e:
+                        if e.returncode == 1:
+                            subprocess.call(["/sbin/iptables", "-A"] + input_rule)
+                    else:
+                        if verbose:
+                            print("%s: INPUT rule exists" % svc.name, file=sys.stderr)
+            if output_rule:
+                if debug:
+                    print("%s: %s" % (svc.name, " ".join(["/sbin/iptables", "-A"] + output_rule)))
                 else:
-                    if verbose:
-                        print("%s: OUTPUT rule exists" % svc.name, file=sys.stderr)
+                    try:
+                        subprocess.check_call(["/sbin/iptables", "-C"] + output_rule)
+                    except subprocess.CalledProcessError as e:
+                        if e.returncode == 1:
+                            subprocess.call(["/sbin/iptables", "-A"] + output_rule)
+                    else:
+                        if verbose:
+                            print("%s: OUTPUT rule exists" % svc.name, file=sys.stderr)
 
 
 def main():
