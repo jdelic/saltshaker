@@ -353,10 +353,10 @@ def _setup_iptables(services, ip, mode, debug=False, verbose=False):
         print("========= IPTABLES RULES DEBUG =========")
 
     for svc in services:
-        _extports = []
+        _extports = set()
         for port in svc.tagvalue_set("smartstack:extport:"):
             try:
-                _extports.append(int(port))
+                _extports.add(int(port))
             except ValueError:
                 print("Port number for 'smartstack:extport:' must be an integer not %s" %
                       svc.tagvalue("smartstack:extport:"), file=sys.stderr)
@@ -366,23 +366,28 @@ def _setup_iptables(services, ip, mode, debug=False, verbose=False):
         if _protocol == "udp":
             prot = "udp"
             mode = "plain"  # udp can't be used with -m state
-        elif _protocol == "http" or "https-redirect" in svc.tagvalue_set("smartstack:"):
+        elif _protocol == "http":
             prot = "tcp"
-            _extports.append(80)
+            _extports.add(80)
         elif _protocol == "https":
             prot = "tcp"
-            _extports.append(443)
+            _extports.add(443)
         else:
             prot = "tcp"
 
+        if "https-redirect" in svc.tagvalue_set("smartstack:"):
+            _extports.add(80)
+
         if not _extports:
-            print("no external port (smartstack:extport:) for service %s, so not creating iptables rule" % svc.name,
+            print("no external port (smartstack:extport:) for service %s, or no well-known protocol in "
+                  "'smartstack:protocol:' so not creating iptables rule" % svc.name,
                   file=sys.stderr)
             continue
 
-        input_rule = None
-        output_rule = None
         for ruleport in _extports:
+            input_rule = None
+            output_rule = None
+
             if mode == "plain":
                 input_rule = ["INPUT", "-p", prot, "-m", prot, "-s", "0/0", "-d", "%s/32" % ip, "--dport",
                               str(ruleport), "-j", "ACCEPT"]
@@ -477,7 +482,7 @@ def main():
     parser.add_argument("--only-iptables", dest="only_iptables", default=False, action="store_true",
                         help="Use this parameter to only set up iptables rules, and not do anything else. No templates "
                              "will be rendered and no commands executed.")
-    parser.add_argument("--debug-iptables", dest="debug_iptables", default=False, action="store_true",
+    parser.add_argument("--debug-iptables", dest="debug_iptables", default=None, choices=["conntrack", "plain"],
                         help="Like --only-iptables, but output the rules to stdout instead of executing them.")
     parser.add_argument("-D", "--define", dest="defines", action="append", default=[],
                         help="Define a template variable for the rendering in the form 'varname=value'. 'varname' will "
