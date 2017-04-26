@@ -1,8 +1,8 @@
 # included by /etc/sudoers from /etc/sudoers.d
-Defaults  env_keep="SSH_AUTH_SOCK"
-Defaults  env_keep="SYSTEMD_PAGER"
-Defaults  env_keep="VAULT_ADDR"
-Defaults  env_keep="VAULT_CACERT"
+Defaults  env_keep += "SSH_AUTH_SOCK"
+Defaults  env_keep += "SYSTEMD_PAGER"
+Defaults  env_keep += "VAULT_ADDR"
+Defaults  env_keep += "VAULT_CACERT"
 
 # Allow members of group sudo to execute any command
 %sudo   ALL=(ALL:ALL) NOPASSWD: ALL
