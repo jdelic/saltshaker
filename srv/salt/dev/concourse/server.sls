@@ -95,7 +95,12 @@ concourse-server-envvars:
         - contents: |
             CONCOURSE_BASIC_AUTH_USERNAME="sysop"
             CONCOURSE_BASIC_AUTH_PASSWORD="{{pillar['dynamicsecrets']['concourse-sysop']}}"
-            CONCOURSE_POSTGRES_DATA_SOURCE="postgres://concourse:{{pillar['dynamicsecrets']['concourse-db']}}@{{pillar['postgresql']['smartstack-hostname']}}:5432/concourse?sslmode={{pillar['ci']['verify-database-ssl']}}"
+            CONCOURSE_POSTGRES_DATA_SOURCE="postgres://concourse:{{
+                pillar['dynamicsecrets']['concourse-db']}}@{{
+                pillar['postgresql']['smartstack-hostname']}}:5432/concourse?sslmode={{
+                    pillar['ci']['verify-database-ssl']}}&sslrootcert={{pillar['ssl']['service-rootca-cert'] if
+                        pillar['postgresql'].get('pinned-ca-cert', 'default') == 'default'
+                        else pillar['postgresql']['pinned-ca-cert']}}"
 
 
 concourse-server:
