@@ -41,6 +41,30 @@ gpg-shared-keyring-temp:
             - file: gpg-shared-keyring-location
 
 
+gpg2-batchmode-config:
+    file.managed:
+        - name: {{keyloc}}/gpg.conf
+        - contents: |
+            pinentry-mode loopback
+        - user: root
+        - group: root
+        - mode: '0644'
+        - require:
+            - file: gpg-shared-keyring-location
+
+
+gpg2-agent-batchmode-config:
+    file.managed:
+        - name: {{keyloc}}/gpg-agent.conf
+        - contents: |
+            allow-loopback-pinentry
+        - user: root
+        - group: root
+        - mode: '0644'
+        - require:
+            - file: gpg-shared-keyring-location
+
+
 # install all the keys which are set up in the gpg:keys:* pillars
 {% for k, v in pillar.get('gpg', {}).get('keys', {}).items() %}
 gpg-{{k}}:
@@ -52,6 +76,8 @@ gpg-{{k}}:
         - mode: '0640'
         - require:
             - file: gpg-shared-keyring-temp
+            - file: gpg2-batchmode-config
+            - file: gpg2-agent-batchmode-config
     {% if pillar['gpg'].get('fingerprints', {}).get(k, False) %}
     # we have a fingerprint, so render a conditional cmd.run and check whether the key is in the keyring
     cmd.run:
