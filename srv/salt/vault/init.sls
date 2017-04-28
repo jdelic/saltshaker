@@ -189,13 +189,13 @@ vault-init:
                     } 5>&1 |
                     grep "Initial Root Token" |
                     cut -f2 -d":" |
-                    tr -d "[:space:]" >/root/.vault_token;
+                    tr -d "[:space:]" >/root/.vault-token;
                 } 6>&1 |
                 grep "Unseal Key" |
                 cut -f2 -d":" |
                 tail -n 3 |
                 xargs -n 1 vault unseal;
-                cat /root/.vault_token | /usr/local/bin/vault auth -;
+                cat /root/.vault-token | /usr/local/bin/vault auth -;
             }
         {% else %}
         - name: >-
@@ -207,13 +207,13 @@ vault-init:
                     } 5>&1 |
                     grep "Initial Root Token" |
                     cut -f2 -d":" |
-                    tr -d "[:space:]" >/root/.vault_token;
+                    tr -d "[:space:]" >/root/.vault-token;
                 } 6>&1 |
                 grep "Unseal Key" |
                 cut -f2 -d':' |
                 tail -n 3 |
                 xargs -n 1 vault unseal;
-                cat /root/.vault_token | /usr/local/bin/vault auth -;
+                cat /root/.vault-token | /usr/local/bin/vault auth -;
             }
         {% endif %}
         - unless: /usr/local/bin/vault init -check >/dev/null
