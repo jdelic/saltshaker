@@ -82,6 +82,7 @@ base:
 
     'roles:pim':
         - match: grain
+        - fstab.secure
         - radicale
 
     'roles:casserver':
