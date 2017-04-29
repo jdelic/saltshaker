@@ -1,18 +1,18 @@
 
-maurusnet-radicale:
-    pkgrepo.managed:
-        - humanname: repo.maurus.net-radicale
-        - name: {{pillar['repos']['maurusnet-radicale']}}
-        - file: /etc/apt/sources.list.d/mn-radicale.list
-        - key_url: salt://mn/packaging_authority_A78049AF.pgp.key
+#maurusnet-radicale:
+#    pkgrepo.managed:
+#        - humanname: repo.maurus.net-radicale
+#        - name: {{pillar['repos']['maurusnet-radicale']}}
+#        - file: /etc/apt/sources.list.d/mn-radicale.list
+#        - key_url: salt://mn/packaging_authority_A78049AF.pgp.key
 
 
 radicale:
     pkg.installed:
         - name: radicale
-        - fromrepo: mn-radicale
-        - require:
-            - pkgrepo: maurusnet-radicale
+#        - fromrepo: mn-radicale
+#        - require:
+#            - pkgrepo: maurusnet-radicale
     service.running:
         - name: radicale
         - sig: radicale
