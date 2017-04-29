@@ -5,4 +5,8 @@ Defaults  env_keep += "VAULT_ADDR"
 Defaults  env_keep += "VAULT_CACERT"
 
 # Allow members of group sudo to execute any command
+{% if sudoers_allow_nopasswd %}
 %sudo   ALL=(ALL:ALL) NOPASSWD: ALL
+{% else %}
+%sudo   ALL=(ALL:ALL) ALL
+{% endif %}

@@ -54,7 +54,10 @@ vault-envvar-config:
 sudoers-config:
     file.managed:
         - name: /etc/sudoers.d/salt-sudoers
-        - source: salt://etc_mods/salt-sudoers
+        - source: salt://etc_mods/salt-sudoers.jinja
+        - template: jinja
+        - context:
+            sudoers_allow_nopasswd: {{pillar['sudoers_allow_nopasswd']}}
         - user: root
         - group: root
         - mode: '0440'
