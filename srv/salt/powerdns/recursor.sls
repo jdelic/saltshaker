@@ -16,7 +16,7 @@ pdns-recursor-config:
                       grains['ip_interfaces'][pillar['ifassign']['internal']][pillar['ifassign'].get(
                           'internal-ip-index', 0
                       )|int()]
-                  )}}/{{pillar.get('powerdns', {}).get('bitmask', 24)}}
+                  )}}/{{pillar.get('powerdns', {}).get('bitmask', 32)}}
 
 
 pdns-recursor-lua-config:
