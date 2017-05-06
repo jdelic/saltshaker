@@ -58,6 +58,7 @@ base:
     # every minion ID not ending in "test" is at Hetzner right now
     '(?!test)$':
         - match: pcre
+        - hetzner.wellknown
         - hetzner.mailserver-config
         - hetzner.calendar
         - hetzner.network
@@ -77,6 +78,7 @@ base:
 
     # every minion ID ending in ".test" is a local dev environment
     '*.test':
+        - local.wellknown
         - local.mailserver-config
         - local.calendar
         - local.network
