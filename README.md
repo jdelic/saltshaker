@@ -55,7 +55,7 @@ It also contains configuration for
   * single-sign-on for Radicale, Dovecot and OpenSMTPD, other web applications
     and even PAM using a single database for authentication and providing
     OAuth2, CAS and SAML (through Dovecot). This is provided through
-    authserver, a Django separate Django application written by me.
+    authserver, a separate Django application written by me.
 
 The salt configuration is pretty modular, so you can easily just use this
 repository to bring up a GoPythonGo build and deployment environment without
