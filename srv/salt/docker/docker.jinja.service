@@ -1,7 +1,8 @@
 [Unit]
 Description=Docker Application Container Engine
 Documentation=https://docs.docker.com
-After=network.target docker.socket firewalld.service
+After=network-online.target docker.socket firewalld.service
+Wants=network-online.target
 Requires=docker.socket
 
 [Service]
@@ -18,12 +19,16 @@ LimitNPROC=infinity
 LimitCORE=infinity
 # Uncomment TasksMax if your systemd version supports it.
 # Only systemd 226 and above support this version.
-#TasksMax=infinity
+TasksMax=infinity
 TimeoutStartSec=0
 # set delegate yes so that systemd does not reset the cgroups of docker containers
 Delegate=yes
 # kill only the docker process, not all processes in the cgroup
 KillMode=process
+# restart the docker process if it exits prematurely
+Restart=on-failure
+StartLimitBurst=3
+StartLimitInterval=60s
 
 [Install]
 WantedBy=multi-user.target
