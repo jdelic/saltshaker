@@ -85,7 +85,7 @@ base:
         - fstab.secure
         - radicale
 
-    'roles:casserver':
+    'roles:authserver':
         - match: grain
         - mn.cas.server
         - mn.appconfig
