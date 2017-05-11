@@ -91,6 +91,8 @@ SCRIPT
                 touch /etc/salt/roles.d/master
                 touch /etc/salt/roles.d/vault
                 touch /etc/salt/roles.d/consulserver
+                touch /etc/salt/roles.d/database
+                touch /etc/salt/roles.d/authserver
 SCRIPT
         end
 
@@ -163,12 +165,12 @@ SCRIPT
                 mkdir -p /etc/salt/roles.d
                 chown 700 /etc/salt/roles.d
                 touch /etc/salt/roles.d/mail
-                touch /etc/salt/roles.d/database
                 touch /etc/salt/roles.d/pim
                 touch /etc/salt/roles.d/dev
                 touch /etc/salt/roles.d/buildserver
                 touch /etc/salt/roles.d/buildworker
                 touch /etc/salt/roles.d/apps
+                touch /etc/salt/roles.d/loadbalancer
                 chown 600 /etc/salt/roles.d/*
 SCRIPT
         end
