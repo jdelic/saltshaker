@@ -178,7 +178,7 @@ SCRIPT
         test.vm.provision :salt do |salt|
             salt.run_highstate = true
             salt.colorize = true
-            salt.log_level = 'warning'
+            salt.log_level = 'info'
             salt.verbose = true
             salt.no_minion = false
             salt.always_install = false
