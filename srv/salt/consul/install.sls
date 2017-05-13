@@ -165,7 +165,7 @@ consul-all-in-recv:
         - table: filter
         - chain: INPUT
         - jump: ACCEPT
-        - in-interface: consul0
+        - destination: 169.254.1.1
         - save: True
         - require:
             - sls: iptables
