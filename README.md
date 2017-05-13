@@ -478,6 +478,12 @@ network assignments are this:
     interface". It's connected to a non-routed local network between the nodes.
   * The next numbered full network interface is commonly the "external
     interface". It's connected to the internet.
+  * The `consul0` interface is a dummy interface with a link-local IP of
+    `169.254.1.1`. It's used to provide consul HTTP API and DNS API access to
+    local services. A link-local address is used so it can be routed from
+    the docker bridge.
+  * `docker0` is the default bridge network set up by Docker that containers
+    usually attach to.
 
 Some configurations (like the mailserver states) can expect multiple external
 network interfaces or at least multiple IP addresses to work correctly.
