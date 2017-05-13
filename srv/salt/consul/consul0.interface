@@ -1,0 +1,5 @@
+auto consul0
+iface consul0 inet manual
+    pre-up /sbin/ip link add consul0 type dummy
+    up /sbin/ip addr add 169.254.1.1 dev consul0 scope link
+    down /sbin/ip link del consul0

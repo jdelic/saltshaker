@@ -15,6 +15,18 @@
 {% set consul_user = "consul" %}
 {% set consul_group = "consul" %}
 
+# We need to make Consul local APIs (DNS and HTTP) available on a routable link-local IP address so
+# we can easily use them from separate network spaces like the Docker bridge network.
+consul-network-interface:
+    file.managed:
+        - name: /etc/network/interfaces.d/consul0
+        - source: salt://consul/consul0.interface
+    cmd.run:
+        - name: ifdown consul0; ifup consul0
+        - onchanges:
+            - file: consul-network-interface
+
+
 consul-data-dir:
     file.directory:
         - name: /run/consul
@@ -99,10 +111,12 @@ consul-common-config:
                             )|int()]
                         )
                       }}
+            consul_interface_ip: 169.254.1.1
             datacenter: {{pillar['consul-cluster']['datacenter']}}
             encryption_key: {{pillar['dynamicsecrets']['consul-encryptionkey']}}
         - require:
             - file: consul-basedir
+            - cmd: consul-network-interface
 
 
 consul:
@@ -142,6 +156,82 @@ consul-rsyslog:
         - user: root
         - group: root
         - mode: '0644'
+
+
+# open consul interface
+consul-all-in-recv:
+    iptables.append:
+        - table: filter
+        - chain: INPUT
+        - jump: ACCEPT
+        - in-interface: consul0
+        - save: True
+        - require:
+            - sls: iptables
+            - cmd: consul-network-interface
+
+
+# redirect ports from localhost
+# this requires net.ipv4.conf.all.route_localnet = 1
+consul-all-localhost8500-dnat:
+    iptables.insert:
+        - position: 1
+        - table: nat
+        - chain: OUTPUT  # not a typo, this is where localhost is routed when localhost is routed in sysctl
+        - jump: DNAT
+        - to-destination: 169.254.1.1:8500
+        - destination: 127.0.0.1/32
+        - dport: 8500
+        - proto: tcp
+        - save: True
+        - require:
+            - sls: iptables
+
+
+consul-all-localhost8500-snat:
+    iptables.insert:
+        - position: 1
+        - table: nat
+        - chain: POSTROUTING
+        - jump: SNAT
+        - to-source: 169.254.1.1:8500
+        - source: 127.0.0.1/32
+        - sport: 8500
+        - proto: tcp
+        - save: True
+        - require:
+            - sls: iptables
+
+
+consul-all-localhost8600-dnat:
+    iptables.insert:
+        - position: 2
+        - table: nat
+        - chain: OUTPUT
+        - jump: DNAT
+        - to-destination: 169.254.1.1:8600
+        - destination: 127.0.0.1/32
+        - dport: 8600
+        - proto: udp
+        - save: True
+        - require:
+            - sls: iptables
+
+
+consul-all-localhost8600-snat:
+    iptables.insert:
+        - position: 2
+        - table: nat
+        - chain: POSTROUTING
+        - jump: SNAT
+        - to-source: 169.254.1.1:8600
+        - source: 127.0.0.1/32
+        - sport: 8600
+        - proto: udp
+        - save: True
+        - require:
+            - sls: iptables
+
 
 
 # open consul ports TCP

@@ -3,6 +3,7 @@
     "encrypt": "{{encryption_key}}",
     "datacenter": "{{datacenter}}",
     "bind_addr": "{{local_ip}}",
+    "client_addr": "{{consul_interface_ip}}",
     "raft_protocol": 3,
     "enable_syslog": true
 }

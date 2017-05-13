@@ -188,5 +188,10 @@ enable-ipv4-nonlocalbind:
         - value: 1
 
 
+enable-localhost-routing:
+    sysctl.present:
+        - name: net.ipv4.conf.all.route_localnet
+        - value: 1
+
 # vim: syntax=yaml
 
