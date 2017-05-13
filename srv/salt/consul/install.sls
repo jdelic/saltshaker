@@ -160,7 +160,8 @@ consul-rsyslog:
 
 # open consul interface
 consul-all-in-recv:
-    iptables.append:
+    iptables.insert:
+        - position: 2
         - table: filter
         - chain: INPUT
         - jump: ACCEPT
