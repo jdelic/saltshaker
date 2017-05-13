@@ -421,6 +421,19 @@ down the whole Consul cluster and thereby also erase all of the data.
 
 # Networking
 
+## sysctl config
+SysCTL is set up to accept
+
+ * `net.ipv4.ip_forward` IPv4 forwarding so we can route packets to docker and
+   other isolated separate networks
+ * `net.ipv4.ip_nonlocal_bind` to allow local services to bind to IPs and ports
+   even if those don't exist yet. This reduces usage of the `0.0.0.0` wildcard
+   allowing to write more secure configurations.
+ * `net.ipv4.conf.all.route_localnet` allows packets to and from `localhost` to
+   pass through iptables, making it possible to route them. This is required so
+   we can make consul services available on `localhost` even though consul runs 
+   on its own `consul0` dummy interface.
+
 ## iptables states
 iptables is configured by the `basics` and `iptables` states to use the
 `connstate`/`conntrack` module to allow incoming and outgoing packets in the
