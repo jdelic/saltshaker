@@ -10,8 +10,14 @@ PORT   | SMARTSTACK | ASSIGNED SERVICE
 6379   |      X     | Redis internal network (shared)
 6380   |            | Redis local cache (not shared)
 8200   |      X     | Vault
-8300   |            | caldav server
+8300   |            | consul raft
+8301   |            | consul gossip
+8302   |            | consul wan
+8500   |            | consul http
+8600   |            | consul dns
+8990   |            | caldav
 8999   |      X     | authserver
+
 
 
 `*` Only internal SMTP relays for transactional mail are routed through
