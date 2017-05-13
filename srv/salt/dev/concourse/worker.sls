@@ -27,7 +27,7 @@ concourse-keys-worker_key:
 concourse-worker_key-consul-submit:
     cmd.run:
         - name: consul kv put concourse/workers/sshpub/{{grains['id']}} @/etc/concourse/private/worker_key.pem.pub
-        - unless: consul kv get -keys concourse/workers/sshpub/{{grains['id']}}
+        - unless: consul kv get -keys concourse/workers/sshpub/{{grains['id']}} | grep "{{grains['id']}}" >/dev/null
         - require:
             - file: concourse-keys-worker_key
 
