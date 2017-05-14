@@ -4,6 +4,8 @@ Defaults  env_keep += "SYSTEMD_PAGER"
 Defaults  env_keep += "VAULT_ADDR"
 Defaults  env_keep += "VAULT_CACERT"
 Defaults  env_keep += "VAULT_TOKEN"
+Defaults  env_keep += "CONSUL_HTTP_TOKEN"
+Defaults  env_keep += "CONSUL_HTTP_ADDR"
 
 # Allow members of group sudo to execute any command
 {% if sudoers_allow_nopasswd %}
