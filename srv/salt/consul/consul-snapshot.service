@@ -4,4 +4,4 @@ Description=Take regular consul snapshots for single-node development clusters
 [Service]
 Type=oneshot
 EnvironmentFile=-/etc/consul/operator_token_envvar
-ExecStart=/usr/local/bin/consul snapshot save /run/consul/singlenode-backup.snap
+ExecStart=/usr/local/bin/consul snapshot save /etc/consul/singlenode-backup.snap

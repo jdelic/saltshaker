@@ -19,6 +19,7 @@ ExecStart=/usr/local/bin/consul agent \
     {%- endfor %}
 ExecReload=/bin/kill -HUP $MAINPID
 {% if single_node_cluster is defined and single_node_cluster %}
+EnvironmentFile=-/etc/consul/operator_token_envvar
 ExecStartPost=-/usr/local/bin/consul snapshot restore /etc/consul/singlenode-backup.snap
 ExecStartPost=-/bin/rm /etc/consul/singlenode-backup.snap
 {% endif %}
