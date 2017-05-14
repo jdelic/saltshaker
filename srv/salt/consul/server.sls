@@ -80,6 +80,7 @@ consul-server-service:
         - name: consul-server
         - sig: consul
         - enable: True
+        - init_delay: 1
         - watch:
             - file: consul-server-service  # if consul.service changes we want to *restart* (reload: False)
             - file: consul  # restart on a change of the binary
@@ -111,6 +112,7 @@ consul-server-service-reload:
         - sig: consul
         - enable: True
         - reload: True  # makes Salt send a SIGHUP (systemctl reload consul) instead of restarting
+        - init_delay: 1
         - require:
             - file: consul-server-service
         - watch:
