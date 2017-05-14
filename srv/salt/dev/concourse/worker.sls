@@ -61,6 +61,7 @@ concourse-worker:
                 --tsa-worker-private-key /etc/concourse/private/worker_key.pem
                 --garden-network-pool {{pillar.get('ci', {}).get('garden-network-pool', '10.254.0.0/22')}}
                 --garden-docker-registry {{pillar.get('ci', {}).get('garden-docker-registry', 'registry-1.docker.io')}}
+                --garden-dns-server=169.254.1.1
         - require:
             - file: concourse-install
             - file: concourse-worker-dir
@@ -107,5 +108,28 @@ concourse-worker-udp-out53-forward:
         - require:
             - sls: iptables
 
+
+concourse-allow-inter-container-traffic-recv:
+    iptables.append:
+        - table: filter
+        - chain: INPUT
+        - jump: ACCEPT
+        - source: {{pillar.get('ci', {}).get('garden-network-pool', '10.254.0.0/22')}}
+        - destination: {{pillar.get('ci', {}).get('garden-network-pool', '10.254.0.0/22')}}
+        - save: True
+        - require:
+            - sls: iptables
+
+
+concourse-allow-inter-container-traffic-send:
+    iptables.append:
+        - table: filter
+        - chain: OUTPUT
+        - jump: ACCEPT
+        - source: {{pillar.get('ci', {}).get('garden-network-pool', '10.254.0.0/22')}}
+        - destination: {{pillar.get('ci', {}).get('garden-network-pool', '10.254.0.0/22')}}
+        - save: True
+        - require:
+            - sls: iptables
 
 # vim: syntax=yaml
