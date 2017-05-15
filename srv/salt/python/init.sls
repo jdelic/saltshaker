@@ -12,6 +12,7 @@ python-packages:
             - python3-pip
             - python-pip
             - python-setuptools
+            - python3-setuptools
             - python-pkg-resources
             - python-pip-whl
             - python3-virtualenv
