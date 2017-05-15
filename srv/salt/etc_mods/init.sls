@@ -61,3 +61,10 @@ sudoers-config:
         - user: root
         - group: root
         - mode: '0440'
+
+
+ensure-interfaces.d-works:
+    file.append:
+        - name: /etc/network/interfaces
+        - text: source /etc/network/interfaces.d/*
+        - order: 2
