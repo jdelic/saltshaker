@@ -12,11 +12,14 @@ pdns-recursor-config:
         - mode: '0644'
         - template: jinja
         - context:
-            cidr: {{pillar.get('powerdns', {}).get('bind-ip',
+            cidrs:
+                - {{pillar.get('powerdns', {}).get('bind-ip',
                       grains['ip_interfaces'][pillar['ifassign']['internal']][pillar['ifassign'].get(
                           'internal-ip-index', 0
                       )|int()]
                   )}}/{{pillar.get('powerdns', {}).get('bitmask', 32)}}
+                - {% if pillar.get('ci', False) %}{{pillar.get('ci', {}).get('garden-network-pool',
+                      '10.254.0.0/22')}}{% endif %}
 
 
 pdns-recursor-lua-config:
