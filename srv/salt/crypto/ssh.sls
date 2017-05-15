@@ -2,7 +2,6 @@ openssh:
     pkg.installed:
         - pkgs:
             - ssh
-            - openssh-blacklist
             - openssh-server
             - openssh-client
             - libssh2-1
