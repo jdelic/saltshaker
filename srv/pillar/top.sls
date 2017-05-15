@@ -31,7 +31,7 @@ base:
         - shared.buildserver
         - shared.secrets.gpg-package-signing
 
-    'E@(?!test)$ and G@roles:apps or G@roles:loadbalancer or G@roles:mail':
+    'E@.+(?!test)$ and G@roles:apps or G@roles:loadbalancer or G@roles:mail':
         - match: compound
         - shared.secrets.live-ssl  # these are wildcard certificates for hostnames on the main domain
 
@@ -56,7 +56,7 @@ base:
         - allenvs.nomadserver
 
     # every minion ID not ending in "test" is at Hetzner right now
-    '(?!test)$':
+    '.+(?!test)$':
         - match: pcre
         - hetzner.wellknown
         - hetzner.mailserver-config
