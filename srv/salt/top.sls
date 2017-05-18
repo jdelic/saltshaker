@@ -12,9 +12,14 @@ base:
         - haproxy.internal  # everything needs local proxies in smartstack
         - powerdns.recursor
 
+    'roles:xenserver':
+        - match: grain
+        - xen
+        - consul.server
+
     # leading "not" is not supported http://docs.saltstack.com/en/latest/topics/targeting/compound.html
     # everything that is not a consul server has a consul agent
-    '* and not G@roles:consulserver':
+    '* and not G@roles:consulserver and not G@roles:xenserver':
         - match: compound
         - consul.agent
 
@@ -70,6 +75,11 @@ base:
         - mn.cas.postgres_database # this state is empty if authserver doesn't use a database backend
         - mn.cas.postgres_spapi_access # ^ ditto
 
+    # every node that's not a mailserver routes through a mailserver via smartstack
+    '* and not G@roles:mail':
+        - match: compound
+        - ssmtp
+
     'roles:mail':
         - match: grain
         - fstab.secure
@@ -100,7 +110,7 @@ base:
         # enable the NAT networking device for all network traffic
         - iptables.vagrant
 
-# put my personal user on every other machine
+    # put my personal user on every other machine
     '(?!saltmaster).*?net(|.internal)$':
         - match: pcre
         - mn.users.jonas
