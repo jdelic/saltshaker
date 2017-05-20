@@ -8,6 +8,12 @@ ifassign:
     external: {{iface_external}}
     external-alt: {{iface_external2}}
 
+
+network:
+    point-to-point: 144.76.72.97
+    gateway: 144.76.72.97
+
+
 mine_functions:
     internal_ip:
         - mine_function: network.interface_ip

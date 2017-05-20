@@ -82,6 +82,21 @@ icmp-send:
             - pkg: iptables
 
 
+icmp-forward:
+    iptables.append:
+        - table: filter
+        - chain: FORWARD
+        - jump: ACCEPT
+        - proto: icmp
+        - icmp-type: any
+        - source: 0/0
+        - destination: 0/0
+        - order: 2
+        - save: True
+        - require:
+            - pkg: iptables
+
+
 # prevent tcp packets without a connection
 drop-confused-tcp-packets:
     iptables.insert:
