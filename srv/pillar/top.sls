@@ -20,6 +20,10 @@ base:
         - shared.secrets.vault-live
         - shared.secrets.vault-ssl
 
+    'E@.+(?!test)$ and roles:xenserver':
+        - match: compound
+        - hetzner.xenserver
+
     'roles:database':
         - match: grain
         - shared.postgresql
@@ -88,8 +92,8 @@ base:
         - local.crypto
         - local.ssl
         - local.authserver
-        # - local.url_overrides
-        - shared.urls
+        - local.url_overrides
+        # - shared.urls
 
     # the minion ID starting with "test" is currently the main test VM in my Vagrant environment
     # "shared.ssl" is omitted here, because it's already assigned by '*.test'
