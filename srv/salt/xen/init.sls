@@ -55,6 +55,7 @@ xen-bridge-interfaces:
             iface xenbr1 inet manual
                 up ip link add xenbr1 type bridge
                 up ip link set dev {{pillar['ifassign']['external']}} master xenbr1
-                up ip addr add dev xenbr1 peer {{pillar['network']['point-to-point']}} {{grains['ip_interfaces'][pillar['ifassign']['internal']]}}/32
-                up ip addr add default via {{pillar['network']['gateway']}}
+                up ip addr add dev xenbr1 peer {{pillar['network']['gateway']}} {{pillar['network']['primary-ip']}}/32
+                up ip route add {{pillar['network']['gateway']}} via xenbr1
+                up ip route add default via {{pillar['network']['gateway']}}
                 down ip link del xenbr1 type bridge
