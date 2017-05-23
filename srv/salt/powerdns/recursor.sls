@@ -25,6 +25,10 @@ pdns-recursor-config:
             {% if 'xenserver' in grains['roles'] %}
                 - 10.0.1.0/24
             {% endif %}
+            additional_listen_addresses:
+            {% if 'xenserver' in grains['roles'] %}
+                - 10.0.1.1
+            {% endif %}
 
 
 pdns-recursor-lua-config:
