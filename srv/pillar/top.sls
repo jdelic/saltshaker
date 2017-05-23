@@ -20,7 +20,7 @@ base:
         - shared.secrets.vault-live
         - shared.secrets.vault-ssl
 
-    'E@.+(?!test)$ and roles:xenserver':
+    'E@.+(?!test)$ and G@roles:xenserver':
         - match: compound
         - hetzner.xenserver
 
@@ -65,7 +65,7 @@ base:
         - hetzner.wellknown
         - hetzner.mailserver-config
         - hetzner.calendar
-        - hetzner.network
+        - hetzner.vm_network
         - hetzner.consul
         - hetzner.nomad
         - hetzner.buildserver
