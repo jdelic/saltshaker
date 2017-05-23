@@ -22,13 +22,6 @@ pdns-recursor-config:
                 - {{pillar.get('ci', {}).get('garden-network-pool',
                       '10.254.0.0/22')}}
             {% endif %}
-            {% if 'xenserver' in grains['roles'] %}
-                - 10.0.1.0/24
-            {% endif %}
-            additional_listen_addresses:
-            {% if 'xenserver' in grains['roles'] %}
-                - 10.0.1.1
-            {% endif %}
 
 
 pdns-recursor-lua-config:
@@ -69,35 +62,3 @@ pdns-recursor-service:
             - file: pdns-recursor-lua-config
         - require:
             - pkg: pdns-recursor
-
-
-{% if 'xenserver' in grains['roles'] %}
-pdns-tcp53-recv:
-    iptables.append:
-        - table: filter
-        - chain: INPUT
-        - jump: ACCEPT
-        - source: 10.0.1.0/24
-        - destination: 10.0.1.1
-        - dport: 53
-        - match: state
-        - connstate: NEW
-        - proto: tcp
-        - save: True
-        - require:
-            - sls: iptables
-
-
-pdns-udp53-recv:
-    iptables.append:
-        - table: filter
-        - chain: INPUT
-        - jump: ACCEPT
-        - source: 10.0.1.0/24
-        - destination: 10.0.1.1
-        - dport: 53
-        - proto: udp
-        - save: True
-        - require:
-            - sls: iptables
-{% endif %}
