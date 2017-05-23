@@ -1,5 +1,5 @@
 # importable variables for reuse
-{% set iface_internal = 'xbr0dummy0' %}
+{% set iface_internal = 'xenbr0' %}
 {% set iface_external = 'xenbr1' %}
 
 ifassign:
