@@ -41,14 +41,15 @@ xen-bridge-interfaces:
             auto xenbr0
 
             iface xenbr0 inet manual
-                up ip link add xenbr0 type bridge
-                up ip link add xbr0dummy0 type dummy
+                pre-up ip link add xenbr0 type bridge
+                pre-up ip link add xbr0dummy0 type dummy
+                pre-up ip link set xbr0dummy0 up
+                pre-up ip link set xenbr0 up
                 up ip link set xbr0dummy0 master xenbr0
-                up ip link set dev xenbr0 up
                 up ip addr add 10.0.1.1/24 dev xenbr0
-                down ip link set dev xenbr0 down
-                down ip link del xenbr0 type bridge
-                down ip link del xbr0dummy0 type dummy
+                down ip link set xenbr0 down
+                post-down ip link del xenbr0 type bridge
+                post-down ip link del xbr0dummy0 type dummy
 
             auto {{pillar['ifassign']['external']}} xenbr1
 
@@ -65,3 +66,15 @@ xen-bridge-interfaces:
                 up ip route add default via {{pillar['network']['gateway']}} dev xenbr1
                 down ip link set xenbr1 down
                 post-down ip link del xenbr1 type bridge
+
+
+xen-forward-domUs:
+    iptables.append:
+        - table: nat
+        - chain: POSTROUTING
+        - jump: MASQUERADE
+        - source: 10.0.1.0/24
+        - destination: '! 10.0.1.0/24'
+        - save: True
+        - require:
+            - sls: iptables

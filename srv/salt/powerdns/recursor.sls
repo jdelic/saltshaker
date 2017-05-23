@@ -18,8 +18,13 @@ pdns-recursor-config:
                           'internal-ip-index', 0
                       )|int()]
                   )}}/{{pillar.get('powerdns', {}).get('bitmask', 32)}}
-                - {% if pillar.get('ci', False) %}{{pillar.get('ci', {}).get('garden-network-pool',
-                      '10.254.0.0/22')}}{% endif %}
+            {% if pillar.get('ci', False) %}
+                - {{pillar.get('ci', {}).get('garden-network-pool',
+                      '10.254.0.0/22')}}
+            {% endif %}
+            {% if 'xenserver' in grains['roles'] %}
+                - 10.0.1.0/24
+            {% endif %}
 
 
 pdns-recursor-lua-config:
