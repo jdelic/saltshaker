@@ -86,4 +86,18 @@ pdns-tcp53-recv:
         - save: True
         - require:
             - sls: iptables
+
+
+pdns-udp53-recv:
+    iptables.append:
+        - table: filter
+        - chain: INPUT
+        - jump: ACCEPT
+        - source: 10.0.1.0/24
+        - destination: 10.0.1.1
+        - dport: 53
+        - proto: udp
+        - save: True
+        - require:
+            - sls: iptables
 {% endif %}
