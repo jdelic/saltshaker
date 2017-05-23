@@ -19,7 +19,8 @@ def create_user(username, groups=None, optional_groups=None, key_pillars=None, p
         optional_groups=optional_groups,
         home='/home/%s' % username,
         password=password,
-        gid_from_name=create_default_group
+        gid_from_name=create_default_group,
+        shell="/bin/bash"
     )
 
     names = []
