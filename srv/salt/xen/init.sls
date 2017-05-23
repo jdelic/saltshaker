@@ -70,6 +70,18 @@ xen-bridge-interfaces:
 
 xen-forward-domUs:
     iptables.append:
+        - table: filter
+        - chain: FORWARD
+        - jump: ACCEPT
+        - source: 10.0.1.0/24
+        - destination: 0/0
+        - save: True
+        - require:
+            - sls: iptables
+
+
+xen-nat-domUs:
+    iptables.append:
         - table: nat
         - chain: POSTROUTING
         - jump: MASQUERADE
