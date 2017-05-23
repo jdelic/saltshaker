@@ -42,6 +42,8 @@ pnds-recursor-override-resolv.conf:
         - mode: '0644'
         - user: root
         - group: root
+        - require:
+            - service: pdns-recursor-service
     cmd.run:
         - name: chattr +i /etc/resolv.conf
         - onchanges:
@@ -57,7 +59,6 @@ pdns-recursor-service:
         - enable: True
         - order: 10  # see ORDER.md
         - watch:
-            - file: pnds-recursor-override-resolv.conf
             - file: pdns-recursor-config
             - file: pdns-recursor-lua-config
         - require:
