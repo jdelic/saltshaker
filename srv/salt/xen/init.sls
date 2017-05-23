@@ -50,12 +50,18 @@ xen-bridge-interfaces:
                 down ip link del xenbr0 type bridge
                 down ip link del xbr0dummy0 type dummy
 
-            auto xenbr1
+            auto {{pillar['ifassign']['external']}} xenbr1
+
+            iface enp2s0 inet manual
+                up ip link set enp2s0 up
+                down ip link set enp2s0 down
 
             iface xenbr1 inet manual
-                up ip link add xenbr1 type bridge
+                pre-up ip link add xenbr1 type bridge
+                pre-up ip link set {{pillar['ifassign']['external']}} up
+                pre-up ip link set xenbr1 up
                 up ip link set dev {{pillar['ifassign']['external']}} master xenbr1
-                up ip addr add dev xenbr1 peer {{pillar['network']['gateway']}} {{pillar['network']['primary-ip']}}/32
-                up ip route add {{pillar['network']['gateway']}} via xenbr1
-                up ip route add default via {{pillar['network']['gateway']}}
-                down ip link del xenbr1 type bridge
+                up ip addr add {{pillar['network']['primary-ip']}}/32 peer {{pillar['network']['gateway']}} broadcast {{pillar['network']['primary-ip']}} dev xenbr1
+                up ip route add default via {{pillar['network']['gateway']}} dev xenbr1
+                down ip link set xenbr1 down
+                post-down ip link del xenbr1 type bridge
