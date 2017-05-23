@@ -24,6 +24,12 @@ base:
         - match: compound
         - hetzner.xenserver
 
+    # everything not in Vagrant (*.test) is at Hetzner and everything not a xenserver
+    # is a VM
+    'E@.*(?!test)$ and not G@roles:xenserver':
+        - match: compound
+        - hetzner.vm_network
+
     'roles:database':
         - match: grain
         - shared.postgresql
@@ -65,7 +71,6 @@ base:
         - hetzner.wellknown
         - hetzner.mailserver-config
         - hetzner.calendar
-        - hetzner.vm_network
         - hetzner.consul
         - hetzner.nomad
         - hetzner.buildserver
