@@ -19,9 +19,6 @@ mine_functions:
     external_ip:
         - mine_function: network.interface_ip
         - {{iface_external}}
-    external_alt_ip:
-        - mine_function: network.interface_ip
-        - {{iface_external2}}
 
 
 # vim: syntax=yaml
