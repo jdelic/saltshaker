@@ -70,8 +70,8 @@ radicale-rights:
 
 radicale-defaults:
     file.managed:
-        - name: /etc/defaults/radicale
-        - source: salt://radicale/defaults/radicale
+        - name: /etc/default/radicale
+        - source: salt://radicale/default/radicale
         - user: root
         - group: root
         - mode: '0644'
