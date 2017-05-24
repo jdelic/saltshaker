@@ -13,7 +13,7 @@ ssl:
 
 
     install-perenv-ca-certs:
-        - salt://crypto/dev/casserver-ca.crt
+        - salt://crypto/apps/casserver-ca.crt
         - salt://crypto/dev/dev-ca.crt
 
 # vim: syntax=yaml
