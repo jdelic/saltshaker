@@ -15,8 +15,9 @@ base:
         - shared.secrets.vault-dev
         - shared.secrets.vault-ssl
 
-    'saltmaster.maurus.net':
+    'db.maurusnet.internal':
         - hetzner.vault
+        - shared.vault
         - shared.secrets.vault-live
         - shared.secrets.vault-ssl
 
