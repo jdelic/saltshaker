@@ -89,6 +89,7 @@ base:
         - mail.spamassassin
         - mail.storage
         - mn.cas.dkimsigner
+        - ssmtp.not
 
     'roles:pim':
         - match: grain
