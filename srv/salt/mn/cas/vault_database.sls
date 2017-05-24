@@ -43,6 +43,7 @@ authserver-vault-postgresql-connection:
         - env:
             - VAULT_ADDR: "https://vault.service.consul:8200/"
 
+
 authserver-vault-postgresql-lease:
     cmd.run:
         - name: >-
