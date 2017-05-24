@@ -24,8 +24,6 @@ saltminion-{{proto}}-in{{port}}-recv:
         # it's super important these go first so the local minion works, static order 2 is compatible with iptables.init
         - order: 2
         - save: True
-        - require:
-            - sls: iptables
 
 
 # allow us to talk to the saltmaster on the internal network
@@ -40,8 +38,6 @@ saltminion-{{proto}}-in{{port}}-send:
         # it's super important these go first so the local minion works, static order 2 is compatible with iptables.init
         - order: 2
         - save: True
-        - require:
-            - sls: iptables
     {% endfor %}
 {% endfor %}
 
