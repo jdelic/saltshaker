@@ -43,6 +43,7 @@ base:
     'roles:mail':
         - match: grain
         - shared.secrets.smtp
+        - shared.mailserver-private
 
     'roles:pim':
         - match: grain
@@ -71,12 +72,6 @@ base:
         - hetzner.authserver
         - shared.urls
 
-    # the minion ID starting with "cic" is the main PIM and mail server at Hetzner
-    'mail*':
-        - shared.mailserver-private
-        - shared.secrets.ssl
-        - shared.authserver
-
     # every minion ID ending in ".test" is a local dev environment
     '*.test':
         - local.wellknown
@@ -91,11 +86,5 @@ base:
         - local.authserver
         # - local.url_overrides
         - shared.urls
-
-    # the minion ID starting with "test" is currently the main test VM in my Vagrant environment
-    # "shared.ssl" is omitted here, because it's already assigned by '*.test'
-    'test*':
-        - shared.mailserver-private
-        - shared.authserver
 
 # vim: syntax=yaml
