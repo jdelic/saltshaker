@@ -161,7 +161,7 @@ SCRIPT
                 s.inline = ''
             end
             s.inline += <<SCRIPT
-                sh -c 'if ! grep -q 192.168.56.88 /etc/hosts; then echo "192.168.56.88        saltmaster.maurusnet.test" >> /etc/hosts; fi'
+                sh -c 'if ! grep -q 192.168.56.88 /etc/hosts; then echo "192.168.56.88        saltmaster.maurusnet.test saltmaster" >> /etc/hosts; fi'
                 mkdir -p /etc/salt/roles.d
                 chown 700 /etc/salt/roles.d
                 touch /etc/salt/roles.d/mail
