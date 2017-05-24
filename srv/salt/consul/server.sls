@@ -20,7 +20,8 @@ consul-acl-config:
         - context:
             # make sure to change this for multi-datacenter deployments
             main_datacenter: {{pillar['consul-cluster']['datacenter']}}
-            master_token: {{pillar['dynamicsecrets']['consul-master-token']}}
+            master_token: {{pillar['dynamicsecrets']['consul-acl-master-token']}}
+            agent_master_token: {{pillar['dynamicsecrets']['consul-agent-master-token']}}
         - require:
             - file: consul-conf-dir
 
@@ -93,7 +94,7 @@ consul-singlenode-snapshot-timer:
         - source: salt://consul/consul-snapshot.timer
 
 
-consul-singlenode-snapshort-service:
+consul-singlenode-snapshot-service:
     file.managed:
         - name: /etc/systemd/system/consul-snapshot.service
         - source: salt://consul/consul-snapshot.service
@@ -101,7 +102,7 @@ consul-singlenode-snapshort-service:
         - name: consul-snapshot.timer
         - require:
             - file: consul-singlenode-snapshot-timer
-            - file: consul-singlenode-snapshort-service
+            - file: consul-singlenode-snapshot-service
             - service: consul-server-service
 {% endif %}
 
