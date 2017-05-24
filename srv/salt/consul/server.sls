@@ -52,9 +52,21 @@ consul-policy-{{loop.index}}:
 
 consul-acl-token-envvar:
     file.managed:
+        - name: /etc/consul/acl_token_envvar
+        - contents: |
+            CONSUL_HTTP_TOKEN="{{pillar['dynamicsecrets']['consul-acl-master-token']}}"
+        - user: root
+        - group: root
+        - mode: '0640'
+        - require:
+            - file: consul-basedir
+
+
+consul-agent-token-envvar:
+    file.managed:
         - name: /etc/consul/operator_token_envvar
         - contents: |
-            CONSUL_HTTP_TOKEN="{{pillar['dynamicsecrets']['consul-master-token']}}"
+            CONSUL_HTTP_TOKEN="{{pillar['dynamicsecrets']['consul-agent-master-token']}}"
         - user: root
         - group: root
         - mode: '0640'
