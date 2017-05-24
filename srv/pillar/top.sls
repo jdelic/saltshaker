@@ -44,10 +44,12 @@ base:
         - match: grain
         - shared.secrets.smtp
         - shared.mailserver-private
+        - shared.authserver
 
     'roles:pim':
         - match: grain
         - shared.calendar
+        - shared.authserver
 
     'roles:authserver':
         - match: grain
