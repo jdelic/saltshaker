@@ -52,6 +52,8 @@ vault-envvar-config:
 
 
 sudoers-config:
+    pkg.installed:
+        - name: sudo
     file.managed:
         - name: /etc/sudoers.d/salt-sudoers
         - source: salt://etc_mods/salt-sudoers.jinja
@@ -61,6 +63,8 @@ sudoers-config:
         - user: root
         - group: root
         - mode: '0440'
+        - require:
+            - pkg: sudoers-config
 
 
 ensure-interfaces.d-works:
