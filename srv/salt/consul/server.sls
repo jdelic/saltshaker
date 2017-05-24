@@ -20,7 +20,8 @@ consul-acl-config:
         - context:
             # make sure to change this for multi-datacenter deployments
             main_datacenter: {{pillar['consul-cluster']['datacenter']}}
-            master_token: {{pillar['dynamicsecrets']['consul-master-token']}}
+            master_token: {{pillar['dynamicsecrets']['consul-acl-master-token']}}
+            agent_master_token: {{pillar['dynamicsecrets']['consul-agent-master-token']}}
         - require:
             - file: consul-conf-dir
 

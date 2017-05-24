@@ -3,5 +3,6 @@
     "acl_default_policy": "allow",
     "acl_down_policy": "extend-cache",
     "acl_ttl": "30s",
-    "acl_master_token": "{{master_token}}"
+    "acl_master_token": "{{master_token}}",
+    "acl_agent_master_token": "{{agent_master_token}}"
 }
