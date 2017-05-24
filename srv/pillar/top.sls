@@ -29,7 +29,7 @@ base:
     # is a VM
     'E@.*(?!test)$ and not G@roles:xenserver':
         - match: compound
-        - hetzner.vm_network
+        - hetzner.vm_config
 
     'roles:database':
         - match: grain
