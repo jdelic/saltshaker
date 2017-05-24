@@ -11,7 +11,7 @@ secure-mount:
         - name: /secure
         - device: {{grains['envdir']['secure']['device']}}
         - fstype: ext4
-        - opts: data=journal,defaults,noauto,noatime,nosuid,nodiratime
+        - opts: data=journal,defaults,noatime,nosuid,nodiratime
         - dump: 0
         - pass_num: 0
         - persist: True
