@@ -1,3 +1,5 @@
+{% from 'shared/ssl.sls' import localca_location %}
+
 
 ssl:
     sources:
