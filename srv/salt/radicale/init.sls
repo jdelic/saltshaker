@@ -20,6 +20,7 @@ radicale:
         - watch:
             - file: radicale-config
             - file: radicale-rights
+            - file: radicale-defaults
         - require:
             - pkg: radicale
 
@@ -65,6 +66,15 @@ radicale-rights:
         - group: radicale
         - mode: '0640'
         - template: jinja
+
+
+radicale-defaults:
+    file.managed:
+        - name: /etc/defaults/radicale
+        - source: salt://radicale/defaults/radicale
+        - user: root
+        - group: root
+        - mode: '0644'
 
 
 radicale-servicedef-external:
