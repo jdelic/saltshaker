@@ -63,6 +63,9 @@ xen-bridge-interfaces:
                 pre-up ip link set xenbr1 up
                 up ip link set dev {{pillar['ifassign']['external']}} master xenbr1
                 up ip addr add {{pillar['network']['routed-ip']}}/32 peer {{pillar['network']['gateway']}} broadcast {{pillar['network']['routed-ip']}} dev xenbr1
+            {% for additional_ip in pillar['network'].get('additional-ips', []) %}
+                up ip route add {{additional_ip}}/32 dev xenbr1
+            {% endfor %}
                 up ip route add default via {{pillar['network']['gateway']}} dev xenbr1
                 down ip link set xenbr1 down
                 post-down ip link del xenbr1 type bridge
