@@ -21,6 +21,16 @@ base:
         - shared.secrets.vault-live
         - shared.secrets.vault-ssl
 
+    'E@.+(?!test)$ and G@roles:xenserver':
+        - match: compound
+        - hetzner.xenserver
+
+    # everything not in Vagrant (*.test) is at Hetzner and everything not a xenserver
+    # is a VM
+    'E@.*(?!test)$ and not G@roles:xenserver':
+        - match: compound
+        - hetzner.vm_config
+
     'roles:database':
         - match: grain
         - shared.postgresql
@@ -65,7 +75,6 @@ base:
         - hetzner.wellknown
         - hetzner.mailserver-config
         - hetzner.calendar
-        - hetzner.network
         - hetzner.consul
         - hetzner.nomad
         - hetzner.buildserver
