@@ -48,7 +48,7 @@ gpg2-batchmode-config:
             pinentry-mode loopback
         - user: root
         - group: root
-        - mode: '0644'
+        - mode: '0640'
         - require:
             - file: gpg-shared-keyring-location
 
@@ -60,7 +60,7 @@ gpg2-agent-batchmode-config:
             allow-loopback-pinentry
         - user: root
         - group: root
-        - mode: '0644'
+        - mode: '0640'
         - require:
             - file: gpg-shared-keyring-location
 
