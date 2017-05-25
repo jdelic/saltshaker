@@ -20,8 +20,6 @@ saltmaster-{{proto}}-in{{port}}-recv:
         # it's super important these go first so the local minion works
         - order: 2
         - save: True
-        - require:
-            - sls: iptables
 
 
 # allow us to respond to the internal network
@@ -36,8 +34,6 @@ saltmaster-{{proto}}-in{{port}}-send:
         # it's super important these go first so the local minion works
         - order: 2
         - save: True
-        - require:
-            - sls: iptables
     {% endfor %}
 {% endfor %}
 
