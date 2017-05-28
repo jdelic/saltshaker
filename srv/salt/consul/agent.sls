@@ -27,6 +27,7 @@ consul-agent-service:
         - name: consul
         - sig: consul
         - enable: True
+        - init_delay: 2
         - require:
             - file: consul-agent-service
         - watch:

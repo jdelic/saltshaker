@@ -93,7 +93,7 @@ consul-server-service:
         - name: consul-server
         - sig: consul
         - enable: True
-        - init_delay: 1
+        - init_delay: 2
         - watch:
             - file: consul-server-service  # if consul.service changes we want to *restart* (reload: False)
             - file: consul  # restart on a change of the binary
