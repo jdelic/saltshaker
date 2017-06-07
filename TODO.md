@@ -3,31 +3,20 @@
  * add consul service defs to apache2
  * add health checks for services monitored through consul
  * write docs for placeholders in README.md
- * all PHP should run through php-fpm behind Apache2
  * add Nagios/Icinca/xyz monitoring via consul-template
  * add a consul-template cmd.wait watcher state for haproxy.internal that
    deletes the servicerenderer if the command-line parameters change, because
    consul-template will not do it by itself (has this been fixed upstream?)
- * add ssmtp to all servers that don't run opensmtpd
- * switch Dovecot from maildir to sdbox
+ * add a logging server role
 
 # Ponder
 
- * front consul through dnsmasq and make /etc/resolv.conf point to local
-   dnsmasq? What about IPv6?
-
- * Docker containers should probably only expose HTTP to be reverse proxied
-   through haproxy
-     * how does consul discover docker services? -> docker registrator
-       https://github.com/gliderlabs/registrator
-     * how do php-fpm applications gain a HTTP server inside of a docker
-       container? multi-process?
-
- * Fix consul to enable ACLs and then use ACL tokens to secure write access on
-   the cluster from the agents? Does that make sense? Is it overkill? How can
-   you bootstrap this from Salt?
+ * how do php-fpm applications gain a HTTP server inside of a docker
+   container? multi-process?
 
  * should `postgresql.secure` be its own cluster on port 5433?
 
  * add PowerDNS states to implement a fully owned DNSSEC zone (i.e. no trust
    delegation to third parties)
+
+ * switch Dovecot from maildir to sdbox
