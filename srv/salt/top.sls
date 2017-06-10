@@ -85,7 +85,6 @@ base:
         - fstab.secure
         - dovecot
         - opensmtpd.install
-        - mail.nixspam
         - mail.spamassassin
         - mail.storage
         - mn.cas.dkimsigner
