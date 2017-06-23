@@ -55,6 +55,7 @@ base:
     'roles:buildworker':
         - match: grain
         - dev.concourse.worker
+        - nomad.client
 
     'roles:apps':
         - match: grain
