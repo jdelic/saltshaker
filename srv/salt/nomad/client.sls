@@ -16,8 +16,8 @@ nomad-data-dir:
         - group: {{nomad_group}}
         - mode: '0755'
         - require:
-            - user: nomad
-            - group: nomad
+            - user: nomad-user
+            - group: nomad-user
 
 
 nomad-pidfile-dir:
@@ -28,8 +28,8 @@ nomad-pidfile-dir:
         - group: {{nomad_group}}
         - mode: '0755'
         - require:
-            - user: nomad
-            - group: nomad
+            - user: nomad-user
+            - group: nomad-user
 
 
 nomad-pidfile-dir-systemd:
@@ -44,8 +44,8 @@ nomad-pidfile-dir-systemd:
         - group: root
         - mode: '0644'
         - require:
-            - user: nomad  # the user is required in the .conf file
-            - group: nomad
+            - user: nomad-user  # the user is required in the .conf file
+            - group: nomad-user
 
 
 nomad-basedir:
@@ -65,24 +65,25 @@ nomad-service-dir:
         - group: {{nomad_group}}
         - mode: '0755'
         - require:
-            - user: nomad
-            - group: nomad
+            - user: nomad-user
+            - group: nomad-user
             - file: nomad-basedir
 
 
-nomad:
+nomad-user:
     group.present:
         - name: {{nomad_group}}
     user.present:
         - name: {{nomad_user}}
         - gid: {{nomad_group}}
-        - groups:
-            - docker
         - createhome: False
         - home: /var/lib/nomad
         - shell: /bin/sh
         - require:
-             - group: nomad
+             - group: nomad-user
+
+
+nomad:
     archive.extracted:
         - name: /usr/local/bin
         - source: {{pillar["urls"]["nomad"]}}
@@ -97,7 +98,7 @@ nomad:
         - group: {{nomad_group}}
         - replace: False
         - require:
-            - user: nomad
+            - user: nomad-user
             - file: nomad-pidfile-dir
             - file: nomad-data-dir
             - archive: nomad
