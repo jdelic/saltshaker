@@ -1,5 +1,12 @@
+#
+# Install Hashicorp's nomad Docker-based cluster manager from a .zip file and join it to the
+# system-wide consul network.
+#
+
+
 {% set nomad_user = "nomad" %}
 {% set nomad_group = "nomad" %}
+
 
 nomad-data-dir:
     file.directory:

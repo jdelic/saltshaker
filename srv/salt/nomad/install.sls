@@ -1,18 +1,24 @@
 #
-# Install Hashicorp's nomad Docker-based cluster manager from a .zip file and join it to the
-# system-wide consul network.
-#
 # Nomad will be started as a server node if the nomad:is-server pillar is set.
 #
-
-{% from 'nomad/client.sls' import nomad_user, nomad_group %}
 
 include:
     - nomad.client
 
 
+{% from 'nomad/client.sls' import nomad_user, nomad_group %}
+
 {% set internal_ip = grains['ip_interfaces'][pillar['ifassign']['internal']][
                         pillar['ifassign'].get('internal-ip-index', 0)|int()] %}
+
+
+nomad-docker-group-membership:
+    user.present:
+        - name: {{nomad_user}}
+        - groups:
+            - docker
+        - require:
+             - sls: docker
 
 
 nomad-agent-config:
@@ -83,7 +89,6 @@ nomad-service:
             - file: nomad-server-config
             - file: nomad-agent-config
             - file: nomad-common-config
-            - sls: docker
         - watch:
             - file: nomad-service  # if consul.service changes we want to *restart* (reload: False)
             - file: nomad  # restart on a change of the binary
