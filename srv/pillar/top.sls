@@ -15,6 +15,22 @@ base:
         - shared.secrets.vault-dev
         - shared.secrets.vault-ssl
 
+    'db.maurusnet.internal':
+        - hetzner.vault
+        - shared.vault
+        - shared.secrets.vault-live
+        - shared.secrets.vault-ssl
+
+    'E@.+(?!test)$ and G@roles:xenserver':
+        - match: compound
+        - hetzner.xenserver
+
+    # everything not in Vagrant (*.test) is at Hetzner and everything not a xenserver
+    # is a VM
+    'E@.*(?!test)$ and not G@roles:xenserver':
+        - match: compound
+        - hetzner.vm_config
+
     'roles:database':
         - match: grain
         - shared.postgresql
@@ -52,6 +68,20 @@ base:
     'roles:nomadserver':
         - match: grain
         - allenvs.nomadserver
+
+    # every minion ID not ending in "test" is at Hetzner right now
+    '.+(?!test)$':
+        - match: pcre
+        - hetzner.wellknown
+        - hetzner.mailserver-config
+        - hetzner.calendar
+        - hetzner.consul
+        - hetzner.nomad
+        - hetzner.buildserver
+        - hetzner.crypto
+        - hetzner.ssl
+        - hetzner.authserver
+        - shared.urls
 
     # every minion ID ending in ".test" is a local dev environment
     '*.test':
