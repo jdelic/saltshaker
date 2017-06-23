@@ -19,6 +19,7 @@ nomad-docker-group-membership:
             - docker
         - require:
              - sls: docker
+             - user: nomad-user
 
 
 nomad-agent-config:
