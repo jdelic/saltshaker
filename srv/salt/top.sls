@@ -37,6 +37,10 @@ base:
         - vault
         - mn.cas.vault_database
 
+    'roles:docker-registry':
+        - match: grain
+        - docker.registry
+
     'roles:dev':
         - match: grain
         - dev.pbuilder
