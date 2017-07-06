@@ -22,24 +22,24 @@ repos:
 #           state for that!
 
 urls:
-    concourse: https://github.com/concourse/concourse/releases/download/v3.3.0/concourse_linux_amd64
-    consul: https://releases.hashicorp.com/consul/0.8.4/consul_0.8.4_linux_amd64.zip
-    consul-template: https://releases.hashicorp.com/consul-template/0.18.5/consul-template_0.18.5_linux_amd64.zip
+    concourse: https://github.com/concourse/concourse/releases/download/v3.3.1/concourse_linux_amd64
+    consul: https://releases.hashicorp.com/consul/0.8.5/consul_0.8.5_linux_amd64.zip
+    consul-template: https://releases.hashicorp.com/consul-template/0.19.0/consul-template_0.19.0_linux_amd64.zip
     exxo: https://bintray.com/artifact/download/mbachry/exxo/exxo-0.0.7.tar.xz
     nomad: https://releases.hashicorp.com/nomad/0.5.6/nomad_0.5.6_linux_amd64.zip
     pyrun35: https://downloads.egenix.com/python/egenix-pyrun-2.2.3-py3.5_ucs4-linux-x86_64.tgz
-    terraform: https://releases.hashicorp.com/terraform/0.9.8/terraform_0.9.8_linux_amd64.zip
+    terraform: https://releases.hashicorp.com/terraform/0.9.11/terraform_0.9.11_linux_amd64.zip
     vault: https://releases.hashicorp.com/vault/0.7.3/vault_0.7.3_linux_amd64.zip
     vault-ssh-helper: https://releases.hashicorp.com/vault-ssh-helper/0.1.3/vault-ssh-helper_0.1.3_linux_amd64.zip
 
 
 hashes:
-    concourse: sha256=5dc5474034312b976f25ea01fb29a74f35085b4e291e8637aa54d253d1cb2d71
-    consul: sha256=c8859a0a34c50115cdff147f998b2b63226f5f052e50f342209142420d1c2668
-    consul-template: sha256=b0cd6e821d6150c9a0166681072c12e906ed549ef4588f73ed58c9d834295cd2
+    concourse: sha256=ccaba564b04e70eeb9836afcd20b067154c3804090cc8aa93c1d4195c8150b0e
+    consul: sha256=35dc317c80862c306ea5b1d9bc93709483287f992fd0797d214d1cc1848e7b62
+    consul-template: sha256=31dda6ebc7bd7712598c6ac0337ce8fd8c533229887bd58e825757af879c5f9f
     exxo: sha256=ce3d6ae10d364c5a0726cce127602fe6fa5d042b11afd21d79502f8216b42e1e
     nomad: sha256=3f5210f0bcddf04e2cc04b14a866df1614b71028863fe17bcdc8585488f8cb0c
     pyrun35: sha256=8bf8b374f582bb53600dd846a0cdb38e18586bbda06261321d48df69ddbf730e
-    terraform: sha256=f951885f4e15deb4cf66f3b199964e3e74a0298bb46c9fe42e105df2ebcf3d16
+    terraform: sha256=804d31cfa5fee5c2b1bff7816b64f0e26b1d766ac347c67091adccc2626e16f3
     vault: sha256=2822164d5dd347debae8b3370f73f9564a037fc18e9adcabca5907201e5aab45
     vault-ssh-helper: sha256=212eb6f98cfc28f201e4dc3106a1bfb82799eacb31e4b380e7c17a0457732cc0
