@@ -1,0 +1,11 @@
+{
+    "service": {
+        "name": "docker-registry",
+        "tags": ["smartstack:external", "smartstack:port:{{port}}", "smartstack:mode:http",
+                 "smartstack:protocol:https",
+                 "smartstack:hostname:{{hostname}}"],
+        "address": "{{ip}}",
+        "port": {{port}}
+        {# TODO: add service checks here? Or add haproxy in front? #}
+    }
+}

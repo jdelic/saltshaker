@@ -10,6 +10,7 @@ python-packages:
         - pkgs:
             - python3
             - python3-pip
+            - python-docker
             - python-pip
             - python-setuptools
             - python3-setuptools
