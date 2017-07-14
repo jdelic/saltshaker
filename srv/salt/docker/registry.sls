@@ -13,6 +13,22 @@ docker-registry-volume:
 {% set registry_port = pillar.get('docker', {}).get('registry', {}).get('bind-port', 5000) %}
 {% set registry_hostname = "registry.maurusnet.test" %}
 
+
+docker-jwt-certificate:
+    cmd.run:
+        - name: >-
+            JWTFILE=$(mktemp) &&
+            echo "$JWT_KEY" > "$JWTFILE" &&
+            /usr/bin/openssl req -x509 -key $JWTFILE -out /srv/registry/docker_jwt.crt \
+                                 -days 3650 \
+                                 -subj '/C=DE/L=Munich/O=Docker Registry/OU=JWT Auth/CN=docker_registry/';
+            rm $JWTFILE;
+        - creates: /srv/registry/docker_jwt.crt
+        - env:
+            JWT_KEY: |
+                {{pillar['dynamicsecrets']['jwt-key']['key']|indent(16)}}
+
+
 docker-registry:
     dockerng.running:
         - name: registry
@@ -34,11 +50,12 @@ docker-registry:
             - REGISTRY_AUTH_TOKEN_ISSUER: |
                 {{pillar['authserver']['protocol']}}://{{pillar['authserver']['hostname']}}
             - REGISTRY_AUTH_TOKEN_ROOTCERTBUNDLE: |
-                {{pillar['ssl']['service-rootca-cert']}}
+                /var/lib/registry/docker_jwt.crt
             - REGISTRY_HTTP_HOST: https://{{registry_hostname}}/
         - extra_hosts: {{registry_hostname}}:{{registry_ip}}
         - require:
             - file: docker-registry-volume
+            - cmd: docker-jwt-certificate
 
 
 docker-registry-servicedef:
