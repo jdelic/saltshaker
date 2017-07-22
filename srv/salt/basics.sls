@@ -67,6 +67,14 @@ stretch:
         - order: 1  # execute this state early!
 
 
+saltstack-repo:
+    pkgrepo.managed:
+        - name: {{pillar['repos']['saltstack']}}
+        - file: /etc/apt/sources.list.d/saltstack.list
+        - key_url: salt://saltstack_0E08A149DE57BFBE.pgp.key
+        - order: 2  # execute this state early!
+
+
 updates-stretch:
     pkgrepo.managed:
         - name: {{pillar['repos']['stretch-updates']}}
@@ -81,14 +89,14 @@ security-updates-stretch:
         - order: 2  # execute this state early!
 
 
-#backports-org-stretch:
-#    pkgrepo.managed:
-#        - name: {{pillar['repos']['stretch-backports']}}
-#        - file: /etc/apt/sources.list.d/stretch-backports.list
-#        - order: 2  # execute this state early!
-#    file.managed:
-#        - name: /etc/apt/preferences.d/stretch-backports
-#        - source: salt://etc_mods/stretch-backports
+backports-org-stretch:
+    pkgrepo.managed:
+        - name: {{pillar['repos']['stretch-backports']}}
+        - file: /etc/apt/sources.list.d/stretch-backports.list
+        - order: 2  # execute this state early!
+    file.managed:
+        - name: /etc/apt/preferences.d/stretch-backports
+        - source: salt://etc_mods/stretch-backports
 
 
 maurusnet-opensmtpd:

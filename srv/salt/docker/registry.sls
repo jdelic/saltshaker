@@ -26,7 +26,7 @@ docker-jwt-certificate:
         - creates: /srv/registry/docker_jwt.crt
         - env:
             JWT_KEY: |
-                {{pillar['dynamicsecrets']['jwt-key']['key']|indent(16)}}
+                {{pillar['dynamicsecrets']['dockerauth-jwt-key']['key']|indent(16)}}
 
 
 docker-registry:

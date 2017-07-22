@@ -1,9 +1,14 @@
 
 salt-master:
+    pkg.installed:
+        - order: 2
+        - require:
+            - pkgrepo: saltstack-repo
     service:
         - running
         - enable: True
-        - order: 2
+        - require:
+            - pkg: salt-master
 
 
 {% for port in ['4505', '4506'] %}

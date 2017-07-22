@@ -15,7 +15,7 @@ repos:
     maurusnet-opensmtpd: deb http://fileserver.maurusnet.test/mn-opensmtpd/ mn-opensmtpd main
     maurusnet-radicale: deb http://fileserver.maurusnet.test/mn-radicale/ mn-radicale main
     postgresql: deb http://fileserver.maurusnet.test/postgresql/ stretch-pgdg main
-    saltstack: deb http://fileserver.maurusnet.test/apt/debian/8/amd64/latest jessie main
+    saltstack: deb http://fileserver.maurusnet.test/apt/debian/9/amd64/latest stretch main
 
     pgpkey: salt://mn/fileserver_ACADBD6B.pgp.key
 

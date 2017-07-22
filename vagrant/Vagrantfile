@@ -9,9 +9,15 @@ Vagrant.configure('2') do |config|
     # The shell script below sets a Debian VM to load everything from there when you set $local_provision
     # to true.
     $local_provision = false
+    $remote_provision_script = <<SCRIPT
+        wget -O - https://repo.saltstack.com/apt/debian/9/amd64/latest/SALTSTACK-GPG-KEY.pub | sudo apt-key add -
+        sh -c 'echo deb http://repo.saltstack.com/apt/debian/9/amd64/latest stretch main > /etc/apt/sources.list.d/saltstack.list'
+        apt-get update
+SCRIPT
     $local_provision_script = <<SCRIPT
-        sh -c 'echo 192.168.56.10 fileserver.maurusnet.test  debian.saltstack.com repo.saltstack.com httpredir.debian.org >> /etc/hosts'
+        sh -c 'echo 192.168.56.10 fileserver.maurusnet.test httpredir.debian.org >> /etc/hosts'
         sh -c 'echo deb http://fileserver.maurusnet.test/debian/ stretch main > /etc/apt/sources.list'
+        sh -c 'echo deb http://fileserver.maurusnet.test/apt/debian/9/amd64/latest stretch main > /etc/apt/sources.list.d/saltstack.list'
         wget -q -O - http://fileserver.maurusnet.test/dev_apt_signing.public.pgp | apt-key add -
         apt-get update
         sh -c 'apt-get install ca-certificates'
@@ -84,7 +90,7 @@ SCRIPT
             if $local_provision
                 s.inline = $local_provision_script
             else
-                s.inline = ''
+                s.inline = $remote_provision_script
             end
             s.inline += <<SCRIPT
                 mkdir -p /etc/salt/roles.d
@@ -106,6 +112,9 @@ SCRIPT
             salt.install_master = true
             salt.install_syndic = false
             salt.bootstrap_script = 'saltshaker/vagrant/bootstrap-salt.sh'
+            if $local_provision
+                salt.bootstrap_options = "-R fileserver.maurusnet.test"
+            end
             salt.master_pub = 'saltshaker/vagrant/preseed-keys/saltmaster.maurusnet.test.pub'
             salt.master_key = 'saltshaker/vagrant/preseed-keys/saltmaster.maurusnet.test.pem'
             salt.minion_pub = 'saltshaker/vagrant/preseed-keys/saltmaster.maurusnet.test.pub'
@@ -126,6 +135,9 @@ SCRIPT
             salt.install_master = false
             salt.install_syndic = false
             salt.bootstrap_script = 'saltshaker/vagrant/bootstrap-salt.sh'
+            if $local_provision
+                salt.bootstrap_options = "-R fileserver.maurusnet.test"
+            end
             salt.minion_pub = 'saltshaker/vagrant/preseed-keys/saltmaster.maurusnet.test.pub'
             salt.minion_key = 'saltshaker/vagrant/preseed-keys/saltmaster.maurusnet.test.pem'
         end
@@ -158,7 +170,7 @@ SCRIPT
             if $local_provision
                 s.inline = $local_provision_script
             else
-                s.inline = ''
+                s.inline = $remote_provision_script
             end
             s.inline += <<SCRIPT
                 sh -c 'if ! grep -q 192.168.56.88 /etc/hosts; then echo "192.168.56.88        saltmaster.maurusnet.test saltmaster" >> /etc/hosts; fi'
@@ -185,7 +197,9 @@ SCRIPT
             salt.install_master = false
             salt.install_syndic = false
             salt.bootstrap_script = 'saltshaker/vagrant/bootstrap-salt.sh'
-            salt.bootstrap_options = '-P -c /tmp'
+            if $local_provision
+                salt.bootstrap_options = "-R fileserver.maurusnet.test"
+            end
             salt.minion_key = 'saltshaker/vagrant/preseed-keys/test.maurusnet.test.pem'
             salt.minion_pub = 'saltshaker/vagrant/preseed-keys/test.maurusnet.test.pub'
         end
