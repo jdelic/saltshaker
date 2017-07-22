@@ -92,6 +92,7 @@ base:
         - local.network
         - local.consul
         - local.nomad
+        - local.docker
         - local.buildserver
         - local.crypto
         - local.ssl
