@@ -11,7 +11,23 @@ docker-registry-volume:
                          'internal-ip-index', 0)|int()]
                      ) %}
 {% set registry_port = pillar.get('docker', {}).get('registry', {}).get('bind-port', 5000) %}
-{% set registry_hostname = "registry.maurusnet.test" %}
+{% set registry_hostname = pillar['docker']['registry']['hostname'] %}
+
+
+docker-jwt-certificate:
+    cmd.run:
+        - name: >-
+            JWTFILE=$(mktemp) &&
+            echo "$JWT_KEY" > "$JWTFILE" &&
+            /usr/bin/openssl req -x509 -key $JWTFILE -out /srv/registry/docker_jwt.crt \
+                -days 3650 \
+                -subj '/C=DE/L=Munich/O=Docker Registry/OU=JWT Auth/CN={{pillar['authserver']['hostname']}}/';
+            rm $JWTFILE;
+        - creates: /srv/registry/docker_jwt.crt
+        - env:
+            JWT_KEY: |
+                {{pillar['dynamicsecrets']['jwt-key']['key']|indent(16)}}
+
 
 docker-registry:
     dockerng.running:
@@ -28,17 +44,16 @@ docker-registry:
             - 169.254.1.1
         - restart_policy: always
         - environment:
-            - REGISTRY_AUTH_TOKEN_REALM: |
+            - REGISTRY_AUTH_TOKEN_REALM: >
                 {{pillar['authserver']['protocol']}}://{{pillar['authserver']['hostname']}}/docker/token/
-            - REGISTRY_AUTH_TOKEN_SERVICE: docker_registry
-            - REGISTRY_AUTH_TOKEN_ISSUER: |
-                {{pillar['authserver']['protocol']}}://{{pillar['authserver']['hostname']}}
-            - REGISTRY_AUTH_TOKEN_ROOTCERTBUNDLE: |
-                {{pillar['ssl']['service-rootca-cert']}}
+            - REGISTRY_AUTH_TOKEN_SERVICE: {{registry_hostname}}
+            - REGISTRY_AUTH_TOKEN_ISSUER: {{pillar['authserver']['hostname']}}
+            - REGISTRY_AUTH_TOKEN_ROOTCERTBUNDLE: /var/lib/registry/docker_jwt.crt
             - REGISTRY_HTTP_HOST: https://{{registry_hostname}}/
         - extra_hosts: {{registry_hostname}}:{{registry_ip}}
         - require:
             - file: docker-registry-volume
+            - cmd: docker-jwt-certificate
 
 
 docker-registry-servicedef:

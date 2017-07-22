@@ -22,7 +22,7 @@ repos:
 
 urls:
     concourse: http://fileserver.maurusnet.test/downloads/concourse/concourse_linux_amd64
-    consul: http://fileserver.maurusnet.test/downloads/consul/consul_0.8.5_linux_amd64.zip
+    consul: http://fileserver.maurusnet.test/downloads/consul/consul_0.9.0_linux_amd64.zip
     consul-template: http://fileserver.maurusnet.test/downloads/consul-template/consul-template_0.19.0_linux_amd64.zip
     exxo: http://fileserver.maurusnet.test/downloads/exxo/exxo-0.0.7.tar.xz
     nomad: http://fileserver.maurusnet.test/downloads/nomad/nomad_0.5.6_linux_amd64.zip
@@ -35,7 +35,7 @@ urls:
 
 hashes:
     concourse: sha256=ccaba564b04e70eeb9836afcd20b067154c3804090cc8aa93c1d4195c8150b0e
-    consul: sha256=35dc317c80862c306ea5b1d9bc93709483287f992fd0797d214d1cc1848e7b62
+    consul: sha256=33e54c7d9a93a8ce90fc87f74c7f787068b7a62092b7c55a945eea9939e8577f
     consul-template: sha256=31dda6ebc7bd7712598c6ac0337ce8fd8c533229887bd58e825757af879c5f9f
     exxo: sha256=ce3d6ae10d364c5a0726cce127602fe6fa5d042b11afd21d79502f8216b42e1e
     nomad: sha256=3f5210f0bcddf04e2cc04b14a866df1614b71028863fe17bcdc8585488f8cb0c
