@@ -11,7 +11,7 @@ docker-registry-volume:
                          'internal-ip-index', 0)|int()]
                      ) %}
 {% set registry_port = pillar.get('docker', {}).get('registry', {}).get('bind-port', 5000) %}
-{% set registry_hostname = "registry.maurusnet.test" %}
+{% set registry_hostname = pillar['docker']['registry']['hostname'] %}
 
 
 docker-jwt-certificate:
