@@ -81,14 +81,14 @@ security-updates-stretch:
         - order: 2  # execute this state early!
 
 
-#backports-org-stretch:
-#    pkgrepo.managed:
-#        - name: {{pillar['repos']['stretch-backports']}}
-#        - file: /etc/apt/sources.list.d/stretch-backports.list
-#        - order: 2  # execute this state early!
-#    file.managed:
-#        - name: /etc/apt/preferences.d/stretch-backports
-#        - source: salt://etc_mods/stretch-backports
+backports-org-stretch:
+    pkgrepo.managed:
+        - name: {{pillar['repos']['stretch-backports']}}
+        - file: /etc/apt/sources.list.d/stretch-backports.list
+        - order: 2  # execute this state early!
+    file.managed:
+        - name: /etc/apt/preferences.d/stretch-backports
+        - source: salt://etc_mods/stretch-backports
 
 
 maurusnet-opensmtpd:
