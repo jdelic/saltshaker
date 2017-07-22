@@ -7,13 +7,13 @@
 
 docker-registry-tokenauth:
     cmd.run:
-        - name: >
+        - name: >-
             echo $JWT_KEY |
             /usr/local/authserver/bin/envdir /etc/appconfig/authserver/env/
                 /usr/local/authserver/bin/django-admin.py dockerauth --settings=authserver.settings
                     registry add --name "Main Registry" --client-id "{{registry_hostname}}" --sign-key-pem -
 
-        - unless: >
+        - unless: >-
             /usr/local/authserver/bin/envdir /etc/appconfig/authserver/env/
                 /usr/local/authserver/bin/django-admin.py dockerauth --settings=authserver.settings
                     registry list | grep -q "{{registry_hostname}}"
