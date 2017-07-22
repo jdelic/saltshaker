@@ -77,6 +77,7 @@ base:
         - hetzner.calendar
         - hetzner.consul
         - hetzner.nomad
+        - hetzner.docker
         - hetzner.buildserver
         - hetzner.crypto
         - hetzner.ssl
