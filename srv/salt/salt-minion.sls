@@ -5,9 +5,14 @@
 
 
 salt-minion:
+    pkg.installed:
+        - require:
+            - pkgrepo: saltstack-repo
     service:
         - running
         - enable: True
+        - require:
+            - pkg: salt-minion
 
 
 {% for port in ['4505', '4506'] %}
