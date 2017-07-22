@@ -20,8 +20,8 @@ docker-jwt-certificate:
             JWTFILE=$(mktemp) &&
             echo "$JWT_KEY" > "$JWTFILE" &&
             /usr/bin/openssl req -x509 -key $JWTFILE -out /srv/registry/docker_jwt.crt \
-                                 -days 3650 \
-                                 -subj '/C=DE/L=Munich/O=Docker Registry/OU=JWT Auth/CN=docker_registry/';
+                -days 3650 \
+                -subj '/C=DE/L=Munich/O=Docker Registry/OU=JWT Auth/CN={{pillar['authserver']['hostname']}}/';
             rm $JWTFILE;
         - creates: /srv/registry/docker_jwt.crt
         - env:
@@ -44,13 +44,11 @@ docker-registry:
             - 169.254.1.1
         - restart_policy: always
         - environment:
-            - REGISTRY_AUTH_TOKEN_REALM: |
+            - REGISTRY_AUTH_TOKEN_REALM: >
                 {{pillar['authserver']['protocol']}}://{{pillar['authserver']['hostname']}}/docker/token/
-            - REGISTRY_AUTH_TOKEN_SERVICE: docker_registry
-            - REGISTRY_AUTH_TOKEN_ISSUER: |
-                {{pillar['authserver']['protocol']}}://{{pillar['authserver']['hostname']}}
-            - REGISTRY_AUTH_TOKEN_ROOTCERTBUNDLE: |
-                /var/lib/registry/docker_jwt.crt
+            - REGISTRY_AUTH_TOKEN_SERVICE: {{registry_hostname}}
+            - REGISTRY_AUTH_TOKEN_ISSUER: {{pillar['authserver']['hostname']}}
+            - REGISTRY_AUTH_TOKEN_ROOTCERTBUNDLE: /var/lib/registry/docker_jwt.crt
             - REGISTRY_HTTP_HOST: https://{{registry_hostname}}/
         - extra_hosts: {{registry_hostname}}:{{registry_ip}}
         - require:
