@@ -104,6 +104,7 @@ base:
         - match: grain
         - mn.cas.server
         - mn.appconfig
+        - docker.authserver_dockerregistry  # empty unless a JWT key is configured
 
     'roles:loadbalancer':
         - match: grain
