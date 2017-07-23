@@ -91,7 +91,10 @@ xen-nat-domUs:
         - source: 10.0.1.0/24
         # negation is currently broken because of https://github.com/saltstack/salt/issues/42437
         #- destination: '! 10.0.1.0/24'
-        - out-interface: xenbr1
+        - destination: 0/0
         - save: True
         - require:
             - sls: iptables
+
+
+# vim: syntax=yaml
