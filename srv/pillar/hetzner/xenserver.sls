@@ -4,7 +4,9 @@
 
 ifassign:
     internal: {{iface_internal}}
+    real-internal: xbr0dummy0
     external: {{iface_external}}
+    real-external: enp2s0
 
 
 network:
