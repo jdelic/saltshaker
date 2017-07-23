@@ -30,7 +30,7 @@ docker-jwt-certificate:
 
 
 docker-registry:
-    dockerng.running:
+    docker_container.running:
         - name: registry
         - image: registry:latest
         - binds:
