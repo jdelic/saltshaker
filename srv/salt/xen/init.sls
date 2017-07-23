@@ -69,8 +69,6 @@ xen-bridge-interfaces:
                 up ip route add default via {{pillar['network']['gateway']}} dev {{pillar['ifassign']['external']}}
                 down ip link set {{pillar['ifassign']['external']}} down
                 post-down ip link del {{pillar['ifassign']['external']}} type bridge
-        - require_in:
-            - file: ensure-interfaces.d-works
 
 
 xen-forward-domUs:
