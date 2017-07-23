@@ -51,7 +51,7 @@ xen-bridge-interfaces:
                 post-down ip link del xenbr0 type bridge
                 post-down ip link del xbr0dummy0 type dummy
 
-            auto {{pillar['ifassign']['external']}} xenbr1
+            auto enp2s0 {{pillar['ifassign']['external']}}
 
             iface enp2s0 inet manual
                 up ip link set enp2s0 up
