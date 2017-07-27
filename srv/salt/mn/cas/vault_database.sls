@@ -27,7 +27,7 @@ authserver-vault-postgresql-policy:
 
 authserver-vault-postgresql-backend:
     cmd.run:
-        - name: /usr/local/bin/vault mount -path=postgresql_authserver postgresql
+        - name: /usr/local/bin/vault mount -path=postgresql_authserver database
         - unless: /usr/local/bin/vault mounts | grep postgresql_authserver >/dev/null
         - env:
             - VAULT_ADDR: "https://vault.service.consul:8200/"
