@@ -27,7 +27,7 @@ urls:
     exxo: http://fileserver.maurusnet.test/downloads/exxo/exxo-0.0.7.tar.xz
     nomad: http://fileserver.maurusnet.test/downloads/nomad/nomad_0.6.0_linux_amd64.zip
     pyrun35: http://fileserver.maurusnet.test/downloads/exxo/egenix-pyrun-2.2.3-py3.5_ucs4-linux-x86_64.tgz
-    terraform: http://fileserver.maurusnet.test/downloads/terraform/terraform_0.9.11_linux_amd64.zip
+    terraform: http://fileserver.maurusnet.test/downloads/terraform/terraform_0.10.0_linux_amd64.zip
     vault: http://fileserver.maurusnet.test/downloads/vault/vault_0.7.3_linux_amd64.zip
     vault-ssh-helper: http://fileserver.maurusnet.test/downloads/vault/vault-ssh-helper_0.1.3_linux_amd64.zip
     fpmdeps: http://fileserver.maurusnet.test/downloads/ruby/fpm+deps.zip
@@ -40,7 +40,7 @@ hashes:
     exxo: sha256=ce3d6ae10d364c5a0726cce127602fe6fa5d042b11afd21d79502f8216b42e1e
     nomad: sha256=fcf108046164cfeda84eab1c3047e36ad59d239b66e6b2f013e6c93064bc6313
     pyrun35: sha256=8bf8b374f582bb53600dd846a0cdb38e18586bbda06261321d48df69ddbf730e
-    terraform: sha256=804d31cfa5fee5c2b1bff7816b64f0e26b1d766ac347c67091adccc2626e16f3
+    terraform: sha256=f991039e3822f10d6e05eabf77c9f31f3831149b52ed030775b6ec5195380999
     vault: sha256=2822164d5dd347debae8b3370f73f9564a037fc18e9adcabca5907201e5aab45
     vault-ssh-helper: sha256=212eb6f98cfc28f201e4dc3106a1bfb82799eacb31e4b380e7c17a0457732cc0
     fpmdeps: sha256=121445fb992c88d4b73ed0736aa4e6e1fb67696b73de9fb4b82e33b1f09b02ad
