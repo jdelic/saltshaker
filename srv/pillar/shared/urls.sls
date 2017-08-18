@@ -29,7 +29,7 @@ urls:
     nomad: https://releases.hashicorp.com/nomad/0.6.0/nomad_0.6.0_linux_amd64.zip
     pyrun35: https://downloads.egenix.com/python/egenix-pyrun-2.2.3-py3.5_ucs4-linux-x86_64.tgz
     terraform: https://releases.hashicorp.com/terraform/0.10.0/terraform_0.10.0_linux_amd64.zip
-    vault: https://releases.hashicorp.com/vault/0.8.0/vault_0.8.0_linux_amd64.zip
+    vault: https://releases.hashicorp.com/vault/0.8.1/vault_0.8.1_linux_amd64.zip
     vault-ssh-helper: https://releases.hashicorp.com/vault-ssh-helper/0.1.3/vault-ssh-helper_0.1.3_linux_amd64.zip
 
 
@@ -41,5 +41,5 @@ hashes:
     nomad: sha256=fcf108046164cfeda84eab1c3047e36ad59d239b66e6b2f013e6c93064bc6313
     pyrun35: sha256=8bf8b374f582bb53600dd846a0cdb38e18586bbda06261321d48df69ddbf730e
     terraform: sha256=f991039e3822f10d6e05eabf77c9f31f3831149b52ed030775b6ec5195380999
-    vault: sha256=4a0a6fd53ac6913ae78c719113a18cca0569102ce25cfbf1d9e81bdb3c5c508f
+    vault: sha256=3c4d70ba71619a43229e65c67830e30e050eab7a81ac6b28325ff707e5914188
     vault-ssh-helper: sha256=212eb6f98cfc28f201e4dc3106a1bfb82799eacb31e4b380e7c17a0457732cc0
