@@ -97,16 +97,6 @@ openvpn-tls-crypt-key:
             - file: openvpn-config-folder
 
 
-# keys for additional security during TLS negotation, should be rotated every 8192 years divided by the number
-# of users that share the same key
-openvpn-tls-auth-key:
-    cmd.run:
-        - name: openvpn --genkey --secret /etc/openvpn/server/tls-preshared-auth.key
-        - creates: /etc/openvpn/server/tls-preshared.key
-        - require:
-            - file: openvpn-config-folder
-
-
 openvpn-udp-service:
     service.running:
         - name: openvpn-server@gateway-udp
@@ -115,7 +105,6 @@ openvpn-udp-service:
             - file: openvpn-udp-gateway-conf
             - cmd: openvpn-dhparams
             - cmd: openvpn-tls-crypt-key
-            - cmd: openvpn-tls-auth-key
         - require:
             - pkg: openvpn
 
@@ -128,7 +117,6 @@ openvpn-tcp-service:
             - file: openvpn-tcp-gateway-conf
             - cmd: openvpn-dhparams
             - cmd: openvpn-tls-crypt-key
-            - cmd: openvpn-tls-auth-key
         - require:
             - pkg: openvpn
 
