@@ -215,7 +215,7 @@ openvpn-clients-nat:
         - chain: POSTROUTING
         - jump: MASQUERADE
         - source: 10.0.254.0/24
-        - destication: '0/0'
+        - destination: '0/0'
         - save: True
         - require:
             - sls: iptables
