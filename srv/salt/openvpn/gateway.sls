@@ -213,13 +213,26 @@ openvpn-udp-in1194-send:
             - sls: iptables
 
 
-openvpn-clients-nat:
+{% for net in ['10.0.253.0', '10.0.254.0'] %}
+openvpn-clients-nat-{{loop.index}}:
     iptables.append:
         - table: nat
         - chain: POSTROUTING
         - jump: MASQUERADE
-        - source: 10.0.254.0/24
+        - source: {{net}}/24
         - destination: '0/0'
         - save: True
         - require:
             - sls: iptables
+
+openvpn-clients-forward-{{loop.index}}:
+    iptables.append:
+        - table: filter
+        - chain: FORWARD
+        - jump: ACCEPT
+        - source: {{net}}/24
+        - destination: 0/0
+        - save: True
+        - require:
+            - sls: iptables
+{% endfor %}
