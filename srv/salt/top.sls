@@ -110,6 +110,10 @@ base:
         - match: grain
         - haproxy.external
 
+    'roles:vpnrouter':
+        - match: grain
+        - openvpn
+
     '*.test':
         # put vagrant user config on .test machines
         - mn.users.vagrant
