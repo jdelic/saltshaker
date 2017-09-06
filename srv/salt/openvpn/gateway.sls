@@ -92,7 +92,7 @@ openvpn-dhparams:
 openvpn-tls-crypt-key:
     cmd.run:
         - name: openvpn --genkey --secret /etc/openvpn/server/tls-preshared-crypt.key
-        - creates: /etc/openvpn/server/tls-preshared.key
+        - creates: /etc/openvpn/server/tls-preshared-crypt.key
         - require:
             - file: openvpn-config-folder
 
