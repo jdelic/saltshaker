@@ -69,19 +69,42 @@ openvpn-tcp-gateway-conf:
             - file: {{pillar['ssl']['service-rootca-cert']}}
 
 
-# create our own dhparams for more SSL security
-openvpn-dhparams:
+openvpn-config-folder:
     file.directory:
         - name: /etc/openvpn/server
         - user: root
         - group: root
         - mode: '0755'
         - makedirs: True
+
+
+# create our own dhparams for more SSL security
+openvpn-dhparams:
     cmd.run:
         - name: openssl dhparam -out /etc/openvpn/server/dhparams.pem 2048
         - creates: /etc/openvpn/server/dhparams.pem
         - require:
-            - file: openvpn-dhparams
+            - file: openvpn-config-folder
+
+
+# keys for additional security during TLS negotation, should be rotated every 8192 years divided by the number
+# of users that share the same key
+openvpn-tls-crypt-key:
+    cmd.run:
+        - name: openvpn --genkey --secret /etc/openvpn/server/tls-preshared-crypt.key
+        - creates: /etc/openvpn/server/tls-preshared.key
+        - require:
+            - file: openvpn-config-folder
+
+
+# keys for additional security during TLS negotation, should be rotated every 8192 years divided by the number
+# of users that share the same key
+openvpn-tls-auth-key:
+    cmd.run:
+        - name: openvpn --genkey --secret /etc/openvpn/server/tls-preshared-auth.key
+        - creates: /etc/openvpn/server/tls-preshared.key
+        - require:
+            - file: openvpn-config-folder
 
 
 openvpn-udp-service:
@@ -90,9 +113,11 @@ openvpn-udp-service:
         - sig: openvpn-server/status-gateway-udp
         - watch:
             - file: openvpn-udp-gateway-conf
+            - cmd: openvpn-dhparams
+            - cmd: openvpn-tls-crypt-key
+            - cmd: openvpn-tls-auth-key
         - require:
             - pkg: openvpn
-            - cmd: openvpn-dhparams
 
 
 openvpn-tcp-service:
@@ -101,9 +126,11 @@ openvpn-tcp-service:
         - sig: openvpn-server/status-gateway-tcp
         - watch:
             - file: openvpn-tcp-gateway-conf
+            - cmd: openvpn-dhparams
+            - cmd: openvpn-tls-crypt-key
+            - cmd: openvpn-tls-auth-key
         - require:
             - pkg: openvpn
-            - cmd: openvpn-dhparams
 
 
 # allow others to contact us
