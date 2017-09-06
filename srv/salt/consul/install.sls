@@ -237,7 +237,7 @@ consul-all-localhost8600-snat:
 
 
 # open consul ports TCP
-{% for port in ['8300', '8301', '8400', '8500', '8600'] %}
+{% for port in ['8300', '8301', '8302', '8400', '8500', '8600'] %}
 # allow others to talk to us
 consul-tcp-in{{port}}-recv:
     iptables.append:
@@ -246,8 +246,6 @@ consul-tcp-in{{port}}-recv:
         - jump: ACCEPT
         - in-interface: {{pillar['ifassign']['internal']}}
         - dport: {{port}}
-        - match: state
-        - connstate: NEW
         - proto: tcp
         - save: True
         - require:
@@ -262,8 +260,6 @@ consul-tcp-out{{port}}-send:
         - jump: ACCEPT
         - out-interface: {{pillar['ifassign']['internal']}}
         - dport: {{port}}
-        - match: state
-        - connstate: NEW
         - proto: tcp
         - save: True
         - require:
