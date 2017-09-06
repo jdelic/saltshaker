@@ -1,7 +1,7 @@
 # install a openvpn server
 
 openvpn:
-    pkg.install:
+    pkg.installed:
         - install_recommends: False
 
 
@@ -62,7 +62,7 @@ openvpn-service:
 
 
 # allow others to contact us
-openvpn-in1194-recv:
+openvpn-tcp-in1194-recv:
     iptables.append:
         - table: filter
         - chain: INPUT
@@ -74,8 +74,45 @@ openvpn-in1194-recv:
             )|int()]
         )}}
         - dport: 1194
+        - proto: tcp
         - match: state
         - connstate: NEW
+        - save: True
+        - require:
+            - sls: iptables
+
+
+openvpn-udp-in1194-recv:
+    iptables.append:
+        - table: filter
+        - chain: INPUT
+        - jump: ACCEPT
+        - source: '0/0'
+        - destination: {{pillar.get('openvpn', {}).get(
+            'bind-ip', grains['ip_interfaces'][pillar['ifassign']['external']][pillar['ifassign'].get(
+                'external-ip-index', 0
+            )|int()]
+        )}}
+        - dport: 1194
+        - proto: udp
+        - save: True
+        - require:
+            - sls: iptables
+
+
+openvpn-udp-in1194-send:
+    iptables.append:
+        - table: filter
+        - chain: OUTPUT
+        - jump: ACCEPT
+        - source: {{pillar.get('openvpn', {}).get(
+            'bind-ip', grains['ip_interfaces'][pillar['ifassign']['external']][pillar['ifassign'].get(
+                'external-ip-index', 0
+            )|int()]
+        )}}
+        - destination: '0/0'
+        - sport: 1194
+        - proto: udp
         - save: True
         - require:
             - sls: iptables
