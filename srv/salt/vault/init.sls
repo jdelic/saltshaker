@@ -69,6 +69,7 @@ vault:
         - source: {{pillar["urls"]["vault"]}}
         - source_hash: {{pillar["hashes"]["vault"]}}
         - archive_format: zip
+        - unless: test -f /usr/local/bin/vault  # workaround for https://github.com/saltstack/salt/issues/42681
         - if_missing: /usr/local/bin/vault
         - enforce_toplevel: False
     file.managed:

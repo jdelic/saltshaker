@@ -135,6 +135,7 @@ consul:
         - source: {{pillar["urls"]["consul"]}}
         - source_hash: {{pillar["hashes"]["consul"]}}
         - archive_format: zip
+        - unless: test -f /usr/local/bin/consul  # workaround for https://github.com/saltstack/salt/issues/42681
         - if_missing: /usr/local/bin/consul
         - enforce_toplevel: False
     file.managed:
