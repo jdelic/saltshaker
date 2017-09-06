@@ -42,6 +42,7 @@ openvpn-udp-gateway-conf:
                 )}}
             server_port: 1194
             proto: udp
+            basenet: 10.0.254.0
             capath: {{pillar['ssl']['service-rootca-cert']}}
             servercert: >
                 {%- if pillar.get('openvpn', {}).get('sslcert', 'default') == 'default' %}
@@ -74,6 +75,7 @@ openvpn-tcp-gateway-conf:
                 )}}
             server_port: 1194
             proto: tcp
+            basenet: 10.0.253.0
             capath: {{pillar['ssl']['service-rootca-cert']}}
             servercert: >
                 {%- if pillar.get('openvpn', {}).get('sslcert', 'default') == 'default' %}
