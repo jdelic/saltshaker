@@ -1,5 +1,7 @@
 # TODO
 
+ * BUG: if consul is unavailable, vault init -check dies which then overwrites 
+   the GPG encrypted vault_keys.txt.gpg
  * add consul service defs to apache2
  * add health checks for services monitored through consul
  * write docs for placeholders in README.md
@@ -8,7 +10,7 @@
    deletes the servicerenderer if the command-line parameters change, because
    consul-template will not do it by itself (has this been fixed upstream?)
  * add a logging server role
-
+ 
 # Ponder
 
  * how do php-fpm applications gain a HTTP server inside of a docker
