@@ -237,6 +237,19 @@ openvpn-clients-forward-{{loop.index}}:
         - require:
             - sls: iptables
 
+
+openvpn-clients-dns-access-{{loop.index}}:
+    iptables.append:
+        - table: filter
+        - chain: INPUT
+        - jump: ACCEPT
+        - source: {{net}}/24
+        - destination: {{net[:-1]}}1
+        - dport: 53
+        - save: True
+        - require:
+            - sls: iptables
+
 openvpn-pdns-recursor-ip-{{loop.index}}:
   file.accumulated:
       - name: powerdns-recursor-additional-listen-ips
