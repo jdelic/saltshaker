@@ -1,8 +1,31 @@
 # install a openvpn server that routes all traffic to the internet
 
-openvpn:
-    pkg.installed:
-        - install_recommends: False
+include:
+    - openvpn.install
+
+
+{% if pillar.get('openvpn', {}).get('sslcert', 'default') != 'default' %}
+openvpn-gateway-ssl-cert:
+    file.managed:
+        - name: {{pillar['openvpn']['sslcert']}}
+        - contents_pillar: {{pillar['openvpn']['sslcert-contents']}}
+        - mode: 440
+        - user: root
+        - group: root
+        - require:
+            - file: ssl-cert-location
+
+
+openvpn-gateway-ssl-key:
+    file.managed:
+        - name: {{pillar['openvpn']['sslkey']}}
+        - contents_pillar: {{pillar['openvpn']['sslkey-contents']}}
+        - mode: 400
+        - user: root
+        - group: root
+        - require:
+            - file: ssl-key-location
+{% endif %}
 
 
 openvpn-udp-gateway-conf:
@@ -105,6 +128,10 @@ openvpn-udp-service:
             - file: openvpn-udp-gateway-conf
             - cmd: openvpn-dhparams
             - cmd: openvpn-tls-crypt-key
+{% if pillar.get('openvpn', {}).get('sslcert', 'default') != 'default' %}
+            - file: openvpn-gateway-ssl-cert
+            - file: openvpn-gateway-ssl-key
+{% endif %}
         - require:
             - pkg: openvpn
 
@@ -117,6 +144,10 @@ openvpn-tcp-service:
             - file: openvpn-tcp-gateway-conf
             - cmd: openvpn-dhparams
             - cmd: openvpn-tls-crypt-key
+{% if pillar.get('openvpn', {}).get('sslcert', 'default') != 'default' %}
+            - file: openvpn-gateway-ssl-cert
+            - file: openvpn-gateway-ssl-key
+{% endif %}
         - require:
             - pkg: openvpn
 
