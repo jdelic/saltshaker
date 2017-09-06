@@ -87,6 +87,7 @@ openvpn-dhparams:
 openvpn-udp-service:
     service.running:
         - name: openvpn-server@gateway-udp
+        - sig: openvpn-server/status-gateway-udp
         - watch:
             - file: openvpn-udp-gateway-conf
         - require:
@@ -97,6 +98,7 @@ openvpn-udp-service:
 openvpn-tcp-service:
     service.running:
         - name: openvpn-server@gateway-tcp
+        - sig: openvpn-server/status-gateway-tcp
         - watch:
             - file: openvpn-tcp-gateway-conf
         - require:
