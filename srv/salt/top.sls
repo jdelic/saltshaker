@@ -110,9 +110,9 @@ base:
         - match: grain
         - haproxy.external
 
-    'roles:vpnrouter':
+    'roles:vpngateway':
         - match: grain
-        - openvpn
+        - openvpn.gateway
 
     '*.test':
         # put vagrant user config on .test machines
