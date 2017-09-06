@@ -85,6 +85,7 @@ concourse-worker-tcp-out{{port}}-forward:
         - jump: ACCEPT
         - source: {{pillar.get('ci', {}).get('garden-network-pool', '10.254.0.0/22')}}
         - destination: 0/0
+        - dport: {{port}}
         - match: state
         - connstate: NEW
         - proto: tcp
@@ -101,6 +102,7 @@ concourse-worker-udp-out53-forward:
         - jump: ACCEPT
         - source: {{pillar.get('ci', {}).get('garden-network-pool', '10.254.0.0/22')}}
         - destination: 0/0
+        - dport: 53
         - match: state
         - connstate: NEW
         - proto: udp

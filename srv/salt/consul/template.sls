@@ -4,7 +4,9 @@ consul-template:
         - name: /usr/local/bin
         - source: {{pillar["urls"]["consul-template"]}}
         - source_hash: {{pillar["hashes"]["consul-template"]}}
+        - keep: True
         - archive_format: zip
+        - unless: test -f /usr/local/bin/consul-template  # workaround for https://github.com/saltstack/salt/issues/42681
         - if_missing: /usr/local/bin/consul-template
         - enforce_toplevel: False
     file.managed:

@@ -16,6 +16,7 @@ exxo:
         - source: {{pillar["urls"]["exxo"]}}
         - source_hash: {{pillar["hashes"]["exxo"]}}
         - archive_format: tar
+        - unless: test -f /usr/local/bin/exxo  # workaround for https://github.com/saltstack/salt/issues/42681
         - if_missing: /usr/local/bin/exxo
         - enforce_toplevel: False
     file.managed:

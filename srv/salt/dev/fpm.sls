@@ -23,6 +23,7 @@ fpm:
         - source: {{pillar["urls"]["fpmdeps"]}}
         - source_hash: {{pillar["hashes"]["fpmdeps"]}}
         - archive_format: zip
+        - unless: test -f /usr/local/src/fpm/fpm-1.8.1.gem  # workaround for https://github.com/saltstack/salt/issues/42681
         - if_missing: /usr/local/src/fpm/fpm-1.8.1.gem
         - enforce_toplevel: False
         - require:

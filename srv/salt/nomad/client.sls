@@ -89,6 +89,7 @@ nomad:
         - source: {{pillar["urls"]["nomad"]}}
         - source_hash: {{pillar["hashes"]["nomad"]}}
         - archive_format: zip
+        - unless: test -f /usr/local/bin/nomad  # workaround for https://github.com/saltstack/salt/issues/42681
         - if_missing: /usr/local/bin/nomad
         - enforce_toplevel: False
     file.managed:
