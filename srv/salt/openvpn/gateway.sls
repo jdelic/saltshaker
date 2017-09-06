@@ -225,6 +225,7 @@ openvpn-clients-nat-{{loop.index}}:
         - require:
             - sls: iptables
 
+
 openvpn-clients-forward-{{loop.index}}:
     iptables.append:
         - table: filter
@@ -235,4 +236,20 @@ openvpn-clients-forward-{{loop.index}}:
         - save: True
         - require:
             - sls: iptables
+
+openvpn-pdns-recursor-ip-{{loop.index}}:
+  file.accumulated:
+      - name: powerdns-recursor-additional-listen-ips
+      - filename: /etc/powerdns/recursor.conf
+      - text: {{net[:-1]}}1
+      - require_in:
+          - file: pdns-recursor-config
+
+openvpn-pdns-recursor-cidr-{{loop.index}}:
+  file.accumulated:
+      - name: powerdns-recursor-additional-cidrs
+      - filename: /etc/powerdns/recursor.conf
+      - text: {{net}}/24
+      - require_in:
+          - file: pdns-recursor-config
 {% endfor %}

@@ -571,12 +571,46 @@ to the node.
 Example:
 
 ```yaml
-file.accumulated:
-    - name: postgresql-hba-md5users-accumulator
-    - filename: {{pillar['postgresql']['hbafile']}}
-    - text: {{pillar['vault']['postgres']['dbname']}} {{pillar['vault']['postgres']['dbuser']}}
-    - require_in:
-        - file: postgresql-hba-config
+mydb-remote-user:
+    file.accumulated:
+        - name: postgresql-hba-md5users-accumulator
+        - filename: {{pillar['postgresql']['hbafile']}}
+        - text: {{pillar['vault']['postgres']['dbname']}} {{pillar['vault']['postgres']['dbuser']}}
+        - require_in:
+            - file: postgresql-hba-config
+```
+
+## PowerDNS Recursor
+
+This Salt config sets up a PowerDNS recursor on every node that serves as an
+interface to the Consul DNS API. It's usually only available to local clients
+on `127.0.0.1:53` and `169.254.1.1:53` from where it forwards to Consul on 
+`169.254.1.1:8600`. However, sometimes it's useful to expose the DNS API to
+other services, for example on a Docker bridge or for other OCI containers.
+
+### Accumulators
+
+The PowerDNS configuration uses two accumulators to allow the adding of IPs
+that PowerDNS Recursor listens on and allow CIDR ranges that can query the 
+recursing DNS server on those IPs:
+
+  * `powerdns-recursor-additional-listen-ips` and
+  * `powerdns-recursor-additional-cidrs`
+  
+As above, the `filename` attribute for each `file.accumulated` state that uses
+one such accumulator *must* be set to `/etc/powerdns/recursor.conf` and it must
+have a `require_in` directive tying it to the `pdns-recursor-config` state.
+
+Example:
+
+```yaml
+mynetwork-dns:
+    file.accumulated:
+          - name: powerdns-recursor-additional-listen-ips
+          - filename: /etc/powerdns/recursor.conf
+          - text: 10.0.254.1
+          - require_in:
+              - file: pdns-recursor-config
 ```
 
 
