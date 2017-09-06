@@ -124,6 +124,7 @@ openvpn-udp-service:
     service.running:
         - name: openvpn-server@gateway-udp
         - sig: openvpn-server/status-gateway-udp
+        - enable: True
         - watch:
             - file: openvpn-udp-gateway-conf
             - cmd: openvpn-dhparams
@@ -140,6 +141,7 @@ openvpn-tcp-service:
     service.running:
         - name: openvpn-server@gateway-tcp
         - sig: openvpn-server/status-gateway-tcp
+        - enable: True
         - watch:
             - file: openvpn-tcp-gateway-conf
             - cmd: openvpn-dhparams
