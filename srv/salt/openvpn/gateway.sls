@@ -238,7 +238,7 @@ openvpn-clients-forward-{{loop.index}}:
             - sls: iptables
 
 
-openvpn-clients-dns-access-{{loop.index}}:
+openvpn-clients-dns-udp-access-{{loop.index}}:
     iptables.append:
         - table: filter
         - chain: INPUT
@@ -246,6 +246,21 @@ openvpn-clients-dns-access-{{loop.index}}:
         - source: {{net}}/24
         - destination: {{net[:-1]}}1
         - dport: 53
+        - proto: udp
+        - save: True
+        - require:
+            - sls: iptables
+
+
+openvpn-clients-dns-tcp-access-{{loop.index}}:
+    iptables.append:
+        - table: filter
+        - chain: INPUT
+        - jump: ACCEPT
+        - source: {{net}}/24
+        - destination: {{net[:-1]}}1
+        - dport: 53
+        - proto: tcp
         - save: True
         - require:
             - sls: iptables
