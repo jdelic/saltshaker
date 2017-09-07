@@ -1,7 +1,5 @@
 # TODO
 
- * BUG: if consul is unavailable, vault init -check dies which then overwrites 
-   the GPG encrypted vault_keys.txt.gpg
  * add consul service defs to apache2
  * add health checks for services monitored through consul
  * write docs for placeholders in README.md
