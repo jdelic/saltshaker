@@ -8,7 +8,7 @@
    deletes the servicerenderer if the command-line parameters change, because
    consul-template will not do it by itself (has this been fixed upstream?)
  * add a logging server role
-
+ 
 # Ponder
 
  * how do php-fpm applications gain a HTTP server inside of a docker

@@ -12,6 +12,7 @@ authserver-vault-ssl-cert:
         - env:
             - VAULT_ADDR: "https://vault.service.consul:8200/"
         - unless: /usr/local/bin/vault list auth/cert/certs | grep authserver_database >/dev/null
+        - onlyif: /usr/local/bin/vault init -check >/dev/null
 
 
 authserver-vault-postgresql-policy:
@@ -20,17 +21,20 @@ authserver-vault-postgresql-policy:
             echo 'path "postgresql/creds/authserver_fullaccess" {
                 policy="read"
             }' | /usr/local/bin/vault policy-write postgresql_authserver_fullaccess -
-        - unless: /usr/local/bin/vault policies | grep postgresql_authserver_fullaccess >/dev/null
         - env:
             - VAULT_ADDR: "https://vault.service.consul:8200/"
+        - unless: /usr/local/bin/vault policies | grep postgresql_authserver_fullaccess >/dev/null
+        - onlyif: /usr/local/bin/vault init -check >/dev/null
+
 
 
 authserver-vault-postgresql-backend:
     cmd.run:
         - name: /usr/local/bin/vault mount -path=postgresql database
-        - unless: /usr/local/bin/vault mounts | grep postgresql >/dev/null
         - env:
             - VAULT_ADDR: "https://vault.service.consul:8200/"
+        - unless: /usr/local/bin/vault mounts | grep postgresql >/dev/null
+        - onlyif: /usr/local/bin/vault init -check >/dev/null
 
 
 authserver-vault-postgresql-connection:
@@ -40,6 +44,7 @@ authserver-vault-postgresql-connection:
                 plugin_name=postgresql-database-plugin \
                 allowed_roles="authserver_fullaccess" \
                 connection_url="postgresql://{{pillar['authserver']['dbuser']}}:{{pillar['dynamicsecrets']['authserver']}}@postgresql.service.consul:5432/"
+        - onlyif: /usr/local/bin/vault init -check >/dev/null
         - onchanges:
             - cmd: authserver-vault-postgresql-backend
         - env:
@@ -63,6 +68,7 @@ authserver-vault-postgresql-role:
         - name: cat /etc/appconfig/authserver/vault_role.json | /usr/local/bin/vault write postgresql/roles/authserver_fullaccess -
         - env:
             - VAULT_ADDR: "https://vault.service.consul:8200/"
+        - onlyif: /usr/local/bin/vault init -check >/dev/null
         - onchanges:
             - cmd: authserver-vault-postgresql-connection
         - require:

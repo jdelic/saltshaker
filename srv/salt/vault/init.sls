@@ -217,7 +217,9 @@ vault-init:
                 cat /root/.vault-token | /usr/local/bin/vault auth -;
             }
         {% endif %}
-        - unless: /usr/local/bin/vault init -check >/dev/null
+        # vault check -init returns error code 1 on an ERROR and 2 when Vault is uninitialized
+        # so we do nothing on exit codes 0 and 1
+        - unless: /usr/local/bin/vault init -check >/dev/null; test $? -lt 2 && /bin/true
         # we use Vault's Consul DNS API name here, because we can't rely on SmartStack being available
         # when the node has just been brought up. It doesn't matter here though, because Vault is
         # by definition local to this node when this state runs.
@@ -234,6 +236,7 @@ vault-cert-auth-enabled:
     cmd.run:
         - name: /usr/local/bin/vault auth-enable cert
         - unless: /usr/local/bin/vault auth -methods | grep cert >/dev/null
+        - onlyif: /usr/local/bin/vault init -check >/dev/null
         # we use Vault's Consul DNS API name here, because we can't rely on SmartStack being available
         # when the node has just been brought up. It doesn't matter here though, because Vault is
         # by definition local to this node when this state runs.
