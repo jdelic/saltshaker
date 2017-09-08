@@ -38,9 +38,10 @@ authserver-postgres:
             - postgres_user: authserver-postgres
 
 
-dkimsigner-postgres:
+{% for user in ['dkimsigner', 'mailforwarder'] %}
+{{user}}-postgres:
     postgres_user.present:
-        - name: {{pillar['dkimsigner']['dbuser']}}
+        - name: {{pillar[user]['dbuser']}}
         - createdb: False
         - createroles: False
         - createuser: False
@@ -49,7 +50,7 @@ dkimsigner-postgres:
         - inherit: True
         - superuser: False
         - replication: False
-        - password: {{pillar['dynamicsecrets']['dkimsigner']}}
+        - password: {{pillar['dynamicsecrets'][user]}}
         - user: postgres
         - require:
             - service: data-cluster-service
@@ -58,7 +59,7 @@ dkimsigner-postgres:
     # the PostgreSQL server might not be hardened by using a database template that does
     # does not grant 'create' on the implicit 'public' schema.
     postgres_privileges.present:
-        - name: {{pillar['dkimsigner']['dbuser']}}
+        - name: {{pillar[user]['dbuser']}}
         - object_name: {{pillar['authserver']['dbname']}}
         - object_type: database
         - privileges:
@@ -66,12 +67,12 @@ dkimsigner-postgres:
         - user: postgres
         - maintenance_db: {{pillar['authserver']['dbname']}}
         - require:
-            - postgres_user: dkimsigner-postgres
+            - postgres_user: {{user}}-postgres
 
 
-dkimsigner-drop-create:
+{{user}}-drop-create:
     postgres_privileges.absent:
-        - name: {{pillar['dkimsigner']['dbuser']}}
+        - name: {{pillar[user]['dbuser']}}
         - object_name: public
         - object_type: schema
         - privileges:
@@ -79,12 +80,11 @@ dkimsigner-drop-create:
         - user: postgres
         - maintenance_db: {{pillar['authserver']['dbname']}}
         - require:
-            - postgres_user: dkimsigner-postgres
+            - postgres_user: {{user}}-postgres
 
-
-dkimsigner-usage-privileges:
+{{user}}-usage-privileges:
     postgres_privileges.present:
-        - name: {{pillar['dkimsigner']['dbuser']}}
+        - name: {{pillar[user]['dbuser']}}
         - object_name: public
         - object_type: schema
         - privileges:
@@ -92,7 +92,8 @@ dkimsigner-usage-privileges:
         - user: postgres
         - maintenance_db: {{pillar['authserver']['dbname']}}
         - require:
-            - postgres_user: dkimsigner-postgres
+            - postgres_user: {{user}}-postgres
+{% endfor %}
 
 
 dkimsigner-read-privileges:
@@ -105,6 +106,43 @@ dkimsigner-read-privileges:
         - user: postgres
         - maintenance_db: {{pillar['authserver']['dbname']}}
         - order: last  # make sure this is ordered after authserver setup, when the database table exists
+
+
+mailforwarder-read-privileges-emailalias:
+    postgres_privileges.present:
+        - name: {{pillar['mailforwarder']['dbuser']}}
+        - object_name: mailauth_emailalias
+        - object_type: table
+        - privileges:
+            - SELECT
+        - user: postgres
+        - maintenance_db: {{pillar['authserver']['dbname']}}
+        - order: last  # make sure this is ordered after authserver setup, when the database table exists
+
+
+mailforwarder-read-privileges-domain:
+    postgres_privileges.present:
+        - name: {{pillar['mailforwarder']['dbuser']}}
+        - object_name: mailauth_domain
+        - object_type: table
+        - privileges:
+            - SELECT
+        - user: postgres
+        - maintenance_db: {{pillar['authserver']['dbname']}}
+        - order: last  # make sure this is ordered after authserver setup, when the database table exists
+
+
+mailforwarder-read-privileges-mailinglist:
+    postgres_privileges.present:
+        - name: {{pillar['mailforwarder']['dbuser']}}
+        - object_name: mailauth_mailinglist
+        - object_type: table
+        - privileges:
+            - SELECT
+        - user: postgres
+        - maintenance_db: {{pillar['authserver']['dbname']}}
+        - order: last  # make sure this is ordered after authserver setup, when the database table exists
+
 
 {% if pillar['authserver'].get('use-vault', False) %}
 authserver-vault-md5:

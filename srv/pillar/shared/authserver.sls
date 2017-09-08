@@ -15,4 +15,7 @@ dkimsigner:
     dbuser: dkimsigner  # a read-only user for the mailauth_domains table
 
 
+mailforwarder:
+    dbuser: mailforwarder  # a read-only user for the mailauth_domains table
+
 # vim: syntax=yaml
