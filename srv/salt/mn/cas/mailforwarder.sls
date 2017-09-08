@@ -32,9 +32,9 @@ mailforwarder-rsyslog:
     "VAULT_CA": pillar['ssl']['service-rootca-cert'] if pillar['vault'].get('pinned-ca-cert', 'default') == 'default'
         else pillar['vault']['pinned-ca-cert'],
     "BINDIP": '127.0.0.1',
-    "BINDPORT": pillar.get('mailforwarder', {}).get('bind-port', 10036),
+    "BINDPORT": pillar.get('mailforwarder', {}).get('bind-port', 10046),
     "RELAYIP": '127.0.0.1',
-    "RELAYPORT": pillar.get('mailforwarder', {}).get('relay-port', 10035),
+    "RELAYPORT": pillar.get('mailforwarder', {}).get('relay-port', 10045),
     "DATABASE_NAME": pillar['authserver']['dbname'],
     "POSTGRESQL_CA": pillar['ssl']['service-rootca-cert'] if
         pillar['postgresql'].get('pinned-ca-cert', 'default') == 'default'
