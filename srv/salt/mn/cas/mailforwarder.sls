@@ -7,11 +7,11 @@ mailforwarder:
         - require:
             - appconfig: mailforwarder-appconfig
     service.running:
-        - name: dkimsigner
-        - sig: dkimsigner
+        - name: mailforwarder
+        - sig: mailforwarder
         - enable: True
         - require:
-            - pkg: dkimsigner
+            - pkg: mailforwarder
 
 
 mailforwarder-appconfig:
