@@ -93,6 +93,7 @@ base:
         - mail.spamassassin
         - mail.storage
         - mn.cas.dkimsigner
+        - mn.cas.mailforwarder
         - ssmtp.not
 
     'roles:pim':
