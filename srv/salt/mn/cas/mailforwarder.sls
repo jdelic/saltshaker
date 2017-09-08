@@ -46,7 +46,7 @@ mailforwarder-rsyslog:
 
 
 {% for envvar, value in config.items() %}
-dkimsigner-config-{{loop.index}}:
+mailforwarder-config-{{loop.index}}:
     file.managed:
         - name: /etc/appconfig/mailforwarder/env/{{envvar}}
         - contents: {{value}}
