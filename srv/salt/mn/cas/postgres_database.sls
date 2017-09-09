@@ -152,15 +152,6 @@ authserver-vault-md5:
         - text: {{pillar['authserver']['dbname']}} {{pillar['authserver']['dbuser']}}
         - require_in:
             - file: postgresql-hba-config
-
-
-dkimsigner-vault-md5:
-  file.accumulated:
-      - name: postgresql-hba-md5users-accumulator
-      - filename: {{pillar['postgresql']['hbafile']}}
-      - text: {{pillar['authserver']['dbname']}} {{pillar['dkimsigner']['dbuser']}}
-      - require_in:
-          - file: postgresql-hba-config
 {% else %}
 authserver-sslclient:
     file.accumulated:
@@ -169,13 +160,42 @@ authserver-sslclient:
         - text: {{pillar['authserver']['dbname']}} {{pillar['authserver']['dbuser']}}
         - require_in:
             - file: postgresql-hba-config
+{% endif %}
 
 
+{% if pillar['dkimsigner'].get('use-vault', False) %}
+dkimsigner-vault-md5:
+  file.accumulated:
+      - name: postgresql-hba-md5users-accumulator
+      - filename: {{pillar['postgresql']['hbafile']}}
+      - text: {{pillar['authserver']['dbname']}} {{pillar['dkimsigner']['dbuser']}}
+      - require_in:
+          - file: postgresql-hba-config
+{% else %}
 dkimsigner-sslclient:
     file.accumulated:
         - name: postgresql-hba-certusers-accumulator
         - filename: {{pillar['postgresql']['hbafile']}}
         - text: {{pillar['authserver']['dbname']}} {{pillar['dkimsigner']['dbuser']}}
+        - require_in:
+            - file: postgresql-hba-config
+{% endif %}
+
+
+{% if pillar['mailforwarder'].get('use-vault', False) %}
+mailforwarder-vault-md5:
+  file.accumulated:
+      - name: postgresql-hba-md5users-accumulator
+      - filename: {{pillar['postgresql']['hbafile']}}
+      - text: {{pillar['authserver']['dbname']}} {{pillar['mailforwarder']['dbuser']}}
+      - require_in:
+          - file: postgresql-hba-config
+{% else %}
+mailforwarder-sslclient:
+    file.accumulated:
+        - name: postgresql-hba-certusers-accumulator
+        - filename: {{pillar['postgresql']['hbafile']}}
+        - text: {{pillar['authserver']['dbname']}} {{pillar['mailforwarder']['dbuser']}}
         - require_in:
             - file: postgresql-hba-config
 {% endif %}
