@@ -34,7 +34,7 @@ mailforwarder-rsyslog:
     "BINDIP": '127.0.0.1',
     "BINDPORT": pillar.get('mailforwarder', {}).get('bind-port', 10046),
     "DELIVERYIP": '127.0.0.1',
-    "DELIVERYPORT": pillar.get('mailforwarder', {}).get('relay-port', 10045),
+    "DELIVERYPORT": pillar.get('mailforwarder', {}).get('delivery-port', 10045),
     "RELAYIP": '127.0.0.1',
     "RELAYPORT": pillar.get('mailforwarder', {}).get('relay-port', 10035),
     "DATABASE_NAME": pillar['authserver']['dbname'],
