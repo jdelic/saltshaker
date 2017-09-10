@@ -101,6 +101,7 @@ concourse-server-envvars:
                     pillar['ci']['verify-database-ssl']}}&sslrootcert={{pillar['ssl']['service-rootca-cert'] if
                         pillar['postgresql'].get('pinned-ca-cert', 'default') == 'default'
                         else pillar['postgresql']['pinned-ca-cert']}}"
+            CONCOURSE_ENCRYPTION_KEY="{{pillar['dynamicsecrets']['concourse-encryption']}}"
 
 
 concourse-server:

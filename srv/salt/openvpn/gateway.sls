@@ -116,10 +116,10 @@ openvpn-dhparams:
 
 # keys for additional security during TLS negotation, should be rotated every 8192 years divided by the number
 # of users that share the same key
-openvpn-tls-crypt-key:
+openvpn-tls-auth-key:
     cmd.run:
-        - name: openvpn --genkey --secret /etc/openvpn/server/tls-preshared-crypt.key
-        - creates: /etc/openvpn/server/tls-preshared-crypt.key
+        - name: openvpn --genkey --secret /etc/openvpn/server/tls-preshared-auth.key
+        - creates: /etc/openvpn/server/tls-preshared-auth.key
         - require:
             - file: openvpn-config-folder
 
@@ -132,7 +132,7 @@ openvpn-udp-service:
         - watch:
             - file: openvpn-udp-gateway-conf
             - cmd: openvpn-dhparams
-            - cmd: openvpn-tls-crypt-key
+            - cmd: openvpn-tls-auth-key
 {% if pillar.get('openvpn', {}).get('sslcert', 'default') != 'default' %}
             - file: openvpn-gateway-ssl-cert
             - file: openvpn-gateway-ssl-key
@@ -149,7 +149,7 @@ openvpn-tcp-service:
         - watch:
             - file: openvpn-tcp-gateway-conf
             - cmd: openvpn-dhparams
-            - cmd: openvpn-tls-crypt-key
+            - cmd: openvpn-tls-auth-key
 {% if pillar.get('openvpn', {}).get('sslcert', 'default') != 'default' %}
             - file: openvpn-gateway-ssl-cert
             - file: openvpn-gateway-ssl-key
