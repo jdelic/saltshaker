@@ -361,7 +361,7 @@ opensmtpd-relay-out25-send:
         - table: filter
         - chain: OUTPUT
         - jump: ACCEPT
-        - source: {{salt['network.default_route']('inet')['gateway']}}/32
+        - source: {{salt['network.interface_ip'](salt['network.default_route']('inet')[0]['interface'])}}/32
         - destination: 0/0
         - dport: 25
         - match: state
@@ -371,13 +371,12 @@ opensmtpd-relay-out25-send:
         - require:
             - sls: iptables
 
-
 opensmtpd-relay-out465-send:
     iptables.append:
         - table: filter
         - chain: OUTPUT
         - jump: ACCEPT
-        - source: {{salt['network.default_route']('inet')['gateway']}}/32
+        - source: {{salt['network.interface_ip'](salt['network.default_route']('inet')[0]['interface'])}}/32
         - destination: 0/0
         - dport: 465
         - match: state
