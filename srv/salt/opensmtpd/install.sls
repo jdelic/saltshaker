@@ -273,15 +273,6 @@ opensmtpd-authserver-config:
             - pkg: opensmtpd
 
 
-procmail:
-    pkg.installed:
-        - install_recommends: False
-        # this would be a gratuitous requirement if procmail didn't pull in mail-transport-agent
-        # which means exim is installed if opensmtpd fails to install
-        - require:
-            - pkg: opensmtpd
-
-
 # ('/var/spool/smtpd/offline', ('root', 'root', '1777')),       <-- this is correct for opensmtpd 5.7.x
 # ('/var/spool/smtpd/offline', ('root', 'opensmtpq', '0770')),  <-- this is correct for opensmtpd 5.9.x
 {% set spool = [
