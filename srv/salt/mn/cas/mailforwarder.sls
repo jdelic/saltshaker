@@ -33,8 +33,10 @@ mailforwarder-rsyslog:
         else pillar['vault']['pinned-ca-cert'],
     "BINDIP": '127.0.0.1',
     "BINDPORT": pillar.get('mailforwarder', {}).get('bind-port', 10046),
+    "DELIVERYIP": '127.0.0.1',
+    "DELIVERYPORT": pillar.get('mailforwarder', {}).get('delivery-port', 10045),
     "RELAYIP": '127.0.0.1',
-    "RELAYPORT": pillar.get('mailforwarder', {}).get('relay-port', 10045),
+    "RELAYPORT": pillar.get('mailforwarder', {}).get('relay-port', 10035),
     "DATABASE_NAME": pillar['authserver']['dbname'],
     "POSTGRESQL_CA": pillar['ssl']['service-rootca-cert'] if
         pillar['postgresql'].get('pinned-ca-cert', 'default') == 'default'
@@ -42,7 +44,7 @@ mailforwarder-rsyslog:
     "DATABASE_URL": 'postgresql://%s:@postgresql.local:5432/%s'|format(pillar['mailforwarder']['dbuser'],
         pillar['authserver']['dbname']),
     "ALLOWED_HOSTS": "%s,%s"|format(pillar['authserver']['hostname'], pillar['authserver']['smartstack-hostname'])
-} %}
+} %}{# # RELAYPORT uses  dkimproxy's local relay to send mail #}
 
 
 {% for envvar, value in config.items() %}
