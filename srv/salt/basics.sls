@@ -103,16 +103,16 @@ maurusnet-opensmtpd:
     pkgrepo.managed:
         - humanname: repo.maurus.net-opensmtpd
         - name: {{pillar['repos']['maurusnet-opensmtpd']}}
-        - file: /etc/apt/sources.list.d/opensmtpd.list
+        - file: /etc/apt/sources.list.d/mn-opensmtpd.list
         - key_url: salt://mn/packaging_authority_A78049AF.pgp.key
         - order: 2
 
 
-maurusnet-authserver:
+maurusnet-apps:
     pkgrepo.managed:
-        - humanname: repo.maurus.net-nightly
-        - name: {{pillar['repos']['maurusnet-nightly']}}
-        - file: /etc/apt/sources.list.d/mn-nightly.list
+        - humanname: repo.maurus.net-apps
+        - name: {{pillar['repos']['maurusnet-apps']}}
+        - file: /etc/apt/sources.list.d/mn-apps.list
         - key_url: salt://mn/packaging_authority_A78049AF.pgp.key
         - order: 2
 
