@@ -354,3 +354,35 @@ opensmtpd-receiver-tcp-in465-recv:
         - save: True
         - require:
             - sls: iptables
+
+
+opensmtpd-relay-out25-send:
+    iptables.append:
+        - table: filter
+        - chain: OUTPUT
+        - jump: ACCEPT
+        - source: {{salt['network.default_route']('inet')['gateway']}}/32
+        - destination: 0/0
+        - dport: 25
+        - match: state
+        - connstate: NEW
+        - proto: tcp
+        - save: True
+        - require:
+            - sls: iptables
+
+
+opensmtpd-relay-out465-send:
+    iptables.append:
+        - table: filter
+        - chain: OUTPUT
+        - jump: ACCEPT
+        - source: {{salt['network.default_route']('inet')['gateway']}}/32
+        - destination: 0/0
+        - dport: 465
+        - match: state
+        - connstate: NEW
+        - proto: tcp
+        - save: True
+        - require:
+            - sls: iptables
