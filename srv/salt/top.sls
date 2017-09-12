@@ -11,6 +11,7 @@ base:
         - consul.template  # everything needs consul-template in smartstack
         - haproxy.internal  # everything needs local proxies in smartstack
         - powerdns.recursor
+        - duplicity
 
     'roles:xenserver':
         - match: grain
