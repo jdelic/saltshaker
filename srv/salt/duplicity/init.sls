@@ -6,7 +6,7 @@ duplicity:
             - duplicity
             - python-paramiko
             - python-boto
-        install_recommends: False
+        - install_recommends: False
 
 
 {% if pillar.get('duplicity-backup', {}).get('enabled', False) %}
