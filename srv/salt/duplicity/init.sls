@@ -9,6 +9,7 @@ duplicity:
         install_recommends: False
 
 
+{% if pillar.get('duplicity-backup', {}).get('enabled', False) %}
 duplicity-cron:
     file.managed:
         - name: /etc/cron.hourly/duplicity-backup.sh
@@ -18,3 +19,4 @@ duplicity-cron:
             backup_folders: {{pillar['duplicity-backup'].get('backup-folders', [])}}
             backup_target_url: {{pillar['duplicity-backup']['backup-target']}}
             gpg_key_id: {{pillar['duplicity-backup']['gpg-key-id']}}
+{% endif %}
