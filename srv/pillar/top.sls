@@ -66,7 +66,7 @@ base:
         - local.crypto
         - local.ssl
         - local.authserver
-        # - local.url_overrides
-        - shared.urls
+        - local.url_overrides
+        # - shared.urls
 
 # vim: syntax=yaml
