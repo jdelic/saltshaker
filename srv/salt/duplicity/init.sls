@@ -12,7 +12,7 @@ duplicity:
 {% if pillar.get('duplicity-backup', {}).get('enabled', False) %}
 duplicity-cron:
     file.managed:
-        - name: /etc/cron.hourly/duplicity-backup.sh
+        - name: {{pillar['duplicity-backup']['filename']}}
         - source: salt://duplicity/cron/duplicity-backup.jinja.sh
         - template: jinja
         - context:
