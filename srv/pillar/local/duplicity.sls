@@ -4,4 +4,3 @@ duplicity-backup:
     enabled: False
     gpg-key-id: 7CDC4589
     backup-target: sftp://user@host/path  # replace when enabled
-    backup-folders: []

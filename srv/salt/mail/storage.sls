@@ -21,3 +21,13 @@ email-storage:
         - require:
             - user: virtmail
             - secure-mount
+
+
+{% if pillar.get('duplicity-backup', {}).get('enabled', False) %}
+email-backup:
+    file.symlink:
+        - name: /etc/duplicity.d/daily/folderlinks/secure-email
+        - target: {{pillar['emailstore']['path']}}
+        - require:
+            - file: email-storage
+{% endif %}
