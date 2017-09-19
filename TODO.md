@@ -8,6 +8,7 @@
    deletes the servicerenderer if the command-line parameters change, because
    consul-template will not do it by itself (has this been fixed upstream?)
  * add a logging server role
+ * write docs for duplicity config folder structure
  
 # Ponder
 
