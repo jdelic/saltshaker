@@ -120,6 +120,18 @@ mailforwarder-read-privileges-emailalias:
         - order: last  # make sure this is ordered after authserver setup, when the database table exists
 
 
+mailforwarder-read-privileges-mnuser:
+    postgres_privileges.present:
+        - name: {{pillar['mailforwarder']['dbuser']}}
+        - object_name: mailauth_mnuser
+        - object_type: table
+        - privileges:
+            - SELECT
+        - user: postgres
+        - maintenance_db: {{pillar['authserver']['dbname']}}
+        - order: last  # make sure this is ordered after authserver setup, when the database table exists
+
+
 mailforwarder-read-privileges-domain:
     postgres_privileges.present:
         - name: {{pillar['mailforwarder']['dbuser']}}
