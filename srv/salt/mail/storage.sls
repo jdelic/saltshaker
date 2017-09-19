@@ -25,12 +25,9 @@ email-storage:
 
 {% if pillar.get('duplicity-backup', {}).get('enabled', False) %}
 email-backup:
-    file.accumulated:
-        - name: duplicity-cron-folders
-        - filename: {{pillar['duplicity-backup']['filename']}}
-        - text: {{pillar['emailstore']['path']}}
-        - require_in:
-            - file: duplicity-cron
+    file.symlink:
+        - name: /etc/duplicity.d/daily/folderlinks/secure-email
+        - target: {{pillar['emailstore']['path']}}
         - require:
             - file: email-storage
 {% endif %}

@@ -9,6 +9,8 @@
    consul-template will not do it by itself (has this been fixed upstream?)
  * add a logging server role
  * write docs for duplicity config folder structure
+ * add prescripts for email storage backup that disable opensmtpd delivery
+   by setting +t on the Maildirs
  
 # Ponder
 
