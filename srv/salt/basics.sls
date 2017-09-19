@@ -53,7 +53,16 @@ basic-required-packages:
             - net-tools
             - libcap2-bin
             - apt-transport-https
+            - cron
         -  order: 1  # execute this state early, because later states need unzip
+
+
+cron:
+    service.running:
+        - sig: /usr/sbin/cron
+        - reload: True
+        - watch:
+            - file: /etc/cron.d*
 
 
 stretch:
