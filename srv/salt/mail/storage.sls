@@ -21,3 +21,16 @@ email-storage:
         - require:
             - user: virtmail
             - secure-mount
+
+
+{% if pillar.get('duplicity-backup', {}).get('enabled', False) %}
+email-backup:
+    file.accumulated:
+        - name: duplicity-cron-folders
+        - filename: {{pillar['duplicity-backup']['filename']}}
+        - text: {{pillar['emailstore']['path']}}
+        - require_in:
+            - file: duplicity-cron
+        - require:
+            - file: email-storage
+{% endif %}
