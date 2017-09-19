@@ -33,6 +33,8 @@ consul-agent-service:
         - watch:
             - file: consul-agent-service  # if consul.service changes we want to *restart* (reload: False)
             - file: consul  # restart on a change of the binary
+        - watch_in:
+            - service: pdns-recursor-service
 
 
 consul-agent-service-reload:
@@ -51,6 +53,8 @@ consul-agent-service-reload:
             # consul.install.consul-service-dir state.
             - file: /etc/consul/services.d*
             - file: consul-common-config
+        - watch_in:
+            - service: pdns-recursor-service
 
 
 consul-server-absent:
