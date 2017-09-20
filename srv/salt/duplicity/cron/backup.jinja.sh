@@ -1,5 +1,9 @@
 #!/usr/bin/env bash
 
+{% for envvar, value in envvars %}
+export {{envvar}}="{{value}}"
+{% endfor %}
+
 if [ ! -e /etc/duplicity.d ]; then
     echo "configuration folder /etc/duplicity.d is missing"
     exit 1;
