@@ -12,6 +12,27 @@ fi
 if [ $# -ne 1 ]; then
     echo "usage: duplicity-backup.sh [crontype]"
     echo "where [crontype] is the name of a subfolder of /etc/duplicity.d"
+    echo ""
+    echo "This script will execute all executable files in"
+    echo "/etc/duplicity.d/[ct]/prescripts without recursing into subfolders. It will then"
+    echo "backup folders symlinked from /etc/duplicity.d/[ct]/folderlinks taking care to"
+    echo "check if prescripts or postscripts contains a folder of the same name as the"
+    echo "symlink. If they do t\is script will execute these pre and postscripts before"
+    echo "and after backing up the symlink's target folder."
+    echo "After completing all backup jobs, this script will execute all executable"
+    echo "files in /etc/duplicity.d/[ct]/postscripts without recursing into subfolders."
+    echo "This allows you to execute scripts before and after all of the backups by just"
+    echo "dropping them into /etc/duplicity.d/[ct]/prescripts and "
+    echo "/etc/duplicity.d/[ct]/postscripts and also execute them before and after each"
+    echo "individual backup job by putting them into subfolders of prescripts/postscripts"
+    echo "that share the symlinks name in /etc/duplicity.d/folderlinks."
+    echo ""
+    echo "Valid detected [crontype] values are:"
+    for DIR in /etc/duplicity.d/*; do
+        if [ -d $DIR ]; then
+            echo "    $DIR"
+        fi
+    done
     exit 1;
 fi
 
@@ -30,7 +51,6 @@ for PRESCRIPT in /etc/duplicity.d/$1/prescripts/*; do
         echo "executing prescript:$PRESCRIPT"
         $PRESCRIPT
     else
-        echo "$PRESCRIPT is not a file or not executable"
         continue
     fi
 done
