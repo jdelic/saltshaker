@@ -57,11 +57,24 @@ done
 
 for LINK in /etc/duplicity.d/$1/folderlinks/*; do
     FOLDER=""
+    BL="$(basename $LINK)"
     if [ -h $LINK ]; then
         FOLDER="$(readlink $LINK)"
     else
         echo "$LINK is not a symlink. /etc/duplicity.d/$1/folderlinks/ should only contain symlinks"
         continue
+    fi
+
+    if [ -d "/etc/duplicity.d/$1/prescripts/$BL" ]; then
+        for PRESCRIPT in /etc/duplicity.d/$1/prescripts/$BL/*; do
+            if [ -x $PRESCRIPT ]; then
+                echo "executing prescript:$BL:$(basename $PRESCRIPT)"
+                $PRESCRIPT
+            else
+                echo "warning: $PRESCRIPT\n    is not executable. Subfolders of /etc/duplicity.d/[ct]/prescripts should"
+                echo "    only contain script files."
+            fi
+        done
     fi
 
     echo "Running duplicity {{additional_options|replace('"', '\"')}}" \
@@ -70,6 +83,18 @@ for LINK in /etc/duplicity.d/$1/folderlinks/*; do
 
     /usr/bin/duplicity {{additional_options}} --encrypt-key={{gpg_key_id}} \
         --gpg-options='{{gpg_options}}' $FOLDER {{backup_target_url}}
+
+    if [ -d "/etc/duplicity.d/$1/postscripts/$BL" ]; then
+        for POSTSCRIPT in /etc/duplicity.d/$1/postscripts/$BL/* ]; do
+            if [ -x $POSTSCRIPT ]; then
+                echo "executing postscript:$BL:$(basename $POSTSCRIPT)"
+                $POSTSCRIPT
+            else
+                echo "warning: $POSTSCRIPT\n    is not executable. Subfolders of /etc/duplicity.d/[ct]/postscripts"
+                echo "    should only contain script files."
+            fi
+        done
+    fi
 done
 
 for POSTSCRIPT in /etc/duplicity.d/$1/postscripts/*; do
@@ -77,7 +102,6 @@ for POSTSCRIPT in /etc/duplicity.d/$1/postscripts/*; do
         echo "executing postscript:$POSTSCRIPT"
         $POSTSCRIPT
     else
-        echo "$POSTSCRIPT is not a file or not executable"
         continue
     fi
 done
