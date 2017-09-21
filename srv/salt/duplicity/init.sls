@@ -35,8 +35,8 @@ duplicity-cron-script:
 
 
 {% for crontype in ['hourly', 'daily'] %}
-    {% for ix, folder in enumerate(['prescripts', 'postscripts', 'folderlinks']) %}
-duplicity-config-{{crontype}}-{{ix}}:
+    {% for folder in ['prescripts', 'postscripts', 'folderlinks'] %}
+duplicity-config-{{crontype}}-{{loop.index}}:
     file.directory:
         - name: /etc/duplicity.d/{{crontype}}/{{folder}}
         - user: root
