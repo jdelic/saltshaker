@@ -66,6 +66,7 @@ base:
         - local.crypto
         - local.ssl
         - local.authserver
+        - local.duplicity
         # - local.url_overrides
         - shared.urls
 
