@@ -22,7 +22,7 @@ repos:
 #           state for that!
 
 urls:
-    concourse: https://github.com/concourse/concourse/releases/download/v3.4.1/concourse_linux_amd64
+    concourse: https://github.com/concourse/concourse/releases/download/v3.5.0/concourse_linux_amd64
     consul: https://releases.hashicorp.com/consul/0.9.3/consul_0.9.3_linux_amd64.zip
     consul-template: https://releases.hashicorp.com/consul-template/0.19.2/consul-template_0.19.2_linux_amd64.zip
     exxo: https://bintray.com/artifact/download/mbachry/exxo/exxo-0.0.7.tar.xz
@@ -34,7 +34,7 @@ urls:
 
 
 hashes:
-    concourse: sha256=1a7385b9bed35ec93c0ed59eec1a4a08c3dd131310585ffff84530abaec0baa1
+    concourse: sha256=048856072d17d9420676e53b64ab57d995523323110a1716d22d4817bd806fb7
     consul: sha256=9c6d652d772478d9ff44b6decdd87d980ae7e6f0167ad0f7bd408de32482f632
     consul-template: sha256=c4bf073081a99030f45a446a11b8e9f8a4b56270b096d90b51e48f6e4416ffcc
     exxo: sha256=ce3d6ae10d364c5a0726cce127602fe6fa5d042b11afd21d79502f8216b42e1e
