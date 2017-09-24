@@ -35,8 +35,8 @@ gpg-shared-keyring-temp:
         - name: {{keyloc}}/tmp
         - makedirs: True
         - user: root
-        - group: root
-        - mode: '0700'
+        - group: gpg-access
+        - mode: '0710'
         - require:
             - file: gpg-shared-keyring-location
 
@@ -128,13 +128,13 @@ managed-keyring:
     file.directory:
         - name: {{keyloc}}
         - file_mode: '0640'
+        - dir_mode: '0710'
         - user: root
         - group: gpg-access
         - recurse:
             - user
             - group
             - mode
-            - ignore_dirs
         - require:
             - group: gpg-access
             - file: gpg-shared-keyring-location
