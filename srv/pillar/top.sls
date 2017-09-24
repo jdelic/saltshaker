@@ -82,6 +82,7 @@ base:
         - hetzner.crypto
         - hetzner.ssl
         - hetzner.authserver
+        - hetzner.duplicity
         - shared.urls
         - shared.secrets.live-backup
 
