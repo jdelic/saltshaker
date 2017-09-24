@@ -30,7 +30,7 @@ if [ $# -ne 1 ]; then
     echo "Valid detected [crontype] values are:"
     for DIR in /etc/duplicity.d/*; do
         if [ -d $DIR ]; then
-            echo "    $DIR"
+            echo "    $(basename $DIR)"
         fi
     done
     exit 1;
