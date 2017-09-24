@@ -112,13 +112,13 @@ gpg-establish-trust-{{k}}:
                 --with-colons {{keyloc}}/tmp/gpg-{{k}}.asc | head -1 | cut -d':' -f5 2>/dev/null) 2>/dev/null |
             grep "pub:" | cut -d':' -f2 | grep "u" >/dev/null
         - name: >
-            echo -e "trust\n5\ny\n" |
+            echo -e "$(/usr/bin/gpg --no-default-keyring --homedir {{keyloc}} \
+                --with-fingerprint --with-fingerprint --with-colons {{keyloc}}/tmp/gpg-{{k}}.asc |
+                grep "fpr:" | head -1 | cut -d':' -f10 2>/dev/null):6:" |
             /usr/bin/gpg
             --homedir=/etc/gpg-managed-keyring/
-            --command-fd 0
             --batch
-            --edit-key $(/usr/bin/gpg --no-default-keyring --homedir {{keyloc}} \
-                --with-colons {{keyloc}}/tmp/gpg-{{k}}.asc | head -1 | cut -d':' -f5 2>/dev/null)
+            --import-ownertrust
         - require:
             - cmd: gpg-{{k}}
 {% endfor %}
