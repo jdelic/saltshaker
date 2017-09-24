@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-{% for envvar, value in envvars %}
+{% for envvar, value in envvars.items() %}
 export {{envvar}}="{{value}}"
 {% endfor %}
 
@@ -47,7 +47,7 @@ if [ ! -x /usr/bin/duplicity ]; then
 fi
 
 for PRESCRIPT in /etc/duplicity.d/$1/prescripts/*; do
-    if [ -x $PRESCRIPT ]; then
+    if [ ! -d $PRESCRIPT ] && [ -x $PRESCRIPT ]; then
         echo "executing prescript:$PRESCRIPT"
         $PRESCRIPT
     else
@@ -71,26 +71,29 @@ for LINK in /etc/duplicity.d/$1/folderlinks/*; do
                 echo "executing prescript:$BL:$(basename $PRESCRIPT)"
                 $PRESCRIPT
             else
-                echo "warning: $PRESCRIPT\n    is not executable. Subfolders of /etc/duplicity.d/[ct]/prescripts should"
+                echo "warning: $PRESCRIPT"
+                echo "    is not executable. Subfolders of /etc/duplicity.d/[ct]/prescripts should"
                 echo "    only contain script files."
             fi
         done
     fi
 
-    echo "Running duplicity {{additional_options|replace('"', '\"')}}" \
+    echo "Running duplicity {% if additional_options %}{{additional_options|replace('"', '\"')}}{% endif %}" \
          "--encrypt-key={{gpg_key_id|replace('"', '\"')}} " \
-         "--gpg-options='{{gpg_options|replace('"', '\"')}}' $FOLDER {{backup_target_url}}"
+         "{% if gpg_options %}--gpg-options='{{gpg_options|replace('"', '\"')}}'{% endif %} " \
+         "$FOLDER {{backup_target_url}}"
 
-    /usr/bin/duplicity {{additional_options}} --encrypt-key={{gpg_key_id}} \
-        --gpg-options='{{gpg_options}}' $FOLDER {{backup_target_url}}
+    /usr/bin/duplicity {% if additional_options %}{{additional_options}}{% endif %} --encrypt-key={{gpg_key_id}} \
+        {% if gpg_options %}--gpg-options='{{gpg_options}}'{% endif %} $FOLDER {{backup_target_url}}
 
     if [ -d "/etc/duplicity.d/$1/postscripts/$BL" ]; then
-        for POSTSCRIPT in /etc/duplicity.d/$1/postscripts/$BL/* ]; do
+        for POSTSCRIPT in /etc/duplicity.d/$1/postscripts/$BL/*; do
             if [ -x $POSTSCRIPT ]; then
                 echo "executing postscript:$BL:$(basename $POSTSCRIPT)"
                 $POSTSCRIPT
             else
-                echo "warning: $POSTSCRIPT\n    is not executable. Subfolders of /etc/duplicity.d/[ct]/postscripts"
+                echo "warning: $POSTSCRIPT"
+                echo "    is not executable. Subfolders of /etc/duplicity.d/[ct]/postscripts"
                 echo "    should only contain script files."
             fi
         done
@@ -98,7 +101,7 @@ for LINK in /etc/duplicity.d/$1/folderlinks/*; do
 done
 
 for POSTSCRIPT in /etc/duplicity.d/$1/postscripts/*; do
-    if [ -x $POSTSCRIPT ]; then
+    if [ ! -d $POSTSCRIPT ] && [ -x $POSTSCRIPT ]; then
         echo "executing postscript:$POSTSCRIPT"
         $POSTSCRIPT
     else
