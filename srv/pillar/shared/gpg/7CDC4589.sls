@@ -211,5 +211,3 @@ gpg:
             Jh2l3w==
             =vwGU
             -----END PGP PUBLIC KEY BLOCK-----
-    fingerprints:
-        jonas-maurus-key: 23FC12D75291ED448C0728C877C339AB7CDC4589
