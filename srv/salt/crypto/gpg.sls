@@ -116,6 +116,7 @@ gpg-establish-trust-{{k}}:
             /usr/bin/gpg
             --homedir=/etc/gpg-managed-keyring/
             --command-fd 0
+            --batch
             --edit-key $(/usr/bin/gpg --no-default-keyring --homedir {{keyloc}} \
                 --with-colons {{keyloc}}/tmp/gpg-{{k}}.asc | head -1 | cut -d':' -f5 2>/dev/null)
         - require:
