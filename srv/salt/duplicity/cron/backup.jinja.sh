@@ -47,6 +47,7 @@ if [ ! -x /usr/bin/duplicity ]; then
 fi
 
 for PRESCRIPT in /etc/duplicity.d/$1/prescripts/*; do
+    [ -e "$PRESCRIPT" ] || continue
     if [ ! -d $PRESCRIPT ] && [ -x $PRESCRIPT ]; then
         echo "executing prescript:$PRESCRIPT"
         $PRESCRIPT
@@ -56,6 +57,7 @@ for PRESCRIPT in /etc/duplicity.d/$1/prescripts/*; do
 done
 
 for LINK in /etc/duplicity.d/$1/folderlinks/*; do
+    [ -e "$LINK" ] || continue
     FOLDER=""
     BL="$(basename $LINK)"
     if [ -h $LINK ]; then
@@ -101,6 +103,7 @@ for LINK in /etc/duplicity.d/$1/folderlinks/*; do
 done
 
 for POSTSCRIPT in /etc/duplicity.d/$1/postscripts/*; do
+    [ -e "$POSTSCRIPT" ] || continue
     if [ ! -d $POSTSCRIPT ] && [ -x $POSTSCRIPT ]; then
         echo "executing postscript:$POSTSCRIPT"
         $POSTSCRIPT
