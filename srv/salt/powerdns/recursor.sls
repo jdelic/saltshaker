@@ -50,7 +50,7 @@ pdns-dhclient-enforce-nameservers:
     file.append:
         - name: /etc/dhcp/dhclient.conf
         - text: |
-            supersede domain-name-servers 127.0.0.1
+            supersede domain-name-servers 127.0.0.1;
         - require:
             - service: pdns-recursor-service
 
