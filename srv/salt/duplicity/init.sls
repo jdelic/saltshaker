@@ -61,5 +61,5 @@ duplicity-crontab:
         - source: salt://duplicity/cron/crontab
         - user: root
         - group: root
-        - mode: '0755'
+        - mode: '0644'
 {% endif %}
