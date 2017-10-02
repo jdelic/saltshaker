@@ -82,6 +82,7 @@ authserver-postgres:
         - require:
             - postgres_user: {{user}}-postgres
 
+
 {{user}}-usage-privileges:
     postgres_privileges.present:
         - name: {{pillar[user]['dbuser']}}

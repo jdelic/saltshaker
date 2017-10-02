@@ -5,6 +5,7 @@ rsyslog:
         - enable: True
         - watch:
             - file: /etc/rsyslog.d*
+            - file: /etc/rsyslog.conf
 
 
 /etc/rsyslog.d:
@@ -13,6 +14,26 @@ rsyslog:
         - user: root
         - group: root
         - mode: '0755'
+
+
+/etc/rsyslog.d/10-main.conf:
+    file.managed:
+        - source: salt://rsyslog/10-main.conf
+        - user: root
+        - group: root
+        - mode: '0640'
+        - require:
+            - file: /etc/rsyslog.d
+
+
+/etc/rsyslog.conf:
+    file.managed:
+        - source: salt://rsyslog/rsyslog.conf
+        - user: root
+        - group: root
+        - mode: '0644'
+        - require:
+            - pkg: rsyslog
 
 
 salt-log-dir:
