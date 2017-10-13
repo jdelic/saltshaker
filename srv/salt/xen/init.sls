@@ -33,6 +33,17 @@ libvirt-xen:
             - libvirt0
 
 
+xendomains-config:
+    file.managed:
+        - name: /etc/default/xendomains
+        - source: salt://xen/xendomains
+        - user: root
+        - group: root
+        - mode: '0644'
+        - require:
+            - pkg: xen-hypervisor
+
+
 xen-bridge-interfaces:
     file.managed:
         - name: /etc/network/interfaces.d/xenbridges
