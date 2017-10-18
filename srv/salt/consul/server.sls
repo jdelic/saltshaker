@@ -97,6 +97,8 @@ consul-server-service:
         - watch:
             - file: consul-server-service  # if consul.service changes we want to *restart* (reload: False)
             - file: consul  # restart on a change of the binary
+        - watch_in:
+            - service: pdns-recursor-service
 
 
 {% if pillar['consul-cluster']['number-of-nodes'] == 1 %}
@@ -137,6 +139,8 @@ consul-server-service-reload:
             - file: /etc/consul/services.d*
             - file: consul-common-config
             - file: consul-acl-config
+        - watch_in:
+            - service: pdns-recursor-service
 
 
 consul-agent-absent:

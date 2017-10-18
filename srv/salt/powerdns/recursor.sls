@@ -44,12 +44,15 @@ pnds-recursor-override-resolv.conf:
         - group: root
         - require:
             - service: pdns-recursor-service
-    cmd.run:
-        - name: chattr +i /etc/resolv.conf
-        - onchanges:
-            - file: pnds-recursor-override-resolv.conf
+
+
+pdns-dhclient-enforce-nameservers:
+    file.append:
+        - name: /etc/dhcp/dhclient.conf
+        - text: |
+            supersede domain-name-servers 127.0.0.1;
         - require:
-            - file: pnds-recursor-override-resolv.conf
+            - service: pdns-recursor-service
 
 
 pdns-recursor-service:

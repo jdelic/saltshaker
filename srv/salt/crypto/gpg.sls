@@ -35,8 +35,8 @@ gpg-shared-keyring-temp:
         - name: {{keyloc}}/tmp
         - makedirs: True
         - user: root
-        - group: root
-        - mode: '0700'
+        - group: gpg-access
+        - mode: '0710'
         - require:
             - file: gpg-shared-keyring-location
 
@@ -78,25 +78,18 @@ gpg-{{k}}:
             - file: gpg-shared-keyring-temp
             - file: gpg2-batchmode-config
             - file: gpg2-agent-batchmode-config
-    {% if pillar['gpg'].get('fingerprints', {}).get(k, False) %}
-    # we have a fingerprint, so render a conditional cmd.run and check whether the key is in the keyring
     cmd.run:
+        # more info here
+        # https://stackoverflow.com/questions/22136029/how-to-display-gpg-key-details-without-importing-it
         - unless: >
             /usr/bin/gpg
             --homedir {{keyloc}}
             --no-default-keyring
-            --keyring {{salt['file.join'](keyloc, "pubring.gpg")}}
-            --secret-keyring {{salt['file.join'](keyloc, "secring.gpg")}}
-            --trustdb {{salt['file.join'](keyloc, "trustdb.gpg")}}
-            --list-keys {{pillar['gpg']['fingerprints'][k]}}
-    {% else %}
-    # otherwise depend on the state change of the file state
-    cmd.run:
-        - onchanges:
-            - file: gpg-{{k}}
-    {% endif %}
+            --list-keys $(/usr/bin/gpg --no-default-keyring --homedir {{keyloc}} \
+                --with-colons {{keyloc}}/tmp/gpg-{{k}}.asc | head -1 | cut -d':' -f5 2>/dev/null) 2>/dev/null
         - name: >
             /usr/bin/gpg
+            --verbose
             --homedir {{keyloc}}
             --no-default-keyring
             --keyring {{salt['file.join'](keyloc, "pubring.gpg")}}
@@ -104,6 +97,30 @@ gpg-{{k}}:
             --trustdb {{salt['file.join'](keyloc, "trustdb.gpg")}}
             --batch
             --import {{keyloc}}/tmp/gpg-{{k}}.asc
+        - require:
+            - file: gpg-{{k}}
+
+
+gpg-establish-trust-{{k}}:
+    cmd.run:
+        - unless: >
+            /usr/bin/gpg
+            --homedir {{keyloc}}
+            --no-default-keyring
+            --with-colons
+            --list-keys $(/usr/bin/gpg --no-default-keyring --homedir {{keyloc}} \
+                --with-colons {{keyloc}}/tmp/gpg-{{k}}.asc | head -1 | cut -d':' -f5 2>/dev/null) 2>/dev/null |
+            grep "pub:" | cut -d':' -f2 | grep "u" >/dev/null
+        - name: >
+            echo "$(/usr/bin/gpg --no-default-keyring --homedir {{keyloc}} \
+                --with-fingerprint --with-fingerprint --with-colons {{keyloc}}/tmp/gpg-{{k}}.asc |
+                grep "fpr:" | head -1 | cut -d':' -f10 2>/dev/null):6:" |
+            /usr/bin/gpg
+            --homedir=/etc/gpg-managed-keyring/
+            --batch
+            --import-ownertrust
+        - require:
+            - cmd: gpg-{{k}}
 {% endfor %}
 
 
@@ -112,13 +129,13 @@ managed-keyring:
     file.directory:
         - name: {{keyloc}}
         - file_mode: '0640'
+        - dir_mode: '0710'
         - user: root
         - group: gpg-access
         - recurse:
             - user
             - group
             - mode
-            - ignore_dirs
         - require:
             - group: gpg-access
             - file: gpg-shared-keyring-location

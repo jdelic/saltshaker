@@ -1,7 +1,5 @@
 #!/bin/sh
 
-/var/qmail/bin/jgreylist-clean
-
 echo ""
 echo "removing spam older than 14 days from all .Spam mailboxes"
 
@@ -22,4 +20,4 @@ for DIR in `find /secure/email -type d -name .Spam`; do
 done
 
 echo removed $REMCOUNT spam mails
-echo "" 
+echo ""

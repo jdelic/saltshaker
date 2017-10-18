@@ -53,7 +53,23 @@ basic-required-packages:
             - net-tools
             - libcap2-bin
             - apt-transport-https
+            - cron
         -  order: 1  # execute this state early, because later states need unzip
+
+
+empty-crontab:
+    file.managed:
+        - name: /etc/cron.d/00-ignore
+        - contents: |
+            # nothing to see here, this is just for salt
+
+
+cron:
+    service.running:
+        - sig: /usr/sbin/cron
+        - reload: True
+        - watch:
+            - file: /etc/cron.d*
 
 
 stretch:

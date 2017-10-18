@@ -82,7 +82,9 @@ base:
         - hetzner.crypto
         - hetzner.ssl
         - hetzner.authserver
+        - hetzner.duplicity
         - shared.urls
+        - shared.secrets.live-backup
 
     # every minion ID ending in ".test" is a local dev environment
     '*.test':
@@ -97,6 +99,7 @@ base:
         - local.crypto
         - local.ssl
         - local.authserver
+        - local.duplicity
         # - local.url_overrides
         - shared.urls
 
