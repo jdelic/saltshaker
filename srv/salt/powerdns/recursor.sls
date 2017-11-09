@@ -38,7 +38,7 @@ pnds-recursor-override-resolv.conf:
     file.managed:
         - name: /etc/resolv.conf
         - contents: |
-            nameserver 127.0.0.1
+            nameserver 169.254.1.1
         - mode: '0644'
         - user: root
         - group: root
@@ -50,7 +50,7 @@ pdns-dhclient-enforce-nameservers:
     file.append:
         - name: /etc/dhcp/dhclient.conf
         - text: |
-            supersede domain-name-servers 127.0.0.1;
+            supersede domain-name-servers 169.254.1.1;
         - require:
             - service: pdns-recursor-service
 
