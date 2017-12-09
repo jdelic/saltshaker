@@ -34,7 +34,7 @@ urls:
 
 
 hashes:
-    concourse: sha256=ec6036cdffe4e2495a0db0ce1ca70aa3bb2a973c96fe79c6c536059e7278b31b
+    concourse: sha256=05a6f9882a87a41bfa8ef27ba025b3b6b3c2fb2c56357263656bec8151f4bfe4
     consul: sha256=eac5755a1d19e4b93f6ce30caaf7b3bd8add4557b143890b1c07f5614a667a68
     consul-template: sha256=5f70a7fb626ea8c332487c491924e0a2d594637de709e5b430ecffc83088abc0
     exxo: sha256=ce3d6ae10d364c5a0726cce127602fe6fa5d042b11afd21d79502f8216b42e1e
