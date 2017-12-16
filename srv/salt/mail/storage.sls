@@ -58,7 +58,7 @@ email-backup-prescript-script:
         - name: /etc/duplicity.d/daily/prescripts/secure-email/disable_delivery.sh
         - contents: |
             #!/bin/bash
-            # enable deliveries for virtmail
+            # disable deliveries for virtmail
             chmod +t {{pillar['emailstore']['path']}}
         - user: root
         - group: root
