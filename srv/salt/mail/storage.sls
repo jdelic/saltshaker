@@ -23,6 +23,17 @@ email-storage:
             - secure-mount
 
 
+email-storage-tmp:
+    file.directory:
+        - name: {{salt['file.join](pillar['emailstore']['path'], 'tmp')}}
+        - user: virtmail
+        - group: mail
+        - mode: '0770'
+        - require:
+            - user: virtmail
+            - secure-mount
+
+
 {% if pillar.get('duplicity-backup', {}).get('enabled', False) %}
 email-backup-prescript-folder:
     file.directory:
