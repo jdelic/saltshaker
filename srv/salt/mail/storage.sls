@@ -25,7 +25,7 @@ email-storage:
 
 email-storage-tmp:
     file.directory:
-        - name: {{salt['file.join](pillar['emailstore']['path'], 'tmp')}}
+        - name: {{salt['file.join'](pillar['emailstore']['path'], 'tmp')}}
         - user: virtmail
         - group: mail
         - mode: '0770'
