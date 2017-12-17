@@ -136,7 +136,8 @@ SCRIPT
             salt.install_syndic = false
             salt.bootstrap_script = 'saltshaker/vagrant/bootstrap-salt.sh'
             if $local_provision
-                salt.bootstrap_options = "-R fileserver.maurusnet.test"
+                # -l uses http instead of https
+                salt.bootstrap_options = "-l -R fileserver.maurusnet.test"
             end
             salt.minion_pub = 'saltshaker/vagrant/preseed-keys/saltmaster.maurusnet.test.pub'
             salt.minion_key = 'saltshaker/vagrant/preseed-keys/saltmaster.maurusnet.test.pem'
@@ -198,7 +199,8 @@ SCRIPT
             salt.install_syndic = false
             salt.bootstrap_script = 'saltshaker/vagrant/bootstrap-salt.sh'
             if $local_provision
-                salt.bootstrap_options = "-R fileserver.maurusnet.test"
+                # -l uses http instead of https
+                salt.bootstrap_options = "-l -R fileserver.maurusnet.test"
             end
             salt.minion_key = 'saltshaker/vagrant/preseed-keys/test.maurusnet.test.pem'
             salt.minion_pub = 'saltshaker/vagrant/preseed-keys/test.maurusnet.test.pub'
