@@ -3,6 +3,12 @@
 duplicity-backup:
     enabled: True
     gpg-key-id: 7CDC4589
-    filename: /etc/cron.hourly/duplicity-backup.sh  # use this to reference accumulators
+    additional-options: --full-if-older-than 1M
+    # enable-cleanup will run an additional cron job at the first of every month
+    # removing backups older than a certain time (unless newer backups depend on them)
+    enable-cleanup-cron: True
+    cleanup-cron-schedule: 0 10 1 * *
+    cleanup-mode: remove-older-than
+    cleanup-selector: 1y
     # backup-target is set in shared.secrets.live-backup
     envvars: {}
