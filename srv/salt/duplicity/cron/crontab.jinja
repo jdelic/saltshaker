@@ -1,0 +1,8 @@
+# backup folders linked in /etc/duplicity.d/(hourly|daily)/folders
+
+0  * * * *    root    /etc/duplicity.d/backup.sh hourly
+0  5 * * *    root    /etc/duplicity.d/backup.sh daily
+{% if cleanup_enabled -%}
+{{cleanup_schedule}}    root    /etc/duplicity.d/cleanup.sh run
+{% endif %}
+

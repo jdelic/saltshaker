@@ -23,7 +23,7 @@ duplicity-cron-config-folder:
     {% set x = envvars.__setitem__('GNUPGHOME', pillar['gpg']['shared-keyring-location']) %}
 {% endif %}
 
-duplicity-cron-script:
+duplicity-cron-backup-script:
     file.managed:
         - name: /etc/duplicity.d/backup.sh
         - source: salt://duplicity/cron/backup.jinja.sh
@@ -36,6 +36,22 @@ duplicity-cron-script:
             backup_target_url: {{pillar['duplicity-backup']['backup-target']}}
             gpg_key_id: {{pillar['duplicity-backup']['gpg-key-id']}}
             gpg_options: {{pillar['duplicity-backup'].get('gpg-options', '')}}
+            envvars: {{envvars}}
+
+
+duplicity-cron-cleanup-script:
+    file.managed:
+        - name: /etc/duplicity.d/cleanup.sh
+        - source: salt://duplicity/cron/cleanup.jinja.sh
+        - template: jinja
+        - user: root
+        - group: root
+        - mode: '0700'
+        - context:
+            backup_target_url: {{pillar['duplicity-backup']['backup-target']}}
+            cron_enabled: {{pillar.get('duplicity-backup', {}).get('enable-cleanup-cron', False)}}
+            cleanup_mode: {{pillar.get('duplicity-backup', {}).get('cleanup-mode', 'remove-older-than')}}
+            cleanup_selector: {{pillar.get('duplicity-backup', {}).get('cleanup-selector', '1y')}}
             envvars: {{envvars}}
 
 
@@ -58,8 +74,12 @@ duplicity-config-{{crontype}}-{{loop.index}}:
 duplicity-crontab:
     file.managed:
         - name: /etc/cron.d/duplicity
-        - source: salt://duplicity/cron/crontab
+        - source: salt://duplicity/cron/crontab.jinja
         - user: root
         - group: root
         - mode: '0644'
+        - template: jinja
+        - context:
+            cleanup_enabled: {{pillar.get('duplicity-backup', {}).get('enable-cleanup-cron', False)}}
+            cleanup_schedule: {{pillar.get('duplicity-backup', {}).get('cleanup-cron-schedule', '0 10 1 * *')}}
 {% endif %}
