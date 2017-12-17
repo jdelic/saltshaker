@@ -21,6 +21,7 @@ concourse-user:
         - createhome: False
         - require:
             - group: concourse-user
+            - group: gpg-access
 
 
 concourse-config-folder:
