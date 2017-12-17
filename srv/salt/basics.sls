@@ -67,7 +67,6 @@ empty-crontab:
 cron:
     service.running:
         - sig: /usr/sbin/cron
-        - reload: True
         - watch:
             - file: /etc/cron.d*
 
