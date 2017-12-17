@@ -11,4 +11,3 @@ duplicity-backup:
     cleanup-mode: remove-older-than
     cleanup-selector: 1y
     # backup-target is set in shared.secrets.live-backup
-    envvars: {}
