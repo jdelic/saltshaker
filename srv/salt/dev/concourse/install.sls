@@ -21,6 +21,7 @@ concourse-user:
         - createhome: False
         - require:
             - group: concourse-user
+            - group: gpg-access
 
 
 concourse-config-folder:
@@ -66,6 +67,7 @@ concourse-install:
         - mode: '0755'
         - user: concourse
         - group: concourse
+        - replace: False
         - require:
             - user: concourse-user
             - file: concourse-keys-host_key-public
