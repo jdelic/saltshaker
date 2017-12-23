@@ -142,6 +142,8 @@ timezone-utc:
     cmd.run:
         - name: timedatectl set-timezone UTC
         - unless: test "$(readlink /etc/localtime)" = "../usr/share/zoneinfo/UTC"
+        - require:
+            - service: dbus
 
 
 #openssl:
