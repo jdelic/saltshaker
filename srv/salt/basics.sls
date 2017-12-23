@@ -132,6 +132,13 @@ maurusnet-apps:
         - order: 2
 
 
+# enforce UTC
+timezone-utc:
+    cmd.run:
+        - name: timedatectl set-timezone UTC
+        - unless: test "$(readlink /etc/localtime)" = "../usr/share/zoneinfo/UTC"
+
+
 #openssl:
 #    # this will upgrade the installed version from the basebox
 #    pkg.latest:

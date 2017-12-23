@@ -1,8 +1,18 @@
 # install haproxy
 
+haproxy-repo:
+    pkgrepo.managed:
+        - name: {{pillar['repos']['haproxy']}}
+        - file: /etc/apt/sources.list.d/haproxy.list
+        - key_url: salt://haproxy/bernat.debian.org.pgp.key
+
+
 haproxy:
     pkg.installed:
         - install_recommends: False
+        - fromrepo: stretch-backports-1.8
+        - require:
+            - pkgrepo: haproxy-repo
     service.dead:
         - name: haproxy
         - enable: False

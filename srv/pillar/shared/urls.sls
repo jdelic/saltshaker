@@ -16,6 +16,7 @@ repos:
     maurusnet-radicale: deb http://repo.maurus.net/stretch/radicale/ mn-radicale main
     postgresql: deb http://apt.postgresql.org/pub/repos/apt/ stretch-pgdg main
     saltstack: deb http://repo.saltstack.com/apt/debian/9/amd64/latest stretch main
+    haproxy: deb http://haproxy.debian.net stretch-backports-1.8 main
 
 #   pgpkey: Set this to a salt:// url if you need to deploy your own repo signing key
 #           If you need to deploy more than one key, you should really write your own
