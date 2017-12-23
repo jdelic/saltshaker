@@ -113,8 +113,8 @@ dovecot-sql-config:
             - file: {{pillar['ssl']['service-rootca-cert']}}
 
 
-{% for port in ['143', '993'] %}
-# allow others to contact us on ports
+# allow others to contact us on ports (imap, imaps, managesieve)
+{% for port in ['143', '993', '4190'] %}
 dovecot-in{{port}}-recv:
     iptables.append:
         - table: filter
