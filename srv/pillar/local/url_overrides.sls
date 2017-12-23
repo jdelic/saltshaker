@@ -16,6 +16,7 @@ repos:
     maurusnet-radicale: deb http://fileserver.maurusnet.test/mn-radicale/ mn-radicale main
     postgresql: deb http://fileserver.maurusnet.test/postgresql/ stretch-pgdg main
     saltstack: deb http://fileserver.maurusnet.test/apt/debian/9/amd64/latest stretch main
+    haproxy: deb http://fileserver.maurusnet.test/haproxy/ stretch-backports-1.8 main
 
     pgpkey: salt://mn/fileserver_ACADBD6B.pgp.key
 
