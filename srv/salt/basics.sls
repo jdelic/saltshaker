@@ -54,6 +54,7 @@ basic-required-packages:
             - libcap2-bin
             - apt-transport-https
             - cron
+            - dbus
         -  order: 1  # execute this state early, because later states need unzip
 
 
