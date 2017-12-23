@@ -72,6 +72,10 @@ cron:
             - file: /etc/cron.d*
 
 
+dbus:
+    service.running
+
+
 stretch:
     pkgrepo.managed:
         - name: {{pillar['repos']['stretch']}}
