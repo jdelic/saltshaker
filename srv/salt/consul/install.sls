@@ -117,6 +117,10 @@ consul-common-config:
         - require:
             - file: consul-basedir
             - cmd: consul-network-interface
+            - user: consul
+            - group: consul
+            - file: consul-service-dir
+            - file: consul-conf-dir
 
 
 consul:

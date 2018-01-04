@@ -94,6 +94,9 @@ consul-server-service:
         - sig: consul
         - enable: True
         - init_delay: 2
+        - require:
+            - file: consul-common-config
+            - file: consul-acl-config
         - watch:
             - file: consul-server-service  # if consul.service changes we want to *restart* (reload: False)
             - file: consul  # restart on a change of the binary

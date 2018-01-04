@@ -40,11 +40,11 @@ smartstack-external:
                 {%- endif %}
             template: /etc/haproxy/haproxy-external.jinja.cfg
         - require:
+            - file: haproxy-multi
             - file: haproxy-config-template-external
     service.enabled:  # haproxy will be started by the smartstack script rendered by consul-template (see command above)
         - name: haproxy@external
         - require:
-            - file: haproxy-multi
             - file: smartstack-external
             {% if 'ssl' in pillar and 'maincert' in pillar['ssl'] %}
             - file: ssl-maincert

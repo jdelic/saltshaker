@@ -30,6 +30,8 @@ consul-agent-service:
         - init_delay: 2
         - require:
             - file: consul-agent-service
+            - file: consul-common-config
+            - file: consul-acl-config
         - watch:
             - file: consul-agent-service  # if consul.service changes we want to *restart* (reload: False)
             - file: consul  # restart on a change of the binary
