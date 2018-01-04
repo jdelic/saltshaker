@@ -8,9 +8,9 @@ Wants=syslog.service
 [Service]
 Environment=CONFIG=/etc/haproxy/haproxy-%i.cfg
 EnvironmentFile=-/etc/default/haproxy
-ExecStartPre=/usr/sbin/haproxy -f ${CONFIG} -c -q
-ExecStart=/usr/sbin/haproxy-systemd-wrapper -f ${CONFIG} -p /run/haproxy-%i.pid $EXTRAOPTS
-ExecReload=/usr/sbin/haproxy -c -f ${CONFIG}
+ExecStartPre=/usr/sbin/haproxy -f ${CONFIG} -c -q $EXTRAOPTS
+ExecStart=/usr/sbin/haproxy -Ws -f ${CONFIG} -p /run/haproxy-%i.pid $EXTRAOPTS
+ExecReload=/usr/sbin/haproxy -f $CONFIG -c -q $EXTRAOPTS
 ExecReload=/bin/kill -USR2 $MAINPID
 KillMode=mixed
 Restart=always
