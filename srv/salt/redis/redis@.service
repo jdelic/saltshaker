@@ -11,7 +11,7 @@ TimeoutStopSec=0
 Restart=always
 User=redis
 Group=redis
-RunTimeDirectory=redis
+RuntimeDirectory=redis
 
 ExecStartPre=-/bin/run-parts --verbose /etc/redis/redis-server.pre-up.d
 ExecStartPost=-/bin/run-parts --verbose /etc/redis/redis-server.post-up.d
