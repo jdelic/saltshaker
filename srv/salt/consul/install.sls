@@ -119,6 +119,8 @@ consul-common-config:
             - cmd: consul-network-interface
             - user: consul
             - group: consul
+            - file: consul-service-dir
+            - file: consul-conf-dir
 
 
 consul:
