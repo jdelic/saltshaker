@@ -44,6 +44,15 @@ dockerd-service:
 # to the internet
 
 
+docker-pdns-recursor-cidr:
+  file.accumulated:
+      - name: powerdns-recursor-additional-cidrs
+      - filename: /etc/powerdns/recursor.conf
+      - text: {{pillar['docker']['bridge-cidr']}}/24
+      - require_in:
+          - file: pdns-recursor-config
+
+
 # enable encryption for overlay nets
 docker-overlaynet-enable-protocol50-in:
     iptables.append:
