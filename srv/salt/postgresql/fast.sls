@@ -68,14 +68,19 @@ postgresql-hba-config:
             - cmd: data-cluster
 
 
-data-cluster-config-network:
+data-cluster-config-base:
     file.append:
         - name: /etc/postgresql/9.6/main/postgresql.conf
-        - text: listen_addresses = '{{pillar.get('postgresql', {}).get(
+        - text: |
+            listen_addresses = '{{pillar.get('postgresql', {}).get(
                 'bind-ip', grains['ip_interfaces'][pillar['ifassign']['internal']][pillar['ifassign'].get(
                     'internal-ip-index', 0
                 )|int()]
             )}}'
+            max_wal_senders = 2  # minimum necessary for for hot backup without additional log shipping
+            wal_keep_segments = 3  # just as a precaution.
+            wal_level = replica
+            archive_mode = off  # we don't do log shipping, just hot backups, so we don't need archive_command
         - require:
             - cmd: data-cluster
         - require_in:
@@ -172,7 +177,7 @@ data-cluster-service:
         - order: 15  # see ORDER.md
         - watch:
             - file: postgresql-hba-config
-            - file: data-cluster-config-network
+            - file: data-cluster-config-base
 {% if pillar.get("ssl", {}).get("postgresql") %}
             - file: postgresql-ssl-cert
             - file: postgresql-ssl-key
