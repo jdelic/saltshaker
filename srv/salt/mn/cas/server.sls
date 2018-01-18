@@ -3,7 +3,6 @@
 authserver:
     pkg.installed:
         - name: authserver
-        - fromrepo: mn-nightly
         - require:
             - appconfig: authserver-appconfig
     service.running:
