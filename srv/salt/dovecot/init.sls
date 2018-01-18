@@ -16,9 +16,6 @@ dovecot:
         - running
         - enable: True
         - watch:
-{% for file in conffiles %}
-            - file: /etc/dovecot/conf.d/{{file}}
-{% endfor %}
 {% if pillar['imap']['sslcert'] != 'default' %}
             - file: dovecot-ssl-cert
             - file: dovecot-ssl-key
@@ -92,6 +89,8 @@ dovecot-config-{{file}}:
                 )}}
             bindport: 143
             ssl_bindport: 993
+        - watch_in:
+            - service: dovecot
         - require:
             - pkg: dovecot
             - file: {{pillar['ssl']['service-rootca-cert']}}
