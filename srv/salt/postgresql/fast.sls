@@ -227,4 +227,76 @@ postgresql-servicedef:
             - service: data-cluster-service
 
 
+{% if pillar.get('duplicity-backup', {}).get('enabled', False) %}
+# We're dumping the whole cluster, so we just pretend that /secure will always exist if
+# duplicity backup is enabled. This is so because otherwise we might dump sensitive data on
+# and unencrypted partition. This could be handled better if secure databases were handled
+# by a separate postgresql cluster.
+postgresql-backup-target:
+    file.directory:
+        - name: /secure/postgres-backup
+        - user: postgres
+        - group: root
+        - mode: '0750'
+        - makedirs: True
+        - require:
+            - secure-mount
+
+
+postgresql-backup-prescript-folder:
+    file.directory:
+        - name: /etc/duplicity.d/daily/prescripts/postgresql
+        - user: root
+        - group: root
+        - mode: '0755'
+        - makedirs: True
+
+
+postscript-backup-postscript-folder:
+    file.directory:
+        - name: /etc/duplicity.d/daily/postscripts/postgresql
+        - user: root
+        - group: root
+        - mode: '0755'
+        - makedirs: True
+
+
+postgresql-backup-prescript:
+    file.managed:
+        - name: /etc/duplicity.d/daily/prescripts/postgresql/clusterbackup.sh
+        - contents: |
+            #!/bin/bash
+            # The below command will fail if there are more table spaces than those configured in this Salt config.
+            su -s /bin/bash -c "/usr/bin/pg_basebackup -D /secure/postgres-backup/backup \
+                --waldir /secure/postgres-backup/wal \
+                -X stream -R -T /secure/postgres/10/main=/secure/postgres-backup/backup-secure" postgres
+        - user: root
+        - group: root
+        - mode: '0750'
+        - require:
+            - file: postgresql-backup-prescript-folder
+
+
+postgresql-backup-postscript:
+    file.managed:
+        - name: /etc/duplicity.d/daily/postscripts/postgresql/removebackup.sh
+        - contents: |
+            #!/bin/bash
+            # remove backup files after duplicity has processed them, because pg_basebackup will not
+            # proceed if its target directory isn't empty.
+            rm -rf /secure/postgres-backup/*
+        - user: root
+        - group: root
+        - mode: '0750'
+        - require:
+            - file: postgresql-backup-postscript-folder
+
+
+postgresql-backup-symlink:
+    - name: /etc/duplicity.d/daily/folderlinks/secure-postgres-backup
+    - target: /secure/postgres-backup
+    - require:
+        - file: postgresql-backup-target
+{% endif %}
+
 # vim: syntax=yaml
