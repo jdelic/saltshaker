@@ -50,10 +50,10 @@ postgresql-step2:
 data-cluster:
     cmd.run:
         - name: >
-            /usr/bin/pg_createcluster -d /data/postgres/10.1/main --locale=en_US.utf-8 -e utf-8 -p 5432
-            10.1 main
+            /usr/bin/pg_createcluster -d /data/postgres/10/main --locale=en_US.utf-8 -e utf-8 -p 5432
+            10 main
         - runas: root
-        - unless: test -e /data/postgres/10.1/main
+        - unless: test -e /data/postgres/10/main
         - require:
             - postgresql-step2
             - data-base-dir
@@ -70,7 +70,7 @@ postgresql-hba-config:
 
 data-cluster-config-base:
     file.append:
-        - name: /etc/postgresql/10.1/main/postgresql.conf
+        - name: /etc/postgresql/10/main/postgresql.conf
         - text: |
             listen_addresses = '{{pillar.get('postgresql', {}).get(
                 'bind-ip', grains['ip_interfaces'][pillar['ifassign']['internal']][pillar['ifassign'].get(
@@ -113,7 +113,7 @@ postgresql-ssl-key:
 {% if "sslcert" in pillar["postgresql"] %}
 data-cluster-config-sslcert:
     file.replace:
-        - name: /etc/postgresql/10.1/main/postgresql.conf
+        - name: /etc/postgresql/10/main/postgresql.conf
         - pattern: ssl_cert_file = '/etc/ssl/certs/ssl-cert-snakeoil.pem'[^\n]*$
         - repl: ssl_cert_file = '{{pillar['postgresql']['sslcert']
             if pillar['postgresql'].get('sslcert', 'default') != 'default'
@@ -125,7 +125,7 @@ data-cluster-config-sslcert:
 
 data-cluster-config-sslkey:
     file.replace:
-        - name: /etc/postgresql/10.1/main/postgresql.conf
+        - name: /etc/postgresql/10/main/postgresql.conf
         - pattern: ssl_key_file = '/etc/ssl/private/ssl-cert-snakeoil.key'[^\n]*$
         - repl: ssl_key_file = '{{pillar['postgresql']['sslkey']
             if pillar['postgresql'].get('sslcert', 'default') != 'default'
@@ -136,7 +136,7 @@ data-cluster-config-sslkey:
 
 data-cluster-config-sslciphers:
     file.replace:
-        - name: /etc/postgresql/10.1/main/postgresql.conf
+        - name: /etc/postgresql/10/main/postgresql.conf
         - pattern: "^#ssl_ciphers\\s+=\\s+'HIGH:MEDIUM:\\+3DES:!aNULL'[^\n]*$"
         - repl: >
             ssl_ciphers = 'ECDHE-ECDSA-CHACHA20-POLY1305:ECDHE-RSA-CHACHA20-POLY1305:ECDHE-ECDSA-AES128-GCM-SHA256:
@@ -156,7 +156,7 @@ data-cluster-config-sslciphers:
 # that were collected in the postgresql-hba-certusers-accumulator accumulator
 data-cluster-config-ssl_client_ca:
     file.replace:
-        - name: /etc/postgresql/10.1/main/postgresql.conf
+        - name: /etc/postgresql/10/main/postgresql.conf
         - pattern: "^#ssl_ca_file = ''[^\n]*$"
         - repl: ssl_ca_file = '{{pillar['ssl']['environment-rootca-cert']}}'
         - backup: False
@@ -171,8 +171,8 @@ data-cluster-config-ssl_client_ca:
 
 data-cluster-service:
     service.running:
-        - name: postgresql@10.1-main
-        - sig: /usr/lib/postgresql/10.1/bin/postgres
+        - name: postgresql@10-main
+        - sig: /usr/lib/postgresql/10/bin/postgres
         - enable: True
         - order: 15  # see ORDER.md
         - watch:
