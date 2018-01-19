@@ -63,9 +63,6 @@ email-backup-prescript-script:
         - user: root
         - group: root
         - mode: '0750'
-        - template: jinja
-        - context:
-            storepath: {{pillar['emailstore']['path']}}
         - require:
             - file: email-backup-prescript-folder
 
@@ -80,9 +77,6 @@ email-backup-postscript-script:
         - user: root
         - group: root
         - mode: '0750'
-        - template: jinja
-        - context:
-            storepath: {{pillar['emailstore']['path']}}
         - require:
             - file: email-backup-postscript-folder
 
