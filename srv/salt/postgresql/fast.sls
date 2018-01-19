@@ -293,10 +293,11 @@ postgresql-backup-postscript:
 
 
 postgresql-backup-symlink:
-    - name: /etc/duplicity.d/daily/folderlinks/secure-postgres-backup
-    - target: /secure/postgres-backup
-    - require:
-        - file: postgresql-backup-target
+    file.symlink:
+        - name: /etc/duplicity.d/daily/folderlinks/secure-postgres-backup
+        - target: /secure/postgres-backup
+        - require:
+            - file: postgresql-backup-target
 {% endif %}
 
 # vim: syntax=yaml
