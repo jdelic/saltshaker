@@ -252,7 +252,7 @@ postgresql-backup-prescript-folder:
         - makedirs: True
 
 
-postscript-backup-postscript-folder:
+postgresql-backup-postscript-folder:
     file.directory:
         - name: /etc/duplicity.d/daily/postscripts/postgresql
         - user: root
