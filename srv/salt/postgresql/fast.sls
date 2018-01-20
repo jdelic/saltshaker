@@ -245,7 +245,7 @@ postgresql-backup-target:
 
 postgresql-backup-prescript-folder:
     file.directory:
-        - name: /etc/duplicity.d/daily/prescripts/postgresql
+        - name: /etc/duplicity.d/daily/prescripts/postgres-backup
         - user: root
         - group: root
         - mode: '0755'
@@ -254,7 +254,7 @@ postgresql-backup-prescript-folder:
 
 postgresql-backup-postscript-folder:
     file.directory:
-        - name: /etc/duplicity.d/daily/postscripts/postgresql
+        - name: /etc/duplicity.d/daily/postscripts/postgres-backup
         - user: root
         - group: root
         - mode: '0755'
@@ -263,7 +263,7 @@ postgresql-backup-postscript-folder:
 
 postgresql-backup-prescript:
     file.managed:
-        - name: /etc/duplicity.d/daily/prescripts/postgresql/clusterbackup.sh
+        - name: /etc/duplicity.d/daily/prescripts/postgres-backup/clusterbackup.sh
         - contents: |
             #!/bin/bash
             # The below command will fail if there are more table spaces than those configured in this Salt config.
@@ -279,7 +279,7 @@ postgresql-backup-prescript:
 
 postgresql-backup-postscript:
     file.managed:
-        - name: /etc/duplicity.d/daily/postscripts/postgresql/removebackup.sh
+        - name: /etc/duplicity.d/daily/postscripts/postgres-backup/removebackup.sh
         - contents: |
             #!/bin/bash
             # remove backup files after duplicity has processed them, because pg_basebackup will not
@@ -294,7 +294,7 @@ postgresql-backup-postscript:
 
 postgresql-backup-symlink:
     file.symlink:
-        - name: /etc/duplicity.d/daily/folderlinks/secure-postgres-backup
+        - name: /etc/duplicity.d/daily/folderlinks/postgres-backup
         - target: /secure/postgres-backup
         - require:
             - file: postgresql-backup-target
