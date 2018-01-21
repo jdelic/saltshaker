@@ -3,7 +3,8 @@
         "name": "postgresql",
         "tags": [
             "smartstack:internal", "smartstack:port:{{port}}",
-            "haproxy:backend:option:pgsql-check user postgres"
+            "haproxy:backend:option:pgsql-check user postgres",
+            "haproxy:backend:option:tcpka"
         ],
         "address": "{{ip}}",
         "port": {{port}}
