@@ -48,6 +48,7 @@ authserver-rsyslog:
     "ALLOWED_HOSTS": "%s,%s"|format(pillar['authserver']['hostname'], pillar['authserver']['smartstack-hostname']),
     "CORS_ORIGIN_REGEX_WHITELIST": "^https://(\w+\.)?(maurusnet\.test|maurus\.net)$",
     "USE_X_FORWARDED_HOST": "true",
+    "APPLICATION_LOGLEVEL": "INFO",
 } %}
 
 {# because we don't have jinja2.ext.do, we have to use the following work-around to set dict items #}
