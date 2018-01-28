@@ -43,7 +43,8 @@ mailforwarder-rsyslog:
         else pillar['postgresql']['pinned-ca-cert'],
     "DATABASE_URL": 'postgresql://%s:@postgresql.local:5432/%s'|format(pillar['mailforwarder']['dbuser'],
         pillar['authserver']['dbname']),
-    "ALLOWED_HOSTS": "%s,%s"|format(pillar['authserver']['hostname'], pillar['authserver']['smartstack-hostname'])
+    "ALLOWED_HOSTS": "%s,%s"|format(pillar['authserver']['hostname'], pillar['authserver']['smartstack-hostname']),
+    "APPLICATION_LOGLEVEL": "INFO",
 } %}{# # RELAYPORT uses  dkimproxy's local relay to send mail #}
 
 
