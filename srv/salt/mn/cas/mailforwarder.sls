@@ -36,7 +36,7 @@ mailforwarder-rsyslog:
     "DELIVERYIP": '127.0.0.1',
     "DELIVERYPORT": pillar.get('mailforwarder', {}).get('delivery-port', 10045),
     "RELAYIP": '127.0.0.1',
-    "RELAYPORT": pillar.get('mailforwarder', {}).get('relay-port', 10036),
+    "RELAYPORT": pillar.get('mailforwarder', {}).get('relay-port', 10045),
     "DATABASE_NAME": pillar['authserver']['dbname'],
     "POSTGRESQL_CA": pillar['ssl']['service-rootca-cert'] if
         pillar['postgresql'].get('pinned-ca-cert', 'default') == 'default'
