@@ -73,6 +73,7 @@ base:
         - fstab.secure
         - fstab.data
         - postgresql.fast
+        - postgresql.checkuser
         - redis.cache
         - dev.concourse.postgres_database
         - postgresql.secure
