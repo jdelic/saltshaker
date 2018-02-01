@@ -13,13 +13,14 @@ authserver-vault-ssl-cert:
             - VAULT_ADDR: "https://vault.service.consul:8200/"
         - unless: /usr/local/bin/vault list auth/cert/certs | grep authserver_database >/dev/null
         - onlyif: /usr/local/bin/vault init -check >/dev/null
+        - onchanges: vault-cert-auth-enabled
 
 
 authserver-vault-postgresql-policy:
     cmd.run:
         - name: >-
             echo 'path "postgresql/creds/authserver_fullaccess" {
-                policy="read"
+                capabilities=["read"]
             }' | /usr/local/bin/vault policy-write postgresql_authserver_fullaccess -
         - env:
             - VAULT_ADDR: "https://vault.service.consul:8200/"
