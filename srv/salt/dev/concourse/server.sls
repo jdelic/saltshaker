@@ -103,6 +103,13 @@ concourse-server-envvars:
                         else pillar['postgresql']['pinned-ca-cert']}}"
             CONCOURSE_ENCRYPTION_KEY="{{pillar['dynamicsecrets']['concourse-encryption']}}"
 
+            {%- if pillar['ci']['use-vault'] %}
+            CONCOURSE_VAULT_URL="https://{{pillar['vault']['smartstack-hostname']}}:8200/"
+            CONCOURSE_VAULT_CA_CERT="{{pillar['ssl']['service-rootca-cert']}}"
+            CONCOURSE_VAULT_AUTH_BACKEND="approle"
+            CONCOURSE_VAULT_AUTH_PARAM="role_id=[?],secret_id=[?]"
+            {% endif %}
+
 
 concourse-server:
     file.managed:

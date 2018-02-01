@@ -245,6 +245,19 @@ vault-cert-auth-enabled:
         - require:
             - service: vault-service
             - cmd: vault-init
+
+# Vault clients configured by Salt should watch for this state using cmd.run:onchanges
+# and set up their approles and policies
+vault-approle-auth-enabled:
+    cmd.run:
+        - name: /usr/local/bin/vault auth-enable approle
+        - unless: /usr/local/bin/vault auth -methods | grep approle >/dev/null
+        - onlyif: /usr/local/bin/vault init -check >/dev/null
+        - env:
+            - VAULT_ADDR: "https://vault.service.consul:8200/"
+        - require:
+            - service: vault-service
+            - cmd: vault-init
 {% endif %}
 
 
