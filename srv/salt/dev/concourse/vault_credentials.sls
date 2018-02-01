@@ -7,7 +7,7 @@ concourse-vault-approle:
             vault write auth/approle/role/concourse \
                 bind_secret_id=true \
                 token_num_uses=0 \
-                secret_id_num_uses = 0 \
+                secret_id_num_uses=0 \
                 period=45m \
                 token_ttl=45m \
                 token_max_ttl=60m \
@@ -15,7 +15,7 @@ concourse-vault-approle:
                 policies=["concourse_secrets"]
         - env:
             - VAULT_ADDR: "https://vault.service.consul:8200/"
-        - unless: /usr/local/bin/vault list auth/approle/rol | grep concourse_secrets >/dev/null
+        - unless: /usr/local/bin/vault list auth/approle/role | grep concourse >/dev/null
         - onlyif: /usr/local/bin/vault init -check >/dev/null
 
 
