@@ -19,6 +19,18 @@ concourse-vault-approle:
         - onlyif: /usr/local/bin/vault init -check >/dev/null
 
 
+concourse-vault-approle-set-fixed-id:
+    cmd.run:
+        - name: >-
+            vault write auth/approle/role/concourse/role-id \
+                role_name="concourse" \
+                role_id="{{pillar['dynamicsecrets']['concourse-role-id']}}"
+        - env:
+            - VAULT_ADDR: "https://vault.service.consul:8200/"
+        - onchanges:
+            - cmd: concourse-vault-approle
+
+
 concourse-vault-secrets-policy:
     cmd.run:
         - name: >-
