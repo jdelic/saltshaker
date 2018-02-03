@@ -4,6 +4,30 @@
 {% set goldfish_user = "goldfish" %}
 {% set goldfish_group = "goldfish" %}
 
+goldfish-config-dir:
+    file.directory:
+        - name: /etc/goldfish
+        - user: root
+        - group: root
+        - mode: '0755'
+        - makedirs: True
+
+
+goldfish-config:
+    file.managed:
+        - name: /etc/goldfish/goldfish.conf
+        - source: salt://vault/goldfish.jinja.conf
+        - template: jinja
+        - context:
+            ip: {{pillar.get('vault', {}).get('bind-ip',
+                    grains['ip_interfaces'][pillar['ifassign']['internal']][pillar['ifassign'].get(
+                        'internal-ip-index', 0
+                    )|int()]
+                )}}
+            port: 8201
+        - require:
+            - file: goldfish-config-dir
+
 
 goldfish:
     group.present:
@@ -19,6 +43,7 @@ goldfish:
         - require:
             - group: goldfish
             - group: ssl-cert
+            - file: goldfish-config-dir
     archive.extracted:
         - name: /usr/local/bin
         - source: {{pillar["urls"]["goldfish"]}}
@@ -37,3 +62,20 @@ goldfish:
             - user: goldfish
             - archive: goldfish
 
+
+goldfish-service:
+    file.managed:
+        - name: /etc/systemd/system/goldfish.service
+        - source: salt://vault/goldfish.jinja.service
+        - template: jinja
+        - context:
+            user: {{goldfish_user}}
+            group: {{goldfish_group}}
+    service.running:
+        - watch:
+            file: goldfish
+            file: goldfish-service
+            file: goldfish-config
+
+
+goldfish-servicedef:
