@@ -3,6 +3,12 @@
 
 {% set goldfish_user = "goldfish" %}
 {% set goldfish_group = "goldfish" %}
+{% set ip = pillar.get('goldfish', {}).get('bind-ip',
+                grains['ip_interfaces'][pillar['ifassign']['internal']][pillar['ifassign'].get(
+                    'internal-ip-index', 0
+                )|int()]
+            ) %}
+{% set port = 8201 %}
 
 goldfish-config-dir:
     file.directory:
@@ -19,12 +25,8 @@ goldfish-config:
         - source: salt://vault/goldfish.jinja.conf
         - template: jinja
         - context:
-            ip: {{pillar.get('vault', {}).get('bind-ip',
-                    grains['ip_interfaces'][pillar['ifassign']['internal']][pillar['ifassign'].get(
-                        'internal-ip-index', 0
-                    )|int()]
-                )}}
-            port: 8201
+            ip: {{ip}}
+            port: {{port}}
         - require:
             - file: goldfish-config-dir
 
@@ -68,6 +70,8 @@ goldfish-approle-secret-id:
         - name: >-
             /usr/local/bin/vault write -f -wrap-ttl=15m \
                 auth/approle/role/{{pillar['dynamicsecrets']['goldfish-role-id']}}/secret-id
+        - env:
+            - VAULT_ADDR: "https://vault.service.consul:8200/"
         - require:
             file: vault
 
@@ -88,3 +92,16 @@ goldfish-service:
 
 
 goldfish-servicedef:
+    file.managed:
+        - name: /etc/consul/services.d/goldfish.json
+        - source: salt://vault/consul/vault_goldfish_ui.jinja.json
+        - mode: '0644'
+        - template: jinja
+        - context:
+            service: goldfish
+            mode: http
+            ip: {{ip}}
+            port: {{port}}
+            hostname: {{pillar['goldfish']['hostname']}}
+        - require:
+            - file: consul-service-dir
