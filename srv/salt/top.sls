@@ -37,6 +37,12 @@ base:
         - match: grain
         - vault
         - mn.cas.vault_database
+        - vault.vault_goldfish
+
+    'roles:goldfish':
+        - match: grain
+        - vault.install  # goldfish needs the vault binary on the node
+        - vault.goldfish_ui
 
     'roles:docker-registry':
         - match: grain
@@ -108,6 +114,7 @@ base:
         - mn.cas.server
         - mn.appconfig
         - docker.authserver_dockerregistry  # empty unless a JWT key is configured
+        - vault.install  # authserver might need the vault binary on the node
 
     'roles:loadbalancer':
         - match: grain

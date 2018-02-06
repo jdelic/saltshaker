@@ -9,6 +9,9 @@
 {% set vault_user = "vault" %}
 {% set vault_group = "vault" %}
 
+include:
+    - vault.install
+
 
 vault-data-dir:
     file.directory:
@@ -48,40 +51,6 @@ vault-config-dir:
         - require:
             - user: vault
             - group: vault
-
-
-vault:
-    group.present:
-        - name: {{vault_group}}
-    user.present:
-        - name: {{vault_user}}
-        - gid: {{vault_group}}
-        - groups:
-            - ssl-cert
-        - createhome: False
-        - home: /etc/vault
-        - shell: /bin/sh
-        - require:
-            - group: vault
-            - group: ssl-cert
-    archive.extracted:
-        - name: /usr/local/bin
-        - source: {{pillar["urls"]["vault"]}}
-        - source_hash: {{pillar["hashes"]["vault"]}}
-        - archive_format: zip
-        - unless: test -f /usr/local/bin/vault  # workaround for https://github.com/saltstack/salt/issues/42681
-        - if_missing: /usr/local/bin/vault
-        - enforce_toplevel: False
-    file.managed:
-        - name: /usr/local/bin/vault
-        - user: {{vault_user}}
-        - group: {{vault_user}}
-        - mode: '0755'
-        - replace: False
-        - require:
-            - user: vault
-            - file: vault-data-dir
-            - archive: vault
 
 
 # the vault executable must have the "cap_ipc_lock=+ep" flag so it can lock memory from swap.
@@ -240,6 +209,18 @@ vault-cert-auth-enabled:
         # we use Vault's Consul DNS API name here, because we can't rely on SmartStack being available
         # when the node has just been brought up. It doesn't matter here though, because Vault is
         # by definition local to this node when this state runs.
+        - env:
+            - VAULT_ADDR: "https://vault.service.consul:8200/"
+        - require:
+            - service: vault-service
+            - cmd: vault-init
+
+
+vault-approle-auth-enabled:
+    cmd.run:
+        - name: /usr/local/bin/vault auth-enable approle
+        - unless: /usr/local/bin/vault auth -methods | grep approle >/dev/null
+        - onlyif: /usr/local/bin/vault init -check >/dev/null
         - env:
             - VAULT_ADDR: "https://vault.service.consul:8200/"
         - require:

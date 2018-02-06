@@ -63,6 +63,15 @@ goldfish:
             - archive: goldfish
 
 
+goldfish-approle-secret-id:
+    cmd.run:
+        - name: >-
+            /usr/local/bin/vault write -f -wrap-ttl=15m \
+                auth/approle/role/{{pillar['dynamicsecrets']['goldfish-role-id']}}/secret-id
+        - require:
+            file: vault
+
+
 goldfish-service:
     file.managed:
         - name: /etc/systemd/system/goldfish.service
