@@ -1,3 +1,7 @@
+
+{% set vault_user = "vault" %}
+{% set vault_group = "vault" %}
+
 vault:
     group.present:
         - name: {{vault_group}}

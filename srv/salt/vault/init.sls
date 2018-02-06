@@ -6,11 +6,11 @@
 # credentials and more.
 #
 
-{% set vault_user = "vault" %}
-{% set vault_group = "vault" %}
-
 include:
     - vault.install
+
+
+{% from 'vault/install.sls' import vault_user, vault_group %}
 
 
 vault-data-dir:

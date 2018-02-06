@@ -65,17 +65,6 @@ goldfish:
             - archive: goldfish
 
 
-goldfish-approle-secret-id:
-    cmd.run:
-        - name: >-
-            /usr/local/bin/vault write -f -wrap-ttl=15m \
-                auth/approle/role/{{pillar['dynamicsecrets']['goldfish-role-id']}}/secret-id
-        - env:
-            - VAULT_ADDR: "https://vault.service.consul:8200/"
-        - require:
-            file: vault
-
-
 goldfish-service:
     file.managed:
         - name: /etc/systemd/system/goldfish.service
@@ -86,9 +75,9 @@ goldfish-service:
             group: {{goldfish_group}}
     service.running:
         - watch:
-            file: goldfish
-            file: goldfish-service
-            file: goldfish-config
+            - file: goldfish
+            - file: goldfish-service
+            - file: goldfish-config
 
 
 goldfish-servicedef:
