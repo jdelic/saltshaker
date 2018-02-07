@@ -98,3 +98,19 @@ goldfish-servicedef:
             hostname: {{pillar['goldfish']['hostname']}}
         - require:
             - file: consul-service-dir
+
+
+goldfish-tcp-in{{port}}-recv:
+    iptables.append:
+        - table: filter
+        - chain: INPUT
+        - jump: ACCEPT
+        - source: '0/0'
+        - destination: {{ip}}/32
+        - dport: {{port}}
+        - match: state
+        - connstate: NEW
+        - proto: tcp
+        - save: True
+        - require:
+            - sls: iptables
