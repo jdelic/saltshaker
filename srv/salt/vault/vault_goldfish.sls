@@ -68,4 +68,4 @@ goldfish-vault-config:
         - env:
             - VAULT_ADDR: "https://vault.service.consul:8200/"
         - onchanges:
-            - cmd: goldfish-approle
+            - cmd: goldfish-vault-approle
