@@ -44,6 +44,28 @@ dkimsigner-rsyslog:
     "ALLOWED_HOSTS": "%s,%s"|format(pillar['authserver']['hostname'], pillar['authserver']['smartstack-hostname']),
     "APPLICATION_LOGLEVEL": "INFO",
 } %}
+{% if pillar['dkimsigner'].get('use-vault', False) %}
+    {% set x = config.__setitem__("VAULT_DATABASE_PATH", 'postgresql/creds/authserver_dkimsigner') %}
+    {% if pillar['dkimsigner'].get('vault-authtype', 'approle') == 'approle' %}
+        {% set x = config.__setitem__("VAULT_ROLEID", pillar['dynamicsecrets']['authserver-role-id']) %}
+mailforwarder-config-secretid:
+    cmd.run:
+        - name: >-
+            /usr/local/bin/vault write -f -format=json \
+                auth/approle/role/authserver/secret-id |
+                jq -r .data.secret_id > /etc/appconfig/mailforwarder/env/VAULT_SECRETID
+        - env:
+            - VAULT_ADDR: "https://vault.service.consul:8200/"
+            - VAULT_TOKEN: {{pillar['dynamicsecrets']['approle-auth-token']}}
+        - creates: /etc/appconfig/authserver/env/VAULT_SECRETID
+        - watch_in:
+            - service: authserver
+    {% endif %}
+{% else %}
+    {% set x = config.__setitem__("DATABASE_URL", 'postgresql://%s:@postgresql.local:5432/%s'|format(pillar['mailforwarder']['dbuser'],
+        pillar['authserver']['dbname'])) %}
+{% endif %}
+
 
 
 {% for envvar, value in config.items() %}

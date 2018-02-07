@@ -43,7 +43,11 @@ authserver-postgres:
     postgres_user.present:
         - name: {{pillar[user]['dbuser']}}
         - createdb: False
+{% if pillar[user].get('use-vault', False) %}
         - createroles: False
+{% else %}
+        - createroles: True
+{% endif %}
         - createuser: False
         - encrypted: True
         - login: True
