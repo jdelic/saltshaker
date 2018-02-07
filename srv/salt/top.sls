@@ -61,11 +61,13 @@ base:
 
     'roles:buildserver':
         - match: grain
+        - vault.install
         - dev.concourse.server
 
     'roles:buildworker':
         - match: grain
         - dev.concourse.worker
+        - vault.install
         - nomad.client
 
     'roles:apps':
