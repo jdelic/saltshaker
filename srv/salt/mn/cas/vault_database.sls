@@ -22,7 +22,7 @@ authserver-vault-approle:
 authserver-vault-approle-roleid:
     cmd.run:
         - name: >-
-            /usr/local/bin/vault write auth/approle/authserver/role-id \
+            /usr/local/bin/vault write auth/approle/role/authserver/role-id \
                 role_id="{{pillar['dynamicsecrets']['authserver-role-id']}}"
         - env:
             - VAULT_ADDR: "https://vault.service.consul:8200/"
