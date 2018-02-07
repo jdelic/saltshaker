@@ -119,6 +119,7 @@ concourse-server-envvars:
                 jq -r .data.secret_id)#"  /etc/concourse/envvars.tpl > /etc/concourse/envvars
         - env:
             - VAULT_ADDR: "https://vault.service.consul:8200/"
+            - VAULT_TOKEN: {{pillar['dynamicsecrets']['approle-auth-token']}}
         - onchanges:
             - file: concourse-server-envvars-template
         - creates: /etc/concourse/envvars
