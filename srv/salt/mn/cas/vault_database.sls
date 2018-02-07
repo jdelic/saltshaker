@@ -116,7 +116,7 @@ mailforwarder-vault-postgresql-role:
         - onlyif: /usr/local/bin/vault init -check >/dev/null
         - unless: /usr/local/bin/vault list postgresql/roles | grep authserver_mailforwarder >/dev/null
         - onchanges:
-            - cmd: mailforwarder-vault-postgresql-connection
+            - cmd: authserver-vault-postgresql-connection
 
 
 dkimsigner-vault-postgresql-role:
@@ -134,5 +134,5 @@ dkimsigner-vault-postgresql-role:
         - onlyif: /usr/local/bin/vault init -check >/dev/null
         - unless: /usr/local/bin/vault list postgresql/roles | grep authserver_dkimsigner >/dev/null
         - onchanges:
-            - cmd: dkimsigner-vault-postgresql-connection
+            - cmd: authserver-vault-postgresql-connection
 {% endif %}
