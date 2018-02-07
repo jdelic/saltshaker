@@ -54,6 +54,18 @@ authserver-rsyslog:
 {# because we don't have jinja2.ext.do, we have to use the following work-around to set dict items #}
 {% if pillar['authserver'].get('use-vault', False) %}
     {% set x = config.__setitem__("VAULT_DATABASE_PATH", 'postgresql/creds/authserver_fullaccess') %}
+    {% if pillar['authserver'].get('vault-authtype', 'approle') == 'approle' %}
+        {% set x = config.__setitem__("VAULT_ROLEID", pillar['dynamicsecrets']['authserver-role-id']) %}
+authserver-config-secretid:
+    cmd.run:
+        - name: >-
+            /usr/local/bin/vault write -f -format=json \
+                auth/approle/role/authserver/secret-id |
+                jq -r .data.secret_id > /etc/appconfig/authserver/env/VAULT_SECRETID
+        - creates: /etc/appconfig/authserver/env/VAULT_SECRETID
+        - watch_in:
+            - service: authserver
+    {% endif %}
 {% else %}
     {% set x = config.__setitem__("DATABASE_URL", 'postgresql://%s:@postgresql.local:5432/%s'|format(pillar['authserver']['dbuser'],
         pillar['authserver']['dbname'])) %}
