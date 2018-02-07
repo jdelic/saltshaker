@@ -6,7 +6,7 @@ authserver-vault-approle:
     cmd.run:
         - name: >-
             /usr/local/bin/vault write auth/approle/role/authserver \
-                role_name=authserver
+                role_name=authserver \
                 policies=postgresql_authserver_fullaccess \
                 secret_id_num_uses=0 \
                 secret_id_ttl=15m \
