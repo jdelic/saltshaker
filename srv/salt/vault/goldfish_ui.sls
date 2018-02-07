@@ -60,10 +60,10 @@ goldfish:
 
 goldfish-setcap:
     cmd.run:
-        - name: setcap cap_ipc_lock=+ep /usr/local/bin/goldfish
+        - name: setcap cap_ipc_lock=+ep /usr/local/bin/goldfish-linux-amd64
         - cwd: /usr/local/bin
         - runas: root
-        - unless: getcap /usr/local/bin/goldfish | grep cap_ipc_lock >/dev/null
+        - unless: getcap /usr/local/bin/goldfish-linux-amd64 | grep cap_ipc_lock >/dev/null
         - require:
             - file: goldfish
 
@@ -77,6 +77,7 @@ goldfish-service:
             user: {{goldfish_user}}
             group: {{goldfish_group}}
     service.running:
+        - name: goldfish
         - watch:
             - file: goldfish
             - file: goldfish-service
