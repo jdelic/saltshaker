@@ -27,6 +27,7 @@ goldfish-config:
         - context:
             ip: {{ip}}
             port: {{port}}
+            dynamicsecrets_role_id: {{pillar['dynamicsecrets']['goldfish-role-id']}}
         - require:
             - file: goldfish-config-dir
 
