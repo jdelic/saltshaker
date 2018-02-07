@@ -50,6 +50,10 @@ base:
         - match: compound
         - shared.secrets.dev-ssl  # these are wildcard certificates for hostnames on the main test domain
 
+    '*.test and G@roles:goldfish':
+        - match: compound
+        - local.vault
+
     'roles:mail':
         - match: grain
         - shared.secrets.smtp

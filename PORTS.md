@@ -11,6 +11,7 @@ PORT   | SMARTSTACK | ASSIGNED SERVICE
 6380   |            | Redis local cache (not shared)
 8100   |            | aptly API (devserver, link local)
 8200   |      X     | Vault
+8201   |      X     | Vault Goldfish UI
 8300   |            | consul raft
 8301   |            | consul gossip
 8302   |            | consul wan
