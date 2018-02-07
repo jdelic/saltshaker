@@ -46,23 +46,16 @@ goldfish:
             - group: goldfish
             - group: ssl-cert
             - file: goldfish-config-dir
-    archive.extracted:
-        - name: /usr/local/bin
-        - source: {{pillar["urls"]["goldfish"]}}
-        - source_hash: {{pillar["hashes"]["goldfish"]}}
-        - archive_format: zip
-        - unless: test -f /usr/local/bin/goldfish-linux-amd64  # workaround for https://github.com/saltstack/salt/issues/42681
-        - if_missing: /usr/local/bin/goldfish-linux-amd64
-        - enforce_toplevel: False
     file.managed:
         - name: /usr/local/bin/goldfish-linux-amd64
+        - source: {{pillar["urls"]["goldfish"]}}
+        - source_hash: {{pillar["hashes"]["goldfish"]}}
         - user: {{goldfish_user}}
         - group: {{goldfish_user}}
         - mode: '0755'
         - replace: False
         - require:
             - user: goldfish
-            - archive: goldfish
 
 
 goldfish-service:
