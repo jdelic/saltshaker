@@ -12,18 +12,17 @@ concourse-vault-approle:
                 token_ttl=45m \
                 token_max_ttl=60m \
                 secret_id_ttl=30m \
-                policies=["concourse_secrets"]
+                policies=default,concourse_secrets
         - env:
             - VAULT_ADDR: "https://vault.service.consul:8200/"
         - unless: /usr/local/bin/vault list auth/approle/role | grep concourse >/dev/null
         - onlyif: /usr/local/bin/vault init -check >/dev/null
 
 
-concourse-vault-approle-set-fixed-id:
+concourse-vault-approle-role-id:
     cmd.run:
         - name: >-
             vault write auth/approle/role/concourse/role-id \
-                role_name="concourse" \
                 role_id="{{pillar['dynamicsecrets']['concourse-role-id']}}"
         - env:
             - VAULT_ADDR: "https://vault.service.consul:8200/"
