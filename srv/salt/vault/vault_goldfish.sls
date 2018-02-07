@@ -1,4 +1,4 @@
-goldfish-approle:
+goldfish-vault-approle:
     cmd.run:
         - name: >-
             /usr/local/bin/vault write auth/approle/role/goldfish \
@@ -13,6 +13,17 @@ goldfish-approle:
             - VAULT_ADDR: "https://vault.service.consul:8200/"
         - onchanges:
             - cmd: vault-approle-auth-enabled
+
+
+goldfish-vault-approle-roleid:
+    cmd.run:
+        - name: >-
+            /usr/local/bin/vault write auth/approle/goldfish/role-id \
+                role_id="{{pillar['dynamicsecrets']['goldfish-role-id']}}"
+        - env:
+            - VAULT_ADDR: "https://vault.service.consul:8200/"
+        - onchanges:
+            - cmd: goldfish-vault-approle
 
 
 goldfish-vault-policy:
