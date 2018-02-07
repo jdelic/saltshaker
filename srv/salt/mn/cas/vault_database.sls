@@ -9,7 +9,7 @@ authserver-vault-approle:
                 role_name=authserver \
                 policies=postgresql_authserver_fullaccess \
                 secret_id_num_uses=0 \
-                secret_id_ttl=15m \
+                secret_id_ttl=0 \
                 period=24h \
                 token_ttl=0 \
                 token_max_ttl=0
