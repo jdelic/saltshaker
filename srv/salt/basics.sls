@@ -53,8 +53,10 @@ basic-required-packages:
             - net-tools
             - libcap2-bin
             - apt-transport-https
+            - apt-transport-s3
             - cron
             - dbus
+            - jq
         -  order: 1  # execute this state early, because later states need unzip
 
 
