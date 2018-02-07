@@ -1,6 +1,34 @@
 # This state must be assigned to whatever node runs Hashicorp Vault and will be empty if AuthServer
 # is not configured to use Vault.
 {% if pillar.get('authserver', {}).get('use-vault', False) %}
+    {% if pillar.get('authserver', {}).get('vault-authtype', 'approle') == 'approle' %}
+authserver-vault-approle:
+    cmd.run:
+        - name: >-
+            /usr/local/bin/vault write auth/approle/role/authserver \
+                role_name=authserver
+                policies=postgresql_authserver_fullaccess \
+                secret_id_num_uses=0 \
+                secret_id_ttl=15m \
+                period=24h \
+                token_ttl=0 \
+                token_max_ttl=0
+        - env:
+            - VAULT_ADDR: "https://vault.service.consul:8200/"
+        - onchanges:
+            - cmd: vault-approle-auth-enabled
+
+
+authserver-vault-approle-roleid:
+    cmd.run:
+        - name: >-
+            /usr/local/bin/vault write auth/approle/role/authserver/role-id \
+                role_id="{{pillar['dynamicsecrets']['authserver-role-id']}}"
+        - env:
+            - VAULT_ADDR: "https://vault.service.consul:8200/"
+        - onchanges:
+            - cmd: authserver-vault-approle
+    {% elif pillar.get('authserver', {}).get('vault-authtype', 'approle') == 'ssl' %}
 authserver-vault-ssl-cert:
     cmd.run:
         - name: >-
@@ -15,6 +43,7 @@ authserver-vault-ssl-cert:
         - onlyif: /usr/local/bin/vault init -check >/dev/null
         - onchanges:
             - cmd: vault-cert-auth-enabled
+    {% endif %}
 
 
 authserver-vault-postgresql-policy:
@@ -27,7 +56,6 @@ authserver-vault-postgresql-policy:
             - VAULT_ADDR: "https://vault.service.consul:8200/"
         - unless: /usr/local/bin/vault policies | grep postgresql_authserver_fullaccess >/dev/null
         - onlyif: /usr/local/bin/vault init -check >/dev/null
-
 
 
 authserver-vault-postgresql-backend:
