@@ -2,7 +2,7 @@ goldfish-vault-approle:
     cmd.run:
         - name: >-
             /usr/local/bin/vault write auth/approle/role/goldfish \
-                role_name=goldfish
+                role_name=goldfish \
                 policies=default,goldfish \
                 secret_id_num_uses=0 \
                 secret_id_ttl=15m \
@@ -19,7 +19,7 @@ goldfish-vault-approle-roleid:
     cmd.run:
         - name: >-
             /usr/local/bin/vault write auth/approle/role/goldfish/role-id \
-                role_id=goldfish
+                role_id={{pillar['dynamicsecrets']['goldfish-role-id']}}
         - env:
             - VAULT_ADDR: "https://vault.service.consul:8200/"
         - onchanges:
@@ -33,24 +33,24 @@ goldfish-vault-policy:
                   # store goldfish run-time settings here
                   # goldfish hot-reloads from this endpoint every minute
                   path "secret/goldfish" {
-                    capabilities = ["read", "update"]
+                      capabilities = ["read", "update"]
                   }
 
 
                   # [optional]
                   # to enable transit encryption, see wiki for details
                   path "transit/encrypt/goldfish" {
-                    capabilities = ["read", "update"]
+                      capabilities = ["read", "update"]
                   }
                   path "transit/decrypt/goldfish" {
-                    capabilities = ["read", "update"]
+                      capabilities = ["read", "update"]
                   }
 
 
                   # [optional]
                   # for goldfish to fetch certificates from PKI backend
                   #path "pki/issue/goldfish" {
-                  #  capabilities = ["update"]
+                  #    capabilities = ["update"]
                   #}' | /usr/local/bin/vault policy-write goldfish -
         - env:
             - VAULT_ADDR: "https://vault.service.consul:8200/"
