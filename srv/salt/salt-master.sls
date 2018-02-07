@@ -11,6 +11,12 @@ salt-master:
             - pkg: salt-master
 
 
+{% if pillar.get('duplicity-backup', {}).get('enabled', False) %}
+saltmaster-backup-symlink:
+    - name: /etc/duplicity.d/daily/folderlinks/salt
+    - target: /etc/salt
+{% endif %}
+
 {% for port in ['4505', '4506'] %}
     {% for proto in ['tcp', 'udp'] %}
 # allow the internal network to talk to us
