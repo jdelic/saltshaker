@@ -99,8 +99,6 @@ authserver-vault-postgresql-role:
         - unless: /usr/local/bin/vault list postgresql/roles | grep authserver_fullaccess >/dev/null
         - onchanges:
             - cmd: authserver-vault-postgresql-connection
-        - require:
-            - file: authserver-vault-postgresql-role
 
 
 mailforwarder-vault-postgresql-role:
@@ -119,8 +117,6 @@ mailforwarder-vault-postgresql-role:
         - unless: /usr/local/bin/vault list postgresql/roles | grep authserver_mailforwarder >/dev/null
         - onchanges:
             - cmd: mailforwarder-vault-postgresql-connection
-        - require:
-            - file: mailforwarder-vault-postgresql-role
 
 
 dkimsigner-vault-postgresql-role:
@@ -139,7 +135,4 @@ dkimsigner-vault-postgresql-role:
         - unless: /usr/local/bin/vault list postgresql/roles | grep authserver_dkimsigner >/dev/null
         - onchanges:
             - cmd: dkimsigner-vault-postgresql-connection
-        - require:
-            - file: dkimsigner-vault-postgresql-role
-
 {% endif %}
