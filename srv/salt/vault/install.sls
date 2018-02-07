@@ -32,7 +32,6 @@ vault:
         - replace: False
         - require:
             - user: vault
-            - file: vault-data-dir
             - archive: vault
 
 

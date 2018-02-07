@@ -90,6 +90,7 @@ vault-service:
         - sig: vault
         - enable: True
         - require:
+            - file: vault-data-dir
             - file: vault-service
             - file: vault-servicedef
             {% if 'consulserver' in grains['roles'] and pillar['vault']['backend'] == 'consul' %}
