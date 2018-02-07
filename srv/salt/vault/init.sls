@@ -53,20 +53,6 @@ vault-config-dir:
             - group: vault
 
 
-# the vault executable must have the "cap_ipc_lock=+ep" flag so it can lock memory from swap.
-# Regardless, ideally Vault runs on a server with encryptd swap space. However even if it doesn't then locking the
-# memory will provide additional security. For more information see `man setcap` and `man cap_from_text`, the latter
-# is part of "libcap-dev" on Debian.
-vault-setcap:
-    cmd.run:
-        - name: setcap cap_ipc_lock=+ep /usr/local/bin/vault
-        - cwd: /usr/local/bin
-        - runas: root
-        - unless: getcap /usr/local/bin/vault | grep cap_ipc_lock >/dev/null
-        - require:
-            - file: vault
-
-
 vault-config:
     file.managed:
         - name: /etc/vault/vault.conf
