@@ -6,7 +6,7 @@ After=network-online.target
 [Service]
 User={{user}}
 Group={{group}}
-ExecStart=/usr/local/bin/goldfish-linux-amd64 -config=/etc/goldfish/goldfish-config.hcl
+ExecStart=/usr/local/bin/goldfish-linux-amd64 -config=/etc/goldfish/goldfish.conf
 ExecReload=/bin/kill -HUP $MAINPID
 KillSignal=SIGINT
 
