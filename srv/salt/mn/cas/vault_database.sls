@@ -15,8 +15,7 @@ authserver-vault-approle:
                 token_max_ttl=0
         - env:
             - VAULT_ADDR: "https://vault.service.consul:8200/"
-        - onchanges:
-            - cmd: vault-approle-auth-enabled
+        - unless: /usr/local/bin/vault list auth/approle/role | grep authserver >/dev/null
 
 
 authserver-vault-approle-roleid:
@@ -61,8 +60,7 @@ mailforwarder-vault-approle:
                 token_max_ttl=0
         - env:
             - VAULT_ADDR: "https://vault.service.consul:8200/"
-        - onchanges:
-            - cmd: vault-approle-auth-enabled
+        - unless: /usr/local/bin/vault list auth/approle/role | grep mailforwarder >/dev/null
 
 
 mailforwarder-vault-approle-roleid:
@@ -108,8 +106,7 @@ dkimsigner-vault-approle:
                 token_max_ttl=0
         - env:
             - VAULT_ADDR: "https://vault.service.consul:8200/"
-        - onchanges:
-            - cmd: vault-approle-auth-enabled
+        - unless: /usr/local/bin/vault list auth/approle/role | grep dkimsigner >/dev/null
 
 
 dkimsigner-vault-approle-roleid:
@@ -121,7 +118,6 @@ dkimsigner-vault-approle-roleid:
             - VAULT_ADDR: "https://vault.service.consul:8200/"
         - onchanges:
             - cmd: dkimsigner-vault-approle
-
     {% elif pillar.get('mailforwarder', {}).get('vault-authtype', 'approle') == 'ssl' %}
 
 dkimsigner-vault-ssl-cert:
