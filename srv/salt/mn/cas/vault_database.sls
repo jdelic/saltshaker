@@ -15,8 +15,7 @@ authserver-vault-approle:
                 token_max_ttl=0
         - env:
             - VAULT_ADDR: "https://vault.service.consul:8200/"
-        - onchanges:
-            - cmd: vault-approle-auth-enabled
+        - unless: /usr/local/bin/vault list auth/approle/role | grep authserver >/dev/null
 
 
 authserver-vault-approle-roleid:
@@ -47,6 +46,96 @@ authserver-vault-ssl-cert:
             - cmd: vault-cert-auth-enabled
     {% endif %}
 
+    {% if pillar.get('mailforwarder', {}).get('vault-authtype', 'approle') == 'approle' %}
+mailforwarder-vault-approle:
+    cmd.run:
+        - name: >-
+            /usr/local/bin/vault write auth/approle/role/mailforwarder \
+                role_name=mailforwarder \
+                policies=postgresql_authserver_mailforwarder \
+                secret_id_num_uses=0 \
+                secret_id_ttl=0 \
+                period=24h \
+                token_ttl=0 \
+                token_max_ttl=0
+        - env:
+            - VAULT_ADDR: "https://vault.service.consul:8200/"
+        - unless: /usr/local/bin/vault list auth/approle/role | grep mailforwarder >/dev/null
+
+
+mailforwarder-vault-approle-roleid:
+    cmd.run:
+        - name: >-
+            /usr/local/bin/vault write auth/approle/role/mailforwarder/role-id \
+                role_id="{{pillar['dynamicsecrets']['mailforwarder-role-id']}}"
+        - env:
+            - VAULT_ADDR: "https://vault.service.consul:8200/"
+        - onchanges:
+            - cmd: mailforwarder-vault-approle
+
+    {% elif pillar.get('mailforwarder', {}).get('vault-authtype', 'approle') == 'ssl' %}
+
+mailforwarder-vault-ssl-cert:
+    cmd.run:
+        - name: >-
+            /usr/local/bin/vault write auth/cert/certs/mailforwarder_database \
+                display_name="mailforwarder" \
+                policies=postgresql_authserver_mailforwarder \
+                certificate=@{{pillar['authserver']['vault-application-ca']}} \
+                ttl=3600
+        - env:
+            - VAULT_ADDR: "https://vault.service.consul:8200/"
+        - unless: /usr/local/bin/vault list auth/cert/certs | grep mailforwarder_database >/dev/null
+        - onlyif: /usr/local/bin/vault init -check >/dev/null
+        - onchanges:
+            - cmd: vault-cert-auth-enabled
+    {% endif %}
+
+
+    {% if pillar.get('mailforwarder', {}).get('vault-authtype', 'approle') == 'approle' %}
+dkimsigner-vault-approle:
+    cmd.run:
+        - name: >-
+            /usr/local/bin/vault write auth/approle/role/dkimsigner \
+                role_name=authserver \
+                policies=postgresql_authserver_dkimsigner \
+                secret_id_num_uses=0 \
+                secret_id_ttl=0 \
+                period=24h \
+                token_ttl=0 \
+                token_max_ttl=0
+        - env:
+            - VAULT_ADDR: "https://vault.service.consul:8200/"
+        - unless: /usr/local/bin/vault list auth/approle/role | grep dkimsigner >/dev/null
+
+
+dkimsigner-vault-approle-roleid:
+    cmd.run:
+        - name: >-
+            /usr/local/bin/vault write auth/approle/role/dkimsigner/role-id \
+                role_id="{{pillar['dynamicsecrets']['dkimsigner-role-id']}}"
+        - env:
+            - VAULT_ADDR: "https://vault.service.consul:8200/"
+        - onchanges:
+            - cmd: dkimsigner-vault-approle
+    {% elif pillar.get('mailforwarder', {}).get('vault-authtype', 'approle') == 'ssl' %}
+
+dkimsigner-vault-ssl-cert:
+    cmd.run:
+        - name: >-
+            /usr/local/bin/vault write auth/cert/certs/dkimsigner_database \
+                display_name="dkimsigner" \
+                policies=postgresql_authserver_dkimsigner \
+                certificate=@{{pillar['authserver']['vault-application-ca']}} \
+                ttl=3600
+        - env:
+            - VAULT_ADDR: "https://vault.service.consul:8200/"
+        - unless: /usr/local/bin/vault list auth/cert/certs | grep dkimsigner_database >/dev/null
+        - onlyif: /usr/local/bin/vault init -check >/dev/null
+        - onchanges:
+            - cmd: vault-cert-auth-enabled
+    {% endif %}
+
 
 authserver-vault-postgresql-policy:
     cmd.run:
@@ -57,6 +146,30 @@ authserver-vault-postgresql-policy:
         - env:
             - VAULT_ADDR: "https://vault.service.consul:8200/"
         - unless: /usr/local/bin/vault policies | grep postgresql_authserver_fullaccess >/dev/null
+        - onlyif: /usr/local/bin/vault init -check >/dev/null
+
+
+mailforwarder-vault-postgresql-policy:
+    cmd.run:
+        - name: >-
+            echo 'path "postgresql/creds/authserver_mailforwarder" {
+                capabilities = ["read"]
+            }' | /usr/local/bin/vault policy-write postgresql_authserver_mailforwarder -
+        - env:
+            - VAULT_ADDR: "https://vault.service.consul:8200/"
+        - unless: /usr/local/bin/vault policies | grep postgresql_authserver_mailforwarder >/dev/null
+        - onlyif: /usr/local/bin/vault init -check >/dev/null
+
+
+dkimsigner-vault-postgresql-policy:
+    cmd.run:
+        - name: >-
+            echo 'path "postgresql/creds/authserver_dkimsigner" {
+                capabilities = ["read"]
+            }' | /usr/local/bin/vault policy-write postgresql_authserver_dkimsigner -
+        - env:
+            - VAULT_ADDR: "https://vault.service.consul:8200/"
+        - unless: /usr/local/bin/vault policies | grep postgresql_authserver_dkimsigner >/dev/null
         - onlyif: /usr/local/bin/vault init -check >/dev/null
 
 
@@ -99,8 +212,6 @@ authserver-vault-postgresql-role:
         - unless: /usr/local/bin/vault list postgresql/roles | grep authserver_fullaccess >/dev/null
         - onchanges:
             - cmd: authserver-vault-postgresql-connection
-        - require:
-            - file: authserver-vault-postgresql-role
 
 
 mailforwarder-vault-postgresql-role:
@@ -118,9 +229,7 @@ mailforwarder-vault-postgresql-role:
         - onlyif: /usr/local/bin/vault init -check >/dev/null
         - unless: /usr/local/bin/vault list postgresql/roles | grep authserver_mailforwarder >/dev/null
         - onchanges:
-            - cmd: mailforwarder-vault-postgresql-connection
-        - require:
-            - file: mailforwarder-vault-postgresql-role
+            - cmd: authserver-vault-postgresql-connection
 
 
 dkimsigner-vault-postgresql-role:
@@ -138,8 +247,5 @@ dkimsigner-vault-postgresql-role:
         - onlyif: /usr/local/bin/vault init -check >/dev/null
         - unless: /usr/local/bin/vault list postgresql/roles | grep authserver_dkimsigner >/dev/null
         - onchanges:
-            - cmd: dkimsigner-vault-postgresql-connection
-        - require:
-            - file: dkimsigner-vault-postgresql-role
-
+            - cmd: authserver-vault-postgresql-connection
 {% endif %}
