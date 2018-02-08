@@ -237,8 +237,10 @@ vault-approle-access-token-policy:
 vault-approle-access-token:
     cmd.run:
         - name: >-
+            echo "$TOKENID" |
+            /usr/local/bin/vault token-revoke -;
             /usr/local/bin/vault token-create \
-                -id="{{pillar['dynamicsecrets']['approle-auth-token']}}" \
+                -id="$(echo $TOKENID)" \
                 -display-name="approle-auth" \
                 -policy=default -policy=approle_access \
                 -renewable=true \
@@ -246,7 +248,10 @@ vault-approle-access-token:
                 -explicit-max-ttl=0
         - env:
             - VAULT_ADDR: "https://vault.service.consul:8200/"
-        - unless: /usr/local/bin/vault token-lookup "{{pillar['dynamicsecrets']['approle-auth-token']}}"
+            - TOKENID: "{{pillar['dynamicsecrets']['approle-auth-token']}}"
+        - unless: >-
+            test "$(/usr/local/bin/vault token-lookup \
+                '{{pillar['dynamicsecrets']['approle-auth-token']}}' | jq -r .renewable)" == "true"
 
 
 vault-approle-access-token-renewal:
@@ -255,7 +260,9 @@ vault-approle-access-token-renewal:
             /usr/local/bin/vault token-renew {{pillar['dynamicsecrets']['approle-auth-token']}}
         - env:
             - VAULT_ADDR: "https://vault.service.consul:8200/"
-        - onlyif: /usr/local/bin/vault token-lookup "{{pillar['dynamicsecrets']['approle-auth-token']}}"
+        - onlyif: >-
+            test "$(/usr/local/bin/vault token-lookup \
+                '{{pillar['dynamicsecrets']['approle-auth-token']}}' | jq -r .renewable)" == "true"
 {% endif %}
 
 
