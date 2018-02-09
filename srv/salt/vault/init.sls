@@ -249,7 +249,7 @@ vault-approle-access-token:
             - VAULT_ADDR: "https://vault.service.consul:8200/"
             - TOKENID: "{{pillar['dynamicsecrets']['approle-auth-token']}}"
         - unless: >-
-            test "$(/usr/local/bin/vault token-lookup -format=json {{pillar['dynamicsecrets']['approle-auth-token']}} | jq -r .renewable)" == "true" &&
+            test "$(/usr/local/bin/vault token-lookup -format=json {{pillar['dynamicsecrets']['approle-auth-token']}} | jq -r .renewable)" == "true" ||
             test "$(/usr/local/bin/vault token-lookup -format=json {{pillar['dynamicsecrets']['approle-auth-token']}} | jq -r .data.ttl)" -gt 100
 
 
