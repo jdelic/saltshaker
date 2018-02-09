@@ -249,8 +249,8 @@ vault-approle-access-token:
             - VAULT_ADDR: "https://vault.service.consul:8200/"
             - TOKENID: "{{pillar['dynamicsecrets']['approle-auth-token']}}"
         - unless: >-
-            test "$(/usr/local/bin/vault token-lookup \
-                '{{pillar['dynamicsecrets']['approle-auth-token']}}' | jq -r .renewable)" == "true"
+            test "$(/usr/local/bin/vault token-lookup -format=json {{pillar['dynamicsecrets']['approle-auth-token']}} | jq -r .renewable)" == "true" &&
+            test "$(/usr/local/bin/vault token-lookup -format=json {{pillar['dynamicsecrets']['approle-auth-token']}} | jq -r .data.ttl)" -gt 100
 
 
 vault-approle-access-token-renewal:
@@ -260,8 +260,7 @@ vault-approle-access-token-renewal:
         - env:
             - VAULT_ADDR: "https://vault.service.consul:8200/"
         - onlyif: >-
-            test "$(/usr/local/bin/vault token-lookup \
-                '{{pillar['dynamicsecrets']['approle-auth-token']}}' | jq -r .renewable)" == "true"
+            test "$(/usr/local/bin/vault token-lookup -format=json {{pillar['dynamicsecrets']['approle-auth-token']}} | jq -r .renewable)" == "true"
 {% endif %}
 
 
