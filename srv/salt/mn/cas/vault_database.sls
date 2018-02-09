@@ -210,8 +210,6 @@ authserver-vault-postgresql-role:
             - VAULT_ADDR: "https://vault.service.consul:8200/"
         - onlyif: /usr/local/bin/vault init -check >/dev/null
         - unless: /usr/local/bin/vault list postgresql/roles | grep authserver_fullaccess >/dev/null
-        - onchanges:
-            - cmd: authserver-vault-postgresql-connection
 
 
 mailforwarder-vault-postgresql-role:
@@ -228,8 +226,6 @@ mailforwarder-vault-postgresql-role:
             - VAULT_ADDR: "https://vault.service.consul:8200/"
         - onlyif: /usr/local/bin/vault init -check >/dev/null
         - unless: /usr/local/bin/vault list postgresql/roles | grep authserver_mailforwarder >/dev/null
-        - onchanges:
-            - cmd: authserver-vault-postgresql-connection
 
 
 dkimsigner-vault-postgresql-role:
@@ -246,6 +242,4 @@ dkimsigner-vault-postgresql-role:
             - VAULT_ADDR: "https://vault.service.consul:8200/"
         - onlyif: /usr/local/bin/vault init -check >/dev/null
         - unless: /usr/local/bin/vault list postgresql/roles | grep authserver_dkimsigner >/dev/null
-        - onchanges:
-            - cmd: authserver-vault-postgresql-connection
 {% endif %}
