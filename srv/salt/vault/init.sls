@@ -237,10 +237,9 @@ vault-approle-access-token-policy:
 vault-approle-access-token:
     cmd.run:
         - name: >-
-            echo "$TOKENID" |
-            /usr/local/bin/vault token-revoke -;
+            /usr/local/bin/vault token-revoke $TOKENID &&
             /usr/local/bin/vault token-create \
-                -id="$(echo $TOKENID)" \
+                -id=$TOKENID \
                 -display-name="approle-auth" \
                 -policy=default -policy=approle_access \
                 -renewable=true \
