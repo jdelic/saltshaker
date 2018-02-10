@@ -12,6 +12,7 @@ base:
         - haproxy.internal  # everything needs local proxies in smartstack
         - powerdns.recursor
         - duplicity
+        - vault.install
 
     'roles:xenserver':
         - match: grain
@@ -42,7 +43,6 @@ base:
 
     'roles:goldfish':
         - match: grain
-        - vault.install  # goldfish needs the vault binary on the node
         - vault.goldfish_ui
 
     'roles:docker-registry':
@@ -117,7 +117,6 @@ base:
         - mn.cas.server
         - mn.appconfig
         - docker.authserver_dockerregistry  # empty unless a JWT key is configured
-        - vault.install  # authserver might need the vault binary on the node
 
     'roles:loadbalancer':
         - match: grain
