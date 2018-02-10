@@ -28,7 +28,15 @@ authserver-vault-approle-roleid:
         - onchanges:
             - cmd: authserver-vault-approle
 
-    {% elif pillar.get('authserver', {}).get('vault-authtype', 'approle') == 'ssl' %}
+
+authserver-vault-no-cert:
+    cmd.run:
+        - name: /usr/local/bin/vault delete auth/cert/certs/authserver_database
+        - env:
+            - VAULT_ADDR: "https://vault.service.consul:8200/"
+        - onlyif: /usr/local/bin/vault init -check >/dev/null && /usr/local/bin/vault list auth/cert/certs | grep authserver_database >/dev/null
+
+    {% elif pillar.get('authserver', {}).get('vault-authtype', 'approle') == 'cert' %}
 
 authserver-vault-ssl-cert:
     cmd.run:
@@ -44,6 +52,14 @@ authserver-vault-ssl-cert:
         - onlyif: /usr/local/bin/vault init -check >/dev/null
         - onchanges:
             - cmd: vault-cert-auth-enabled
+
+
+authserver-vault-no-approle:
+    cmd.run:
+        - name: /usr/local/bin/vault delete auth/approle/role/authserver
+        - env:
+            - VAULT_ADDR: "https://vault.service.consul:8200/"
+        - onlyif: /usr/local/bin/vault init -check >/dev/null && /usr/local/bin/vault list auth/approle/role | grep authserver >/dev/null
     {% endif %}
 
     {% if pillar.get('mailforwarder', {}).get('vault-authtype', 'approle') == 'approle' %}
@@ -73,7 +89,15 @@ mailforwarder-vault-approle-roleid:
         - onchanges:
             - cmd: mailforwarder-vault-approle
 
-    {% elif pillar.get('mailforwarder', {}).get('vault-authtype', 'approle') == 'ssl' %}
+
+mailforwarder-vault-no-cert:
+    cmd.run:
+        - name: /usr/local/bin/vault delete auth/cert/certs/mailforwarder_database
+        - env:
+            - VAULT_ADDR: "https://vault.service.consul:8200/"
+        - onlyif: /usr/local/bin/vault init -check >/dev/null && /usr/local/bin/vault list auth/cert/certs | grep mailforwarder_database >/dev/null
+
+    {% elif pillar.get('mailforwarder', {}).get('vault-authtype', 'approle') == 'cert' %}
 
 mailforwarder-vault-ssl-cert:
     cmd.run:
@@ -89,6 +113,14 @@ mailforwarder-vault-ssl-cert:
         - onlyif: /usr/local/bin/vault init -check >/dev/null
         - onchanges:
             - cmd: vault-cert-auth-enabled
+
+
+mailforwarder-vault-no-approle:
+    cmd.run:
+        - name: /usr/local/bin/vault delete auth/approle/role/mailforwarder
+        - env:
+            - VAULT_ADDR: "https://vault.service.consul:8200/"
+        - onlyif: /usr/local/bin/vault init -check >/dev/null && /usr/local/bin/vault list auth/approle/role | grep mailforwarder >/dev/null
     {% endif %}
 
 
@@ -118,7 +150,15 @@ dkimsigner-vault-approle-roleid:
             - VAULT_ADDR: "https://vault.service.consul:8200/"
         - onchanges:
             - cmd: dkimsigner-vault-approle
-    {% elif pillar.get('mailforwarder', {}).get('vault-authtype', 'approle') == 'ssl' %}
+
+
+dkimsigner-vault-no-cert:
+    cmd.run:
+        - name: /usr/local/bin/vault delete auth/cert/certs/dkimsigner_database
+        - env:
+            - VAULT_ADDR: "https://vault.service.consul:8200/"
+        - onlyif: /usr/local/bin/vault init -check >/dev/null && /usr/local/bin/vault list auth/cert/certs | grep dkimsigner_database >/dev/null
+    {% elif pillar.get('mailforwarder', {}).get('vault-authtype', 'approle') == 'cert' %}
 
 dkimsigner-vault-ssl-cert:
     cmd.run:
@@ -134,6 +174,14 @@ dkimsigner-vault-ssl-cert:
         - onlyif: /usr/local/bin/vault init -check >/dev/null
         - onchanges:
             - cmd: vault-cert-auth-enabled
+
+
+dkimsigner-vault-no-approle:
+    cmd.run:
+        - name: /usr/local/bin/vault delete auth/approle/role/dkimsigner
+        - env:
+            - VAULT_ADDR: "https://vault.service.consul:8200/"
+        - onlyif: /usr/local/bin/vault init -check >/dev/null && /usr/local/bin/vault list auth/approle/role | grep dkimsigner >/dev/null
     {% endif %}
 
 
