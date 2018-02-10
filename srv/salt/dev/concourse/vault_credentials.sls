@@ -1,6 +1,6 @@
 # This state must be assigned to whatever node runs Hashicorp Vault and will be empty if concourse
 # is not configured to use Vault.
-{% if pillar.get('concourse', {}).get('use-vault', False) %}
+{% if pillar.get('ci', {}).get('use-vault', False) %}
 concourse-vault-approle:
     cmd.run:
         - name: >-
