@@ -34,7 +34,7 @@ authserver-vault-no-cert:
         - name: /usr/local/bin/vault delete auth/cert/certs/authserver_database
         - env:
             - VAULT_ADDR: "https://vault.service.consul:8200/"
-        - onlyif: /usr/local/bin/vault init -check >/dev/null && /usr/local/bin/vault list auth/cert/certs | grep authserver_database >/dev/null
+        - onlyif: /usr/local/bin/vault operator init -status >/dev/null && /usr/local/bin/vault list auth/cert/certs | grep authserver_database >/dev/null
 
     {% elif pillar.get('authserver', {}).get('vault-authtype', 'approle') == 'cert' %}
 
@@ -50,7 +50,7 @@ authserver-vault-ssl-cert:
         - env:
             - VAULT_ADDR: "https://vault.service.consul:8200/"
         - unless: /usr/local/bin/vault list auth/cert/certs | grep authserver_database >/dev/null
-        - onlyif: /usr/local/bin/vault init -check >/dev/null
+        - onlyif: /usr/local/bin/vault operator init -status >/dev/null
 
 
 authserver-vault-no-approle:
@@ -58,7 +58,7 @@ authserver-vault-no-approle:
         - name: /usr/local/bin/vault delete auth/approle/role/authserver
         - env:
             - VAULT_ADDR: "https://vault.service.consul:8200/"
-        - onlyif: /usr/local/bin/vault init -check >/dev/null && /usr/local/bin/vault list auth/approle/role | grep authserver >/dev/null
+        - onlyif: /usr/local/bin/vault operator init -status >/dev/null && /usr/local/bin/vault list auth/approle/role | grep authserver >/dev/null
     {% endif %}
 
     {% if pillar.get('mailforwarder', {}).get('vault-authtype', 'approle') == 'approle' %}
@@ -94,7 +94,7 @@ mailforwarder-vault-no-cert:
         - name: /usr/local/bin/vault delete auth/cert/certs/mailforwarder_database
         - env:
             - VAULT_ADDR: "https://vault.service.consul:8200/"
-        - onlyif: /usr/local/bin/vault init -check >/dev/null && /usr/local/bin/vault list auth/cert/certs | grep mailforwarder_database >/dev/null
+        - onlyif: /usr/local/bin/vault operator init -status >/dev/null && /usr/local/bin/vault list auth/cert/certs | grep mailforwarder_database >/dev/null
 
     {% elif pillar.get('mailforwarder', {}).get('vault-authtype', 'approle') == 'cert' %}
 
@@ -110,7 +110,7 @@ mailforwarder-vault-ssl-cert:
         - env:
             - VAULT_ADDR: "https://vault.service.consul:8200/"
         - unless: /usr/local/bin/vault list auth/cert/certs | grep mailforwarder_database >/dev/null
-        - onlyif: /usr/local/bin/vault init -check >/dev/null
+        - onlyif: /usr/local/bin/vault operator init -status >/dev/null
 
 
 mailforwarder-vault-no-approle:
@@ -118,7 +118,7 @@ mailforwarder-vault-no-approle:
         - name: /usr/local/bin/vault delete auth/approle/role/mailforwarder
         - env:
             - VAULT_ADDR: "https://vault.service.consul:8200/"
-        - onlyif: /usr/local/bin/vault init -check >/dev/null && /usr/local/bin/vault list auth/approle/role | grep mailforwarder >/dev/null
+        - onlyif: /usr/local/bin/vault operator init -status >/dev/null && /usr/local/bin/vault list auth/approle/role | grep mailforwarder >/dev/null
     {% endif %}
 
 
@@ -155,7 +155,7 @@ dkimsigner-vault-no-cert:
         - name: /usr/local/bin/vault delete auth/cert/certs/dkimsigner_database
         - env:
             - VAULT_ADDR: "https://vault.service.consul:8200/"
-        - onlyif: /usr/local/bin/vault init -check >/dev/null && /usr/local/bin/vault list auth/cert/certs | grep dkimsigner_database >/dev/null
+        - onlyif: /usr/local/bin/vault operator init -status >/dev/null && /usr/local/bin/vault list auth/cert/certs | grep dkimsigner_database >/dev/null
     {% elif pillar.get('mailforwarder', {}).get('vault-authtype', 'approle') == 'cert' %}
 
 dkimsigner-vault-ssl-cert:
@@ -170,7 +170,7 @@ dkimsigner-vault-ssl-cert:
         - env:
             - VAULT_ADDR: "https://vault.service.consul:8200/"
         - unless: /usr/local/bin/vault list auth/cert/certs | grep dkimsigner_database >/dev/null
-        - onlyif: /usr/local/bin/vault init -check >/dev/null
+        - onlyif: /usr/local/bin/vault operator init -status >/dev/null
 
 
 dkimsigner-vault-no-approle:
@@ -178,7 +178,7 @@ dkimsigner-vault-no-approle:
         - name: /usr/local/bin/vault delete auth/approle/role/dkimsigner
         - env:
             - VAULT_ADDR: "https://vault.service.consul:8200/"
-        - onlyif: /usr/local/bin/vault init -check >/dev/null && /usr/local/bin/vault list auth/approle/role | grep dkimsigner >/dev/null
+        - onlyif: /usr/local/bin/vault operator init -status >/dev/null && /usr/local/bin/vault list auth/approle/role | grep dkimsigner >/dev/null
     {% endif %}
 
 
@@ -191,7 +191,7 @@ authserver-vault-postgresql-policy:
         - env:
             - VAULT_ADDR: "https://vault.service.consul:8200/"
         - unless: /usr/local/bin/vault policies | grep postgresql_authserver_fullaccess >/dev/null
-        - onlyif: /usr/local/bin/vault init -check >/dev/null
+        - onlyif: /usr/local/bin/vault operator init -status >/dev/null
 
 
 mailforwarder-vault-postgresql-policy:
@@ -203,7 +203,7 @@ mailforwarder-vault-postgresql-policy:
         - env:
             - VAULT_ADDR: "https://vault.service.consul:8200/"
         - unless: /usr/local/bin/vault policies | grep postgresql_authserver_mailforwarder >/dev/null
-        - onlyif: /usr/local/bin/vault init -check >/dev/null
+        - onlyif: /usr/local/bin/vault operator init -status >/dev/null
 
 
 dkimsigner-vault-postgresql-policy:
@@ -215,7 +215,7 @@ dkimsigner-vault-postgresql-policy:
         - env:
             - VAULT_ADDR: "https://vault.service.consul:8200/"
         - unless: /usr/local/bin/vault policies | grep postgresql_authserver_dkimsigner >/dev/null
-        - onlyif: /usr/local/bin/vault init -check >/dev/null
+        - onlyif: /usr/local/bin/vault operator init -status >/dev/null
 
 
 authserver-vault-postgresql-backend:
@@ -224,7 +224,7 @@ authserver-vault-postgresql-backend:
         - env:
             - VAULT_ADDR: "https://vault.service.consul:8200/"
         - unless: /usr/local/bin/vault mounts | grep postgresql >/dev/null
-        - onlyif: /usr/local/bin/vault init -check >/dev/null
+        - onlyif: /usr/local/bin/vault operator init -status >/dev/null
 
 
 authserver-vault-postgresql-connection:
@@ -234,7 +234,7 @@ authserver-vault-postgresql-connection:
                 plugin_name=postgresql-database-plugin \
                 allowed_roles="authserver_fullaccess,authserver_mailforwarder,authserver_dkimsigner" \
                 connection_url="postgresql://{{pillar['authserver']['dbuser']}}:{{pillar['dynamicsecrets']['authserver']}}@postgresql.service.consul:5432/?sslmode=verify-full"
-        - onlyif: /usr/local/bin/vault init -check >/dev/null
+        - onlyif: /usr/local/bin/vault operator init -status >/dev/null
         - unless: /usr/local/bin/vault list postgresql/config | grep authserver >/dev/null
         - env:
             - VAULT_ADDR: "https://vault.service.consul:8200/"
@@ -253,7 +253,7 @@ authserver-vault-postgresql-role:
             }' | /usr/local/bin/vault write postgresql/roles/authserver_fullaccess -
         - env:
             - VAULT_ADDR: "https://vault.service.consul:8200/"
-        - onlyif: /usr/local/bin/vault init -check >/dev/null
+        - onlyif: /usr/local/bin/vault operator init -status >/dev/null
         - unless: /usr/local/bin/vault list postgresql/roles | grep authserver_fullaccess >/dev/null
 
 
@@ -269,7 +269,7 @@ mailforwarder-vault-postgresql-role:
             }' | /usr/local/bin/vault write postgresql/roles/authserver_mailforwarder -
         - env:
             - VAULT_ADDR: "https://vault.service.consul:8200/"
-        - onlyif: /usr/local/bin/vault init -check >/dev/null
+        - onlyif: /usr/local/bin/vault operator init -status >/dev/null
         - unless: /usr/local/bin/vault list postgresql/roles | grep authserver_mailforwarder >/dev/null
 
 
@@ -285,6 +285,6 @@ dkimsigner-vault-postgresql-role:
             }' | /usr/local/bin/vault write postgresql/roles/authserver_dkimsigner -
         - env:
             - VAULT_ADDR: "https://vault.service.consul:8200/"
-        - onlyif: /usr/local/bin/vault init -check >/dev/null
+        - onlyif: /usr/local/bin/vault operator init -status >/dev/null
         - unless: /usr/local/bin/vault list postgresql/roles | grep authserver_dkimsigner >/dev/null
 {% endif %}
