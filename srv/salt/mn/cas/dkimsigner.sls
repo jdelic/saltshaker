@@ -60,7 +60,7 @@ dkimsigner-config-secretid:
             - service: dkimsigner
     {% endif %}
 {% else %}
-    {% set x = config.__setitem__("DATABASE_URL", 'postgresql://%s:@postgresql.local:5432/%s'|format(pillar['mailforwarder']['dbuser'],
+    {% set x = config.__setitem__("DATABASE_URL", 'postgresql://%s:@postgresql.local:5432/%s'|format(pillar['dkimsigner']['dbuser'],
         pillar['authserver']['dbname'])) %}
 {% endif %}
 
