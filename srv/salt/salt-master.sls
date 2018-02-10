@@ -13,8 +13,9 @@ salt-master:
 
 {% if pillar.get('duplicity-backup', {}).get('enabled', False) %}
 saltmaster-backup-symlink:
-    - name: /etc/duplicity.d/daily/folderlinks/salt
-    - target: /etc/salt
+    file.symlink:
+        - name: /etc/duplicity.d/daily/folderlinks/salt
+        - target: /etc/salt
 {% endif %}
 
 {% for port in ['4505', '4506'] %}
