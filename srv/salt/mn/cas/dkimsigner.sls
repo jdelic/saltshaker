@@ -36,6 +36,7 @@ dkimsigner-rsyslog:
     "RELAYIP": '127.0.0.1',
     "RELAYPORT": pillar.get('dkimsigner', {}).get('relay-port', 10035),
     "DATABASE_NAME": pillar['authserver']['dbname'],
+    "DATABASE_PARENTROLE": pillar['dkimsigner']['dbuser'],
     "POSTGRESQL_CA": pillar['ssl']['service-rootca-cert'] if
         pillar['postgresql'].get('pinned-ca-cert', 'default') == 'default'
         else pillar['postgresql']['pinned-ca-cert'],
