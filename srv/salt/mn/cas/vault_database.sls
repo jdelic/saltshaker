@@ -190,7 +190,7 @@ authserver-vault-postgresql-connection:
                 allowed_roles="authserver_fullaccess,authserver_mailforwarder,authserver_dkimsigner" \
                 connection_url="postgresql://{{pillar['authserver']['dbuser']}}:{{pillar['dynamicsecrets']['authserver']}}@postgresql.service.consul:5432/?sslmode=verify-full"
         - onlyif: /usr/local/bin/vault init -check >/dev/null
-        - unless: /usr/local/bin/vault postgresql/config | grep authserver >/dev/null
+        - unless: /usr/local/bin/vault list postgresql/config | grep authserver >/dev/null
         - env:
             - VAULT_ADDR: "https://vault.service.consul:8200/"
 
