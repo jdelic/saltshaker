@@ -41,12 +41,30 @@ mailforwarder-rsyslog:
     "POSTGRESQL_CA": pillar['ssl']['service-rootca-cert'] if
         pillar['postgresql'].get('pinned-ca-cert', 'default') == 'default'
         else pillar['postgresql']['pinned-ca-cert'],
-    "DATABASE_URL": 'postgresql://%s:@postgresql.local:5432/%s'|format(pillar['mailforwarder']['dbuser'],
-        pillar['authserver']['dbname']),
     "ALLOWED_HOSTS": "%s,%s"|format(pillar['authserver']['hostname'], pillar['authserver']['smartstack-hostname']),
     "APPLICATION_LOGLEVEL": "INFO",
-} %}{# # RELAYPORT uses  dkimproxy's local relay to send mail #}
-
+} %}
+{% if pillar['mailforwarder'].get('use-vault', False) %}
+    {% set x = config.__setitem__("VAULT_DATABASE_PATH", 'postgresql/creds/authserver_mailforwarder') %}
+    {% if pillar['mailforwarder'].get('vault-authtype', 'approle') == 'approle' %}
+        {% set x = config.__setitem__("VAULT_ROLEID", pillar['dynamicsecrets']['mailforwarder-role-id']) %}
+mailforwarder-config-secretid:
+    cmd.run:
+        - name: >-
+            /usr/local/bin/vault write -f -format=json \
+                auth/approle/role/mailforwarder/secret-id |
+                jq -r .data.secret_id > /etc/appconfig/mailforwarder/env/VAULT_SECRETID
+        - env:
+            - VAULT_ADDR: "https://vault.service.consul:8200/"
+            - VAULT_TOKEN: {{pillar['dynamicsecrets']['approle-auth-token']}}
+        - creates: /etc/appconfig/mailforwarder/env/VAULT_SECRETID
+        - watch_in:
+            - service: mailforwarder
+    {% endif %}
+{% else %}
+    {% set x = config.__setitem__("DATABASE_URL", 'postgresql://%s:@postgresql.local:5432/%s'|format(pillar['mailforwarder']['dbuser'],
+        pillar['authserver']['dbname'])) %}
+{% endif %}
 
 {% for envvar, value in config.items() %}
 mailforwarder-config-{{loop.index}}:

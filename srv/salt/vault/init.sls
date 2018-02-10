@@ -90,6 +90,7 @@ vault-service:
         - sig: vault
         - enable: True
         - require:
+            - file: vault-data-dir
             - file: vault-service
             - file: vault-servicedef
             {% if 'consulserver' in grains['roles'] and pillar['vault']['backend'] == 'consul' %}
@@ -201,7 +202,8 @@ vault-cert-auth-enabled:
             - service: vault-service
             - cmd: vault-init
 
-
+# Vault clients configured by Salt should watch for this state using cmd.run:onchanges
+# and set up their approles and policies
 vault-approle-auth-enabled:
     cmd.run:
         - name: /usr/local/bin/vault auth-enable approle
@@ -212,6 +214,53 @@ vault-approle-auth-enabled:
         - require:
             - service: vault-service
             - cmd: vault-init
+
+
+# create a token that can request secret-ids from approle
+vault-approle-access-token-policy:
+    cmd.run:
+        - name: >-
+            echo 'path "auth/approle/role/*" {
+                capabilities = ["read", "create", "update", "list"]
+            }' | /usr/local/bin/vault policy-write approle_access -
+        - env:
+            - VAULT_ADDR: "https://vault.service.consul:8200/"
+        - unless: /usr/local/bin/vault policies | grep approle_access >/dev/null
+        - onlyif: /usr/local/bin/vault init -check >/dev/null
+
+
+# this creates a token using a per-salt-cluster uuid from dynamicsecrets. The token
+# will become invalid after 60 minutes unless the vault home runs this state again!
+# This allows minions to create approle secret-ids for themselves but not create new
+# secret ids after one hour. This is a compromise between automatic initialization and
+# security.
+vault-approle-access-token:
+    cmd.run:
+        - name: >-
+            /usr/local/bin/vault token-revoke $TOKENID &&
+            /usr/local/bin/vault token-create \
+                -id=$TOKENID \
+                -display-name="approle-auth" \
+                -policy=default -policy=approle_access \
+                -renewable=true \
+                -period=1h \
+                -explicit-max-ttl=0
+        - env:
+            - VAULT_ADDR: "https://vault.service.consul:8200/"
+            - TOKENID: "{{pillar['dynamicsecrets']['approle-auth-token']}}"
+        - unless: >-
+            test "$(/usr/local/bin/vault token-lookup -format=json {{pillar['dynamicsecrets']['approle-auth-token']}} | jq -r .renewable)" == "true" ||
+            test "$(/usr/local/bin/vault token-lookup -format=json {{pillar['dynamicsecrets']['approle-auth-token']}} | jq -r .data.ttl)" -gt 100
+
+
+vault-approle-access-token-renewal:
+    cmd.run:
+        - name: >-
+            /usr/local/bin/vault token-renew {{pillar['dynamicsecrets']['approle-auth-token']}}
+        - env:
+            - VAULT_ADDR: "https://vault.service.consul:8200/"
+        - onlyif: >-
+            test "$(/usr/local/bin/vault token-lookup -format=json {{pillar['dynamicsecrets']['approle-auth-token']}} | jq -r .renewable)" == "true"
 {% endif %}
 
 

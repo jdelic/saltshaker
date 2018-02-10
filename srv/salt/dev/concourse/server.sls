@@ -86,9 +86,13 @@ concourse-authorized-key-consul-template-watcher:
             - file: authorized_worker_keys-template
 
 
-concourse-server-envvars:
+concourse-server-envvars{% if pillar['ci']['use-vault'] %}-template{% endif %}:
     file.managed:
+    {% if pillar['ci']['use-vault'] %}
+        - name: /etc/concourse/envvars.tpl
+    {% else %}
         - name: /etc/concourse/envvars  # read by concourse.service using systemd's `EnvironmentFile=`
+    {% endif %}
         - user: root
         - group: root
         - mode: '0600'
@@ -102,6 +106,27 @@ concourse-server-envvars:
                         pillar['postgresql'].get('pinned-ca-cert', 'default') == 'default'
                         else pillar['postgresql']['pinned-ca-cert']}}"
             CONCOURSE_ENCRYPTION_KEY="{{pillar['dynamicsecrets']['concourse-encryption']}}"
+
+            {%- if pillar['ci'].get('use-vault', True) %}
+            CONCOURSE_VAULT_URL="https://{{pillar['vault']['smartstack-hostname']}}:8200/"
+            CONCOURSE_VAULT_CA_CERT="{{pillar['ssl']['service-rootca-cert']}}"
+            CONCOURSE_VAULT_AUTH_BACKEND="approle"
+            CONCOURSE_VAULT_AUTH_PARAM="role_id={{pillar['dynamicsecrets']['concourse-role-id']}},secret_id=((secret_id))"
+concourse-server-envvars:
+    cmd.run:
+        - name: >-
+            sed "s#((secret_id))#$(/usr/local/bin/vault write -f -format=json auth/approle/role/concourse/secret-id | \
+                jq -r .data.secret_id)#"  /etc/concourse/envvars.tpl > /etc/concourse/envvars
+        - env:
+            - VAULT_ADDR: "https://vault.service.consul:8200/"
+            - VAULT_TOKEN: {{pillar['dynamicsecrets']['approle-auth-token']}}
+        - onchanges:
+            - file: concourse-server-envvars-template
+        - creates: /etc/concourse/envvars
+        - require:
+            - file: concourse-server-envvars-template
+            - file: vault
+            {% endif %}
 
 
 concourse-server:
@@ -131,7 +156,7 @@ concourse-server:
         - require:
             - file: concourse-install
             - file: authorized_worker_keys-must-exist
-            - file: concourse-server-envvars
+            - concourse-server-envvars
     service.running:
         - name: concourse-web
         - sig: /usr/local/bin/concourse web
@@ -139,7 +164,7 @@ concourse-server:
         - watch:
             - file: concourse-server
             - file: concourse-install  # restart on a change of the binary
-            - file: concourse-server-envvars
+            - concourse-server-envvars  # can be cmd of file
 
 
 concourse-servicedef-tsa:

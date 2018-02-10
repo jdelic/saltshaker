@@ -62,6 +62,9 @@ authserver-config-secretid:
             /usr/local/bin/vault write -f -format=json \
                 auth/approle/role/authserver/secret-id |
                 jq -r .data.secret_id > /etc/appconfig/authserver/env/VAULT_SECRETID
+        - env:
+            - VAULT_ADDR: "https://vault.service.consul:8200/"
+            - VAULT_TOKEN: {{pillar['dynamicsecrets']['approle-auth-token']}}
         - creates: /etc/appconfig/authserver/env/VAULT_SECRETID
         - watch_in:
             - service: authserver

@@ -38,6 +38,7 @@ base:
         - vault
         - mn.cas.vault_database
         - vault.vault_goldfish
+        - dev.concourse.vault_credentials
 
     'roles:goldfish':
         - match: grain
@@ -61,11 +62,13 @@ base:
 
     'roles:buildserver':
         - match: grain
+        - vault.install
         - dev.concourse.server
 
     'roles:buildworker':
         - match: grain
         - dev.concourse.worker
+        - vault.install
         - nomad.client
 
     'roles:apps':
