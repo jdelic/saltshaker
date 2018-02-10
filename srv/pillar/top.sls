@@ -60,7 +60,7 @@ base:
         - local.vault
 
     'E@.+(?!test)$ and G@roles:goldfish':
-        - match: grain
+        - match: compound
         - hetzner.vault
 
     'roles:mail':
