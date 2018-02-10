@@ -37,6 +37,11 @@ base:
         - shared.secrets.postgresql
         - shared.authserver
 
+    'roles:vault':
+        - match: grain
+        - shared.buildserver
+        - shared.authserver
+
     'G@roles:dev or G@roles:buildserver or G@roles:buildworker':
         - match: compound
         - shared.buildserver
