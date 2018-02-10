@@ -6,14 +6,14 @@ authserver:
     protocol: https
     smartstack-hostname: authserver.{{local_domain}}
     vault-application-ca: {{salt['file.join'](localca_location, 'casserver-ca.crt')}}
-    vault-authtype: cert
+    vault-authtype: approle
 
 
 dkimsigner:
     use-vault: True
-    vault-authtype: cert
+    vault-authtype: approle
 
 
 mailforwarder:
     use-vault: True
-    vault-authtype: cert
+    vault-authtype: approle
