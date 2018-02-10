@@ -202,7 +202,8 @@ vault-cert-auth-enabled:
             - service: vault-service
             - cmd: vault-init
 
-
+# Vault clients configured by Salt should watch for this state using cmd.run:onchanges
+# and set up their approles and policies
 vault-approle-auth-enabled:
     cmd.run:
         - name: /usr/local/bin/vault auth-enable approle
@@ -236,8 +237,9 @@ vault-approle-access-token-policy:
 vault-approle-access-token:
     cmd.run:
         - name: >-
+            /usr/local/bin/vault token-revoke $TOKENID &&
             /usr/local/bin/vault token-create \
-                -id="{{pillar['dynamicsecrets']['approle-auth-token']}}" \
+                -id=$TOKENID \
                 -display-name="approle-auth" \
                 -policy=default -policy=approle_access \
                 -renewable=true \
@@ -245,7 +247,10 @@ vault-approle-access-token:
                 -explicit-max-ttl=0
         - env:
             - VAULT_ADDR: "https://vault.service.consul:8200/"
-        - unless: /usr/local/bin/vault token-lookup "{{pillar['dynamicsecrets']['approle-auth-token']}}"
+            - TOKENID: "{{pillar['dynamicsecrets']['approle-auth-token']}}"
+        - unless: >-
+            test "$(/usr/local/bin/vault token-lookup -format=json {{pillar['dynamicsecrets']['approle-auth-token']}} | jq -r .renewable)" == "true" ||
+            test "$(/usr/local/bin/vault token-lookup -format=json {{pillar['dynamicsecrets']['approle-auth-token']}} | jq -r .data.ttl)" -gt 100
 
 
 vault-approle-access-token-renewal:
@@ -254,7 +259,8 @@ vault-approle-access-token-renewal:
             /usr/local/bin/vault token-renew {{pillar['dynamicsecrets']['approle-auth-token']}}
         - env:
             - VAULT_ADDR: "https://vault.service.consul:8200/"
-        - onlyif: /usr/local/bin/vault token-lookup "{{pillar['dynamicsecrets']['approle-auth-token']}}"
+        - onlyif: >-
+            test "$(/usr/local/bin/vault token-lookup -format=json {{pillar['dynamicsecrets']['approle-auth-token']}} | jq -r .renewable)" == "true"
 {% endif %}
 
 

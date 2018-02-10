@@ -57,7 +57,7 @@ mailforwarder-config-secretid:
         - env:
             - VAULT_ADDR: "https://vault.service.consul:8200/"
             - VAULT_TOKEN: {{pillar['dynamicsecrets']['approle-auth-token']}}
-        - creates: /etc/appconfig/authserver/env/VAULT_SECRETID
+        - creates: /etc/appconfig/mailforwarder/env/VAULT_SECRETID
         - watch_in:
             - service: mailforwarder
     {% endif %}

@@ -97,7 +97,7 @@ dkimsigner-vault-approle:
     cmd.run:
         - name: >-
             /usr/local/bin/vault write auth/approle/role/dkimsigner \
-                role_name=authserver \
+                role_name=dkimsigner \
                 policies=postgresql_authserver_dkimsigner \
                 secret_id_num_uses=0 \
                 secret_id_ttl=0 \
@@ -188,14 +188,14 @@ authserver-vault-postgresql-connection:
             /usr/local/bin/vault write postgresql/config/{{pillar['authserver']['dbname']}} \
                 plugin_name=postgresql-database-plugin \
                 allowed_roles="authserver_fullaccess,authserver_mailforwarder,authserver_dkimsigner" \
-                connection_url="postgresql://{{pillar['authserver']['dbuser']}}:{{pillar['dynamicsecrets']['authserver']}}@postgresql.service.consul:5432/"
+                connection_url="postgresql://{{pillar['authserver']['dbuser']}}:{{pillar['dynamicsecrets']['authserver']}}@postgresql.service.consul:5432/?sslmode=verify-full"
         - onlyif: /usr/local/bin/vault init -check >/dev/null
-        - onchanges:
-            - cmd: authserver-vault-postgresql-backend
+        - unless: /usr/local/bin/vault list postgresql/config | grep authserver >/dev/null
         - env:
             - VAULT_ADDR: "https://vault.service.consul:8200/"
 
 
+# '"'"' is bash for ' when using single quotes around the json string
 authserver-vault-postgresql-role:
     cmd.run:
         - name: >-
@@ -203,15 +203,13 @@ authserver-vault-postgresql-role:
                 "db_name": "{{pillar['authserver']['dbname']}}",
                 "default_ttl": "10m",
                 "max_ttl": "1h",
-                "creation_statements": "CREATE ROLE \"{{'{{'}}name{{'}}'}}\" WITH LOGIN ENCRYPTED PASSWORD '{{'{{'}}password{{'}}'}}' VALID UNTIL '{{'{{'}}expiration{{'}}'}}' IN ROLE \"{{pillar['authserver']['dbuser']}}\" INHERIT NOCREATEROLE NOCREATEDB NOSUPERUSER NOREPLICATION NOBYPASSRLS;",
+                "creation_statements": "CREATE ROLE \"{{'{{'}}name{{'}}'}}\" WITH LOGIN ENCRYPTED PASSWORD '"'"'{{'{{'}}password{{'}}'}}'"'"' VALID UNTIL '"'"'{{'{{'}}expiration{{'}}'}}'"'"' IN ROLE \"{{pillar['authserver']['dbuser']}}\" INHERIT NOCREATEROLE NOCREATEDB NOSUPERUSER NOREPLICATION NOBYPASSRLS;",
                 "revocation_statements": "DROP ROLE \"{{'{{'}}name{{'}}'}}\";"
             }' | /usr/local/bin/vault write postgresql/roles/authserver_fullaccess -
         - env:
             - VAULT_ADDR: "https://vault.service.consul:8200/"
         - onlyif: /usr/local/bin/vault init -check >/dev/null
         - unless: /usr/local/bin/vault list postgresql/roles | grep authserver_fullaccess >/dev/null
-        - onchanges:
-            - cmd: authserver-vault-postgresql-connection
 
 
 mailforwarder-vault-postgresql-role:
@@ -221,15 +219,13 @@ mailforwarder-vault-postgresql-role:
                 "db_name": "{{pillar['authserver']['dbname']}}",
                 "default_ttl": "10m",
                 "max_ttl": "1h",
-                "creation_statements": "CREATE ROLE \"{{'{{'}}name{{'}}'}}\" WITH LOGIN ENCRYPTED PASSWORD '{{'{{'}}password{{'}}'}}' VALID UNTIL '{{'{{'}}expiration{{'}}'}}' IN ROLE \"{{pillar['mailforwarder']['dbuser']}}\" INHERIT NOCREATEROLE NOCREATEDB NOSUPERUSER NOREPLICATION NOBYPASSRLS;",
+                "creation_statements": "CREATE ROLE \"{{'{{'}}name{{'}}'}}\" WITH LOGIN ENCRYPTED PASSWORD '"'"'{{'{{'}}password{{'}}'}}'"'"' VALID UNTIL '"'"'{{'{{'}}expiration{{'}}'}}'"'"' IN ROLE \"{{pillar['mailforwarder']['dbuser']}}\" INHERIT NOCREATEROLE NOCREATEDB NOSUPERUSER NOREPLICATION NOBYPASSRLS;",
                 "revocation_statements": "DROP ROLE \"{{'{{'}}name{{'}}'}}\";"
             }' | /usr/local/bin/vault write postgresql/roles/authserver_mailforwarder -
         - env:
             - VAULT_ADDR: "https://vault.service.consul:8200/"
         - onlyif: /usr/local/bin/vault init -check >/dev/null
         - unless: /usr/local/bin/vault list postgresql/roles | grep authserver_mailforwarder >/dev/null
-        - onchanges:
-            - cmd: authserver-vault-postgresql-connection
 
 
 dkimsigner-vault-postgresql-role:
@@ -239,13 +235,11 @@ dkimsigner-vault-postgresql-role:
                 "db_name": "{{pillar['authserver']['dbname']}}",
                 "default_ttl": "10m",
                 "max_ttl": "1h",
-                "creation_statements": "CREATE ROLE \"{{'{{'}}name{{'}}'}}\" WITH LOGIN ENCRYPTED PASSWORD '{{'{{'}}password{{'}}'}}' VALID UNTIL '{{'{{'}}expiration{{'}}'}}' IN ROLE \"{{pillar['dkimsigner']['dbuser']}}\" INHERIT NOCREATEROLE NOCREATEDB NOSUPERUSER NOREPLICATION NOBYPASSRLS;",
+                "creation_statements": "CREATE ROLE \"{{'{{'}}name{{'}}'}}\" WITH LOGIN ENCRYPTED PASSWORD '"'"'{{'{{'}}password{{'}}'}}'"'"' VALID UNTIL '"'"'{{'{{'}}expiration{{'}}'}}'"'"' IN ROLE \"{{pillar['dkimsigner']['dbuser']}}\" INHERIT NOCREATEROLE NOCREATEDB NOSUPERUSER NOREPLICATION NOBYPASSRLS;",
                 "revocation_statements": "DROP ROLE \"{{'{{'}}name{{'}}'}}\";"
             }' | /usr/local/bin/vault write postgresql/roles/authserver_dkimsigner -
         - env:
             - VAULT_ADDR: "https://vault.service.consul:8200/"
         - onlyif: /usr/local/bin/vault init -check >/dev/null
         - unless: /usr/local/bin/vault list postgresql/roles | grep authserver_dkimsigner >/dev/null
-        - onchanges:
-            - cmd: authserver-vault-postgresql-connection
 {% endif %}
