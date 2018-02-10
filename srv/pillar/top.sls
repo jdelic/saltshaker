@@ -59,6 +59,10 @@ base:
         - match: compound
         - local.vault
 
+    'E@.+(?!test)$ and G@roles:goldfish':
+        - match: grain
+        - hetzner.vault
+
     'roles:mail':
         - match: grain
         - shared.secrets.smtp
