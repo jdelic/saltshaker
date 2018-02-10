@@ -8,10 +8,10 @@ concourse-vault-approle:
                 bind_secret_id=true \
                 token_num_uses=0 \
                 secret_id_num_uses=0 \
-                period=45m \
-                token_ttl=45m \
-                token_max_ttl=60m \
-                secret_id_ttl=30m \
+                period=60m \
+                token_ttl=60m \
+                token_max_ttl=0 \
+                secret_id_ttl=0 \
                 policies=default,concourse_secrets
         - env:
             - VAULT_ADDR: "https://vault.service.consul:8200/"
