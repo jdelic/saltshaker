@@ -45,13 +45,12 @@ authserver-vault-ssl-cert:
                 display_name="authserver" \
                 policies=postgresql_authserver_fullaccess \
                 certificate=@{{pillar['authserver']['vault-application-ca']}} \
+                allowed_names="authserver" \
                 ttl=3600
         - env:
             - VAULT_ADDR: "https://vault.service.consul:8200/"
         - unless: /usr/local/bin/vault list auth/cert/certs | grep authserver_database >/dev/null
         - onlyif: /usr/local/bin/vault init -check >/dev/null
-        - onchanges:
-            - cmd: vault-cert-auth-enabled
 
 
 authserver-vault-no-approle:
@@ -106,13 +105,12 @@ mailforwarder-vault-ssl-cert:
                 display_name="mailforwarder" \
                 policies=postgresql_authserver_mailforwarder \
                 certificate=@{{pillar['authserver']['vault-application-ca']}} \
+                allowed_names="mailforwarder" \
                 ttl=3600
         - env:
             - VAULT_ADDR: "https://vault.service.consul:8200/"
         - unless: /usr/local/bin/vault list auth/cert/certs | grep mailforwarder_database >/dev/null
         - onlyif: /usr/local/bin/vault init -check >/dev/null
-        - onchanges:
-            - cmd: vault-cert-auth-enabled
 
 
 mailforwarder-vault-no-approle:
@@ -167,13 +165,12 @@ dkimsigner-vault-ssl-cert:
                 display_name="dkimsigner" \
                 policies=postgresql_authserver_dkimsigner \
                 certificate=@{{pillar['authserver']['vault-application-ca']}} \
+                allowed_names="dkimsigner" \
                 ttl=3600
         - env:
             - VAULT_ADDR: "https://vault.service.consul:8200/"
         - unless: /usr/local/bin/vault list auth/cert/certs | grep dkimsigner_database >/dev/null
         - onlyif: /usr/local/bin/vault init -check >/dev/null
-        - onchanges:
-            - cmd: vault-cert-auth-enabled
 
 
 dkimsigner-vault-no-approle:
