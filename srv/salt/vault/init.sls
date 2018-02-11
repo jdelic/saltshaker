@@ -124,7 +124,7 @@ vault-init:
         {% if pillar['vault'].get('encrypt-vault-keys-with-gpg', False) %}
             {% set long_id = pillar['vault']['encrypt-vault-keys-with-gpg'][-16:] %}
             {% set keyloc = pillar['gpg']['shared-keyring-location'] %}
-        # use Bash process groups and fd pipes to send vault init's output into three separate
+        # use Bash process groups and fd pipes to send vault operator init's output into three separate
         # pipes:
         #   1. encrypt the output for the administrator
         #   2. save the initial root token to a file in /root and authenticate root as Vault root
@@ -133,7 +133,7 @@ vault-init:
             {
                 {
                     {
-                        /usr/local/bin/vault init |
+                        /usr/local/bin/vault operator init |
                         tee /dev/fd/5 /dev/fd/6 |
                         gpg --homedir {{keyloc}} \
                             --no-default-keyring \
@@ -159,7 +159,7 @@ vault-init:
             {
                 {
                     {
-                        /usr/local/bin/vault init |
+                        /usr/local/bin/vault operator init |
                         tee /dev/fd/5 /dev/fd/6 >/root/vault_keys.txt;
                     } 5>&1 |
                     grep "Initial Root Token" |
@@ -175,7 +175,7 @@ vault-init:
         {% endif %}
         # vault check -init returns error code 1 on an ERROR and 2 when Vault is uninitialized
         # so we do nothing on exit codes 0 and 1
-        - unless: /usr/local/bin/vault init -check >/dev/null; test $? -lt 2 && /bin/true
+        - unless: /usr/local/bin/vault operator init -status >/dev/null; test $? -lt 2 && /bin/true
         # we use Vault's Consul DNS API name here, because we can't rely on SmartStack being available
         # when the node has just been brought up. It doesn't matter here though, because Vault is
         # by definition local to this node when this state runs.
@@ -192,7 +192,7 @@ vault-cert-auth-enabled:
     cmd.run:
         - name: /usr/local/bin/vault auth-enable cert
         - unless: /usr/local/bin/vault auth -methods | grep cert >/dev/null
-        - onlyif: /usr/local/bin/vault init -check >/dev/null
+        - onlyif: /usr/local/bin/vault operator init -status >/dev/null
         # we use Vault's Consul DNS API name here, because we can't rely on SmartStack being available
         # when the node has just been brought up. It doesn't matter here though, because Vault is
         # by definition local to this node when this state runs.
@@ -208,7 +208,7 @@ vault-approle-auth-enabled:
     cmd.run:
         - name: /usr/local/bin/vault auth-enable approle
         - unless: /usr/local/bin/vault auth -methods | grep approle >/dev/null
-        - onlyif: /usr/local/bin/vault init -check >/dev/null
+        - onlyif: /usr/local/bin/vault operator init -status >/dev/null
         - env:
             - VAULT_ADDR: "https://vault.service.consul:8200/"
         - require:
@@ -226,7 +226,7 @@ vault-approle-access-token-policy:
         - env:
             - VAULT_ADDR: "https://vault.service.consul:8200/"
         - unless: /usr/local/bin/vault policies | grep approle_access >/dev/null
-        - onlyif: /usr/local/bin/vault init -check >/dev/null
+        - onlyif: /usr/local/bin/vault operator init -status >/dev/null
 
 
 # this creates a token using a per-salt-cluster uuid from dynamicsecrets. The token

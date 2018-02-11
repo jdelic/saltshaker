@@ -55,7 +55,7 @@ goldfish-vault-policy:
         - env:
             - VAULT_ADDR: "https://vault.service.consul:8200/"
         - unless: /usr/local/bin/vault policies | grep goldfish >/dev/null
-        - onlyif: /usr/local/bin/vault init -check >/dev/null
+        - onlyif: /usr/local/bin/vault operator init -status >/dev/null
 
 
 goldfish-vault-config:

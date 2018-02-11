@@ -16,7 +16,7 @@ concourse-vault-approle:
         - env:
             - VAULT_ADDR: "https://vault.service.consul:8200/"
         - unless: /usr/local/bin/vault list auth/approle/role | grep concourse >/dev/null
-        - onlyif: /usr/local/bin/vault init -check >/dev/null
+        - onlyif: /usr/local/bin/vault operator init -status >/dev/null
 
 
 concourse-vault-approle-role-id:
@@ -39,5 +39,5 @@ concourse-vault-secrets-policy:
         - env:
             - VAULT_ADDR: "https://vault.service.consul:8200/"
         - unless: /usr/local/bin/vault policies | grep concourse_secrets >/dev/null
-        - onlyif: /usr/local/bin/vault init -check >/dev/null
+        - onlyif: /usr/local/bin/vault operator init -status >/dev/null
 {% endif %}
