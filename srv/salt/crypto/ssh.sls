@@ -57,7 +57,7 @@ openssh-config-builder:
             - file: openssh-config-folder
     cmd.run:
         - name: /etc/ssh/assemble-ssh-config.sh
-        - onchanges:
+        - watch:
             - file: /etc/ssh/sshd_config.d*
 
 

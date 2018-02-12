@@ -16,6 +16,8 @@ photosync-sftp-config-enable-sftp:
         - name: /etc/ssh/sshd_config.d/01-enable-sftp
         - contents: |
             Subsystem       sftp    internal-sftp
+        - onchanges_in:
+            - cmd: openssh-config-builder
         - require:
             - file: openssh-config-folder
 
@@ -62,6 +64,6 @@ photosync-sftp-config-{{photosync_svc}}:
         - require:
             - file: photosync-folder-{{photosync_svc}}
             - group: photosync-group-{{photosync_svc}}
-        - watch_in:
+        - onchanges_in:
             - cmd: openssh-config-builder
 {% endfor %}
