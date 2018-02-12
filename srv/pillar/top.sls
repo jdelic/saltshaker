@@ -63,6 +63,14 @@ base:
         - match: compound
         - hetzner.vault
 
+    '*.test and G@roles:photosync':
+        - match: compound
+        - local.photosync
+
+    'E@.+(?!test)$ and G@roles:photosync':
+        - match: compound
+        - hetzner.photosync
+
     'roles:mail':
         - match: grain
         - shared.secrets.smtp
