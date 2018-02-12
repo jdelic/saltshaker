@@ -36,7 +36,7 @@ photosync-folder-{{photosync_svc}}-root:
         - name: /secure/photosync/{{photosync_svc}}-root
         - user: root
         - group: root
-        - mode: '0750'
+        - mode: '0755'
         - makedirs: True
         - require:
             - file: photosync-secure-storage
@@ -51,6 +51,7 @@ photosync-folder-{{photosync_svc}}:
         - makedirs: True
         - require:
             - group: photosync-group-{{photosync_svc}}
+            - file: photosync-folder-{{photosync_svc}}-root
 
 
     {% for photosync_user in pillar['photosync'][photosync_svc] %}
