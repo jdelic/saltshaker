@@ -11,7 +11,7 @@ for cf in /etc/ssh/sshd_config.d/*; do
 done
 
 # test new config
-if sshd -c /etc/ssh/sshd_config.new -t; then
+if sshd -f /etc/ssh/sshd_config.new -t; then
     mv /etc/ssh/sshd_config.new /etc/ssh/sshd_config
     systemctl restart sshd
 else

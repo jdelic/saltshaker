@@ -19,7 +19,6 @@ openssh-reload:
         - enable: True
         - reload: True
         - watch:
-            - file: openssh-config
 {% if pillar.get("crypto", {}).get("generate-secure-dhparams", True) %}
             - file: openssh-replace-moduli
 {% endif %}
@@ -58,7 +57,7 @@ openssh-config-builder:
             - file: openssh-config-folder
     cmd.run:
         - name: /etc/ssh/assemble-ssh-config.sh
-        - creates: /etc/ssh/sshd_config
+        - onchanges: /etc/ssh/sshd_config.d*
 
 
 {% if pillar.get("crypto", {}).get("generate-secure-dhparams", True) %}
