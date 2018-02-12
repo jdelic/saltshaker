@@ -37,6 +37,7 @@ photosync-folder-{{photosync_svc}}-root:
         - user: root
         - group: root
         - mode: '0750'
+        - makedirs: True
         - require:
             - file: photosync-secure-storage
 
@@ -47,6 +48,7 @@ photosync-folder-{{photosync_svc}}:
         - user: root
         - group: ps-{{photosync_svc}}
         - mode: '0770'
+        - makedirs: True
         - require:
             - group: photosync-group-{{photosync_svc}}
 
