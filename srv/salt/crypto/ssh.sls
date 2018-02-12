@@ -57,7 +57,8 @@ openssh-config-builder:
             - file: openssh-config-folder
     cmd.run:
         - name: /etc/ssh/assemble-ssh-config.sh
-        - onchanges: /etc/ssh/sshd_config.d*
+        - onchanges:
+            - file: /etc/ssh/sshd_config.d*
 
 
 {% if pillar.get("crypto", {}).get("generate-secure-dhparams", True) %}
