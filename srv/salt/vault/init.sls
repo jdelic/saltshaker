@@ -151,8 +151,8 @@ vault-init:
                 grep "Unseal Key" |
                 cut -f2 -d":" |
                 tail -n 3 |
-                xargs -n 1 vault unseal;
-                cat /root/.vault-token | /usr/local/bin/vault auth -;
+                xargs -n 1 vault operator unseal;
+                cat /root/.vault-token | /usr/local/bin/vault login -;
             }
         {% else %}
         - name: >-
@@ -169,8 +169,8 @@ vault-init:
                 grep "Unseal Key" |
                 cut -f2 -d':' |
                 tail -n 3 |
-                xargs -n 1 vault unseal;
-                cat /root/.vault-token | /usr/local/bin/vault auth -;
+                xargs -n 1 vault operator unseal;
+                cat /root/.vault-token | /usr/local/bin/vault login -;
             }
         {% endif %}
         # vault check -init returns error code 1 on an ERROR and 2 when Vault is uninitialized
@@ -190,8 +190,8 @@ vault-init:
 # and set up their CA certificate and policies
 vault-cert-auth-enabled:
     cmd.run:
-        - name: /usr/local/bin/vault auth-enable cert
-        - unless: /usr/local/bin/vault auth -methods | grep cert >/dev/null
+        - name: /usr/local/bin/vault auth enable cert
+        - unless: /usr/local/bin/vault auth list | grep cert >/dev/null
         - onlyif: /usr/local/bin/vault operator init -status >/dev/null
         # we use Vault's Consul DNS API name here, because we can't rely on SmartStack being available
         # when the node has just been brought up. It doesn't matter here though, because Vault is
@@ -206,8 +206,8 @@ vault-cert-auth-enabled:
 # and set up their approles and policies
 vault-approle-auth-enabled:
     cmd.run:
-        - name: /usr/local/bin/vault auth-enable approle
-        - unless: /usr/local/bin/vault auth -methods | grep approle >/dev/null
+        - name: /usr/local/bin/vault auth enable approle
+        - unless: /usr/local/bin/vault auth list | grep approle >/dev/null
         - onlyif: /usr/local/bin/vault operator init -status >/dev/null
         - env:
             - VAULT_ADDR: "https://vault.service.consul:8200/"
@@ -222,7 +222,7 @@ vault-approle-access-token-policy:
         - name: >-
             echo 'path "auth/approle/role/*" {
                 capabilities = ["read", "create", "update", "list"]
-            }' | /usr/local/bin/vault policy-write approle_access -
+            }' | /usr/local/bin/vault policy write approle_access -
         - env:
             - VAULT_ADDR: "https://vault.service.consul:8200/"
         - unless: /usr/local/bin/vault policies | grep approle_access >/dev/null
@@ -237,8 +237,8 @@ vault-approle-access-token-policy:
 vault-approle-access-token:
     cmd.run:
         - name: >-
-            /usr/local/bin/vault token-revoke $TOKENID &&
-            /usr/local/bin/vault token-create \
+            /usr/local/bin/vault token revoke $TOKENID &&
+            /usr/local/bin/vault token create \
                 -id=$TOKENID \
                 -display-name="approle-auth" \
                 -policy=default -policy=approle_access \
@@ -249,18 +249,18 @@ vault-approle-access-token:
             - VAULT_ADDR: "https://vault.service.consul:8200/"
             - TOKENID: "{{pillar['dynamicsecrets']['approle-auth-token']}}"
         - unless: >-
-            test "$(/usr/local/bin/vault token-lookup -format=json {{pillar['dynamicsecrets']['approle-auth-token']}} | jq -r .renewable)" == "true" ||
-            test "$(/usr/local/bin/vault token-lookup -format=json {{pillar['dynamicsecrets']['approle-auth-token']}} | jq -r .data.ttl)" -gt 100
+            test "$(/usr/local/bin/vault token lookup -format=json {{pillar['dynamicsecrets']['approle-auth-token']}} | jq -r .renewable)" == "true" ||
+            test "$(/usr/local/bin/vault token lookup -format=json {{pillar['dynamicsecrets']['approle-auth-token']}} | jq -r .data.ttl)" -gt 100
 
 
 vault-approle-access-token-renewal:
     cmd.run:
         - name: >-
-            /usr/local/bin/vault token-renew {{pillar['dynamicsecrets']['approle-auth-token']}}
+            /usr/local/bin/vault token renew {{pillar['dynamicsecrets']['approle-auth-token']}}
         - env:
             - VAULT_ADDR: "https://vault.service.consul:8200/"
         - onlyif: >-
-            test "$(/usr/local/bin/vault token-lookup -format=json {{pillar['dynamicsecrets']['approle-auth-token']}} | jq -r .renewable)" == "true"
+            test "$(/usr/local/bin/vault token lookup -format=json {{pillar['dynamicsecrets']['approle-auth-token']}} | jq -r .renewable)" == "true"
 {% endif %}
 
 

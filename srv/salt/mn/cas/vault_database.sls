@@ -187,7 +187,7 @@ authserver-vault-postgresql-policy:
         - name: >-
             echo 'path "postgresql/creds/authserver_fullaccess" {
                 capabilities = ["read"]
-            }' | /usr/local/bin/vault policy-write postgresql_authserver_fullaccess -
+            }' | /usr/local/bin/vault policy write postgresql_authserver_fullaccess -
         - env:
             - VAULT_ADDR: "https://vault.service.consul:8200/"
         - unless: /usr/local/bin/vault policies | grep postgresql_authserver_fullaccess >/dev/null
@@ -199,7 +199,7 @@ mailforwarder-vault-postgresql-policy:
         - name: >-
             echo 'path "postgresql/creds/authserver_mailforwarder" {
                 capabilities = ["read"]
-            }' | /usr/local/bin/vault policy-write postgresql_authserver_mailforwarder -
+            }' | /usr/local/bin/vault policy write postgresql_authserver_mailforwarder -
         - env:
             - VAULT_ADDR: "https://vault.service.consul:8200/"
         - unless: /usr/local/bin/vault policies | grep postgresql_authserver_mailforwarder >/dev/null
@@ -211,7 +211,7 @@ dkimsigner-vault-postgresql-policy:
         - name: >-
             echo 'path "postgresql/creds/authserver_dkimsigner" {
                 capabilities = ["read"]
-            }' | /usr/local/bin/vault policy-write postgresql_authserver_dkimsigner -
+            }' | /usr/local/bin/vault policy write postgresql_authserver_dkimsigner -
         - env:
             - VAULT_ADDR: "https://vault.service.consul:8200/"
         - unless: /usr/local/bin/vault policies | grep postgresql_authserver_dkimsigner >/dev/null

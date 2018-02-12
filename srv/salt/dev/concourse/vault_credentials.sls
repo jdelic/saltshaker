@@ -35,7 +35,7 @@ concourse-vault-secrets-policy:
         - name: >-
             echo 'path "concourse/*" {
                 capabilities=["read", "list"]
-            }' | /usr/local/bin/vault policy-write concourse_secrets -
+            }' | /usr/local/bin/vault policy write concourse_secrets -
         - env:
             - VAULT_ADDR: "https://vault.service.consul:8200/"
         - unless: /usr/local/bin/vault policies | grep concourse_secrets >/dev/null
