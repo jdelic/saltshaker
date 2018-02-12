@@ -74,7 +74,7 @@ photosync-sftp-config-{{photosync_svc}}:
         - contents: |
             Match Group ps-{{photosync_svc}}
                 ForceCommand internal-sftp
-                ChrootDirectory /secure/photosync/{{photosync_svc}}
+                ChrootDirectory /secure/photosync/{{photosync_svc}}-root
                 X11Forwarding no
                 AllowTcpForwarding no
         - require:
