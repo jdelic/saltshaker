@@ -77,6 +77,11 @@ base:
         - nomad.install
         - mn.appconfig
 
+    'roles:photosync':
+        - match: grain
+        - mn.photosync
+        - fstab.secure
+
     'roles:database':
         - match: grain
         - fstab.secure

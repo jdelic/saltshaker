@@ -43,6 +43,10 @@ base:
         - match: compound
         - local.vault
 
+    '*.test and G@roles:photosync':
+        - match: compound
+        - local.photosync
+
     'roles:mail':
         - match: grain
         - shared.secrets.smtp
