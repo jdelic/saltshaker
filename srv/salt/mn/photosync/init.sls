@@ -27,7 +27,7 @@ photosync-group-{{photosync_svc}}:
 
 
 photosync-folder-{{photosync_svc}}:
-    folder.directory:
+    file.directory:
         - name: /secure/photosync/{{photosync_svc}}
         - user: root
         - group: ps-{{photosync_svc}}
