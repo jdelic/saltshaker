@@ -41,7 +41,7 @@ photosync-folder-{{photosync_svc}}:
 photosync-{{photosync_svc}}-user-{{photosync_user}}:
     user.present:
         - name: {{photosync_user}}
-        - gid: ps-{{photosync_user}}
+        - gid: ps-{{photosync_svc}}
         - password: {{pillar['photosync'][photosync_svc][photosync_user]}}
         - home: /secure/photosync/{{photosync_svc}}
         - require:
