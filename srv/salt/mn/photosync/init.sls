@@ -33,7 +33,7 @@ photosync-group-{{photosync_svc}}:
 # to be able to see the other roots, we have to nest the homedir twice.
 photosync-folder-{{photosync_svc}}-root:
     file.directory:
-        - name: /secure/photosync/{{photosync_svc}}-root
+        - name: /secure/photosync/{{photosync_svc}}
         - user: root
         - group: root
         - mode: '0755'
@@ -44,7 +44,7 @@ photosync-folder-{{photosync_svc}}-root:
 
 photosync-folder-{{photosync_svc}}:
     file.directory:
-        - name: /secure/photosync/{{photosync_svc}}-root/{{photosync_svc}}
+        - name: /secure/photosync/{{photosync_svc}}/photos
         - user: root
         - group: ps-{{photosync_svc}}
         - mode: '0770'
@@ -60,7 +60,7 @@ photosync-{{photosync_svc}}-user-{{photosync_user}}:
         - name: {{photosync_user}}
         - gid: ps-{{photosync_svc}}
         - password: {{pillar['photosync'][photosync_svc][photosync_user]}}
-        - home: /{{photosync_svc}}
+        - home: /photos
         - createhome: False
         - shell: /bin/false
         - require:
@@ -75,7 +75,7 @@ photosync-sftp-config-{{photosync_svc}}:
         - contents: |
             Match Group ps-{{photosync_svc}}
                 ForceCommand internal-sftp
-                ChrootDirectory /secure/photosync/{{photosync_svc}}-root
+                ChrootDirectory /secure/photosync/{{photosync_svc}}
                 X11Forwarding no
                 AllowTcpForwarding no
         - require:
