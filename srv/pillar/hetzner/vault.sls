@@ -1,3 +1,4 @@
+{% from salt['file.join'](tpldir, 'wellknown.sls') import external_tld %}
 {% from 'shared/ssl.sls' import localca_location, certificate_location, secret_key_location %}
 #
 # This pillar configures the Vault secret storage system which is installed on servers with the
@@ -25,4 +26,4 @@ vault:
 
 
 goldfish:
-    hostname: vault-ui.maurus.net
+    hostname: vault-ui.{{external_tld}}
