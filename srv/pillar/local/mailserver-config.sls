@@ -1,11 +1,12 @@
+{% from salt['file.join'](tpldir, 'wellknown.sls') import external_tld %}
 
 smtp-incoming:
-    hostname: mail.maurusnet.test
+    hostname: mail.{{external_tld}}
     # bind-ip: 123.123.123.123   # override interface bindings to bind to a specific IP
 
 
 smtp-outgoing:
-    hostname: smtp.maurusnet.test
+    hostname: smtp.{{external_tld}}
     # bind-ip: 123.123.123.123   # override interface bindings to bind to a specific IP
 
 
@@ -16,7 +17,7 @@ smtp-local-relay: {}
 
 
 imap-incoming:
-    hostname: mail.maurusnet.test
+    hostname: mail.{{external_tld}}
 
 # vim: syntax=yaml
 
