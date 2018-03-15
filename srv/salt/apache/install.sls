@@ -7,6 +7,10 @@ libapache2-mod-xsendfile:
     pkg.installed
 
 
+libapache2-mod-authnz-external:
+    pkg.installed
+
+
 /etc/apache2/sites/000-default.conf:
     file.absent
 
