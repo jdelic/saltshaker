@@ -4,7 +4,7 @@ aptly:
         - humanname: Aptly Debian
         - name: {{pillar["repos"]["aptly"]}}
         - file: /etc/apt/sources.list.d/aptly.list
-        - key_url: salt://dev/aptly/aptly_9E3E53F19C7DE460.pgp.key
+        - key_url: salt://dev/aptly/aptly_ED75B5A4483DA07C.pgp.key
         - require_in:
             - pkg: aptly
     pkg.installed:
