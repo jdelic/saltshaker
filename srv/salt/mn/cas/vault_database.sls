@@ -220,10 +220,10 @@ dkimsigner-vault-postgresql-policy:
 
 authserver-vault-postgresql-backend:
     cmd.run:
-        - name: /usr/local/bin/vault mount -path=postgresql database
+        - name: /usr/local/bin/vault secrets enable -path=postgresql database
         - env:
             - VAULT_ADDR: "https://vault.service.consul:8200/"
-        - unless: /usr/local/bin/vault mounts | grep postgresql >/dev/null
+        - unless: /usr/local/bin/vault secrets list | grep postgresql >/dev/null
         - onlyif: /usr/local/bin/vault operator init -status >/dev/null
 
 
