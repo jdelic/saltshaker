@@ -123,6 +123,12 @@ concourse-server-envvars:
         - onchanges:
             - file: concourse-server-envvars-template
         - creates: /etc/concourse/envvars
+        - unless: >-
+            test -f /etc/concourse/envvars &&
+            source /etc/concourse/envvars &&
+            echo $CONCOURSE_VAULT_AUTH_PARAM | cut -d',' -f2 | cut -d'=' -f2 | \
+                vault write auth/approle/login role_id={{pillar['dynamicsecrets']['concourse-role-id']}} secret_id=- &&
+            test $? -eq 0
         - require:
             - file: concourse-server-envvars-template
             - file: vault
