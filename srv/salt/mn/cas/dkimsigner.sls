@@ -3,7 +3,6 @@
 dkimsigner:
     pkg.installed:
         - name: authserver
-        - fromrepo: mn-nightly
         - require:
             - appconfig: dkimsigner-appconfig
     service.running:

@@ -3,7 +3,6 @@
 mailforwarder:
     pkg.installed:
         - name: authserver
-        - fromrepo: mn-nightly
         - require:
             - appconfig: mailforwarder-appconfig
     service.running:
