@@ -74,8 +74,8 @@ SCRIPT
             vb.customize ['modifyvm', :id, '--rtcuseutc', 'on']
         end
 
-        master.vm.box = 'maurusnet-debian'
-        master.vm.box_url = $box_url
+        master.vm.box = 'debian/contrib-stretch64'
+        #master.vm.box_url = $box_url
         master.vm.network :private_network, ip: '192.168.56.88'
         master.vm.hostname = 'saltmaster.maurusnet.test'
 
@@ -159,8 +159,8 @@ SCRIPT
             vb.customize ['modifyvm', :id, '--rtcuseutc', 'on']
         end
 
-        test.vm.box = 'maurusnet-debian'
-        test.vm.box_url = $box_url
+        test.vm.box = 'debian/contrib-stretch64'
+        #test.vm.box_url = $box_url
         test.vm.network :private_network, ip: '192.168.56.162'
         test.vm.network :private_network, ip: '192.168.56.163'
         test.vm.network :private_network, ip: '192.168.56.164'

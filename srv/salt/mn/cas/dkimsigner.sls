@@ -56,7 +56,11 @@ dkimsigner-config-secretid:
         - env:
             - VAULT_ADDR: "https://vault.service.consul:8200/"
             - VAULT_TOKEN: {{pillar['dynamicsecrets']['approle-auth-token']}}
-        - creates: /etc/appconfig/dkimsigner/env/VAULT_SECRETID
+        - unless: >-
+            test -f /etc/appconfig/dkimsigner/env/VAULT_SECRETID &&
+            cat /etc/appconfig/dkimsigner/env/VAULT_SECRETID | \
+                vault write auth/approle/login role_id={{config['VAULT_ROLEID']}} secret_id=- &&
+            test $? -eq 0
         - watch_in:
             - service: dkimsigner
     {% endif %}
