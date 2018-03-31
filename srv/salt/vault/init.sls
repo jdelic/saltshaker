@@ -175,7 +175,7 @@ vault-init:
         {% endif %}
         # vault check -init returns error code 1 on an ERROR and 2 when Vault is uninitialized
         # so we do nothing on exit codes 0 and 1
-        - unless: /usr/local/bin/vault operator init -status >/dev/null; test $? -lt 2 && /bin/true
+        - unless: /usr/local/bin/vault operator init -status >/dev/null || test $? -lt 2 && /bin/true
         # we use Vault's Consul DNS API name here, because we can't rely on SmartStack being available
         # when the node has just been brought up. It doesn't matter here though, because Vault is
         # by definition local to this node when this state runs.
