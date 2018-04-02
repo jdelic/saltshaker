@@ -12,7 +12,7 @@ if [ $# -ne 1 ]; then
     echo "This script is a helper that runs duplicity so it removes backups older than"
     echo "a certain timeframe as configured via Salt."
     echo ""
-    echo "Cronjob enabled: {{cron_enabled}}
+    echo "Cronjob enabled: {{cron_enabled}}"
     echo "Cleanup mode: {{cleanup_mode}}"
     echo "Cleanup parameter: {{cleanup_selector}}"
     exit 1;
