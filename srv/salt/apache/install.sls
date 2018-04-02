@@ -15,6 +15,19 @@ authclient:
     pkg.installed
 
 
+authnz-external-config:
+    file.managed:
+        - name: /etc/apache2/mods-available/authnz_external.conf
+        - source: salt://apache/modules/authnz_external.conf
+
+
+authnz-external-enable:
+    cmd.run:
+        - name: /usr/sbin/a2enmod authnz_external
+        - require:
+            - file: authnz-external-config
+
+
 /etc/apache2/sites/000-default.conf:
     file.absent
 
