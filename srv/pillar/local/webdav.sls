@@ -1,7 +1,6 @@
 apache2:
     webdav:
-        scopes:
-            - webdav-storage
+        enabled: True
         sites:
             - webdav.maurusnet.test:
                 authrealm: maurus.net webdav
