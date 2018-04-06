@@ -8,5 +8,7 @@ apache2:
                 sslkey: default
                 folders:
                     - vagrant:
-                        required-scopes:
+                        write-scopes:
                             - webdav-storage
+                        # readonly-scopes:
+                        #     - webdav-download
