@@ -14,6 +14,14 @@ secure-webdav-basedir:
             - secure-mount
             - pkg: apache2
 
+{% set ip = pillar.get('apache2', {}).get('webdav', {}).get(
+                'bind-ip', grains['ip_interfaces'][pillar['ifassign']['internal']][pillar['ifassign'].get(
+                    'internal-ip-index', 0
+                )|int()]
+            ) %}
+
+{% set port = pillar.get('apache2', {}).get('webdav', {}).get('bind-port', 32080) %}
+
 
 {% if pillar.get('apache2', {}).get('webdav', {}).get('enabled', False) %}
     {% for sitedef in pillar.get('apache2', {}).get('webdav', {}).get('sites', []) %}
@@ -62,12 +70,8 @@ apache2-webdav-config-{{sitecnt}}:
         - source: salt://apache/sites/webdav.jinja.conf
         - template: jinja
         - context:
-            ip: {{config.get(
-                    'bind-ip', grains['ip_interfaces'][pillar['ifassign']['internal']][pillar['ifassign'].get(
-                        'internal-ip-index', 0
-                    )|int()]
-                )}}
-            port: {{config.get('bind-port', 32080)}}
+            ip: {{ip}}
+            port: {{port}}
             site: {{site}}
             folders: {{config['folders']}}
             auth_url: {{pillar['authserver']['hostname']}}
@@ -85,9 +89,9 @@ apache2-webdav-servicedef-{{site}}:
         - template: jinja
         - context:
             routing: external
-            suffix: {{site}}
-            mode: tcp
-            protocol: http
+            suffix: {{site|replace('.', '-')}}
+            mode: http
+            protocol: https
             hostname: {{site}}
             ip: {{config.get(
                     'bind-ip', grains['ip_interfaces'][pillar['ifassign']['internal']][pillar['ifassign'].get(
