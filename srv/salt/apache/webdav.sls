@@ -107,3 +107,19 @@ apache2-webdav-servicedef-{{site}}:
         {% endfor %}
     {% endfor %}
 {% endif %}
+
+
+apache2-webdav-tcp-in{{port}}-recv:
+    iptables.append:
+        - table: filter
+        - chain: INPUT
+        - jump: ACCEPT
+        - source: '0/0'
+        - destination: {{ip}}/32
+        - dport: {{port}}
+        - match: state
+        - connstate: NEW
+        - proto: tcp
+        - save: True
+        - require:
+            - sls: iptables
