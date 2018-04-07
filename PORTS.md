@@ -19,7 +19,8 @@ PORT     | SMARTSTACK | ASSIGNED SERVICE
   8600   |            | consul dns
   8990   |            | caldav
   8999   |      X     | authserver
- 32443   |      X     | apache webdav
+ 32080   |      X     | apache HTTP
+ 32443   |      X     | apache HTTPS
 
 
 

@@ -1,0 +1,12 @@
+{
+    "service": {
+        "name": "webdav-{{suffix}}",
+        "tags": ["smartstack:{{routing}}", "smartstack:port:{{port}}", "smartstack:mode:{{mode}}"
+                {% if hostname is defined %}, "smartstack:hostname:{{hostname}}"{% endif %}
+                {% if protocol is defined %}, "smartstack:protocol:{{protocol}}"{% endif %},
+                "smartstack:https-redirect"],
+        "address": "{{ip}}",
+        "port": {{port}}
+        {# TODO: add service checks here? #}
+    }
+}

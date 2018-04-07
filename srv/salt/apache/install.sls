@@ -8,28 +8,40 @@ libapache2-mod-xsendfile:
 
 
 libapache2-mod-authnz-external:
-    pkg.installed
+    pkg.installed:
+        - require:
+            - pkg: apache2
 
 
 authclient:
     pkg.installed
 
 
-authnz-external-config:
-    file.managed:
-        - name: /etc/apache2/mods-available/authnz_external.conf
-        - source: salt://apache/modules/authnz_external.conf
-
-
 authnz-external-enable:
     cmd.run:
         - name: /usr/sbin/a2enmod authnz_external
         - require:
-            - file: authnz-external-config
+            - pkg: libapache2-mod-authnz-external
 
 
 /etc/apache2/sites/000-default.conf:
     file.absent
+
+
+apache2-mods-symlink-directory:
+    file.directory:
+        - name: /etc/apache2/mods-enabled
+        - user: root
+        - group: root
+        - mode: '0755'
+
+
+apache2-sites-symlink-directory:
+    file.directory:
+        - name: /etc/apache2/sites-enabled
+        - user: root
+        - group: root
+        - mode: '0755'
 
 
 apache2-service:
