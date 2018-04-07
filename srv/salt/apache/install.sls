@@ -44,6 +44,14 @@ apache2-sites-symlink-directory:
         - mode: '0755'
 
 
+apache2-sites-config-directory:
+    file.directory:
+        - name: /etc/apache2/sites-available
+        - user: root
+        - group: root
+        - mode: '0755'
+
+
 apache2-service:
     service.running:
         - name: apache2
@@ -51,6 +59,7 @@ apache2-service:
         - reload: True
         - watch:
             - file: /etc/apache2/sites-enabled*
+            - file: /etc/apache2/sites-available*
             - file: /etc/apache2/mods-enabled*
         - require:
             - pkg: apache2
