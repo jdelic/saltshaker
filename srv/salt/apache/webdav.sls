@@ -84,7 +84,7 @@ apache2-webdav-servicedef-{{site}}:
         - mode: '0644'
         - template: jinja
         - context:
-            routing: internal
+            routing: external
             suffix: {{site}}
             mode: tcp
             protocol: http
