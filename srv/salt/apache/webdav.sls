@@ -38,7 +38,7 @@ apache2-webdav-config-folder:
         - mode: '0755'
         - makedirs: True
         - require:
-            pkg: apache2
+            - pkg: apache2
 
 
 apache2-webdav-config-jwtkey:

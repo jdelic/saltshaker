@@ -102,7 +102,7 @@ authserver-create-auth-domain:
             /usr/local/authserver/bin/django-admin.py domain --settings=authserver.settings list
                 --find-parent-domain {{pillar['authserver']['hostname']}}
         - require:
-            service: authserver
+            - service: authserver
 
 
 authserver-servicedef-external:
