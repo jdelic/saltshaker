@@ -2,6 +2,14 @@
 include:
     - apache.install
 
+{% set ip = pillar.get('apache2', {}).get('webdav', {}).get(
+                'bind-ip', grains['ip_interfaces'][pillar['ifassign']['internal']][pillar['ifassign'].get(
+                    'internal-ip-index', 0
+                )|int()]
+            ) %}
+
+{% set port = pillar.get('apache2', {}).get('webdav', {}).get('bind-port', 32080) %}
+
 
 secure-webdav-basedir:
     file.directory:
@@ -14,13 +22,12 @@ secure-webdav-basedir:
             - secure-mount
             - pkg: apache2
 
-{% set ip = pillar.get('apache2', {}).get('webdav', {}).get(
-                'bind-ip', grains['ip_interfaces'][pillar['ifassign']['internal']][pillar['ifassign'].get(
-                    'internal-ip-index', 0
-                )|int()]
-            ) %}
 
-{% set port = pillar.get('apache2', {}).get('webdav', {}).get('bind-port', 32080) %}
+apache2-webdav-enable-dav:
+    cmd.run:
+        - name: /usr/sbin/a2enmod dav_fs
+        - require_in:
+            - service: apache2-service
 
 
 {% if pillar.get('apache2', {}).get('webdav', {}).get('enabled', False) %}
@@ -66,7 +73,7 @@ apache2-webdav-folders-{{sitecnt}}-{{foldername}}-{{fdcnt}}-{{loop.index}}:
 
 apache2-webdav-config-{{sitecnt}}:
     file.managed:
-        - name: /etc/apache2/sites-available/001-{{loop.index}}-webdav.conf
+        - name: /etc/apache2/sites-available/001-{{sitecnt}}-webdav.conf
         - source: salt://apache/sites/webdav.jinja.conf
         - template: jinja
         - context:
@@ -81,13 +88,17 @@ apache2-webdav-config-{{sitecnt}}:
             - pkg: apache2
 
 
-# TODO: ENABLE THIS SITE
-# ADD PORT LISTENER TO APACHE2
+apache2-webdav-enable-site-{{sitecnt}}:
+    file.symlink:
+        - name: /etc/apache2/sites-enabled/001-{{sitecnt}}-webdav.conf
+        - target: /etc/apache2/sites-available/001-{{sitecnt}}-webdav.conf
+        - require:
+            - file: apache2-webdav-config-{{sitecnt}}
 
 
 apache2-webdav-servicedef-{{site}}:
     file.managed:
-        - name: /etc/consul/services.d/webdav-{{loop.index}}.json
+        - name: /etc/consul/services.d/webdav-{{sitecnt}}.json
         - source: salt://apache/consul/webdav.jinja.json
         - mode: '0644'
         - template: jinja
@@ -104,13 +115,22 @@ apache2-webdav-servicedef-{{site}}:
                 )}}
             port: {{config.get('bind-port', 32080)}}
         - require:
-            - file: apache2-webdav-config-{{loop.index}}
+            - file: apache2-webdav-enable-site-{{sitecnt}}
             - service: apache2-service
             - file: consul-service-dir
 
         {% endfor %}
     {% endfor %}
 {% endif %}
+
+
+apache2-webdav-add-port-{{port}}:
+    file.accumulated:
+        - name: apache2-listen-ports
+        - filename: /etc/apache2/ports.conf
+        - text: {{ip}}:{{port}}
+        - require_in:
+            - file: apache2-ports-config
 
 
 apache2-webdav-tcp-in{{port}}-recv:

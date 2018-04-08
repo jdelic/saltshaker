@@ -52,7 +52,29 @@ apache2-sites-config-directory:
         - mode: '0755'
 
 
+# This uses the accumulator 'apache2-listen-ports' to get a list of all the ports that apache
+# should listen on.
+apache2-ports-config:
+    file.managed:
+        - name: /etc/apache2/ports.conf
+        - source: salt://apache/ports.jinja.conf
+        - template: jinja
+        - user: root
+        - group: root
+        - mode: '0644'
+        - require:
+            - pkg: apache2
+
+
 apache2-service:
+    service.running:
+        - name: apache2
+        - enable: True
+        - require:
+            - pkg: apache2
+
+
+apache2-service-reload:
     service.running:
         - name: apache2
         - enable: True
@@ -61,8 +83,9 @@ apache2-service:
             - file: /etc/apache2/sites-enabled*
             - file: /etc/apache2/sites-available*
             - file: /etc/apache2/mods-enabled*
+            - file: apache2-ports-config
         - require:
-            - pkg: apache2
+            - service: apache2-service
 
 
 # -* vim: syntax=yaml
