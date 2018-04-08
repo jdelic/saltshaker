@@ -5,8 +5,10 @@
 authserver:
     hostname: auth.{{external_tld}}
 
-    # The domain to create for JWT signatures.
-    sso-auth-domain: {{external_tld}}
+    # The domain to create for JWT signatures. Changing this allows you to use a higher level domain than the
+    # main authserver domain.
+    # sso-auth-domain: {{external_tld}}
+
     protocol: https
     smartstack-hostname: authserver.{{local_domain}}
 
