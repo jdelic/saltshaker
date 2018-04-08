@@ -43,7 +43,7 @@ apache2-webdav-config-folder:
 
 apache2-webdav-config-jwtkey:
     cmd.run:
-        - name: >
+        - name: >-
             /usr/local/bin/mn-authclient.py -m init --ca-file /etc/ssl/certs/ca-certificates.crt \
                 -u https://{{pillar['authserver']['hostname']}}/getkey/ \
                 --jwtkey /etc/apache2/webdav-config/jwt.public.pem
