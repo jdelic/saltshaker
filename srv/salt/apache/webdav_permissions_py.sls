@@ -7,7 +7,7 @@ if __pillar__.get('apache2', {}).get('webdav', {}).get('enabled', False):
     for sitedef in __pillar__.get('apache2', {}).get('webdav', {}).get('sites', []):
         for sitename, siteconfig in sitedef.items():
             for folderdef in siteconfig.get('folders', []):
-                for foldername, folderconfig in folderdef:
+                for foldername, folderconfig in folderdef.items():
                     for perm in folderconfig.get('read-scopes', []):
                         permissions.add(perm)
                     for perm in folderconfig.get('write-scopes', []):
