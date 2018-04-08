@@ -91,6 +91,20 @@ authserver-config-{{loop.index}}:
 {% endfor %}
 
 
+authserver-create-auth-domain:
+    cmd.run:
+        - name: >
+            /usr/local/authserver/bin/envdir /etc/appconfig/authserver/env/
+            /usr/local/authserver/bin/django-admin.py domain --settings=authserver.settings create
+                --create-key jwt {{pillar['authserver'].get('sso-auth-domain', pillar['authserver']['hostname'])}}
+        - unless: >
+            /usr/local/authserver/bin/envdir /etc/appconfig/authserver/env/
+            /usr/local/authserver/bin/django-admin.py domain --settings=authserver.settings list
+                --find-parent-domain {{pillar['authserver']['hostname']}}
+        - require:
+            service: authserver
+
+
 authserver-servicedef-external:
     file.managed:
         - name: /etc/consul/services.d/authserver-external.json
