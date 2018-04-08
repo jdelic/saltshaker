@@ -4,10 +4,14 @@
 if __pillar__.get('apache2', {}).get('webdav', {}).get('enabled', False):
     permissions = set()
 
-    for site in __pillar__.get('apache2', {}).get('webdav', {}).get('sites', []):
-        for folder in site.get('folders', []):
-            for perm in folder.get('required-scopes', []):
-                permissions.add(perm)
+    for sitedef in __pillar__.get('apache2', {}).get('webdav', {}).get('sites', []):
+        for sitename, siteconfig in sitedef.items():
+            for folderdef in siteconfig.get('folders', []):
+                for foldername, folderconfig in folderdef:
+                    for perm in folderconfig.get('read-scopes', []):
+                        permissions.add(perm)
+                    for perm in folderconfig.get('write-scopes', []):
+                        permissions.add(perm)
 
     for perm in permissions:
         perm_cmd = state('authserver-webdav-%s' % perm).cmd
