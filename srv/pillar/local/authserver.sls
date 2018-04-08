@@ -4,9 +4,18 @@
 
 authserver:
     hostname: auth.{{external_tld}}
+
+    # The domain to create for JWT signatures.
+    sso-auth-domain: {{external_tld}}
     protocol: https
     smartstack-hostname: authserver.{{local_domain}}
-    vault-application-ca: {{salt['file.join'](localca_location, 'casserver-ca.crt')}}
+
+    # If vault-authtype is 'cert', then this CA is installed into Vault for authenticating authserver.
+    # vault-application-ca: {{salt['file.join'](localca_location, 'casserver-ca.crt')}}
+
+    # vault-authtype can be 'approle' (read app-id from dynamicsecrets and create secret-id in Vault on the node
+    # running the application) or 'cert' which uses a SSL client certificate (often created during build time via
+    # GoPythonGo's vaultgetcert tool).
     vault-authtype: approle
 
 
