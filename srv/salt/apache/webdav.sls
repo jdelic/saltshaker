@@ -129,12 +129,11 @@ apache2-webdav-servicedef-{{site}}:
             mode: http
             protocol: https
             hostname: {{site}}
-            ip: {{config.get(
-                    'bind-ip', grains['ip_interfaces'][pillar['ifassign']['internal']][pillar['ifassign'].get(
-                        'internal-ip-index', 0
-                    )|int()]
-                )}}
-            port: {{config.get('bind-port', 32080)}}
+            ip: {{ip}}
+            port: {{port}}
+            {% if 'ssl-combined-cert' in config and config['ssl-combined-cert'] != 'default' %}
+            certificate: {{config['ssl-combined-cert']}}
+            {% endif %}
         - require:
             - file: apache2-webdav-enable-site-{{sitecnt}}
             - service: apache2-service
