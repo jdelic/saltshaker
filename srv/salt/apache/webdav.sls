@@ -30,6 +30,26 @@ apache2-webdav-enable-dav:
             - service: apache2-service
 
 
+apache2-webdav-config-folder:
+    file.directory:
+        - name: /etc/apache2/webdav-config
+        - user: root
+        - group: root
+        - mode: '0755'
+        - makedirs: True
+        - require:
+            pkg: apache2
+
+
+apache2-webdav-config-jwtkey:
+    cmd.run:
+        - name: >
+            /usr/local/bin/mn-authclient.py -m init --ca-file /etc/ssl/certs/ca-certificates.crt
+                -u https://{{pillar['authserver']['hostname']}}/getkey/
+                --jwtkey /etc/apache2/webdav-config/jwt.public.pem
+        - creates: /etc/apache2/webdav-config/jwt.public.pem
+
+
 {% if pillar.get('apache2', {}).get('webdav', {}).get('enabled', False) %}
     {% for sitedef in pillar.get('apache2', {}).get('webdav', {}).get('sites', []) %}
         {% for site, config in sitedef.items() %}
@@ -83,6 +103,7 @@ apache2-webdav-config-{{sitecnt}}:
             folders: {{config['folders']}}
             auth_url: {{pillar['authserver']['hostname']}}
             authrealm: {{config['authrealm']}}
+            jwtkey: /etc/apache2/webdav-config/jwt.public.pem
         - require:
             - pkg: authclient
             - pkg: apache2
