@@ -122,6 +122,7 @@ base:
         - mn.cas.server
         - mn.appconfig
         - docker.authserver_dockerregistry  # empty unless a JWT key is configured
+        - apache.webdav_permissions_py
 
     'roles:loadbalancer':
         - match: grain
@@ -130,6 +131,10 @@ base:
     'roles:vpngateway':
         - match: grain
         - openvpn.gateway
+
+    'roles:webdav':
+        - match: grain
+        - apache.webdav
 
     '*.test':
         # put vagrant user config on .test machines
