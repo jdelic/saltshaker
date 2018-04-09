@@ -8,6 +8,8 @@ authserver:
     # The domain to create for JWT signatures. Changing this allows you to use a higher level domain than the
     # main authserver domain.
     # sso-auth-domain: {{external_tld}}
+    # allowing subdomain signing allows the authserver Domain record for tread.mil to sign for a.tread.mil
+    # sso-allow-subdomain-signing: False
 
     protocol: https
     smartstack-hostname: authserver.{{local_domain}}
