@@ -34,5 +34,5 @@ if __pillar__.get('apache2', {}).get('webdav', {}).get('enabled', False):
               else "", auth_domain),
         unless="/usr/local/authserver/bin/envdir /etc/appconfig/authserver/env/ "
                "/usr/local/authserver/bin/django-admin.py domain --settings=authserver.settings list " \
-               "--include-parent-domain %s" % auth_domain)
+               "--include-parent-domain %s" % auth_domain
     )
