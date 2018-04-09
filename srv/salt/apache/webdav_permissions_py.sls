@@ -23,3 +23,16 @@ if __pillar__.get('apache2', {}).get('webdav', {}).get('enabled', False):
                    "/usr/local/authserver/bin/django-admin.py permissions --settings=authserver.settings list | "
                    "grep \"%s\" >/dev/null" % perm,
         )
+
+    auth_domain = __pillar__['authserver'].get('sso-auth-domain', __pillar__['authserver']['hostname'])
+    ad_cmd = state('authserver-webdav-ensure-domain').cmd
+    ad_cmd.run(
+        name="/usr/local/authserver/bin/envdir /etc/appconfig/authserver/env/ "
+             "/usr/local/authserver/bin/django-admin.py domain --settings=authserver.settings create "
+             "--create-key jwt %s %s" %
+             ("--jwt-allow-subdomain-signing" if __pillar__['authserver'].get('sso-allow-subdomain-signing', False)
+              else "", auth_domain),
+        unless="/usr/local/authserver/bin/envdir /etc/appconfig/authserver/env/ "
+               "/usr/local/authserver/bin/django-admin.py domain --settings=authserver.settings list " \
+               "--include-parent-domain %s" % auth_domain)
+    )
