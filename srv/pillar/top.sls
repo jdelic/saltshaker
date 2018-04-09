@@ -47,6 +47,10 @@ base:
         - match: compound
         - local.photosync
 
+    '*.test and G@roles:webdav':
+        - match: compound
+        - local.webdav
+
     'roles:mail':
         - match: grain
         - shared.secrets.smtp

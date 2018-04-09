@@ -548,6 +548,8 @@ Those are:
 
 ### Accumulators
 
+**PostgreSQL**
+
 The PostgreSQL configuration uses two accumulators that record `database user`
 pairs (separated by a single space) for the `pg_hba.conf` file. These
 accumulators are called:
@@ -578,6 +580,26 @@ mydb-remote-user:
         - text: {{pillar['vault']['postgres']['dbname']}} {{pillar['vault']['postgres']['dbuser']}}
         - require_in:
             - file: postgresql-hba-config
+```
+
+**Apache2**
+
+The Apache2 configuration uses an acuumulator `apache2-listen-ports` to gather
+all listen directives for its `/etc/apache2/ports.conf` file. The filename
+attribute  for states setting up new `Listen` directives, should be set to 
+`apache2-ports-config`. The values accumulated can be either just port numbers
+or `ip:port` pairs.
+
+Example:
+
+```yaml
+apache2-webdav-port:
+    file.accumulated:
+        - name: apache2-listen-ports
+        - filename: /etc/apache2/ports.conf
+        - text: {{my_ip}}:{{my_port}}
+        - require_in:
+            - file: apache2-ports-config
 ```
 
 ## PowerDNS Recursor
