@@ -47,7 +47,7 @@ base:
         - match: compound
         - local.photosync
 
-    '*.test and G@roles:webdav or G@roles:authserver':
+    '*.test and (G@roles:webdav or G@roles:authserver)':
         - match: compound
         - local.webdav
 
