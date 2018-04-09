@@ -67,12 +67,11 @@ base:
         - match: compound
         - local.photosync
 
-
     'E@.+(?!test)$ and G@roles:photosync':
         - match: compound
         - hetzner.photosync
 
-    '*.test and G@roles:webdav':
+    '*.test and G@roles:webdav or G@roles:authserver':
         - match: compound
         - local.webdav
 
