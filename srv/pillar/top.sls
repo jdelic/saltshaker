@@ -75,7 +75,7 @@ base:
         - match: compound
         - local.webdav
 
-    'E@.+(?!test)$ and G@roles:webdav':
+    'E@.+(?!test)$ and G@roles:webdav or G@roles:authserver':
         - match: compound
         - hetzner.webdav
 
