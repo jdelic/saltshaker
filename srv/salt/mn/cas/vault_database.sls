@@ -250,7 +250,6 @@ authserver-vault-postgresql-role:
                 "max_ttl": "1h",
                 "creation_statements": "CREATE ROLE \"{{'{{'}}name{{'}}'}}\" WITH LOGIN ENCRYPTED PASSWORD '"'"'{{'{{'}}password{{'}}'}}'"'"' VALID UNTIL '"'"'{{'{{'}}expiration{{'}}'}}'"'"' IN ROLE \"{{pillar['authserver']['dbuser']}}\" INHERIT NOCREATEROLE NOCREATEDB NOSUPERUSER NOREPLICATION NOBYPASSRLS;",
                 "revocation_statements": "DROP ROLE \"{{'{{'}}name{{'}}'}}\";"
-                "
             }' | /usr/local/bin/vault write postgresql/roles/authserver_fullaccess -
         - env:
             - VAULT_ADDR: "https://vault.service.consul:8200/"
