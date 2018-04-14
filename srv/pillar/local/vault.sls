@@ -46,7 +46,4 @@ vault:
 
     # default_lease_ttl: (default: 30 days)
     # max_lease_ttl: (default: 1 year)
-
-
-goldfish:
-    hostname: vault-ui.{{external_tld}}
+    hostname: vault.{{external_tld}}

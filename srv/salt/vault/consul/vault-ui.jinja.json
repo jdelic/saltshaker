@@ -1,0 +1,11 @@
+{
+    "service": {
+        "name": "vault-ui",
+        "tags": ["smartstack:external", "smartstack:port:8200",
+                 "smartstack:protocol:sni", "smartstack:mode:tcp",
+                 "smartstack:hostname:{{hostname}}", "smartstack:https-redirect"],
+        "address": "{{ip}}",
+        "port": {{port}}
+        {# TODO: add service checks here? Or add haproxy in front? #}
+    }
+}

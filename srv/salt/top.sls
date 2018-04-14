@@ -41,10 +41,6 @@ base:
         - vault.vault_goldfish
         - dev.concourse.vault_credentials
 
-    'roles:goldfish':
-        - match: grain
-        - vault.goldfish_ui
-
     'roles:docker-registry':
         - match: grain
         - docker.registry
