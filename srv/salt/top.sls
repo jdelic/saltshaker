@@ -38,7 +38,6 @@ base:
         - match: grain
         - vault
         - mn.cas.vault_database
-        - vault.vault_goldfish
         - dev.concourse.vault_credentials
 
     'roles:docker-registry':
