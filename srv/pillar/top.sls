@@ -39,10 +39,6 @@ base:
         - match: compound
         - shared.secrets.dev-ssl  # these are wildcard certificates for hostnames on the main test domain
 
-    '*.test and G@roles:goldfish':
-        - match: compound
-        - local.vault
-
     '*.test and G@roles:photosync':
         - match: compound
         - local.photosync
