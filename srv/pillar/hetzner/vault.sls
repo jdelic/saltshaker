@@ -23,7 +23,4 @@ vault:
         # S3 secrets config moved to saltshaker-secrets
 
     enable-telemetry: False
-
-
-goldfish:
-    hostname: vault-ui.{{external_tld}}
+    hostname: vault.{{external_tld}}
