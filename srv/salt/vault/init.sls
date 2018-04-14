@@ -92,7 +92,7 @@ vault-service:
         - require:
             - file: vault-data-dir
             - file: vault-service
-            - file: vault-servicedef
+            - file: vault-internal-servicedef
             {% if 'consulserver' in grains['roles'] and pillar['vault']['backend'] == 'consul' %}
             - service: consul-server-service
             {% elif 'consulserver' not in grains['roles'] and pillar['vault']['backend'] == 'consul' %}
@@ -276,7 +276,7 @@ vault-service-reload:
             - file: /etc/vault/vault.conf
 
 
-vault-servicedef:
+vault-internal-servicedef:
     file.managed:
         - name: /etc/consul/services.d/vault.json
         - source: salt://vault/consul/vault.jinja.json
@@ -291,6 +291,26 @@ vault-servicedef:
             port: {{pillar.get('vault', {}).get('bind-port', 8200)}}
         - require:
             - file: consul-service-dir
+
+
+{% if 'vault' in pillar and 'hostname' in pillar['vault'] %}
+vault-external-servicedef:
+    file.managed:
+        - name: /etc/consul/services.d/vault-ui.json
+        - source: salt://vault/consul/vault-ui.jinja.json
+        - mode: '0644'
+        - template: jinja
+        - context:
+            ip: {{pillar.get('vault', {}).get('bind-ip',
+                    grains['ip_interfaces'][pillar['ifassign']['internal']][pillar['ifassign'].get(
+                        'internal-ip-index', 0
+                    )|int()]
+                )}}
+            port: {{pillar.get('vault', {}).get('bind-port', 8200)}}
+            hostname: {{pillar['vault']['hostname']}}
+        - require:
+            - file: consul-service-dir
+{% endif %}
 
 
 vault-ssl-cert:
