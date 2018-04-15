@@ -32,11 +32,12 @@ smartstack-external:
                 --include tags=smartstack:external
                 --open-iptables=conntrack
                 --smartstack-localip {{pillar.get('loadbalancer', {}).get('external-ip', grains['ip_interfaces'][pillar['ifassign']['external']][pillar['ifassign'].get('external-ip-index', 0)|int()])}}
-                {% if 'ssl' in pillar and 'maincert' in pillar['ssl'] -%}
-                    -D maincert={{pillar['ssl']['filenames']['default-cert-full']}}
+                {%- if pillar.get('ssl', {}).get('sources', {}).get('default-cert', None) and
+                      salt['pillar.fetch'](pillar['ssl']['sources']['default-cert'], None) -%}
+                    {{' '}}-D maincert={{pillar['ssl']['filenames']['default-cert-full']}}
                 {%- endif %}
-                {% if pillar.get("crypto", {}).get("generate-secure-dhparams", True) -%}
-                    -D load_dhparams=True
+                {%- if pillar.get("crypto", {}).get("generate-secure-dhparams", True) -%}
+                    {{' '}}-D load_dhparams=True
                 {%- endif %}
             template: /etc/haproxy/haproxy-external.jinja.cfg
         - require:
