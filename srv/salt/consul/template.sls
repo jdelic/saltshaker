@@ -74,10 +74,8 @@ consul-template-service:
             - file: consul-data-dir
             - file: consul-template-config
             - file: consul-template-dir
-            - file: consul-template
         - watch:
             - file: consul-template-service
-            - file: consul-template-servicerenderer
             - file: consul-template  # restart on a change of the binary
 
 
@@ -94,6 +92,7 @@ consul-template-service-reload:
         - watch:
             - file: /etc/consul/template.d*
             - file: /etc/consul/consul-template.conf
+            - cmd: consul-template-servicerenderer
 
 
 consul-template-servicerenderer:
@@ -105,6 +104,11 @@ consul-template-servicerenderer:
         - mode: '0644'
         - require:
             - file: consul-basedir
+    cmd.run:
+        - name: >
+            rm /etc/consul/renders/*
+        - onchanges:
+            - file: consul-template-servicerenderer
 
 
 # vim: syntax=yaml
