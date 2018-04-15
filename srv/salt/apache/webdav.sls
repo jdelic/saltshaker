@@ -91,6 +91,7 @@ apache2-webdav-folders-{{sitecnt}}-{{foldername}}-{{fdcnt}}-{{loop.index}}:
                 {% endfor %}
             {% endfor %}
 
+
 apache2-webdav-config-{{sitecnt}}:
     file.managed:
         - name: /etc/apache2/sites-available/001-{{sitecnt}}-webdav.conf
