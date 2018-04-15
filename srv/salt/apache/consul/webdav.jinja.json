@@ -5,7 +5,7 @@
                 {% if hostname is defined %}, "smartstack:hostname:{{hostname}}"{% endif %}
                 {% if protocol is defined %}, "smartstack:protocol:{{protocol}}"{% endif %}
                 {% if sslcert is defined %}, "smartstack:crt:{{sslcert}}"{% endif %}
-                ,"smartstack:https-redirect"],
+                ,"smartstack:https-redirect", "smartstack:hsts-enabled"],
         "address": "{{ip}}",
         "port": {{port}}
         {# TODO: add service checks here? #}
