@@ -9,8 +9,8 @@ haproxy-config-template-external:
         - source: salt://haproxy/haproxy-external.jinja.cfg
         - require:
             - pkg: haproxy
-        - watch_in:
-            - service: consul-template-service
+        - onchanges_in:
+            - cmd: consul-template-servicerenderer
 
 
 smartstack-external:

@@ -21,13 +21,13 @@ base:
         - shared.secrets.vault-live
         - shared.secrets.vault-ssl
 
-    'E@.+(?!test)$ and G@roles:xenserver':
+    'E@(?!test)$ and G@roles:xenserver':
         - match: compound
         - hetzner.xenserver
 
     # everything not in Vagrant (*.test) is at Hetzner and everything not a xenserver
     # is a VM
-    'E@.*(?!test)$ and not G@roles:xenserver':
+    'E@(?!test)$ and not G@roles:xenserver':
         - match: compound
         - hetzner.vm_config
 
@@ -47,11 +47,13 @@ base:
         - shared.buildserver
         - shared.secrets.gpg-package-signing
 
-    'E@.+(?!test)$ and G@roles:apps or G@roles:loadbalancer or G@roles:mail':
+    # spaces ' ' are important after parentheses for the matcher to work (see
+    # https://docs.saltstack.com/en/latest/topics/targeting/compound.html)
+    'E@(?!test)$ and ( G@roles:apps or G@roles:loadbalancer or G@roles:mail )':
         - match: compound
         - shared.secrets.live-ssl  # these are wildcard certificates for hostnames on the main domain
 
-    '*.test and G@roles:apps or G@roles:loadbalancer or G@roles:mail':
+    '*.test and ( G@roles:apps or G@roles:loadbalancer or G@roles:mail )':
         - match: compound
         - shared.secrets.dev-ssl  # these are wildcard certificates for hostnames on the main test domain
 
@@ -59,15 +61,15 @@ base:
         - match: compound
         - local.photosync
 
-    'E@.+(?!test)$ and G@roles:photosync':
+    'E@(?!test)$ and G@roles:photosync':
         - match: compound
         - hetzner.photosync
 
-    '*.test and (G@roles:webdav or G@roles:authserver)':
+    '*.test and ( G@roles:webdav or G@roles:authserver )':
         - match: compound
         - local.webdav
 
-    'E@.+(?!test)$ and (G@roles:webdav or G@roles:authserver)':
+    'E@(?!test)$ and (G@roles:webdav or G@roles:authserver)':
         - match: compound
         - hetzner.webdav
 

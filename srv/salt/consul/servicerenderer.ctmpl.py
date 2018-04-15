@@ -173,6 +173,18 @@ class SmartstackServiceContainer(object):
                                      ".".join(self.group_by_type) if self.group_by_type is not None else "None",
                                      ".".join(self.filtered_to if self.filtered_to is not None else "None"))
 
+    def __add__(self, other):
+        if isinstance(other.services, dict) and isinstance(self.services, dict):
+            combined = dict(self.services)
+            combined.update(other.services)
+            return SmartstackServiceContainer(combined, all_services=self.all_services,
+                                              filtered_to=["__combined"])
+        elif isinstance(other.services, list) and isinstance(self.services, list):
+            return SmartstackServiceContainer(self.services + other.services, all_services=self.all_services,
+                                              filtered_to=["__combined"])
+        else:
+            raise ValueError("Trying to combine list of services with dict of services")
+
     def keys(self):
         res = self.services.keys()
         if "__untagged" in res:
@@ -239,6 +251,9 @@ class SmartstackServiceContainer(object):
                 if tag.startswith(tagpart):
                     res.add(tag[len(tagpart):])
         return res
+
+    def empty(self):
+        return SmartstackServiceContainer([], all_services=self.all_services, filtered_to=["__empty"])
 
 
 @contextlib.contextmanager
