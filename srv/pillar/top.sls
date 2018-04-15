@@ -21,13 +21,13 @@ base:
         - shared.secrets.vault-live
         - shared.secrets.vault-ssl
 
-    'E@(?!test)$ and G@roles:xenserver':
+    'not *.test and G@roles:xenserver':
         - match: compound
         - hetzner.xenserver
 
     # everything not in Vagrant (*.test) is at Hetzner and everything not a xenserver
     # is a VM
-    'E@(?!test)$ and not G@roles:xenserver':
+    'not *.test and not G@roles:xenserver':
         - match: compound
         - hetzner.vm_config
 
@@ -49,7 +49,7 @@ base:
 
     # spaces ' ' are important after parentheses for the matcher to work (see
     # https://docs.saltstack.com/en/latest/topics/targeting/compound.html)
-    'E@(?!test)$ and ( G@roles:apps or G@roles:loadbalancer or G@roles:mail )':
+    'not *.test and ( G@roles:apps or G@roles:loadbalancer or G@roles:mail )':
         - match: compound
         - shared.secrets.live-ssl  # these are wildcard certificates for hostnames on the main domain
 
@@ -61,7 +61,7 @@ base:
         - match: compound
         - local.photosync
 
-    'E@(?!test)$ and G@roles:photosync':
+    'not *.test and G@roles:photosync':
         - match: compound
         - hetzner.photosync
 
@@ -69,7 +69,7 @@ base:
         - match: compound
         - local.webdav
 
-    'E@(?!test)$ and (G@roles:webdav or G@roles:authserver)':
+    'not *.test and ( G@roles:webdav or G@roles:authserver )':
         - match: compound
         - hetzner.webdav
 
@@ -93,8 +93,8 @@ base:
         - allenvs.nomadserver
 
     # every minion ID not ending in "test" is at Hetzner right now
-    '.+(?!test)$':
-        - match: pcre
+    'not *.test':
+        - match: compound
         - hetzner.wellknown
         - hetzner.mailserver-config
         - hetzner.calendar
