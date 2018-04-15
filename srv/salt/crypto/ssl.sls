@@ -26,7 +26,8 @@ ssl-key-location:
 
 
 # install private certificates if they have been assigned to this node in the pillars
-{% if 'ssl' in pillar and 'maincert' in pillar['ssl'] %}
+{% if pillar.get('ssl', {}).get('sources', {}).get('default-cert', None) and
+      salt['pillar.fetch'](pillar['ssl']['sources']['default-cert'], None) %}
 ssl-maincert-combined-certificate:
     file.managed:
         - name: {{pillar['ssl']['filenames']['default-cert-combined']}}
