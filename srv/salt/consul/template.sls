@@ -106,7 +106,7 @@ consul-template-servicerenderer:
             - file: consul-basedir
     cmd.run:
         - name: >
-            test -z "$(ls -A /etc/consul/renders)" && rm /etc/consul/renders/*
+            test ! -z "$(ls -A /etc/consul/renders)" && rm /etc/consul/renders/*; /bin/true
         - onchanges:
             - file: consul-template-servicerenderer
 
