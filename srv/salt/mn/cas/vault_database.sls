@@ -7,7 +7,7 @@ authserver-vault-approle:
         - name: >-
             /usr/local/bin/vault write auth/approle/role/authserver \
                 role_name=authserver \
-                policies=postgresql_authserver_fullaccess \
+                policies=postgresql_authserver_fullaccess,authserver_secrets \
                 secret_id_num_uses=0 \
                 secret_id_ttl=0 \
                 period=24h \
@@ -180,6 +180,18 @@ dkimsigner-vault-no-approle:
             - VAULT_ADDR: "https://vault.service.consul:8200/"
         - onlyif: /usr/local/bin/vault operator init -status >/dev/null && /usr/local/bin/vault list auth/approle/role | grep dkimsigner >/dev/null
     {% endif %}
+
+
+authserver-vault-secrets-policy:
+    cmd.run:
+        - name: >-
+            echo 'path "secret/authserver/*" {
+                capabilities = ["create", "read", "update", "delete", "list"]
+            }' | /usr/local/bin/vault policy write authserver_secrets -
+        - env:
+            - VAULT_ADDR: "https://vault.service.consul:8200/"
+        - unless: /usr/local/bin/vault policies | grep authserver_secrets >/dev/null
+        - onlyif: /usr/local/bin/vault operator init -status >/dev/null
 
 
 authserver-vault-postgresql-policy:

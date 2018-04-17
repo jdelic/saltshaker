@@ -34,10 +34,22 @@ concourse-vault-secrets-policy:
     cmd.run:
         - name: >-
             echo 'path "concourse/*" {
-                capabilities=["read", "list"]
+                capabilities = ["read", "list"]
             }' | /usr/local/bin/vault policy write concourse_secrets -
         - env:
             - VAULT_ADDR: "https://vault.service.consul:8200/"
         - unless: /usr/local/bin/vault policies | grep concourse_secrets >/dev/null
+        - onlyif: /usr/local/bin/vault operator init -status >/dev/null
+
+
+concourse-vault-authserver-credentials-policy:
+    cmd.run:
+        - name: >
+            echo 'path "secret/authserver/concourse" {
+                capabilities = ["read"]
+            }' | /usr/local/bin/vault policy write concourse_authserver_credentials
+        - env:
+            - VAULT_ADDR: "https://vault.service.consul:8200/"
+        - unless: /usr/local/bin/vault policies | grep concourse_authserver_credentials >/dev/null
         - onlyif: /usr/local/bin/vault operator init -status >/dev/null
 {% endif %}
