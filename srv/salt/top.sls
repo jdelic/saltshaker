@@ -127,7 +127,7 @@ base:
         - openvpn.gateway
 
     'not roles:vpngateway':
-        - match: grain
+        - match: compound
         - openvpn.gateway_accessible
 
     'roles:webdav':
