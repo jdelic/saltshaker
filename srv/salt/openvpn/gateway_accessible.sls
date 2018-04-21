@@ -3,7 +3,7 @@
 {% if salt['mine.get']('roles:vpngateway', 'internal_ip', expr_form='grain').items() %}
 openvpn-allow-access-through-gateway:
     file.managed:
-        - name: /etc/network/interfaces/if-up.d/openvpn-gateway
+        - name: /etc/network/if-up.d/openvpn-gateway
         - contents: |
             #!/bin/bash
 
@@ -26,7 +26,7 @@ openvpn-allow-access-through-gateway:
         - group: root
         - mode: '0755'
     cmd.run:
-        - name: /etc/network/interfaces/if-up.d/openvpn-gateway
+        - name: /etc/network/if-up.d/openvpn-gateway
         - onchanges:
             - file: openvpn-allow-access-through-gateway
         - env:
