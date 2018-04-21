@@ -126,6 +126,10 @@ base:
         - match: grain
         - openvpn.gateway
 
+    'not roles:vpngateway':
+        - match: grain
+        - openvpn.gateway_accessible
+
     'roles:webdav':
         - match: grain
         - apache.webdav
