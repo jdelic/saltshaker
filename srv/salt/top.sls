@@ -46,7 +46,8 @@ base:
     'roles:dev':
         - match: grain
         - dev.pbuilder
-        - dev.aptly
+        - dev.aptly.install
+        - dev.aptly.apiserver
         - dev.fpm
 #        - dev.pypi
 #        - sentry
