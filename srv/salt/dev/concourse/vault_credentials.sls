@@ -40,4 +40,14 @@ concourse-vault-secrets-policy:
             - VAULT_ADDR: "https://vault.service.consul:8200/"
         - unless: /usr/local/bin/vault policies | grep concourse_secrets >/dev/null
         - onlyif: /usr/local/bin/vault operator init -status >/dev/null
+
+
+concourse-secret-mount:
+    cmd.run:
+        - name: >-
+            vault secrets enable -path=concourse kv
+        - env:
+            - VAULT_ADDR: "https://vault.service.consul:8200/"
+        - unless: /usr/local/bin/vault secrets list | grep concourse/ >/dev/null
+        - onlyif: /usr/local/bin/vault operator init -status >/dev/null
 {% endif %}
