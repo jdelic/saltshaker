@@ -33,7 +33,7 @@ base:
 
     # spaces ' ' are important after parentheses for the matcher to work (see
     # https://docs.saltstack.com/en/latest/topics/targeting/compound.html)
-    'E@(?!test)$ and ( G@roles:apps or G@roles:loadbalancer or G@roles:mail )':
+    'not *.test and ( G@roles:apps or G@roles:loadbalancer or G@roles:mail )':
         - match: compound
         - shared.secrets.live-ssl  # these are wildcard certificates for hostnames on the main domain
 
