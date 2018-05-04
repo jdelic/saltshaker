@@ -13,6 +13,7 @@ base:
         - powerdns.recursor
         - duplicity
         - vault.install
+        - mn.cas.client
 
     'roles:xenserver':
         - match: grain
