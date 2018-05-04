@@ -1,0 +1,3 @@
+
+authclient:
+    pkg.installed
