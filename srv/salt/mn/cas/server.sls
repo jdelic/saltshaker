@@ -97,7 +97,7 @@ authserver-spapi-install:
                 /usr/local/authserver/bin/django-admin.py spapi --settings=authserver.settings install
         - unless: >
             /usr/local/authserver/bin/envdir /etc/appconfig/authserver/env/ \
-                /usr/local/authserver/bin/django-admin.py spapi --settings=authserver.settings check --type=install
+                /usr/local/authserver/bin/django-admin.py spapi --settings=authserver.settings check --installed
         - require:
             - service: authserver
 
@@ -110,8 +110,8 @@ authserver-grant-spapi-access-{{spapi_user}}:
                 /usr/local/authserver/bin/django-admin.py spapi --settings=authserver.settings grant {{spapi_user}}
         - unless: >
             /usr/local/authserver/bin/envdir /etc/appconfig/authserver/env/ \
-                /usr/local/authserver/bin/django-admin.py spapi --settings=authserver.settings check --type=grant \
-                    {{spapi_user}}
+                /usr/local/authserver/bin/django-admin.py spapi --settings=authserver.settings check \
+                    --grant={{spapi_user}}
         - require:
             - cmd: authserver-spapi-install
 {% endfor %}
