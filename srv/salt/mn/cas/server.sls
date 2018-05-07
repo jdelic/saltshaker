@@ -41,7 +41,6 @@ authserver-rsyslog:
     "BINDPORT": pillar.get('authserver', {}).get('bind-port', 8999),
     "DATABASE_NAME": pillar['authserver']['dbname'],
     "DATABASE_PARENTROLE": pillar['authserver']['dbuser'],
-    "SPAPI_DBUSERS": ",".join(pillar['authserver']['stored-procedure-api-users']),
     "POSTGRESQL_CA": pillar['ssl']['service-rootca-cert'] if
         pillar['postgresql'].get('pinned-ca-cert', 'default') == 'default'
         else pillar['postgresql']['pinned-ca-cert'],
@@ -88,6 +87,33 @@ authserver-config-{{loop.index}}:
             - appconfig: authserver-appconfig
         - watch_in:
             - service: authserver
+{% endfor %}
+
+
+authserver-spapi-install:
+    cmd.run:
+        - name: >
+            /usr/local/authserver/bin/envdir /etc/appconfig/authserver/env/ \
+                /usr/local/authserver/bin/django-admin.py spapi --settings=authserver.settings install
+        - unless: >
+            /usr/local/authserver/bin/envdir /etc/appconfig/authserver/env/ \
+                /usr/local/authserver/bin/django-admin.py spapi --settings=authserver.settings check --type=install
+        - require:
+            - service: authserver
+
+
+{% for spapi_user in pillar['authserver'].get('stored-procedure-api-users', []) %}
+authserver-grant-spapi-access-{{spapi_user}}:
+    cmd.run:
+        - name: >-
+            /usr/local/authserver/bin/envdir /etc/appconfig/authserver/env/ \
+                /usr/local/authserver/bin/django-admin.py spapi --settings=authserver.settings grant {{spapi_user}}
+        - unless: >
+            /usr/local/authserver/bin/envdir /etc/appconfig/authserver/env/ \
+                /usr/local/authserver/bin/django-admin.py spapi --settings=authserver.settings check --type=grant \
+                    {{spapi_user}}
+        - require:
+            - cmd: authserver-spapi-install
 {% endfor %}
 
 
