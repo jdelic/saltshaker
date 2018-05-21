@@ -2,6 +2,17 @@
 {% set vault_user = "vault" %}
 {% set vault_group = "vault" %}
 
+vault-plugin-folder:
+    file.directory:
+        - name: /usr/local/lib/vault/
+        - makedirs: True
+        - user: root
+        - group: vault
+        - mode: '0750'
+        - require:
+            - group: vault
+
+
 vault:
     group.present:
         - name: {{vault_group}}
@@ -36,7 +47,7 @@ vault:
 
 
 # the vault executable must have the "cap_ipc_lock=+ep" flag so it can lock memory from swap.
-# Regardless, ideally Vault runs on a server with encryptd swap space. However even if it doesn't then locking the
+# Regardless, ideally Vault runs on a server with encrypted swap space. However even if it doesn't then locking the
 # memory will provide additional security. For more information see `man setcap` and `man cap_from_text`, the latter
 # is part of "libcap-dev" on Debian.
 vault-setcap:
