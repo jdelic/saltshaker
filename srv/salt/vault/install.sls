@@ -2,16 +2,6 @@
 {% set vault_user = "vault" %}
 {% set vault_group = "vault" %}
 
-vault-plugin-folder:
-    file.directory:
-        - name: /usr/local/lib/vault/
-        - makedirs: True
-        - user: root
-        - group: vault
-        - mode: '0750'
-        - require:
-            - group: vault
-
 
 vault:
     group.present:
@@ -37,8 +27,8 @@ vault:
         - enforce_toplevel: False
     file.managed:
         - name: /usr/local/bin/vault
-        - user: {{vault_user}}
-        - group: {{vault_user}}
+        - user: root
+        - group: root
         - mode: '0755'
         - replace: False
         - require:
