@@ -41,6 +41,48 @@ vault-data-dir-systemd:
             - group: vault
 
 
+vault-plugin-dir:
+    file.directory:
+        - name: /usr/local/lib/vault/
+        - makedirs: True
+        - user: root
+        - group: vault
+        - mode: '0750'
+        - require:
+            - group: vault
+
+
+vault-plugin-gpg:
+    archive.extracted:
+        - name: /usr/local/lib/vault
+        - source: {{pillar["urls"]["vault-gpg-plugin"]}}
+        - source_hash: {{pillar["hashes"]["vault-gpg-plugin"]}}
+        - archive_format: zip
+        - unless: test -f /usr/local/lib/vault/vault-gpg-plugin  # workaround for https://github.com/saltstack/salt/issues/42681
+        - if_missing: /usr/local/lib/vault-vault-gpg-plugin
+        - enforce_toplevel: False
+        - require:
+            - file: vault-plugin-dir
+    file.managed:
+        - name: /usr/local/lib/vault/vault-gpg-plugin
+        - user: root
+        - group: root
+        - mode: '0755'
+        - replace: False
+        - require:
+            - archive: vault-plugin-gpg
+
+
+vault-plugin-gpg-setcap:
+    cmd.run:
+        - name: setcap cap_ipc_lock=+ep /usr/local/lib/vault/vault-gpg-plugin
+        - cwd: /usr/local/lib/vault
+        - runas: root
+        - unless: getcap /usr/local/lib/vault/vault-gpg-plugin | grep cap_ipc_lock >/dev/null
+        - require:
+            - file: vault-plugin-gpg
+
+
 vault-config-dir:
     file.directory:
         - name: /etc/vault
@@ -261,6 +303,19 @@ vault-approle-access-token-renewal:
             - VAULT_ADDR: "https://vault.service.consul:8200/"
         - onlyif: >-
             test "$(/usr/local/bin/vault token lookup -format=json {{pillar['dynamicsecrets']['approle-auth-token']}} | jq -r .renewable)" == "true"
+
+
+vault-init-gpg-plugin:
+    cmd.run:
+        - name: >-
+            /usr/local/bin/vault write sys/plugins/catalog/gpg \
+                sha_256={{pillar['hashes']['vault-gpg-plugin-binary']}} command=vault-gpg-plugin &&
+            /usr/local/bin/vault secrets enable -path=gpg -plugin-name=gpg plugin
+        - env:
+            - VAULT_ADDR: "https://vault.service.consul:8200/"
+        - unless: >-
+            /usr/local/bin/vault secrets list | grep "gpg/" >/dev/null
+        - onlyif: /usr/local/bin/vault operator init -status >/dev/null
 {% endif %}
 
 

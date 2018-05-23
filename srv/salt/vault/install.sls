@@ -2,6 +2,7 @@
 {% set vault_user = "vault" %}
 {% set vault_group = "vault" %}
 
+
 vault:
     group.present:
         - name: {{vault_group}}
@@ -26,8 +27,8 @@ vault:
         - enforce_toplevel: False
     file.managed:
         - name: /usr/local/bin/vault
-        - user: {{vault_user}}
-        - group: {{vault_user}}
+        - user: root
+        - group: root
         - mode: '0755'
         - replace: False
         - require:
@@ -36,7 +37,7 @@ vault:
 
 
 # the vault executable must have the "cap_ipc_lock=+ep" flag so it can lock memory from swap.
-# Regardless, ideally Vault runs on a server with encryptd swap space. However even if it doesn't then locking the
+# Regardless, ideally Vault runs on a server with encrypted swap space. However even if it doesn't then locking the
 # memory will provide additional security. For more information see `man setcap` and `man cap_from_text`, the latter
 # is part of "libcap-dev" on Debian.
 vault-setcap:
