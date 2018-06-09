@@ -127,7 +127,7 @@ base:
         - match: grain
         - openvpn.gateway
 
-    'not roles:vpngateway':
+    'not G@roles:vpngateway':
         - match: compound
         - openvpn.gateway_accessible
 
