@@ -331,6 +331,22 @@ opensmtpd-{{svc}}-tcp-in25-recv:
 {% endfor %}
 
 
+opensmtpd-relay-tcp-in465-recv:
+    iptables.append:
+        - table: filter
+        - chain: INPUT
+        - jump: ACCEPT
+        - source: '0/0'
+        - destination: {{opensmtpd_ips['relay']}}/32
+        - dport: 465
+        - match: state
+        - connstate: NEW
+        - proto: tcp
+        - save: True
+        - require:
+            - sls: iptables
+
+
 opensmtpd-receiver-tcp-in465-recv:
     iptables.append:
         - table: filter
