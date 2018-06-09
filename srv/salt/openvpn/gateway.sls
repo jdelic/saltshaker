@@ -281,6 +281,7 @@ openvpn-clients-dns-tcp-access-{{loop.index}}:
         - require:
             - sls: iptables
 
+
 openvpn-pdns-recursor-ip-{{loop.index}}:
   file.accumulated:
       - name: powerdns-recursor-additional-listen-ips
@@ -288,6 +289,7 @@ openvpn-pdns-recursor-ip-{{loop.index}}:
       - text: {{net[:-1]}}1
       - require_in:
           - file: pdns-recursor-config
+
 
 openvpn-pdns-recursor-cidr-{{loop.index}}:
   file.accumulated:
