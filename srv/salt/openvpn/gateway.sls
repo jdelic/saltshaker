@@ -114,7 +114,7 @@ openvpn-dhparams:
             - file: openvpn-config-folder
 
 
-# keys for additional security during TLS negotation, should be rotated every 8192 years divided by the number
+# keys for additional security during TLS negotiation, should be rotated every 8192 years divided by the number
 # of users that share the same key
 openvpn-tls-auth-key:
     cmd.run:
@@ -222,7 +222,7 @@ openvpn-clients-nat-{{loop.index}}:
         - chain: POSTROUTING
         - jump: MASQUERADE
         - source: {{net}}/24
-        - destination: '0/0'
+        - destination: '! {{net}}/24'
         - save: True
         - require:
             - sls: iptables
@@ -248,6 +248,20 @@ openvpn-clients-dns-udp-access-{{loop.index}}:
         - source: {{net}}/24
         - destination: {{net[:-1]}}1
         - dport: 53
+        - proto: udp
+        - save: True
+        - require:
+            - sls: iptables
+
+
+openvpn-clients-dns-udp-replies-{{loop.index}}:
+    iptables.append:
+        - table: filter
+        - chain: INPUT
+        - jump: ACCEPT
+        - source: {{net[:-1]}}1
+        - destination: {{net}}/24
+        - sport: 53
         - proto: udp
         - save: True
         - require:
