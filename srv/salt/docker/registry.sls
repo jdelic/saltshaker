@@ -17,16 +17,12 @@ docker-registry-volume:
 docker-jwt-certificate:
     cmd.run:
         - name: >-
-            JWTFILE=$(mktemp) &&
-            echo "$JWT_KEY" > "$JWTFILE" &&
-            /usr/bin/openssl req -x509 -key $JWTFILE -out /srv/registry/docker_jwt.crt \
-                -days 3650 \
-                -subj '/C=DE/L=Munich/O=Docker Registry/OU=JWT Auth/CN={{pillar['authserver']['hostname']}}/';
-            rm $JWTFILE;
+            /usr/local/bin/mn-authclient.py -m init --ca-file /etc/ssl/certs/ca-certificates.crt \
+                -u https://{{pillar['authserver']['hostname']}}/getkey/ --format cert \
+                --domain {{registry_hostname}} --jwtkey /srv/registry/docker_jwt.crt
         - creates: /srv/registry/docker_jwt.crt
-        - env:
-            JWT_KEY: |
-                {{pillar['dynamicsecrets']['dockerauth-jwt-key']['key']|indent(16)}}
+        - require:
+            - pkg: authclient
 
 
 docker-registry:
