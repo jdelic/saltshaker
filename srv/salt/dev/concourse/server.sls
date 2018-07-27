@@ -97,8 +97,8 @@ concourse-server-envvars{% if pillar['ci']['use-vault'] %}-template{% endif %}:
         - group: root
         - mode: '0600'
         - contents: |
-            CONCOURSE_BASIC_AUTH_USERNAME="sysop"
-            CONCOURSE_BASIC_AUTH_PASSWORD="{{pillar['dynamicsecrets']['concourse-sysop']}}"
+            CONCOURSE_MAIN_TEAM_LOCAL_USER="sysop"
+            CONCOURSE_ADD_LOCAL_USER="sysop:{{pillar['dynamicsecrets']['concourse-sysop']}}"
             CONCOURSE_POSTGRES_DATA_SOURCE="postgres://concourse:{{
                 pillar['dynamicsecrets']['concourse-db']}}@{{
                 pillar['postgresql']['smartstack-hostname']}}:5432/concourse?sslmode={{
@@ -106,6 +106,7 @@ concourse-server-envvars{% if pillar['ci']['use-vault'] %}-template{% endif %}:
                         pillar['postgresql'].get('pinned-ca-cert', 'default') == 'default'
                         else pillar['postgresql']['pinned-ca-cert']}}"
             CONCOURSE_ENCRYPTION_KEY="{{pillar['dynamicsecrets']['concourse-encryption']}}"
+            CONCOURSE_COOKIE_SECURE=true
 
             {%- if pillar['ci'].get('use-vault', True) %}
             CONCOURSE_VAULT_URL="https://{{pillar['vault']['smartstack-hostname']}}:8200/"
