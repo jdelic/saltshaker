@@ -13,6 +13,7 @@ key \"oauth2-clients\" {
 key \"concourse/workers/sshpub\" {
     policy = \"write\"
 }
+
 node \"\" {
     policy = \"read\"
 }
