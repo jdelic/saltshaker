@@ -21,7 +21,7 @@ except ImportError:
     pass
 else:
     if typing.TYPE_CHECKING:
-        from typing import Union, Dict, List, Any
+        from typing import Union, Dict, List, Tuple, Any
 
 
 class DynamicSecretsStore(object):
@@ -81,7 +81,7 @@ class DynamicSecretsStore(object):
             c.close()
 
     def loadall(self, secret_name):
-        # type: (str) -> List[Union[Dict[str, str], str]]
+        # type: (str) -> List[Tuple[Any, Any]]
         c = self._conn.cursor()
         try:
             q = "SELECT secret, host FROM store WHERE secretname=?"
