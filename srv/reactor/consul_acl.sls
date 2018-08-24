@@ -9,7 +9,12 @@ consul_acl_create:
                     X-Consul-Token: {{salt['dynamicsecrets'].get_store().load('consul-acl-master-token', host="*")}}
                 - data: >-
                     {
-                        "ID": "{{salt['dynamicsecrets'].get_store().load('consul-acl-token', host=data['id'])}}",
+                        "ID": "{{salt['dynamicsecrets'].get_store().get_or_create(
+                                    {
+                                        "type": "uuid",
+                                    },
+                                    'consul-acl-token',
+                                    host=data['id'])}}",
                         "Name": "{{data['id']}}",
                         "Rules": "
                             key \"\" {
