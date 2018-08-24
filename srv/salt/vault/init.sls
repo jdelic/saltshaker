@@ -279,7 +279,7 @@ vault-approle-access-token-policy:
 vault-approle-access-token:
     cmd.run:
         - name: >-
-            /usr/local/bin/vault token revoke $TOKENID &&
+            /usr/local/bin/vault token revoke $TOKENID;
             /usr/local/bin/vault token create \
                 -id=$TOKENID \
                 -display-name="approle-auth" \
