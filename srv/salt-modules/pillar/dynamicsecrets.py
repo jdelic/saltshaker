@@ -18,7 +18,7 @@ else:
 
 def ext_pillar(minion_id, pillar, **pillarconfig):
     # type: (str, str, Dict[str, Any]) -> Dict[str, Dict[str, Union[str, Dict[str, str]]]]
-    db = __salt__['dynamicsecrets'].get_store()  # type: DynamicSecretsPillar
+    db = __salt__['dynamicsecrets.get_store']()  # type: DynamicSecretsPillar
 
     # make sure all required secrets exist and filter them
     # according to the current minion's roles or host id
@@ -78,7 +78,7 @@ def ext_pillar(minion_id, pillar, **pillarconfig):
                     if secret_name not in this_node_secrets:
                         this_node_secrets[secret_name] = db.get_or_create(secret_config, secret_name, host)
 
-    minion_match_keys = __salt__['dynamicsecrets'].match_minion_id(minion_id, pillarconfig["hostmapping"])
+    minion_match_keys = __salt__['dynamicsecrets.match_minion_id'](minion_id, pillarconfig["hostmapping"])
     for minion_match_key in minion_match_keys:
         for secret_name in pillarconfig["hostmapping"][minion_match_key]:
             secret_config = pillarconfig["config"].get(secret_name, {})
