@@ -1,5 +1,9 @@
 # This state must be assigned to whatever node runs Hashicorp Vault and will be empty if AuthServer
 # is not configured to use Vault.
+
+include:
+    - mn.cas.sync
+
 {% if pillar.get('authserver', {}).get('use-vault', False) %}
     {% if pillar.get('authserver', {}).get('vault-authtype', 'approle') == 'approle' %}
 authserver-vault-approle:
@@ -16,6 +20,8 @@ authserver-vault-approle:
         - env:
             - VAULT_ADDR: "https://vault.service.consul:8200/"
         - unless: /usr/local/bin/vault list auth/approle/role | grep authserver >/dev/null
+        - require_in:
+            - cmd: authserver-config-secretid-sync
 
 
 authserver-vault-approle-roleid:
@@ -27,6 +33,8 @@ authserver-vault-approle-roleid:
             - VAULT_ADDR: "https://vault.service.consul:8200/"
         - onchanges:
             - cmd: authserver-vault-approle
+        - require_in:
+            - cmd: authserver-config-secretid-sync
 
 
 authserver-vault-no-cert:
@@ -76,6 +84,8 @@ mailforwarder-vault-approle:
         - env:
             - VAULT_ADDR: "https://vault.service.consul:8200/"
         - unless: /usr/local/bin/vault list auth/approle/role | grep mailforwarder >/dev/null
+        - require_in:
+            - cmd: authserver-config-secretid-sync
 
 
 mailforwarder-vault-approle-roleid:
@@ -87,6 +97,8 @@ mailforwarder-vault-approle-roleid:
             - VAULT_ADDR: "https://vault.service.consul:8200/"
         - onchanges:
             - cmd: mailforwarder-vault-approle
+        - require_in:
+            - cmd: authserver-config-secretid-sync
 
 
 mailforwarder-vault-no-cert:
@@ -137,6 +149,8 @@ dkimsigner-vault-approle:
         - env:
             - VAULT_ADDR: "https://vault.service.consul:8200/"
         - unless: /usr/local/bin/vault list auth/approle/role | grep dkimsigner >/dev/null
+        - require_in:
+            - cmd: authserver-config-secretid-sync
 
 
 dkimsigner-vault-approle-roleid:
@@ -148,6 +162,8 @@ dkimsigner-vault-approle-roleid:
             - VAULT_ADDR: "https://vault.service.consul:8200/"
         - onchanges:
             - cmd: dkimsigner-vault-approle
+        - require_in:
+            - cmd: authserver-config-secretid-sync
 
 
 dkimsigner-vault-no-cert:
