@@ -316,6 +316,43 @@ vault-init-gpg-plugin:
         - unless: >-
             /usr/local/bin/vault secrets list | grep "gpg/" >/dev/null
         - onlyif: /usr/local/bin/vault operator init -status >/dev/null
+
+
+# create a token that can request GPG keys from Vault
+vault-gpg-access-token-policy:
+    cmd.run:
+        - name: >-
+            echo 'path "gpg/keys/*" {
+                capabilities = ["read", "create", "update", "list"]
+            }' | /usr/local/bin/vault policy write gpg_access -
+        - env:
+            - VAULT_ADDR: "https://vault.service.consul:8200/"
+        - unless: /usr/local/bin/vault policies | grep gpg_access >/dev/null
+        - onlyif: /usr/local/bin/vault operator init -status >/dev/null
+
+
+# this creates a token using a per-salt-cluster uuid from dynamicsecrets. The token
+# will become invalid after 60 minutes unless the vault home runs this state again!
+# This allows minions to create GPG keys for themselves but not create new
+# GPG keys after one hour. This is a compromise between automatic initialization and
+# security.
+vault-gpg-access-token:
+    cmd.run:
+        - name: >-
+            /usr/local/bin/vault token revoke $TOKENID;
+            /usr/local/bin/vault token create \
+                -id=$TOKENID \
+                -display-name="gpg-auth" \
+                -policy=default -policy=gpg_access \
+                -renewable=true \
+                -period=1h \
+                -explicit-max-ttl=0
+        - env:
+            - VAULT_ADDR: "https://vault.service.consul:8200/"
+            - TOKENID: "{{pillar['dynamicsecrets']['gpg-auth-token']}}"
+        - unless: >-
+            test "$(/usr/local/bin/vault token lookup -format=json {{pillar['dynamicsecrets']['gpg-auth-token']}} | jq -r .renewable)" == "true" ||
+            test "$(/usr/local/bin/vault token lookup -format=json {{pillar['dynamicsecrets']['gpg-auth-token']}} | jq -r .data.ttl)" -gt 100
 {% endif %}
 
 
