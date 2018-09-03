@@ -34,7 +34,7 @@ duplicity-cron-backup-script:
         - context:
             additional_options: {{pillar['duplicity-backup'].get('additional-options', '')}}
             backup_target_url: {{pillar['duplicity-backup']['backup-target']}}
-            gpg_key_id: {{pillar['duplicity-backup']['gpg-key-id']}}
+            gpg_keys: {{pillar['duplicity-backup']['gpg-keys']}}
             gpg_options: {{pillar['duplicity-backup'].get('gpg-options', '')}}
             envvars: {{envvars}}
 

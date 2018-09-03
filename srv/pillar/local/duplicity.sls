@@ -4,7 +4,9 @@ duplicity-backup:
     enabled: False
 
     # the key id for which backups will be encrypted
-    gpg-key-id: 1234567
+    gpg-keys:
+        - 1234567
+        # ...
 
     # when NOT using the managed keyring, you will want to use --trusted-key with the long
     # key id here, unless the key has a set trust relationship
