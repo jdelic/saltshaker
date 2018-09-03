@@ -126,6 +126,38 @@ gpg-establish-trust-{{k}}:
 {% endfor %}
 
 
+{% if pillar.get('gpg', {}).get('vault-create-perhost-key', False) %}
+gpg-create-host-key:
+    cmd.run:
+        - name: >-
+            /usr/local/bin/vault write
+            "gpg/keys/{{grains['id']}}"
+            name="test"
+            generate=true
+            real_name="test"
+            key_bits=2048
+            exportable=true
+        - unless: >
+            /usr/local/bin/vault list gpg/keys | grep "{{grains['id']}}" >/dev/null
+        - require:
+            - file: vault
+
+
+gpg-import-host-key:
+    cmd.run:
+        - name: >-
+            /usr/local/bin/vault read
+            -field=key
+            "gpg/export/{{grains['id']}}" |
+            gpg --homedir {{keyloc}} --no-default-keyring --import
+        - env:
+            VAULT_TOKEN: "{{pillar['dynamicsecrets']['gpg-auth-token']}}"
+            VAULT_ADDR: "https://vault.service.consul:8200/"
+        - require:
+            - file: gpg-shared-keyring-location
+{% endif %}
+
+
 # require this state to make sure the GPG keyring is fully configured
 managed-keyring:
     file.directory:
