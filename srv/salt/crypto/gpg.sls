@@ -147,7 +147,7 @@ gpg-create-host-key:
             - VAULT_ADDR: "https://vault.service.consul:8200/"
         - require:
             - file: vault
-            - cmd: vault-sync
+            - cmd: vault-init-sync
 
 
 gpg-import-host-key:
