@@ -135,9 +135,9 @@ gpg-create-host-key:
         - name: >
             /usr/local/bin/vault write
             "gpg/keys/{{grains['id']}}"
-            name="test"
+            name="{{grains['id']}}"
             generate=true
-            real_name="test"
+            real_name="{{grains['id']}}"
             key_bits=2048
             exportable=true
         - unless: >
