@@ -32,7 +32,7 @@ consul_acl_create:
                             policy = \"read\"
                         }
 
-                        node \"{{data['id']}}\" {
+                        node \""|replace('\n', '')|replace('"', '\\"')}}{{data['id']}}{{"\" {
                             policy = \"write\"
                         }
 
