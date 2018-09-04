@@ -102,6 +102,10 @@ consul-server-service:
             - file: consul  # restart on a change of the binary
         - watch_in:
             - service: pdns-recursor-service
+    event.send:
+        - name: maurusnet/consul/installed
+        - require:
+            - service: consul-server-service
 
 
 {% if pillar['consul-cluster']['number-of-nodes'] == 1 %}

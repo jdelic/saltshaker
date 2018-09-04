@@ -36,6 +36,10 @@ consul-agent-service:
             - file: consul  # restart on a change of the binary
         - watch_in:
             - service: pdns-recursor-service
+    event.send:
+        - name: maurusnet/consul/installed
+        - require:
+            - service: consul-agent-service
 
 
 consul-agent-service-reload:
