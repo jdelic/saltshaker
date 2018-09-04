@@ -139,6 +139,9 @@ gpg-create-host-key:
             exportable=true
         - unless: >
             /usr/local/bin/vault list gpg/keys | grep "{{grains['id']}}" >/dev/null
+        - env:
+            - VAULT_TOKEN: "{{pillar['dynamicsecrets']['gpg-auth-token']}}"
+            - VAULT_ADDR: "https://vault.service.consul:8200/"
         - require:
             - file: vault
             - cmd: vault-init-gpg-plugin
@@ -152,8 +155,8 @@ gpg-import-host-key:
             "gpg/export/{{grains['id']}}" |
             gpg --homedir {{keyloc}} --no-default-keyring --import
         - env:
-            VAULT_TOKEN: "{{pillar['dynamicsecrets']['gpg-auth-token']}}"
-            VAULT_ADDR: "https://vault.service.consul:8200/"
+            - VAULT_TOKEN: "{{pillar['dynamicsecrets']['gpg-auth-token']}}"
+            - VAULT_ADDR: "https://vault.service.consul:8200/"
         - require:
             - file: gpg-shared-keyring-location
             - cmd: vault-init-gpg-plugin
@@ -183,6 +186,9 @@ gpg-establish-host-key-trust:
             --homedir=/etc/gpg-managed-keyring/
             --batch
             --import-ownertrust
+        - env:
+            - VAULT_TOKEN: "{{pillar['dynamicsecrets']['gpg-auth-token']}}"
+            - VAULT_ADDR: "https://vault.service.consul:8200/"
         - require:
             - cmd: gpg-import-host-key
 {% endif %}
