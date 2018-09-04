@@ -129,7 +129,7 @@ gpg-establish-trust-{{k}}:
 {% if pillar.get('gpg', {}).get('vault-create-perhost-key', False) %}
 gpg-create-host-key:
     cmd.run:
-        - name: >-
+        - name: >
             /usr/local/bin/vault write
             "gpg/keys/{{grains['id']}}"
             name="test"
@@ -141,11 +141,12 @@ gpg-create-host-key:
             /usr/local/bin/vault list gpg/keys | grep "{{grains['id']}}" >/dev/null
         - require:
             - file: vault
+            - cmd: vault-init-gpg-plugin
 
 
 gpg-import-host-key:
     cmd.run:
-        - name: >-
+        - name: >
             /usr/local/bin/vault read
             -field=key
             "gpg/export/{{grains['id']}}" |
@@ -155,6 +156,35 @@ gpg-import-host-key:
             VAULT_ADDR: "https://vault.service.consul:8200/"
         - require:
             - file: gpg-shared-keyring-location
+            - cmd: vault-init-gpg-plugin
+            - cmd: gpg-create-host-key
+
+
+gpg-establish-host-key-trust:
+    cmd.run:
+        - unless: >
+            /usr/local/bin/vault read
+            -field=key
+            "gpg/export/{{grains['id']}}" |
+            /usr/bin/gpg
+            --homedir {{keyloc}}
+            --no-default-keyring
+            --with-colons
+            --list-keys $(/usr/bin/gpg --no-default-keyring --homedir {{keyloc}} \
+              --import-options import-show --dry-run --with-colons --import |
+            head -1 | cut -d':' -f5 2>/dev/null) 2>/dev/null |
+            grep "pub:" | cut -d':' -f2 | grep "u" >/dev/null
+        - name: >
+            echo "$(/usr/local/bin/vault read -field=key 'gpg/export/{{grains['id']}}' |
+                  /usr/bin/gpg --no-default-keyring --homedir {{keyloc}} \
+                  --import-options import-show --dry-run --with-colons --import |
+                  grep "fpr:" | head -1 | cut -d':' -f10 2>/dev/null):6:" |
+            /usr/bin/gpg
+            --homedir=/etc/gpg-managed-keyring/
+            --batch
+            --import-ownertrust
+        - require:
+            - cmd: gpg-import-host-key
 {% endif %}
 
 
