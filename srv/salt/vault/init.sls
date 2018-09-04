@@ -8,6 +8,7 @@
 
 include:
     - vault.install
+    - vault.sync
 
 
 {% from 'vault/install.sls' import vault_user, vault_group %}
@@ -226,6 +227,8 @@ vault-init:
         - require:
             - file: managed-keyring
             - service: vault-service
+        - require_in:
+            - cmd: vault-init-sync
 
 
 # Vault clients configured by Salt should watch for this state using cmd.run:onchanges
@@ -243,6 +246,8 @@ vault-cert-auth-enabled:
         - require:
             - service: vault-service
             - cmd: vault-init
+        - require_in:
+            - cmd: vault-init-sync
 
 # Vault clients configured by Salt should watch for this state using cmd.run:onchanges
 # and set up their approles and policies
@@ -256,6 +261,8 @@ vault-approle-auth-enabled:
         - require:
             - service: vault-service
             - cmd: vault-init
+        - require_in:
+            - cmd: vault-init-sync
 
 
 # create a token that can request secret-ids from approle
@@ -269,6 +276,8 @@ vault-approle-access-token-policy:
             - VAULT_ADDR: "https://vault.service.consul:8200/"
         - unless: /usr/local/bin/vault policies | grep approle_access >/dev/null
         - onlyif: /usr/local/bin/vault operator init -status >/dev/null
+        - require_in:
+            - cmd: vault-init-sync
 
 
 # this creates a token using a per-salt-cluster uuid from dynamicsecrets. The token
@@ -293,6 +302,8 @@ vault-approle-access-token:
         - unless: >-
             test "$(/usr/local/bin/vault token lookup -format=json {{pillar['dynamicsecrets']['approle-auth-token']}} | jq -r .renewable)" == "true" ||
             test "$(/usr/local/bin/vault token lookup -format=json {{pillar['dynamicsecrets']['approle-auth-token']}} | jq -r .data.ttl)" -gt 100
+        - require_in:
+            - cmd: vault-init-sync
 
 
 vault-approle-access-token-renewal:
@@ -303,6 +314,8 @@ vault-approle-access-token-renewal:
             - VAULT_ADDR: "https://vault.service.consul:8200/"
         - onlyif: >-
             test "$(/usr/local/bin/vault token lookup -format=json {{pillar['dynamicsecrets']['approle-auth-token']}} | jq -r .renewable)" == "true"
+        - require_in:
+            - cmd: vault-init-sync
 
 
 vault-init-gpg-plugin:
@@ -316,6 +329,8 @@ vault-init-gpg-plugin:
         - unless: >-
             /usr/local/bin/vault secrets list | grep "gpg/" >/dev/null
         - onlyif: /usr/local/bin/vault operator init -status >/dev/null
+        - require_in:
+            - cmd: vault-init-sync
 
 
 # create a token that can request GPG keys from Vault
@@ -329,6 +344,8 @@ vault-gpg-access-token-policy:
             - VAULT_ADDR: "https://vault.service.consul:8200/"
         - unless: /usr/local/bin/vault policies | grep gpg_access >/dev/null
         - onlyif: /usr/local/bin/vault operator init -status >/dev/null
+        - require:
+            - cmd: vault-init-gpg-plugin
 
 
 # this creates a token using a per-salt-cluster uuid from dynamicsecrets. The token
@@ -353,6 +370,8 @@ vault-gpg-access-token:
         - unless: >-
             test "$(/usr/local/bin/vault token lookup -format=json {{pillar['dynamicsecrets']['gpg-auth-token']}} | jq -r .renewable)" == "true" ||
             test "$(/usr/local/bin/vault token lookup -format=json {{pillar['dynamicsecrets']['gpg-auth-token']}} | jq -r .data.ttl)" -gt 100
+        - require_in:
+            - cmd: vault-init-sync
 {% endif %}
 
 
@@ -366,6 +385,8 @@ vault-service-reload:
             - file: vault-service
         - watch:
             - file: /etc/vault/vault.conf
+        - require_in:
+            - cmd: vault-init-sync
 
 
 vault-internal-servicedef:
