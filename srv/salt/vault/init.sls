@@ -278,6 +278,8 @@ vault-approle-access-token-policy:
             - VAULT_ADDR: "https://vault.service.consul:8200/"
         - unless: /usr/local/bin/vault policies | grep approle_access >/dev/null
         - onlyif: /usr/local/bin/vault operator init -status >/dev/null
+        - require:
+            - cmd: vault-init
         - require_in:
             - cmd: vault-sync
 
@@ -304,6 +306,9 @@ vault-approle-access-token:
         - unless: >-
             test "$(/usr/local/bin/vault token lookup -format=json {{pillar['dynamicsecrets']['approle-auth-token']}} | jq -r .renewable)" == "true" ||
             test "$(/usr/local/bin/vault token lookup -format=json {{pillar['dynamicsecrets']['approle-auth-token']}} | jq -r .data.ttl)" -gt 100
+        - require:
+            - cmd: vault-init
+            - cmd: vault-approle-access-token-policy
         - require_in:
             - cmd: vault-sync
 
@@ -316,6 +321,8 @@ vault-approle-access-token-renewal:
             - VAULT_ADDR: "https://vault.service.consul:8200/"
         - onlyif: >-
             test "$(/usr/local/bin/vault token lookup -format=json {{pillar['dynamicsecrets']['approle-auth-token']}} | jq -r .renewable)" == "true"
+        - require:
+            - cmd: vault-init
         - require_in:
             - cmd: vault-sync
 
@@ -331,6 +338,8 @@ vault-init-gpg-plugin:
         - unless: >-
             /usr/local/bin/vault secrets list | grep "gpg/" >/dev/null
         - onlyif: /usr/local/bin/vault operator init -status >/dev/null
+        - require:
+            - cmd: vault-init
         - require_in:
             - cmd: vault-sync
 
@@ -372,6 +381,8 @@ vault-gpg-access-token:
         - unless: >-
             test "$(/usr/local/bin/vault token lookup -format=json {{pillar['dynamicsecrets']['gpg-auth-token']}} | jq -r .renewable)" == "true" ||
             test "$(/usr/local/bin/vault token lookup -format=json {{pillar['dynamicsecrets']['gpg-auth-token']}} | jq -r .data.ttl)" -gt 100
+        - require:
+            - cmd: vault-init
         - require_in:
             - cmd: vault-sync
 {% endif %}
