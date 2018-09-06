@@ -72,5 +72,6 @@ pdns-recursor-service:
             - file: pdns-recursor-lua-config
         - require:
             - pkg: pdns-recursor
+            - cmd: consul-network-interface  # ensure that 169.254.1.1/consul0 exists
         - require_in:
             - cmd: powerdns-sync
