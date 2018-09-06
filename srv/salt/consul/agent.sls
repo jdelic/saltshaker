@@ -36,10 +36,17 @@ consul-agent-service:
             - file: consul  # restart on a change of the binary
         - watch_in:
             - service: pdns-recursor-service
-    event.send:
+    event.wait:
         - name: maurusnet/consul/installed
-        - require:
+        - watch:
             - service: consul-agent-service
+    http.wait_for_successful_query:
+        - name: http://169.254.1.1:8500/v1/acl/info/{{dynamicsecrets['consul-acl-token']}}
+        - wait_for: 10
+        - request_interval: 1
+        - status: 200
+        - require:
+            - event: maurusnet/consul/installed
 
 
 consul-agent-service-reload:

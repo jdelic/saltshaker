@@ -102,10 +102,17 @@ consul-server-service:
             - file: consul  # restart on a change of the binary
         - watch_in:
             - service: pdns-recursor-service
-    event.send:
+    event.wait:
         - name: maurusnet/consul/installed
-        - require:
+        - watch:
             - service: consul-server-service
+    http.wait_for_successful_query:
+        - name: http://169.254.1.1:8500/v1/acl/info/{{pillar['dynamicsecrets']['consul-acl-token']}}
+        - wait_for: 10
+        - request_interval: 1
+        - status: 200
+        - require:
+            - event: maurusnet/consul/installed
 
 
 {% if pillar['consul-cluster']['number-of-nodes'] == 1 %}
