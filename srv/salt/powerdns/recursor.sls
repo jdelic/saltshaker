@@ -1,4 +1,8 @@
 
+include:
+    - powerdns.sync
+
+
 pdns-recursor:
     pkg.installed
 
@@ -44,6 +48,8 @@ pnds-recursor-override-resolv.conf:
         - group: root
         - require:
             - service: pdns-recursor-service
+        - require_in:
+            - cmd: powerdns-sync
 
 
 pdns-dhclient-enforce-nameservers:
@@ -66,3 +72,5 @@ pdns-recursor-service:
             - file: pdns-recursor-lua-config
         - require:
             - pkg: pdns-recursor
+        - require_in:
+            - cmd: powerdns-sync

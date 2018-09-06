@@ -5,8 +5,10 @@
 
 {% set keyloc = pillar['gpg']['shared-keyring-location'] %}
 
+
 include:
     - vault.sync
+
 
 gpg-access:
     group.present
@@ -147,7 +149,7 @@ gpg-create-host-key:
             - VAULT_ADDR: "https://vault.service.consul:8200/"
         - require:
             - file: vault
-            - cmd: vault-init-sync
+            - cmd: vault-sync
 
 
 gpg-import-host-key:

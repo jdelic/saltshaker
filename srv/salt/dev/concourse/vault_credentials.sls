@@ -1,5 +1,10 @@
 # This state must be assigned to whatever node runs Hashicorp Vault and will be empty if concourse
 # is not configured to use Vault.
+
+include:
+    - vault.sync
+
+
 {% if pillar.get('ci', {}).get('use-vault', False) %}
 concourse-vault-approle:
     cmd.run:
@@ -17,6 +22,8 @@ concourse-vault-approle:
             - VAULT_ADDR: "https://vault.service.consul:8200/"
         - unless: /usr/local/bin/vault list auth/approle/role | grep concourse >/dev/null
         - onlyif: /usr/local/bin/vault operator init -status >/dev/null
+        - require:
+            - cmd: vault-sync
 
 
 concourse-vault-approle-role-id:
@@ -40,4 +47,6 @@ concourse-vault-secrets-policy:
             - VAULT_ADDR: "https://vault.service.consul:8200/"
         - unless: /usr/local/bin/vault policies | grep concourse_secrets >/dev/null
         - onlyif: /usr/local/bin/vault operator init -status >/dev/null
+        - require:
+            - cmd: vault-sync
 {% endif %}
