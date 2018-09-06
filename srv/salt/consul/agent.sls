@@ -41,7 +41,7 @@ consul-agent-service:
         - watch:
             - service: consul-agent-service
     http.wait_for_successful_query:
-        - name: http://169.254.1.1:8500/v1/acl/info/{{dynamicsecrets['consul-acl-token']}}
+        - name: http://169.254.1.1:8500/v1/acl/info/{{pillar['dynamicsecrets']['consul-acl-token']}}
         - wait_for: 10
         - request_interval: 1
         - status: 200
