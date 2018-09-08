@@ -113,6 +113,8 @@ consul-server-service:
         - status: 200
         - require:
             - event: maurusnet/consul/installed
+        - require_in:
+            - service: pdns-recursor-service
 
 
 {% if pillar['consul-cluster']['number-of-nodes'] == 1 %}

@@ -47,6 +47,8 @@ consul-agent-service:
         - status: 200
         - require:
             - event: maurusnet/consul/installed
+        - require_in:
+            - service: pdns-recursor-service
 
 
 consul-agent-service-reload:
