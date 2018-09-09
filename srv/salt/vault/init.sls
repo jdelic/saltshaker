@@ -383,6 +383,7 @@ vault-gpg-access-token:
             test "$(/usr/local/bin/vault token lookup -format=json {{pillar['dynamicsecrets']['gpg-auth-token']}} | jq -r .data.ttl)" -gt 100
         - require:
             - cmd: vault-init
+            - cmd: vault-gpg-access-token-policy
         - require_in:
             - cmd: vault-sync
 {% endif %}
