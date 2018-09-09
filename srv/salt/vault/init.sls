@@ -10,6 +10,7 @@ include:
     - vault.install
     - vault.sync
     - powerdns.sync
+    - postgresql.sync
 
 
 {% from 'vault/install.sls' import vault_user, vault_group %}
@@ -137,22 +138,12 @@ vault-service:
             - file: vault-data-dir
             - file: vault-service
             - file: vault-internal-servicedef
-            {% if 'consulserver' in grains['roles'] and pillar['vault']['backend'] == 'consul' %}
-            - service: consul-server-service
-            {% elif 'consulserver' not in grains['roles'] and pillar['vault']['backend'] == 'consul' %}
-            - service: consul-agent-service
-            {% endif %}
-            {% if 'database' in grains['roles'] and pillar['vault']['backend'] == 'postgresql' %}
+            - service: pdns-recursor
+            {% if pillar['vault']['backend'] == 'postgresql' %}
                 {# when we're on the same machine as the PostgreSQL database, wait for it to come up and the #}
                 {# database to be configured #}
-            - service: data-cluster-service
-            - service: pdns-recursor
+            - cmd: postgresql-sync
             - vault-postgres
-                {% if 'consulserver' in grains['roles'] %}
-            - service: consul-server-service
-                {% elif 'consulserver' not in grains['roles'] %}
-            - service: consul-agent-service
-                {% endif %}
             {% endif %}
         - watch:
             - file: vault-service

@@ -1,6 +1,9 @@
-
 # setting create_main_cluster = false in postgresql-common will prevent the automativ
 # creation of a postgres cluster when we install the database
+
+include:
+    - postgresql.sync
+
 
 postgresql-repo:
     pkgrepo.managed:
@@ -185,6 +188,8 @@ data-cluster-service:
             - file: data-cluster-config-sslkey
             - file: data-cluster-config-sslciphers
 {% endif %}
+        - require_in:
+            - cmd: postgresql-sync
 
 
 postgresql-in{{pillar.get('postgresql', {}).get('bind-port', 5432)}}-recv:
