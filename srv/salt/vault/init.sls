@@ -151,6 +151,15 @@ vault-service:
             - file: vault-ssl-cert  # restart when the SSL cert changes
             - file: vault-ssl-key
             - service: smartstack-internal
+    http.wait_for_successful_query:
+        - name: https://vault.service.consul:8200/v1/sys/health
+        - match: "initialized"
+        - wait_for: 10
+        - request_interval: 1
+        - watch:
+            - service: vault-service
+        - require_in:
+            - cmd: vault-sync
 
 
 {% if pillar['vault'].get('initialize', False) %}
@@ -218,7 +227,7 @@ vault-init:
             - VAULT_ADDR: "https://vault.service.consul:8200/"
         - require:
             - file: managed-keyring
-            - service: vault-service
+            - http: vault-service
             - cmd: powerdns-sync
         - require_in:
             - cmd: vault-sync
@@ -237,7 +246,7 @@ vault-cert-auth-enabled:
         - env:
             - VAULT_ADDR: "https://vault.service.consul:8200/"
         - require:
-            - service: vault-service
+            - http: vault-service
             - cmd: vault-init
         - require_in:
             - cmd: vault-sync
@@ -252,7 +261,7 @@ vault-approle-auth-enabled:
         - env:
             - VAULT_ADDR: "https://vault.service.consul:8200/"
         - require:
-            - service: vault-service
+            - http: vault-service
             - cmd: vault-init
         - require_in:
             - cmd: vault-sync
