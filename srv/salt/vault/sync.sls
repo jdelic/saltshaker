@@ -9,3 +9,9 @@ vault-sync:
         - name: /bin/true
         - require:
             - cmd: powerdns-sync
+            - cmd: vault-sync-database
+
+
+vault-sync-database:
+    cmd.run:
+        - name: /bin/true

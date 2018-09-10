@@ -144,7 +144,7 @@ vault-service:
                 {# when we're on the same machine as the PostgreSQL database, wait for it to come up and the #}
                 {# database to be configured #}
             - cmd: postgresql-sync
-            - vault-postgres
+            - cmd: vault-sync-database
             {% endif %}
         - watch:
             - file: vault-service
