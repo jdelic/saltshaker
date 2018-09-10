@@ -361,6 +361,8 @@ vault-gpg-access-token-policy:
         - onlyif: /usr/local/bin/vault operator init -status >/dev/null
         - require:
             - cmd: vault-init-gpg-plugin
+        - require_in:
+            - cmd: vault-sync
 
 
 # this creates a token using a per-salt-cluster uuid from dynamicsecrets. The token
@@ -386,7 +388,6 @@ vault-gpg-access-token:
             test "$(/usr/local/bin/vault token lookup -format=json {{pillar['dynamicsecrets']['gpg-auth-token']}} | jq -r .renewable)" == "true" ||
             test "$(/usr/local/bin/vault token lookup -format=json {{pillar['dynamicsecrets']['gpg-auth-token']}} | jq -r .data.ttl)" -gt 100
         - require:
-            - cmd: vault-init
             - cmd: vault-gpg-access-token-policy
         - require_in:
             - cmd: vault-sync
