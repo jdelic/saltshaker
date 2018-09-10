@@ -99,7 +99,7 @@ consul-server-service:
             - file: consul-acl-config
             - file: consul-server-service  # if consul.service changes we want to *restart* (reload: False)
             - file: consul  # restart on a change of the binary
-        - watch_in:
+        - require_in:
             - service: pdns-recursor-service
     http.wait_for_successful_query:
         - name: http://169.254.1.1:8500/v1/agent/metrics
