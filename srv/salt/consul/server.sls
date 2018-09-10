@@ -128,7 +128,7 @@ consul-server-register-acl:
         - require:
             - event: consul-server-register-acl
         - require_in:
-            - service: pdns-recursor-service
+            - cmd: consul-sync
 
 
 {% if pillar['consul-cluster']['number-of-nodes'] == 1 %}

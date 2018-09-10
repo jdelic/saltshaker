@@ -29,14 +29,11 @@ consul-agent-service:
         - sig: consul
         - enable: True
         - init_delay: 2
-        - require:
+        - watch:
             - file: consul-agent-service
             - file: consul-common-config
-        - watch:
             - file: consul-agent-service  # if consul.service changes we want to *restart* (reload: False)
             - file: consul  # restart on a change of the binary
-        - require_in:
-            - service: pdns-recursor-service
     http.wait_for_successful_query:
         - name: http://169.254.1.1:8500/v1/agent/metrics
         - wait_for: 10
@@ -65,7 +62,7 @@ consul-agent-register-acl:
         - require:
             - event: consul-agent-register-acl
         - require_in:
-            - service: pdns-recursor-service
+            - cmd: consul-sync
 
 
 consul-agent-service-reload:
