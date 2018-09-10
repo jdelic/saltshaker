@@ -403,8 +403,6 @@ vault-service-reload:
             - file: vault-service
         - watch:
             - file: /etc/vault/vault.conf
-        - require_in:
-            - cmd: vault-sync
 
 
 vault-internal-servicedef:
