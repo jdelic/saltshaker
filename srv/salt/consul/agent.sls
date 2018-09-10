@@ -4,6 +4,7 @@
 
 include:
     - consul.install
+    - consul.sync
 
 
 {% from 'consul/install.sls' import consul_user, consul_group %}
@@ -43,6 +44,9 @@ consul-agent-service:
         - status: 200
         - watch:
             - service: consul-agent-service
+        - require_in:
+            - cmd: consul-sync
+
 
 consul-agent-register-acl:
     event.wait:
