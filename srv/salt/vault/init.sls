@@ -127,6 +127,7 @@ vault-service:
             group: {{vault_group}}
         - require:
             - file: vault
+            - cmd: vault-setcap
             - file: vault-config
             - file: vault-ssl-cert
             - file: vault-ssl-key
@@ -340,6 +341,7 @@ vault-init-gpg-plugin:
         - onlyif: /usr/local/bin/vault operator init -status >/dev/null
         - require:
             - cmd: vault-init
+            - cmd: vault-plugin-gpg-setcap
         - require_in:
             - cmd: vault-sync
 
