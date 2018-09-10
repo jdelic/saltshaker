@@ -4,6 +4,7 @@
 
 include:
     - consul.install
+    - consul.sync
 
 
 {% from 'consul/install.sls' import consul_user, consul_group %}
@@ -40,9 +41,14 @@ consul-agent-service:
         - name: http://169.254.1.1:8500/v1/agent/metrics
         - wait_for: 10
         - request_interval: 1
+        - raise_error: False  # only exists in 'tornado' backend
+        - backend: tornado
         - status: 200
         - watch:
             - service: consul-agent-service
+        - require_in:
+            - cmd: consul-sync
+
 
 consul-agent-register-acl:
     event.wait:
@@ -53,6 +59,8 @@ consul-agent-register-acl:
         - name: http://169.254.1.1:8500/v1/acl/info/{{pillar['dynamicsecrets']['consul-acl-token']}}
         - wait_for: 10
         - request_interval: 1
+        - raise_error: False  # only exists in 'tornado' backend
+        - backend: tornado
         - status: 200
         - require:
             - event: consul-agent-register-acl

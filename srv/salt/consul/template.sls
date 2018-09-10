@@ -1,4 +1,8 @@
 
+include:
+    - consul.sync
+
+
 consul-template:
     archive.extracted:
         - name: /usr/local/bin
@@ -74,6 +78,7 @@ consul-template-service:
             - file: consul-data-dir
             - file: consul-template-config
             - file: consul-template-dir
+            - cmd: consul-sync
         - watch:
             - file: consul-template-service
             - file: consul-template  # restart on a change of the binary

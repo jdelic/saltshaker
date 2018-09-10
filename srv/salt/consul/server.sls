@@ -4,6 +4,7 @@
 
 include:
     - consul.install
+    - consul.sync
 
 
 {% from 'consul/install.sls' import consul_user, consul_group %}
@@ -99,15 +100,17 @@ consul-server-service:
             - file: consul-acl-config
             - file: consul-server-service  # if consul.service changes we want to *restart* (reload: False)
             - file: consul  # restart on a change of the binary
-        - require_in:
-            - service: pdns-recursor-service
     http.wait_for_successful_query:
         - name: http://169.254.1.1:8500/v1/agent/metrics
         - wait_for: 10
         - request_interval: 1
+        - raise_error: False  # only exists in 'tornado' backend
+        - backend: tornado
         - status: 200
         - watch:
             - service: consul-server-service
+        - require_in:
+            - cmd: consul-sync
 
 
 consul-server-register-acl:
@@ -119,6 +122,8 @@ consul-server-register-acl:
         - name: http://169.254.1.1:8500/v1/acl/info/{{pillar['dynamicsecrets']['consul-acl-token']}}
         - wait_for: 10
         - request_interval: 1
+        - raise_error: False  # only exists in 'tornado' backend
+        - backend: tornado
         - status: 200
         - require:
             - event: consul-server-register-acl

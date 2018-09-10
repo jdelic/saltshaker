@@ -1,6 +1,7 @@
 
 include:
     - powerdns.sync
+    - consul.sync
 
 
 pdns-recursor:
@@ -74,5 +75,6 @@ pdns-recursor-service:
         - require:
             - pkg: pdns-recursor
             - cmd: consul-network-interface  # ensure that 169.254.1.1/consul0 exists
+            - cmd: consul-sync
         - require_in:
             - cmd: powerdns-sync
