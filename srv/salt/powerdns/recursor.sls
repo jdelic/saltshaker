@@ -66,7 +66,8 @@ pdns-recursor-service:
         - name: pdns-recursor
         - sig: /usr/sbin/pdns_recursor
         - enable: True
-        - order: 10  # see ORDER.md
+        - init_delay: 3
+        #- order: 10  # see ORDER.md
         - watch:
             - file: pdns-recursor-config
             - file: pdns-recursor-lua-config

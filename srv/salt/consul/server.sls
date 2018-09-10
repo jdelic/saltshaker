@@ -94,14 +94,23 @@ consul-server-service:
         - sig: consul
         - enable: True
         - init_delay: 2
-        - require:
+        - watch:
             - file: consul-common-config
             - file: consul-acl-config
-        - watch:
             - file: consul-server-service  # if consul.service changes we want to *restart* (reload: False)
             - file: consul  # restart on a change of the binary
         - watch_in:
             - service: pdns-recursor-service
+    http.wait_for_successful_query:
+        - name: http://169.254.1.1:8500/v1/agent/metrics
+        - wait_for: 10
+        - request_interval: 1
+        - status: 200
+        - watch:
+            - service: consul-server-service
+
+
+consul-server-register-acl:
     event.wait:
         - name: maurusnet/consul/installed
         - watch:
@@ -112,7 +121,7 @@ consul-server-service:
         - request_interval: 1
         - status: 200
         - require:
-            - event: maurusnet/consul/installed
+            - event: consul-server-register-acl
         - require_in:
             - service: pdns-recursor-service
 

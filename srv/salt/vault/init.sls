@@ -10,6 +10,7 @@ include:
     - vault.install
     - vault.sync
     - powerdns.sync
+    - postgresql.sync
 
 
 {% from 'vault/install.sls' import vault_user, vault_group %}
@@ -137,22 +138,12 @@ vault-service:
             - file: vault-data-dir
             - file: vault-service
             - file: vault-internal-servicedef
-            {% if 'consulserver' in grains['roles'] and pillar['vault']['backend'] == 'consul' %}
-            - service: consul-server-service
-            {% elif 'consulserver' not in grains['roles'] and pillar['vault']['backend'] == 'consul' %}
-            - service: consul-agent-service
-            {% endif %}
-            {% if 'database' in grains['roles'] and pillar['vault']['backend'] == 'postgresql' %}
+            - service: pdns-recursor
+            {% if pillar['vault']['backend'] == 'postgresql' %}
                 {# when we're on the same machine as the PostgreSQL database, wait for it to come up and the #}
                 {# database to be configured #}
-            - service: data-cluster-service
-            - service: pdns-recursor
+            - cmd: postgresql-sync
             - vault-postgres
-                {% if 'consulserver' in grains['roles'] %}
-            - service: consul-server-service
-                {% elif 'consulserver' not in grains['roles'] %}
-            - service: consul-agent-service
-                {% endif %}
             {% endif %}
         - watch:
             - file: vault-service
@@ -160,6 +151,15 @@ vault-service:
             - file: vault-ssl-cert  # restart when the SSL cert changes
             - file: vault-ssl-key
             - service: smartstack-internal
+    http.wait_for_successful_query:
+        - name: https://vault.service.consul:8200/v1/sys/health
+        - match: "initialized"
+        - wait_for: 10
+        - request_interval: 1
+        - watch:
+            - service: vault-service
+        - require_in:
+            - cmd: vault-sync
 
 
 {% if pillar['vault'].get('initialize', False) %}
@@ -227,7 +227,7 @@ vault-init:
             - VAULT_ADDR: "https://vault.service.consul:8200/"
         - require:
             - file: managed-keyring
-            - service: vault-service
+            - http: vault-service
             - cmd: powerdns-sync
         - require_in:
             - cmd: vault-sync
@@ -246,7 +246,7 @@ vault-cert-auth-enabled:
         - env:
             - VAULT_ADDR: "https://vault.service.consul:8200/"
         - require:
-            - service: vault-service
+            - http: vault-service
             - cmd: vault-init
         - require_in:
             - cmd: vault-sync
@@ -261,7 +261,7 @@ vault-approle-auth-enabled:
         - env:
             - VAULT_ADDR: "https://vault.service.consul:8200/"
         - require:
-            - service: vault-service
+            - http: vault-service
             - cmd: vault-init
         - require_in:
             - cmd: vault-sync
@@ -383,6 +383,7 @@ vault-gpg-access-token:
             test "$(/usr/local/bin/vault token lookup -format=json {{pillar['dynamicsecrets']['gpg-auth-token']}} | jq -r .data.ttl)" -gt 100
         - require:
             - cmd: vault-init
+            - cmd: vault-gpg-access-token-policy
         - require_in:
             - cmd: vault-sync
 {% endif %}
