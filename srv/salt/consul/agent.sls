@@ -41,6 +41,8 @@ consul-agent-service:
         - name: http://169.254.1.1:8500/v1/agent/metrics
         - wait_for: 10
         - request_interval: 1
+        - raise_error: False  # only exists in 'tornado' backend
+        - backend: tornado
         - status: 200
         - watch:
             - service: consul-agent-service
@@ -57,6 +59,8 @@ consul-agent-register-acl:
         - name: http://169.254.1.1:8500/v1/acl/info/{{pillar['dynamicsecrets']['consul-acl-token']}}
         - wait_for: 10
         - request_interval: 1
+        - raise_error: False  # only exists in 'tornado' backend
+        - backend: tornado
         - status: 200
         - require:
             - event: consul-agent-register-acl

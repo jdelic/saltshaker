@@ -157,6 +157,8 @@ vault-service:
         - match: "initialized"
         - wait_for: 10
         - request_interval: 1
+        - raise_error: False  # only exists in 'tornado' backend
+        - backend: tornado
         - watch:
             - service: vault-service
         - require_in:
