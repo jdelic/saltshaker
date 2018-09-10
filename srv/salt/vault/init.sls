@@ -354,6 +354,10 @@ vault-gpg-access-token-policy:
         - name: >-
             echo 'path "gpg/keys/*" {
                 capabilities = ["read", "create", "update", "list"]
+            }
+
+            path "gpg/export/*" {
+                capabilities = ["read", "list"]
             }' | /usr/local/bin/vault policy write gpg_access -
         - env:
             - VAULT_ADDR: "https://vault.service.consul:8200/"
