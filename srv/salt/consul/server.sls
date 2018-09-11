@@ -102,7 +102,7 @@ consul-server-service:
             - file: consul-server-service  # if consul.service changes we want to *restart* (reload: False)
             - file: consul  # restart on a change of the binary
     http.wait_for_successful_query:
-        - name: http://169.254.1.1:8500/v1/agent/metrics
+        - name: http://169.254.1.1:8500/v1/agent/members
         - wait_for: 10
         - request_interval: 1
         - raise_error: False  # only exists in 'tornado' backend
