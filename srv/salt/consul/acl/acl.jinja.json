@@ -1,8 +1,12 @@
 {
     "acl_datacenter": "{{main_datacenter}}",
-    "acl_default_policy": "allow",
+    "acl_default_policy": "deny",
     "acl_down_policy": "extend-cache",
-    "acl_ttl": "30s",
-    "acl_master_token": "{{master_token}}",
-    "acl_agent_master_token": "{{agent_master_token}}"
+    "acl_ttl": "30s"
+{% if master_token is defined %}
+    ,"acl_master_token": "{{master_token}}"
+{% endif %}
+{% if agent_master_token is defined %}
+    ,"acl_agent_master_token": "{{agent_master_token}}"
+{% endif %}
 }
