@@ -8,7 +8,6 @@ vault-sync:
     cmd.run:
         - name: /bin/true
         - require:
-            - cmd: powerdns-sync
             - cmd: vault-sync-database
 
 

@@ -136,10 +136,11 @@ vault-service:
         - sig: vault
         - enable: True
         - require:
+            - cmd: consul-sync
+            - cmd: powerdns-sync
             - file: vault-data-dir
             - file: vault-service
             - file: vault-internal-servicedef
-            - service: pdns-recursor
             {% if pillar['vault']['backend'] == 'postgresql' %}
                 {# when we're on the same machine as the PostgreSQL database, wait for it to come up and the #}
                 {# database to be configured #}
