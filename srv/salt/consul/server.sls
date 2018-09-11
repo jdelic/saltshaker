@@ -57,7 +57,7 @@ consul-execute-policy-{{loop.index}}:
                 --data @/etc/consul/policies.d/{{fn|replace('.jinja', '')}} \
                 http://169.254.1.1:8500/v1/acl/create
         - env:
-            CONSUL_MASTER_TOKEN: {{pillar['dynamicsecrets']['consul-acl-master-token']}}
+            CONSUL_ACL_MASTER_TOKEN: {{pillar['dynamicsecrets']['consul-acl-master-token']}}
         - require:
             - file: consul-policy-{{loop.index}}
         - require_in:
