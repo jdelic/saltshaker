@@ -1,6 +1,10 @@
 
 {% if pillar['authserver'].get('backend', '') == 'postgresql' %}
 
+include:
+    - postgresql.sync
+
+
 # only create this if the PostgreSQL backend is selected
 authserver-postgres:
     postgres_user.present:
@@ -34,7 +38,7 @@ authserver-postgres:
         - user: postgres
         - order: 20  # see ORDER.md
         - require:
-            - secure-tablespace
+            - cmd: postgresql-sync
             - postgres_user: authserver-postgres
 
 
@@ -57,7 +61,7 @@ authserver-postgres:
         - password: {{pillar['dynamicsecrets'][user]}}
         - user: postgres
         - require:
-            - service: data-cluster-service
+            - cmd: postgresql-sync
     # by default all users are allowed to create new tables in the 'public' schema in
     # a database. So we make sure to revoke that right, if we happen to have it because
     # the PostgreSQL server might not be hardened by using a database template that does

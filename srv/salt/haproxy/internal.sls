@@ -41,6 +41,7 @@ smartstack-internal:
         - require:
             - file: haproxy-multi
             - file: haproxy-config-template-internal
+            - file: consul-template-dir
     service.enabled:  # haproxy will be started by the smartstack script rendered by consul-template (see command above)
         - name: haproxy@internal
         - require:

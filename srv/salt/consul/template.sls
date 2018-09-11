@@ -1,4 +1,8 @@
 
+include:
+    - consul.sync
+
+
 consul-template:
     archive.extracted:
         - name: /usr/local/bin
@@ -54,6 +58,7 @@ consul-template-config:
                         if pillar['vault'].get('pinned-ca-cert', 'default') == 'default'
                         else pillar['vault']['pinned-ca-cert']}}
             vault_url: https://{{pillar['vault']['smartstack-hostname']}}:8200/
+            consul_acl_token: {{pillar['dynamicsecrets']['consul-acl-token']}}
         - require:
             - file: consul-basedir
 
@@ -74,6 +79,7 @@ consul-template-service:
             - file: consul-data-dir
             - file: consul-template-config
             - file: consul-template-dir
+            - cmd: consul-sync
         - watch:
             - file: consul-template-service
             - file: consul-template  # restart on a change of the binary

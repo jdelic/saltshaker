@@ -4,6 +4,7 @@
 
 include:
     - consul.install
+    - consul.sync
 
 
 {% from 'consul/install.sls' import consul_user, consul_group %}
@@ -47,6 +48,22 @@ consul-policy-{{loop.index}}:
         - mode: '0640'
         - require:
             - file: consul-policy-dir
+
+
+consul-execute-policy-{{loop.index}}:
+    cmd.run:
+        - name: >
+            curl -i -s -X PUT -H "X-Consul-Token: $CONSUL_ACL_MASTER_TOKEN" \
+                --data @/etc/consul/policies.d/{{fn|replace('.jinja', '')}} \
+                http://169.254.1.1:8500/v1/acl/create
+        - env:
+            CONSUL_ACL_MASTER_TOKEN: {{pillar['dynamicsecrets']['consul-acl-master-token']}}
+        - require:
+            - file: consul-policy-{{loop.index}}
+        - require_in:
+            - http: consul-server-service
+        - watch:
+            - service: consul-server-service
 {% endfor %}
 
 
@@ -84,6 +101,7 @@ consul-server-service:
             group: {{consul_group}}
             extra_parameters: -server -bootstrap-expect={{pillar['consul-cluster']['number-of-nodes']}} -ui
             single_node_cluster: {% if pillar['consul-cluster']['number-of-nodes'] == 1 %}True{% else %}False{% endif %}
+            node_id: {{grains['id']}}
         - require:
             - file: consul
             - file: consul-agent-absent
@@ -94,14 +112,42 @@ consul-server-service:
         - sig: consul
         - enable: True
         - init_delay: 2
-        - require:
+        - watch:
             - file: consul-common-config
             - file: consul-acl-config
-        - watch:
             - file: consul-server-service  # if consul.service changes we want to *restart* (reload: False)
             - file: consul  # restart on a change of the binary
-        - watch_in:
-            - service: pdns-recursor-service
+    http.wait_for_successful_query:
+        - name: http://169.254.1.1:8500/v1/agent/members
+        - wait_for: 10
+        - request_interval: 1
+        - raise_error: False  # only exists in 'tornado' backend
+        - backend: tornado
+        - status: 200
+        - header_dict:
+            X-Consul-Token: anonymous
+        - watch:
+            - service: consul-server-service
+        - require_in:
+            - cmd: consul-sync
+
+
+consul-server-register-acl:
+    event.wait:
+        - name: maurusnet/consul/installed
+        - watch:
+            - service: consul-server-service
+    http.wait_for_successful_query:
+        - name: http://169.254.1.1:8500/v1/acl/info/{{pillar['dynamicsecrets']['consul-acl-token']}}
+        - wait_for: 10
+        - request_interval: 1
+        - raise_error: False  # only exists in 'tornado' backend
+        - backend: tornado
+        - status: 200
+        - require:
+            - event: consul-server-register-acl
+        - require_in:
+            - cmd: consul-sync
 
 
 {% if pillar['consul-cluster']['number-of-nodes'] == 1 %}
