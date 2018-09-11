@@ -124,6 +124,8 @@ consul-server-service:
         - raise_error: False  # only exists in 'tornado' backend
         - backend: tornado
         - status: 200
+        - header_dict:
+            X-Consul-Token: anonymous
         - watch:
             - service: consul-server-service
         - require_in:
