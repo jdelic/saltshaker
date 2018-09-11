@@ -48,6 +48,22 @@ consul-policy-{{loop.index}}:
         - mode: '0640'
         - require:
             - file: consul-policy-dir
+
+
+consul-execute-policy-{{loop.index}}:
+    cmd.run:
+        - name: >
+            curl -X PUT -H "X-Consul-Token: $CONSUL_ACL_MASTER_TOKEN" \
+                --data @/etc/consul/policies.d/{{fn|replace('.jinja', '')}} \
+                http://169.254.1.1:8500/v1/acl/create
+        - env:
+            CONSUL_MASTER_TOKEN: {{pillar['dynamicsecrets']['consul-acl-master-token']}}
+        - require:
+            - file: consul-policy-{{loop.index}}
+        - require_in:
+            - cmd: consul-sync
+        - watch:
+            - service: consul-server-service
 {% endfor %}
 
 
