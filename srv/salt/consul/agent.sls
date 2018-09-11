@@ -10,6 +10,21 @@ include:
 {% from 'consul/install.sls' import consul_user, consul_group %}
 
 
+consul-acl-config:
+    file.managed:
+        - name: /etc/consul/conf.d/acl.json
+        - source: salt://consul/acl/acl.jinja.json
+        - user: {{consul_user}}
+        - group: {{consul_group}}
+        - mode: '0600'
+        - template: jinja
+        - context:
+            # make sure to change this for multi-datacenter deployments
+            main_datacenter: {{pillar['consul-cluster']['datacenter']}}
+        - require:
+            - file: consul-conf-dir
+
+
 consul-agent-service:
     file.managed:
         - name: /etc/systemd/system/consul.service
@@ -31,6 +46,7 @@ consul-agent-service:
         - enable: True
         - init_delay: 2
         - watch:
+            - file: consul-acl-config
             - file: consul-agent-service
             - file: consul-common-config
             - file: consul-agent-service  # if consul.service changes we want to *restart* (reload: False)
