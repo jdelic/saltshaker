@@ -1,6 +1,7 @@
 
 include:
     - dev.concourse.install
+    - vault.sync
 
 
 concourse-keys-session_signing_key:
@@ -133,6 +134,7 @@ concourse-server-envvars:
         - require:
             - file: concourse-server-envvars-template
             - file: vault
+            - cmd: vault-sync
             {% endif %}
 
 

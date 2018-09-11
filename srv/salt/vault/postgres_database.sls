@@ -9,6 +9,10 @@
 
 {% if pillar['vault'].get('backend', '') == 'postgresql' %}
 
+include:
+    - postgresql.sync
+
+
 # only create this if the PostgreSQL backend is selected
 vault-postgres:
     postgres_user.present:
@@ -25,7 +29,7 @@ vault-postgres:
         - user: postgres
         - order: 20  # see ORDER.md
         - require:
-            - secure-tablespace
+            - cmd: postgresql-sync
     file.accumulated:
         - name: postgresql-hba-md5users-accumulator
         - filename: {{pillar['postgresql']['hbafile']}}
@@ -41,7 +45,6 @@ vault-postgres:
         - order: 20  # see ORDER.md
         - require:
             - postgres_user: vault-postgres
-            - secure-tablespace
     cmd.script:
         - name: salt://vault/vault_postgresql_db.jinja.sh
         - template: jinja
@@ -58,4 +61,6 @@ vault-postgres:
             - PGPASSWORD: {{pillar['dynamicsecrets']['secure-vault']}}
         - require:
             - postgres_database: vault-postgres
+        - require_in:
+            - cmd: vault-sync-database
 {% endif %}

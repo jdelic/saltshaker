@@ -1,5 +1,9 @@
 # these states set up and configure the mailsystem CAS server
 
+include:
+    - mn.cas.sync
+
+
 authserver:
     pkg.installed:
         - name: authserver
@@ -71,6 +75,8 @@ authserver-config-secretid:
             test $? -eq 0
         - watch_in:
             - service: authserver
+        - require:
+            - cmd: authserver-config-secretid-sync
     {% endif %}
 {% else %}
     {% set x = config.__setitem__("DATABASE_URL", 'postgresql://%s:@postgresql.local:5432/%s'|format(pillar['authserver']['dbuser'],

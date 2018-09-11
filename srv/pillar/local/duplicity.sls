@@ -3,8 +3,15 @@
 duplicity-backup:
     enabled: False
 
+    # if vault-create-perhost-key is True then duplicity can use the
+    # host's key to encrypt and for management purposes. Since all the
+    # data is already on the host, this should be fine in terms of
+    # security.
+    encrypt-for-host: True
     # the key id for which backups will be encrypted
-    gpg-key-id: 1234567
+    gpg-keys:
+        - 1234567
+        # ...
 
     # when NOT using the managed keyring, you will want to use --trusted-key with the long
     # key id here, unless the key has a set trust relationship
