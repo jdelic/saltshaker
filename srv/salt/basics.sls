@@ -57,6 +57,7 @@ basic-required-packages:
             - cron
             - dbus
             - jq
+            - curl
         -  order: 1  # execute this state early, because later states need unzip
 
 

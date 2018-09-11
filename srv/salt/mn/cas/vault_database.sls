@@ -1,5 +1,10 @@
 # This state must be assigned to whatever node runs Hashicorp Vault and will be empty if AuthServer
 # is not configured to use Vault.
+
+include:
+    - mn.cas.sync
+    - vault.sync
+
 {% if pillar.get('authserver', {}).get('use-vault', False) %}
     {% if pillar.get('authserver', {}).get('vault-authtype', 'approle') == 'approle' %}
 authserver-vault-approle:
@@ -16,6 +21,10 @@ authserver-vault-approle:
         - env:
             - VAULT_ADDR: "https://vault.service.consul:8200/"
         - unless: /usr/local/bin/vault list auth/approle/role | grep authserver >/dev/null
+        - require_in:
+            - cmd: authserver-config-secretid-sync
+        - require:
+            - cmd: vault-sync
 
 
 authserver-vault-approle-roleid:
@@ -27,6 +36,10 @@ authserver-vault-approle-roleid:
             - VAULT_ADDR: "https://vault.service.consul:8200/"
         - onchanges:
             - cmd: authserver-vault-approle
+        - require_in:
+            - cmd: authserver-config-secretid-sync
+        - require:
+            - cmd: vault-sync
 
 
 authserver-vault-no-cert:
@@ -35,6 +48,8 @@ authserver-vault-no-cert:
         - env:
             - VAULT_ADDR: "https://vault.service.consul:8200/"
         - onlyif: /usr/local/bin/vault operator init -status >/dev/null && /usr/local/bin/vault list auth/cert/certs | grep authserver_database >/dev/null
+        - require:
+            - cmd: vault-sync
 
     {% elif pillar.get('authserver', {}).get('vault-authtype', 'approle') == 'cert' %}
 
@@ -51,6 +66,8 @@ authserver-vault-ssl-cert:
             - VAULT_ADDR: "https://vault.service.consul:8200/"
         - unless: /usr/local/bin/vault list auth/cert/certs | grep authserver_database >/dev/null
         - onlyif: /usr/local/bin/vault operator init -status >/dev/null
+        - require:
+            - cmd: vault-sync
 
 
 authserver-vault-no-approle:
@@ -59,6 +76,8 @@ authserver-vault-no-approle:
         - env:
             - VAULT_ADDR: "https://vault.service.consul:8200/"
         - onlyif: /usr/local/bin/vault operator init -status >/dev/null && /usr/local/bin/vault list auth/approle/role | grep authserver >/dev/null
+        - require:
+            - cmd: vault-sync
     {% endif %}
 
     {% if pillar.get('mailforwarder', {}).get('vault-authtype', 'approle') == 'approle' %}
@@ -76,6 +95,10 @@ mailforwarder-vault-approle:
         - env:
             - VAULT_ADDR: "https://vault.service.consul:8200/"
         - unless: /usr/local/bin/vault list auth/approle/role | grep mailforwarder >/dev/null
+        - require_in:
+            - cmd: authserver-config-secretid-sync
+        - require:
+            - cmd: vault-sync
 
 
 mailforwarder-vault-approle-roleid:
@@ -87,6 +110,10 @@ mailforwarder-vault-approle-roleid:
             - VAULT_ADDR: "https://vault.service.consul:8200/"
         - onchanges:
             - cmd: mailforwarder-vault-approle
+        - require_in:
+            - cmd: authserver-config-secretid-sync
+        - require:
+            - cmd: vault-sync
 
 
 mailforwarder-vault-no-cert:
@@ -95,6 +122,8 @@ mailforwarder-vault-no-cert:
         - env:
             - VAULT_ADDR: "https://vault.service.consul:8200/"
         - onlyif: /usr/local/bin/vault operator init -status >/dev/null && /usr/local/bin/vault list auth/cert/certs | grep mailforwarder_database >/dev/null
+        - require:
+            - cmd: vault-sync
 
     {% elif pillar.get('mailforwarder', {}).get('vault-authtype', 'approle') == 'cert' %}
 
@@ -111,6 +140,8 @@ mailforwarder-vault-ssl-cert:
             - VAULT_ADDR: "https://vault.service.consul:8200/"
         - unless: /usr/local/bin/vault list auth/cert/certs | grep mailforwarder_database >/dev/null
         - onlyif: /usr/local/bin/vault operator init -status >/dev/null
+        - require:
+            - cmd: vault-sync
 
 
 mailforwarder-vault-no-approle:
@@ -119,6 +150,8 @@ mailforwarder-vault-no-approle:
         - env:
             - VAULT_ADDR: "https://vault.service.consul:8200/"
         - onlyif: /usr/local/bin/vault operator init -status >/dev/null && /usr/local/bin/vault list auth/approle/role | grep mailforwarder >/dev/null
+        - require:
+            - cmd: vault-sync
     {% endif %}
 
 
@@ -137,6 +170,10 @@ dkimsigner-vault-approle:
         - env:
             - VAULT_ADDR: "https://vault.service.consul:8200/"
         - unless: /usr/local/bin/vault list auth/approle/role | grep dkimsigner >/dev/null
+        - require_in:
+            - cmd: authserver-config-secretid-sync
+        - require:
+            - cmd: vault-sync
 
 
 dkimsigner-vault-approle-roleid:
@@ -148,6 +185,10 @@ dkimsigner-vault-approle-roleid:
             - VAULT_ADDR: "https://vault.service.consul:8200/"
         - onchanges:
             - cmd: dkimsigner-vault-approle
+        - require_in:
+            - cmd: authserver-config-secretid-sync
+        - require:
+            - cmd: vault-sync
 
 
 dkimsigner-vault-no-cert:
@@ -156,6 +197,8 @@ dkimsigner-vault-no-cert:
         - env:
             - VAULT_ADDR: "https://vault.service.consul:8200/"
         - onlyif: /usr/local/bin/vault operator init -status >/dev/null && /usr/local/bin/vault list auth/cert/certs | grep dkimsigner_database >/dev/null
+        - require:
+            - cmd: vault-sync
     {% elif pillar.get('mailforwarder', {}).get('vault-authtype', 'approle') == 'cert' %}
 
 dkimsigner-vault-ssl-cert:
@@ -171,6 +214,8 @@ dkimsigner-vault-ssl-cert:
             - VAULT_ADDR: "https://vault.service.consul:8200/"
         - unless: /usr/local/bin/vault list auth/cert/certs | grep dkimsigner_database >/dev/null
         - onlyif: /usr/local/bin/vault operator init -status >/dev/null
+        - require:
+            - cmd: vault-sync
 
 
 dkimsigner-vault-no-approle:
@@ -179,6 +224,8 @@ dkimsigner-vault-no-approle:
         - env:
             - VAULT_ADDR: "https://vault.service.consul:8200/"
         - onlyif: /usr/local/bin/vault operator init -status >/dev/null && /usr/local/bin/vault list auth/approle/role | grep dkimsigner >/dev/null
+        - require:
+            - cmd: vault-sync
     {% endif %}
 
 
@@ -192,6 +239,8 @@ authserver-vault-postgresql-policy:
             - VAULT_ADDR: "https://vault.service.consul:8200/"
         - unless: /usr/local/bin/vault policies | grep postgresql_authserver_fullaccess >/dev/null
         - onlyif: /usr/local/bin/vault operator init -status >/dev/null
+        - require:
+            - cmd: vault-sync
 
 
 mailforwarder-vault-postgresql-policy:
@@ -204,6 +253,8 @@ mailforwarder-vault-postgresql-policy:
             - VAULT_ADDR: "https://vault.service.consul:8200/"
         - unless: /usr/local/bin/vault policies | grep postgresql_authserver_mailforwarder >/dev/null
         - onlyif: /usr/local/bin/vault operator init -status >/dev/null
+        - require:
+            - cmd: vault-sync
 
 
 dkimsigner-vault-postgresql-policy:
@@ -216,6 +267,8 @@ dkimsigner-vault-postgresql-policy:
             - VAULT_ADDR: "https://vault.service.consul:8200/"
         - unless: /usr/local/bin/vault policies | grep postgresql_authserver_dkimsigner >/dev/null
         - onlyif: /usr/local/bin/vault operator init -status >/dev/null
+        - require:
+            - cmd: vault-sync
 
 
 authserver-vault-postgresql-backend:
@@ -225,6 +278,8 @@ authserver-vault-postgresql-backend:
             - VAULT_ADDR: "https://vault.service.consul:8200/"
         - unless: /usr/local/bin/vault secrets list | grep postgresql >/dev/null
         - onlyif: /usr/local/bin/vault operator init -status >/dev/null
+        - require:
+            - cmd: vault-sync
 
 
 authserver-vault-postgresql-connection:
@@ -238,6 +293,8 @@ authserver-vault-postgresql-connection:
         - unless: /usr/local/bin/vault list postgresql/config | grep authserver >/dev/null
         - env:
             - VAULT_ADDR: "https://vault.service.consul:8200/"
+        - require:
+            - cmd: vault-sync
 
 
 # '"'"' is bash for ' when using single quotes around the json string
@@ -255,6 +312,8 @@ authserver-vault-postgresql-role:
             - VAULT_ADDR: "https://vault.service.consul:8200/"
         - onlyif: /usr/local/bin/vault operator init -status >/dev/null
         - unless: /usr/local/bin/vault list postgresql/roles | grep authserver_fullaccess >/dev/null
+        - require:
+            - cmd: vault-sync
 
 
 mailforwarder-vault-postgresql-role:
@@ -271,6 +330,8 @@ mailforwarder-vault-postgresql-role:
             - VAULT_ADDR: "https://vault.service.consul:8200/"
         - onlyif: /usr/local/bin/vault operator init -status >/dev/null
         - unless: /usr/local/bin/vault list postgresql/roles | grep authserver_mailforwarder >/dev/null
+        - require:
+            - cmd: vault-sync
 
 
 dkimsigner-vault-postgresql-role:
@@ -287,4 +348,6 @@ dkimsigner-vault-postgresql-role:
             - VAULT_ADDR: "https://vault.service.consul:8200/"
         - onlyif: /usr/local/bin/vault operator init -status >/dev/null
         - unless: /usr/local/bin/vault list postgresql/roles | grep authserver_dkimsigner >/dev/null
+        - require:
+            - cmd: vault-sync
 {% endif %}

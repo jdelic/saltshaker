@@ -7,18 +7,19 @@ key \"\" {
 }
 
 key \"oauth2-clients\" {
-    policy = \"write\"
+    policy = \"read\"
 }
 
 key \"concourse/workers/sshpub\" {
-    policy = \"write\"
+    policy = \"read\"
 }
+
 node \"\" {
     policy = \"read\"
 }
 
 service \"\" {
-    policy = \"write\"
+    policy = \"read\"
 }
 
 /* we configure a master token for this stuff */

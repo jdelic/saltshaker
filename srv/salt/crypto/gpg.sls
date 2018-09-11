@@ -5,6 +5,11 @@
 
 {% set keyloc = pillar['gpg']['shared-keyring-location'] %}
 
+
+include:
+    - vault.sync
+
+
 gpg-access:
     group.present
 
@@ -124,6 +129,73 @@ gpg-establish-trust-{{k}}:
         - require:
             - cmd: gpg-{{k}}
 {% endfor %}
+
+
+{% if pillar.get('gpg', {}).get('vault-create-perhost-key', False) %}
+gpg-create-host-key:
+    cmd.run:
+        - name: >
+            /usr/local/bin/vault write
+            "gpg/keys/{{grains['id']}}"
+            name="{{grains['id']}}"
+            generate=true
+            real_name="{{grains['id']}}"
+            key_bits=2048
+            exportable=true
+        - unless: >
+            /usr/local/bin/vault list gpg/keys | grep "{{grains['id']}}" >/dev/null
+        - env:
+            - VAULT_TOKEN: "{{pillar['dynamicsecrets']['gpg-auth-token']}}"
+            - VAULT_ADDR: "https://vault.service.consul:8200/"
+        - require:
+            - file: vault
+            - cmd: vault-sync
+
+
+gpg-import-host-key:
+    cmd.run:
+        - name: >
+            /usr/local/bin/vault read
+            -field=key
+            "gpg/export/{{grains['id']}}" |
+            gpg --homedir {{keyloc}} --no-default-keyring --import
+        - env:
+            - VAULT_TOKEN: "{{pillar['dynamicsecrets']['gpg-auth-token']}}"
+            - VAULT_ADDR: "https://vault.service.consul:8200/"
+        - require:
+            - file: gpg-shared-keyring-location
+            - cmd: gpg-create-host-key
+
+
+gpg-establish-host-key-trust:
+    cmd.run:
+        - unless: >
+            /usr/local/bin/vault read
+            -field=key
+            "gpg/export/{{grains['id']}}" |
+            /usr/bin/gpg
+            --homedir {{keyloc}}
+            --no-default-keyring
+            --with-colons
+            --list-keys $(/usr/bin/gpg --no-default-keyring --homedir {{keyloc}} \
+              --import-options import-show --dry-run --with-colons --import |
+            head -1 | cut -d':' -f5 2>/dev/null) 2>/dev/null |
+            grep "pub:" | cut -d':' -f2 | grep "u" >/dev/null
+        - name: >
+            echo "$(/usr/local/bin/vault read -field=key 'gpg/export/{{grains['id']}}' |
+                  /usr/bin/gpg --no-default-keyring --homedir {{keyloc}} \
+                  --import-options import-show --dry-run --with-colons --import |
+                  grep "fpr:" | head -1 | cut -d':' -f10 2>/dev/null):6:" |
+            /usr/bin/gpg
+            --homedir=/etc/gpg-managed-keyring/
+            --batch
+            --import-ownertrust
+        - env:
+            - VAULT_TOKEN: "{{pillar['dynamicsecrets']['gpg-auth-token']}}"
+            - VAULT_ADDR: "https://vault.service.consul:8200/"
+        - require:
+            - cmd: gpg-import-host-key
+{% endif %}
 
 
 # require this state to make sure the GPG keyring is fully configured

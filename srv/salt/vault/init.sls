@@ -8,6 +8,9 @@
 
 include:
     - vault.install
+    - vault.sync
+    - powerdns.sync
+    - postgresql.sync
 
 
 {% from 'vault/install.sls' import vault_user, vault_group %}
@@ -124,6 +127,7 @@ vault-service:
             group: {{vault_group}}
         - require:
             - file: vault
+            - cmd: vault-setcap
             - file: vault-config
             - file: vault-ssl-cert
             - file: vault-ssl-key
@@ -132,25 +136,16 @@ vault-service:
         - sig: vault
         - enable: True
         - require:
+            - cmd: consul-sync
+            - cmd: powerdns-sync
             - file: vault-data-dir
             - file: vault-service
             - file: vault-internal-servicedef
-            {% if 'consulserver' in grains['roles'] and pillar['vault']['backend'] == 'consul' %}
-            - service: consul-server-service
-            {% elif 'consulserver' not in grains['roles'] and pillar['vault']['backend'] == 'consul' %}
-            - service: consul-agent-service
-            {% endif %}
-            {% if 'database' in grains['roles'] and pillar['vault']['backend'] == 'postgresql' %}
+            {% if pillar['vault']['backend'] == 'postgresql' %}
                 {# when we're on the same machine as the PostgreSQL database, wait for it to come up and the #}
                 {# database to be configured #}
-            - service: data-cluster-service
-            - service: pdns-recursor
-            - vault-postgres
-                {% if 'consulserver' in grains['roles'] %}
-            - service: consul-server-service
-                {% elif 'consulserver' not in grains['roles'] %}
-            - service: consul-agent-service
-                {% endif %}
+            - cmd: postgresql-sync
+            - cmd: vault-sync-database
             {% endif %}
         - watch:
             - file: vault-service
@@ -158,6 +153,17 @@ vault-service:
             - file: vault-ssl-cert  # restart when the SSL cert changes
             - file: vault-ssl-key
             - service: smartstack-internal
+    http.wait_for_successful_query:
+        - name: https://vault.service.consul:8200/v1/sys/health
+        - match: "initialized"
+        - wait_for: 10
+        - request_interval: 1
+        - raise_error: False  # only exists in 'tornado' backend
+        - backend: tornado
+        - watch:
+            - service: vault-service
+        - require_in:
+            - cmd: vault-sync
 
 
 {% if pillar['vault'].get('initialize', False) %}
@@ -225,7 +231,10 @@ vault-init:
             - VAULT_ADDR: "https://vault.service.consul:8200/"
         - require:
             - file: managed-keyring
-            - service: vault-service
+            - http: vault-service
+            - cmd: powerdns-sync
+        - require_in:
+            - cmd: vault-sync
 
 
 # Vault clients configured by Salt should watch for this state using cmd.run:onchanges
@@ -241,8 +250,10 @@ vault-cert-auth-enabled:
         - env:
             - VAULT_ADDR: "https://vault.service.consul:8200/"
         - require:
-            - service: vault-service
+            - http: vault-service
             - cmd: vault-init
+        - require_in:
+            - cmd: vault-sync
 
 # Vault clients configured by Salt should watch for this state using cmd.run:onchanges
 # and set up their approles and policies
@@ -254,8 +265,10 @@ vault-approle-auth-enabled:
         - env:
             - VAULT_ADDR: "https://vault.service.consul:8200/"
         - require:
-            - service: vault-service
+            - http: vault-service
             - cmd: vault-init
+        - require_in:
+            - cmd: vault-sync
 
 
 # create a token that can request secret-ids from approle
@@ -269,6 +282,10 @@ vault-approle-access-token-policy:
             - VAULT_ADDR: "https://vault.service.consul:8200/"
         - unless: /usr/local/bin/vault policies | grep approle_access >/dev/null
         - onlyif: /usr/local/bin/vault operator init -status >/dev/null
+        - require:
+            - cmd: vault-init
+        - require_in:
+            - cmd: vault-sync
 
 
 # this creates a token using a per-salt-cluster uuid from dynamicsecrets. The token
@@ -279,7 +296,7 @@ vault-approle-access-token-policy:
 vault-approle-access-token:
     cmd.run:
         - name: >-
-            /usr/local/bin/vault token revoke $TOKENID &&
+            /usr/local/bin/vault token revoke $TOKENID;
             /usr/local/bin/vault token create \
                 -id=$TOKENID \
                 -display-name="approle-auth" \
@@ -293,6 +310,11 @@ vault-approle-access-token:
         - unless: >-
             test "$(/usr/local/bin/vault token lookup -format=json {{pillar['dynamicsecrets']['approle-auth-token']}} | jq -r .renewable)" == "true" ||
             test "$(/usr/local/bin/vault token lookup -format=json {{pillar['dynamicsecrets']['approle-auth-token']}} | jq -r .data.ttl)" -gt 100
+        - require:
+            - cmd: vault-init
+            - cmd: vault-approle-access-token-policy
+        - require_in:
+            - cmd: vault-sync
 
 
 vault-approle-access-token-renewal:
@@ -303,19 +325,77 @@ vault-approle-access-token-renewal:
             - VAULT_ADDR: "https://vault.service.consul:8200/"
         - onlyif: >-
             test "$(/usr/local/bin/vault token lookup -format=json {{pillar['dynamicsecrets']['approle-auth-token']}} | jq -r .renewable)" == "true"
+        - require:
+            - cmd: vault-init
+        - require_in:
+            - cmd: vault-sync
 
 
 vault-init-gpg-plugin:
     cmd.run:
         - name: >-
             /usr/local/bin/vault write sys/plugins/catalog/gpg \
-                sha_256={{pillar['hashes']['vault-gpg-plugin-binary']}} command=vault-gpg-plugin &&
+                sha_256={{pillar['hashes']['vault-gpg-plugin-binary'].split('=', 1)[1]}} command=vault-gpg-plugin &&
             /usr/local/bin/vault secrets enable -path=gpg -plugin-name=gpg plugin
         - env:
             - VAULT_ADDR: "https://vault.service.consul:8200/"
         - unless: >-
             /usr/local/bin/vault secrets list | grep "gpg/" >/dev/null
         - onlyif: /usr/local/bin/vault operator init -status >/dev/null
+        - require:
+            - cmd: vault-init
+            - cmd: vault-plugin-gpg-setcap
+        - require_in:
+            - cmd: vault-sync
+
+
+# create a token that can request GPG keys from Vault
+vault-gpg-access-token-policy:
+    cmd.run:
+        - name: >-
+            echo 'path "gpg/keys/*" {
+                capabilities = ["read", "create", "update", "list"]
+            }
+
+            path "gpg/export/*" {
+                capabilities = ["read", "list"]
+            }' | /usr/local/bin/vault policy write gpg_access -
+        - env:
+            - VAULT_ADDR: "https://vault.service.consul:8200/"
+        - unless: /usr/local/bin/vault policies | grep gpg_access >/dev/null
+        - onlyif: /usr/local/bin/vault operator init -status >/dev/null
+        - require:
+            - cmd: vault-init-gpg-plugin
+        - require_in:
+            - cmd: vault-sync
+
+
+# this creates a token using a per-salt-cluster uuid from dynamicsecrets. The token
+# will become invalid after 60 minutes unless the vault home runs this state again!
+# This allows minions to create GPG keys for themselves but not create new
+# GPG keys after one hour. This is a compromise between automatic initialization and
+# security.
+vault-gpg-access-token:
+    cmd.run:
+        - name: >-
+            /usr/local/bin/vault token revoke $TOKENID;
+            /usr/local/bin/vault token create \
+                -id=$TOKENID \
+                -display-name="gpg-auth" \
+                -policy=default -policy=gpg_access \
+                -renewable=true \
+                -period=1h \
+                -explicit-max-ttl=0
+        - env:
+            - VAULT_ADDR: "https://vault.service.consul:8200/"
+            - TOKENID: "{{pillar['dynamicsecrets']['gpg-auth-token']}}"
+        - unless: >-
+            test "$(/usr/local/bin/vault token lookup -format=json {{pillar['dynamicsecrets']['gpg-auth-token']}} | jq -r .renewable)" == "true" ||
+            test "$(/usr/local/bin/vault token lookup -format=json {{pillar['dynamicsecrets']['gpg-auth-token']}} | jq -r .data.ttl)" -gt 100
+        - require:
+            - cmd: vault-gpg-access-token-policy
+        - require_in:
+            - cmd: vault-sync
 {% endif %}
 
 

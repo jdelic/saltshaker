@@ -1,6 +1,10 @@
 # creates a vaultadmin role that can be used to create dynamic credentials
 # from the Vault postgresql secret backend
 
+include:
+    - postgresql.sync
+
+
 vaultadmin:
     postgres_user.present:
         - name: {{pillar['vault']['managed-database-owner']}}
@@ -15,7 +19,7 @@ vaultadmin:
         - password: {{pillar['dynamicsecrets']['vault-db-credential-admin']}}
         - user: postgres
         - require:
-            - service: data-cluster-service
+            - cmd: postgresql-sync
 
 
 # vim: syntax=yaml

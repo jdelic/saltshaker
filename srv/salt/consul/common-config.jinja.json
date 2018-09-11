@@ -5,5 +5,7 @@
     "bind_addr": "{{local_ip}}",
     "client_addr": "{{consul_interface_ip}}",
     "raft_protocol": 3,
-    "enable_syslog": true
+    "enable_syslog": true,
+    "acl_agent_token": "{{agent_acl_token}}",
+    "acl_token": "{{agent_acl_token}}"
 }

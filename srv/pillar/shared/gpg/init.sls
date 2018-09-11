@@ -9,3 +9,4 @@ include:
 
 gpg:
     shared-keyring-location: /etc/gpg-managed-keyring
+    vault-create-perhost-key: True

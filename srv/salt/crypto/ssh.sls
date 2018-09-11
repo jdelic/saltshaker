@@ -18,10 +18,6 @@ openssh-reload:
         - sig: sshd
         - enable: True
         - reload: True
-        - watch:
-{% if pillar.get("crypto", {}).get("generate-secure-dhparams", True) %}
-            - file: openssh-replace-moduli
-{% endif %}
 
 
 openssh-config-folder:
@@ -84,6 +80,8 @@ openssh-replace-moduli:
         - force: True
         - watch:
             - cmd: openssh-filter-moduli
+        - watch_in:
+            - service: openssh-reload
 {% endif %}
 
 

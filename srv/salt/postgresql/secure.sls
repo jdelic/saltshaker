@@ -1,4 +1,8 @@
 
+include:
+    - postgresql.sync
+
+
 secure-base-dir:
     file.directory:
         - name: /secure/postgres
@@ -29,6 +33,7 @@ secure-tablespace:
         - require:
             - data-cluster-service
             - secure-tablespace-dir
-
+        - require_in:
+            - cmd: postgresql-sync
 
 # vim: syntax=yaml
