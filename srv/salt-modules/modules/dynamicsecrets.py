@@ -215,3 +215,28 @@ def get_store():
     else:
         store = DynamicSecretsPillar(_DEFAULT_PATH)
         return store
+
+
+def get_or_create(secret_config, secret_name, host="*"):
+    # type: (Dict[str, Union[str, int, bool]], str, str) -> Union[Dict[str, str], str]
+    return get_store().get_or_create(secret_config, secret_name, host=host)
+
+
+def create(secret_config, secret_name, host="*"):
+    # type: (Dict[str, Union[str, int, bool]], str, str) -> Union[Dict[str, str], str]
+    return get_store().create(secret_config, secret_name, host=host)
+
+
+def load(secret_name, host="*"):
+    # type: (str, str) -> Union[Dict[str, str], str]
+    return get_store().load(secret_name, host=host)
+
+
+def loadall(secret_name):
+    # type: (str) -> List[Tuple[Any, Any]]
+    return get_store().loadall(secret_name)
+
+
+def save(secret_name, secret, host="*"):
+    # type: (str, str, str) -> None
+    get_store().save(secret_name, secret, host=host)
