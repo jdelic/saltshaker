@@ -19,6 +19,7 @@ consul-agent-service:
             user: {{consul_user}}
             group: {{consul_group}}
             extra_parameters: -retry-max=2
+            node_id: {{grains['id']}}
         - require:
             - file: consul
             - file: consul-server-absent

@@ -85,6 +85,7 @@ consul-server-service:
             group: {{consul_group}}
             extra_parameters: -server -bootstrap-expect={{pillar['consul-cluster']['number-of-nodes']}} -ui
             single_node_cluster: {% if pillar['consul-cluster']['number-of-nodes'] == 1 %}True{% else %}False{% endif %}
+            node_id: {{grains['id']}}
         - require:
             - file: consul
             - file: consul-agent-absent

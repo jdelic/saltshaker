@@ -7,7 +7,7 @@ After=basic.target network.target
 User={{user}}
 Group={{group}}
 Environment=GOMAXPROCS=2
-ExecStart=/usr/local/bin/consul agent -node "%H" \
+ExecStart=/usr/local/bin/consul agent -node "{{node_id}}" \
     -config-file=/etc/consul/common-config.json \
     -config-dir=/etc/consul/services.d -config-dir=/etc/consul/conf.d -data-dir=/run/consul \
     -pid-file=/run/consul/consul.pid {% if extra_parameters is defined %}{{extra_parameters}}{% endif %}
