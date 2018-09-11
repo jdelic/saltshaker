@@ -53,7 +53,7 @@ consul-policy-{{loop.index}}:
 consul-execute-policy-{{loop.index}}:
     cmd.run:
         - name: >
-            curl -X PUT -H "X-Consul-Token: $CONSUL_ACL_MASTER_TOKEN" \
+            curl -i -s -X PUT -H "X-Consul-Token: $CONSUL_ACL_MASTER_TOKEN" \
                 --data @/etc/consul/policies.d/{{fn|replace('.jinja', '')}} \
                 http://169.254.1.1:8500/v1/acl/create
         - env:
