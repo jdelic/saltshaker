@@ -61,7 +61,7 @@ consul-execute-policy-{{loop.index}}:
         - require:
             - file: consul-policy-{{loop.index}}
         - require_in:
-            - cmd: consul-sync
+            - http: consul-server-service
         - watch:
             - service: consul-server-service
 {% endfor %}
