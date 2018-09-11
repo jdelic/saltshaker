@@ -1,4 +1,9 @@
 
+include:
+    - powerdns.sync
+    - consul.sync
+
+
 pdns-recursor:
     pkg.installed
 
@@ -44,6 +49,8 @@ pnds-recursor-override-resolv.conf:
         - group: root
         - require:
             - service: pdns-recursor-service
+        - require_in:
+            - cmd: powerdns-sync
 
 
 pdns-dhclient-enforce-nameservers:
@@ -60,9 +67,14 @@ pdns-recursor-service:
         - name: pdns-recursor
         - sig: /usr/sbin/pdns_recursor
         - enable: True
-        - order: 10  # see ORDER.md
+        - init_delay: 3
+        #- order: 10  # see ORDER.md
         - watch:
             - file: pdns-recursor-config
             - file: pdns-recursor-lua-config
         - require:
             - pkg: pdns-recursor
+            - cmd: consul-network-interface  # ensure that 169.254.1.1/consul0 exists
+            - cmd: consul-sync
+        - require_in:
+            - cmd: powerdns-sync

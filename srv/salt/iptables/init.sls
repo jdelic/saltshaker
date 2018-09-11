@@ -97,22 +97,21 @@ icmp-forward:
             - pkg: iptables
 
 
-# negation is broken as of https://github.com/saltstack/salt/issues/42437
 # prevent tcp packets without a connection
-#drop-confused-tcp-packets:
-#    iptables.insert:
-#        - position: 3
-#        - table: filter
-#        - chain: INPUT
-#        - jump: DROP
-#        - proto: tcp
-#        - match: state
-#        - connstate: NEW
-#        - tcp-flags: '! FIN,SYN,RST,ACK SYN'
-#        - order: 3
-#        - save: True
-#        - require:
-#            - pkg: iptables
+drop-confused-tcp-packets:
+    iptables.insert:
+        - position: 3
+        - table: filter
+        - chain: INPUT
+        - jump: DROP
+        - proto: tcp
+        - match: state
+        - connstate: NEW
+        - tcp-flags: '! FIN,SYN,RST,ACK SYN'
+        - order: 3
+        - save: True
+        - require:
+            - pkg: iptables
 
 
 iptables-default-allow-related-established-input:

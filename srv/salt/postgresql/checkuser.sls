@@ -1,5 +1,9 @@
 # create a user for checking the database
 
+include:
+    - postgresql.sync
+
+
 checkuser-postgres:
     postgres_user.present:
         - name: checkuser
@@ -42,6 +46,8 @@ checkuser-drop-create:
         - maintenance_db: postgres
         - require:
             - postgres_user: checkuser-postgres
+        - require_in:
+            - cmd: postgresql-sync
 
 
 checkuser-pgbha-md5:

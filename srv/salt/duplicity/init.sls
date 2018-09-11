@@ -23,6 +23,11 @@ duplicity-cron-config-folder:
     {% set x = envvars.__setitem__('GNUPGHOME', pillar['gpg']['shared-keyring-location']) %}
 {% endif %}
 
+{% set gpg_keys = pillar['duplicity-backup']['gpg-keys'] %}
+{% if pillar['duplicity-backup'].get('encrypt-for-host', False) %}
+    {% set x = gpg_keys.append(grains['id']) %}
+{% endif %}
+
 duplicity-cron-backup-script:
     file.managed:
         - name: /etc/duplicity.d/backup.sh
@@ -34,7 +39,7 @@ duplicity-cron-backup-script:
         - context:
             additional_options: {{pillar['duplicity-backup'].get('additional-options', '')}}
             backup_target_url: {{pillar['duplicity-backup']['backup-target']}}
-            gpg_key_id: {{pillar['duplicity-backup']['gpg-key-id']}}
+            gpg_keys: {{pillar['duplicity-backup']['gpg-keys']}}
             gpg_options: {{pillar['duplicity-backup'].get('gpg-options', '')}}
             envvars: {{envvars}}
 

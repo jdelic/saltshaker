@@ -1,5 +1,9 @@
 # these states set up and configure the mailsystem CAS server
 
+include:
+    - mn.cas.sync
+
+
 authserver:
     pkg.installed:
         - name: authserver
@@ -41,7 +45,6 @@ authserver-rsyslog:
     "BINDPORT": pillar.get('authserver', {}).get('bind-port', 8999),
     "DATABASE_NAME": pillar['authserver']['dbname'],
     "DATABASE_PARENTROLE": pillar['authserver']['dbuser'],
-    "SPAPI_DBUSERS": ",".join(pillar['authserver']['stored-procedure-api-users']),
     "POSTGRESQL_CA": pillar['ssl']['service-rootca-cert'] if
         pillar['postgresql'].get('pinned-ca-cert', 'default') == 'default'
         else pillar['postgresql']['pinned-ca-cert'],
@@ -72,6 +75,8 @@ authserver-config-secretid:
             test $? -eq 0
         - watch_in:
             - service: authserver
+        - require:
+            - cmd: authserver-config-secretid-sync
     {% endif %}
 {% else %}
     {% set x = config.__setitem__("DATABASE_URL", 'postgresql://%s:@postgresql.local:5432/%s'|format(pillar['authserver']['dbuser'],
@@ -88,6 +93,33 @@ authserver-config-{{loop.index}}:
             - appconfig: authserver-appconfig
         - watch_in:
             - service: authserver
+{% endfor %}
+
+
+authserver-spapi-install:
+    cmd.run:
+        - name: >
+            /usr/local/authserver/bin/envdir /etc/appconfig/authserver/env/ \
+                /usr/local/authserver/bin/django-admin.py spapi --settings=authserver.settings install
+        - unless: >
+            /usr/local/authserver/bin/envdir /etc/appconfig/authserver/env/ \
+                /usr/local/authserver/bin/django-admin.py spapi --settings=authserver.settings check --installed
+        - require:
+            - service: authserver
+
+
+{% for spapi_user in pillar['authserver'].get('stored-procedure-api-users', []) %}
+authserver-grant-spapi-access-{{spapi_user}}:
+    cmd.run:
+        - name: >-
+            /usr/local/authserver/bin/envdir /etc/appconfig/authserver/env/ \
+                /usr/local/authserver/bin/django-admin.py spapi --settings=authserver.settings grant {{spapi_user}}
+        - unless: >
+            /usr/local/authserver/bin/envdir /etc/appconfig/authserver/env/ \
+                /usr/local/authserver/bin/django-admin.py spapi --settings=authserver.settings check \
+                    --grant={{spapi_user}}
+        - require:
+            - cmd: authserver-spapi-install
 {% endfor %}
 
 

@@ -114,6 +114,7 @@ consul-common-config:
             consul_interface_ip: 169.254.1.1
             datacenter: {{pillar['consul-cluster']['datacenter']}}
             encryption_key: {{pillar['dynamicsecrets']['consul-encryptionkey']}}
+            agent_acl_token: {{pillar['dynamicsecrets']['consul-acl-token']}}
         - require:
             - file: consul-basedir
             - cmd: consul-network-interface

@@ -13,10 +13,6 @@ libapache2-mod-authnz-external:
             - pkg: apache2
 
 
-authclient:
-    pkg.installed
-
-
 authnz-external-enable:
     cmd.run:
         - name: /usr/sbin/a2enmod authnz_external

@@ -43,6 +43,7 @@ smartstack-external:
         - require:
             - file: haproxy-multi
             - file: haproxy-config-template-external
+            - file: consul-template-dir
     service.enabled:  # haproxy will be started by the smartstack script rendered by consul-template (see command above)
         - name: haproxy@external
         - require:

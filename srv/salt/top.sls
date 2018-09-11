@@ -13,6 +13,7 @@ base:
         - powerdns.recursor
         - duplicity
         - vault.install
+        - mn.cas.client
 
     'roles:xenserver':
         - match: grain
@@ -125,6 +126,10 @@ base:
     'roles:vpngateway':
         - match: grain
         - openvpn.gateway
+
+    'not G@roles:vpngateway':
+        - match: compound
+        - openvpn.gateway_accessible
 
     'roles:webdav':
         - match: grain

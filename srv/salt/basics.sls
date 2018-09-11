@@ -57,6 +57,7 @@ basic-required-packages:
             - cron
             - dbus
             - jq
+            - curl
         -  order: 1  # execute this state early, because later states need unzip
 
 
@@ -186,8 +187,8 @@ openssh-in22-recv:
 # Note: Consul is installed on all machines so it's covered by consul.install
 {%- set tcp = ['22', '53', '80', '123', '443', '11371'] %}
 
-# dns out, ntp out
-{%- set udp = ['53', '123'] %}
+# dns out, dhcp out, ntp out
+{%- set udp = ['53', '67', '123'] %}
 
 {% for port in tcp %}
 # allow us to contact others on ports
