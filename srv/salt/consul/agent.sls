@@ -100,8 +100,8 @@ consul-agent-service-reload:
             # consul.install.consul-service-dir state.
             - file: /etc/consul/services.d*
             - file: consul-common-config
-        - watch_in:
-            - service: pdns-recursor-service
+        - require_in:  # ensure that all service registrations happen
+            - cmd: consul-sync
 
 
 consul-server-absent:
