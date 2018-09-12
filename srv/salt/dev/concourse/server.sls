@@ -114,6 +114,8 @@ concourse-server-envvars{% if pillar['ci']['use-vault'] %}-template{% endif %}:
             CONCOURSE_VAULT_CA_CERT="{{pillar['ssl']['service-rootca-cert']}}"
             CONCOURSE_VAULT_AUTH_BACKEND="approle"
             CONCOURSE_VAULT_AUTH_PARAM="role_id={{pillar['dynamicsecrets']['concourse-role-id']}},secret_id=((secret_id))"
+
+
 concourse-server-envvars:
     cmd.run:
         - name: >-
