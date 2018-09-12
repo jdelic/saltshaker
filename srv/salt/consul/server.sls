@@ -188,8 +188,8 @@ consul-server-service-reload:
             - file: /etc/consul/services.d*
             - file: consul-common-config
             - file: consul-acl-config
-        - watch_in:
-            - service: pdns-recursor-service
+        - require_in:  # ensure that all service registrations happen
+            - cmd: consul-sync
 
 
 consul-agent-absent:
