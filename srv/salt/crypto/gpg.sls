@@ -160,7 +160,8 @@ gpg-import-host-key:
             --homedir {{keyloc}}
             --no-default-keyring
             --with-colons
-            --list-keys $(/usr/local/bin/vault read \
+            --list-keys $(VAULT_TOKEN="{{pillar['dynamicsecrets']['gpg-read-token']}}" \
+                          /usr/local/bin/vault read \
                               -field=fingerprint \
                               "gpg/keys/{{grains['id']}}" 2>/dev/null) 2>/dev/null
         - name: >
@@ -169,7 +170,7 @@ gpg-import-host-key:
             "gpg/export/{{grains['id']}}" |
             gpg --homedir {{keyloc}} --no-default-keyring --import
         - env:
-            - VAULT_TOKEN: "{{pillar['dynamicsecrets']['gpg-read-token']}}"
+            - VAULT_TOKEN: "{{pillar['dynamicsecrets']['gpg-auth-token']}}"
             - VAULT_ADDR: "https://vault.service.consul:8200/"
         - require:
             - file: gpg-shared-keyring-location
@@ -183,22 +184,21 @@ gpg-establish-host-key-trust:
             --homedir {{keyloc}}
             --no-default-keyring
             --with-colons
-            --list-keys $(/usr/local/bin/vault read \
+            --list-keys $(VAULT_TOKEN="{{pillar['dynamicsecrets']['gpg-read-token']}}" \
+                          /usr/local/bin/vault read \
                               -field=fingerprint \
                               "gpg/keys/{{grains['id']}}" 2>/dev/null) 2>/dev/null |
             grep "pub:" | cut -d':' -f2 | grep "u" >/dev/null
         - name: >
-            /usr/bin/gpg --no-default-keyring --homedir {{keyloc}} \
-            --dry-run --with-colons --list-keys $(/usr/local/bin/vault read \
+            echo "$(/usr/local/bin/vault read \
                 -field=fingerprint \
-                "gpg/keys/{{grains['id']}}" 2>/dev/null) 2>/dev/null |
-            grep "fpr:" | head -1 | cut -d':' -f10 2>/dev/null):6:" |
+                "gpg/keys/{{grains['id']}}" 2>/dev/null):6:" |
             /usr/bin/gpg
             --homedir=/etc/gpg-managed-keyring/
             --batch
             --import-ownertrust
         - env:
-            - VAULT_TOKEN: "{{pillar['dynamicsecrets']['gpg-read-token']}}"
+            - VAULT_TOKEN: "{{pillar['dynamicsecrets']['gpg-auth-token']}}"
             - VAULT_ADDR: "https://vault.service.consul:8200/"
         - require:
             - cmd: gpg-import-host-key
