@@ -252,6 +252,7 @@ basics-internal-network-tcp:
         - connstate: NEW
         - proto: tcp
         - save: True
+        - order: 4
         - require:
             - sls: iptables
 
@@ -264,6 +265,7 @@ basics-internal-network-udp:
         - out-interface: {{pillar['ifassign']['internal']}}
         - proto: udp
         - save: True
+        - order: 4
         - require:
             - sls: iptables
 
