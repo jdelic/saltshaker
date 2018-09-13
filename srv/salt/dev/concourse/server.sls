@@ -125,8 +125,6 @@ concourse-server-envvars:
         - env:
             - VAULT_ADDR: "https://vault.service.consul:8200/"
             - VAULT_TOKEN: {{pillar['dynamicsecrets']['approle-auth-token']}}
-        - onchanges:
-            - file: concourse-server-envvars-template
         - creates: /etc/concourse/envvars
         - unless: >-
             test -f /etc/concourse/envvars &&
