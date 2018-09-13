@@ -132,6 +132,7 @@ gpg-establish-trust-{{k}}:
 
 
 {% if pillar.get('gpg', {}).get('vault-create-perhost-key', False) %}
+# for some reason the key sometimes gets created 1 or 2 seconds in the future, so we sleep 2 as a work-around
 gpg-create-host-key:
     cmd.run:
         - name: >
@@ -141,7 +142,7 @@ gpg-create-host-key:
             generate=true
             real_name="{{grains['id']}}"
             key_bits=2048
-            exportable=true
+            exportable=true; sleep 2
         - unless: >
             /usr/local/bin/vault list gpg/keys | grep "{{grains['id']}}" >/dev/null
         - env:
