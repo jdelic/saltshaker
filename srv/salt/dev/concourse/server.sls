@@ -13,7 +13,7 @@ concourse-keys-session_signing_key:
         - mode: '0640'
         - replace: False
         - require_in:
-            - cmd: require-concourse-keys
+            - service: concourse-server
 
 
 concourse-keys-host_key-public-copy:
@@ -27,7 +27,7 @@ concourse-keys-host_key-public-copy:
         - require:
             - user: concourse-user
         - require_in:
-            - cmd: require-concourse-keys
+            - service: concourse-server
 
 
 concourse-keys-host_key:
@@ -43,12 +43,7 @@ concourse-keys-host_key:
             - file: concourse-keys-host_key-public
             - user: concourse-user
         - require_in:
-            - cmd: require-concourse-keys
-
-
-require-concourse-keys:
-    cmd.run:
-        - name: /bin/true
+            - service: concourse-server
 
 
 authorized_worker_keys-must-exist:
@@ -172,18 +167,17 @@ concourse-server:
                     grains['ip_interfaces'][pillar['ifassign']['internal']][pillar['ifassign'].get(
                         'internal-ip-index', 0)|int()])}}:{{pillar.get('concourse-server', {}).get('atc-port', 8080)}}
         - require:
-            - file: require-concourse-keys
             - file: concourse-install
             - file: authorized_worker_keys-must-exist
             - concourse-server-envvars
     service.running:
         - name: concourse-web
-        - sig: /usr/local/bin/concourse web
+        - sig: /usr/local/bin/concourse_linux_amd64 web
         - enable: True
         - watch:
             - file: concourse-server
             - file: concourse-install  # restart on a change of the binary
-            - concourse-server-envvars  # can be cmd of file
+            - concourse-server-envvars  # can be cmd or file
 
 
 concourse-servicedef-tsa:

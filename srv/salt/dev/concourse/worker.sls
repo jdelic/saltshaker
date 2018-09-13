@@ -68,7 +68,7 @@ concourse-worker:
             - file: concourse-keys-worker_key
     service.running:
         - name: concourse-worker
-        - sig: /usr/local/bin/concourse worker
+        - sig: /usr/local/bin/concourse_linux_amd64 worker
         - enable: True
         - require:
             - file: concourse-worker
