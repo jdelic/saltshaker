@@ -79,6 +79,7 @@ consul-template-service:
             - file: consul-data-dir
             - file: consul-template-config
             - file: consul-template-dir
+            - file: consul-template-servicerenderer
             - cmd: consul-sync
         - watch:
             - file: consul-template-service
