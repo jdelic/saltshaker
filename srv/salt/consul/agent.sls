@@ -51,6 +51,8 @@ consul-agent-service:
             - file: consul-common-config
             - file: consul-agent-service  # if consul.service changes we want to *restart* (reload: False)
             - file: consul  # restart on a change of the binary
+        - require:
+            - cmd: consul-sync-network
     http.wait_for_successful_query:
         - name: http://169.254.1.1:8500/v1/agent/members
         - wait_for: 10
