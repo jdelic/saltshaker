@@ -280,7 +280,7 @@ vault-approle-access-token-policy:
             }' | /usr/local/bin/vault policy write approle_access -
         - env:
             - VAULT_ADDR: "https://vault.service.consul:8200/"
-        - unless: /usr/local/bin/vault policies | grep approle_access >/dev/null
+        - unless: /usr/local/bin/vault policy list | grep approle_access >/dev/null
         - onlyif: /usr/local/bin/vault operator init -status >/dev/null
         - require:
             - cmd: vault-init
@@ -320,13 +320,15 @@ vault-approle-access-token:
 vault-approle-access-token-renewal:
     cmd.run:
         - name: >-
-            /usr/local/bin/vault token renew {{pillar['dynamicsecrets']['approle-auth-token']}}
+            /usr/local/bin/vault token renew $TOKENID
         - env:
             - VAULT_ADDR: "https://vault.service.consul:8200/"
+            - TOKENID: "{{pillar['dynamicsecrets']['approle-auth-token']}}"
         - onlyif: >-
             test "$(/usr/local/bin/vault token lookup -format=json {{pillar['dynamicsecrets']['approle-auth-token']}} | jq -r .renewable)" == "true"
         - require:
             - cmd: vault-init
+            - cmd: vault-approle-access-token-policy
         - require_in:
             - cmd: vault-sync
 
@@ -362,7 +364,7 @@ vault-gpg-access-token-policy:
             }' | /usr/local/bin/vault policy write gpg_access -
         - env:
             - VAULT_ADDR: "https://vault.service.consul:8200/"
-        - unless: /usr/local/bin/vault policies | grep gpg_access >/dev/null
+        - unless: /usr/local/bin/vault policy list | grep gpg_access >/dev/null
         - onlyif: /usr/local/bin/vault operator init -status >/dev/null
         - require:
             - cmd: vault-init-gpg-plugin
@@ -393,6 +395,22 @@ vault-gpg-access-token:
             test "$(/usr/local/bin/vault token lookup -format=json {{pillar['dynamicsecrets']['gpg-auth-token']}} | jq -r .renewable)" == "true" ||
             test "$(/usr/local/bin/vault token lookup -format=json {{pillar['dynamicsecrets']['gpg-auth-token']}} | jq -r .data.ttl)" -gt 100
         - require:
+            - cmd: vault-gpg-access-token-policy
+        - require_in:
+            - cmd: vault-sync
+
+
+vault-gpg-access-token-renewal:
+    cmd.run:
+        - name: >-
+            /usr/local/bin/vault token renew $TOKENID
+        - env:
+            - VAULT_ADDR: "https://vault.service.consul:8200/"
+            - TOKENID: "{{pillar['dynamicsecrets']['gpg-auth-token']}}"
+        - onlyif: >-
+            test "$(/usr/local/bin/vault token lookup -format=json {{pillar['dynamicsecrets']['gpg-auth-token']}} | jq -r .renewable)" == "true"
+        - require:
+            - cmd: vault-init
             - cmd: vault-gpg-access-token-policy
         - require_in:
             - cmd: vault-sync
