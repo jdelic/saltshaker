@@ -352,7 +352,7 @@ vault-init-gpg-plugin:
 
 
 # create a token that can request GPG keys from Vault
-vault-gpg-access-token-policy:
+vault-gpg-full-access-token-policy:
     cmd.run:
         - name: >-
             echo 'path "gpg/keys/*" {
@@ -361,10 +361,27 @@ vault-gpg-access-token-policy:
 
             path "gpg/export/*" {
                 capabilities = ["read", "list"]
-            }' | /usr/local/bin/vault policy write gpg_access -
+            }' | /usr/local/bin/vault policy write gpg_full_access -
         - env:
             - VAULT_ADDR: "https://vault.service.consul:8200/"
-        - unless: /usr/local/bin/vault policy list | grep gpg_access >/dev/null
+        - unless: /usr/local/bin/vault policy list | grep gpg_full_access >/dev/null
+        - onlyif: /usr/local/bin/vault operator init -status >/dev/null
+        - require:
+            - cmd: vault-init-gpg-plugin
+        - require_in:
+            - cmd: vault-sync
+
+
+# create a token that can request GPG keys from Vault
+vault-gpg-read-access-token-policy:
+    cmd.run:
+        - name: >-
+            echo 'path "gpg/keys/*" {
+                capabilities = ["read", "list"]
+            }' | /usr/local/bin/vault policy write gpg_read_access -
+        - env:
+            - VAULT_ADDR: "https://vault.service.consul:8200/"
+        - unless: /usr/local/bin/vault policy list | grep gpg_read_access >/dev/null
         - onlyif: /usr/local/bin/vault operator init -status >/dev/null
         - require:
             - cmd: vault-init-gpg-plugin
@@ -377,14 +394,14 @@ vault-gpg-access-token-policy:
 # This allows minions to create GPG keys for themselves but not create new
 # GPG keys after one hour. This is a compromise between automatic initialization and
 # security.
-vault-gpg-access-token:
+vault-gpg-full-access-token:
     cmd.run:
         - name: >-
             /usr/local/bin/vault token revoke $TOKENID;
             /usr/local/bin/vault token create \
                 -id=$TOKENID \
-                -display-name="gpg-auth" \
-                -policy=default -policy=gpg_access \
+                -display-name="gpg-full" \
+                -policy=default -policy=gpg_full_access \
                 -renewable=true \
                 -period=1h \
                 -explicit-max-ttl=0
@@ -395,12 +412,12 @@ vault-gpg-access-token:
             test "$(/usr/local/bin/vault token lookup -format=json {{pillar['dynamicsecrets']['gpg-auth-token']}} | jq -r .renewable)" == "true" ||
             test "$(/usr/local/bin/vault token lookup -format=json {{pillar['dynamicsecrets']['gpg-auth-token']}} | jq -r .data.ttl)" -gt 100
         - require:
-            - cmd: vault-gpg-access-token-policy
+            - cmd: vault-gpg-full-access-token-policy
         - require_in:
             - cmd: vault-sync
 
 
-vault-gpg-access-token-renewal:
+vault-gpg-full-access-token-renewal:
     cmd.run:
         - name: >-
             /usr/local/bin/vault token renew $TOKENID
@@ -411,7 +428,27 @@ vault-gpg-access-token-renewal:
             test "$(/usr/local/bin/vault token lookup -format=json {{pillar['dynamicsecrets']['gpg-auth-token']}} | jq -r .renewable)" == "true"
         - require:
             - cmd: vault-init
-            - cmd: vault-gpg-access-token-policy
+            - cmd: vault-gpg-full-access-token-policy
+        - require_in:
+            - cmd: vault-sync
+
+
+vault-gpg-read-access-token:
+    cmd.run:
+        - name: >-
+            /usr/local/bin/vault token revoke $TOKENID;
+            /usr/local/bin/vault token create \
+                -id=$TOKENID \
+                -display-name="gpg-read" \
+                -policy=default -policy=gpg_read_access \
+                -explicit-max-ttl=0
+        - env:
+            - VAULT_ADDR: "https://vault.service.consul:8200/"
+            - TOKENID: "{{pillar['dynamicsecrets']['gpg-read-token']}}"
+        - unless: >-
+            /usr/local/bin/vault token lookup -format=json {{pillar['dynamicsecrets']['gpg-read-token']}}
+        - require:
+            - cmd: vault-gpg-read-access-token-policy
         - require_in:
             - cmd: vault-sync
 {% endif %}
