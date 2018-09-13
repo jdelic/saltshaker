@@ -98,12 +98,15 @@ concourse-server-envvars{% if pillar['ci']['use-vault'] %}-template{% endif %}:
         - contents: |
             CONCOURSE_MAIN_TEAM_LOCAL_USER="sysop"
             CONCOURSE_ADD_LOCAL_USER="sysop:{{pillar['dynamicsecrets']['concourse-sysop']}}"
-            CONCOURSE_POSTGRES_DATA_SOURCE="postgres://concourse:{{
-                pillar['dynamicsecrets']['concourse-db']}}@{{
-                pillar['postgresql']['smartstack-hostname']}}:5432/concourse?sslmode={{
-                    pillar['ci']['verify-database-ssl']}}&sslrootcert={{pillar['ssl']['service-rootca-cert'] if
-                        pillar['postgresql'].get('pinned-ca-cert', 'default') == 'default'
-                        else pillar['postgresql']['pinned-ca-cert']}}"
+            CONCOURSE_POSTGRES_HOST="{{pillar['postgresql']['smartstack-hostname']}}"
+            CONCOURSE_POSTGRES_PORT="5432"
+            CONCOURSE_POSTGRES_USER="concourse"
+            CONCOURSE_POSTGRES_PASSWORD="{{pillar['dynamicsecrets']['concourse-db']}}"
+            CONCOURSE_POSTGRES_SSLMODE="{{pillar['ci']['verify-database-ssl']}}"
+            CONCOURSE_POSTGRES_CA_CERT="{{pillar['ssl']['service-rootca-cert'] if
+                                          pillar['postgresql'].get('pinned-ca-cert', 'default') == 'default'
+                                          else pillar['postgresql']['pinned-ca-cert']}}"
+            CONCOURSE_POSTGRES_DATABASE="concourse"
             CONCOURSE_ENCRYPTION_KEY="{{pillar['dynamicsecrets']['concourse-encryption']}}"
             CONCOURSE_COOKIE_SECURE=true
 
