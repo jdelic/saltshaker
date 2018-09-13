@@ -68,7 +68,7 @@ consul-agent-service:
         - name: >
             until
                 test $(curl -s -H 'X-Consul-Token: anonymous' http://169.254.1.1:8500/v1/agent/members \
-                        | jq 'length') -gt 0 || test ${count} -gt 10; do sleep 1 count=$((count+1)); done &&
+                        | jq 'length') -gt 0 || test ${count} -gt 10; do sleep 1; count=$((count+1)); done &&
                 test ${count} -lt 10
         - env:
             count: 0
