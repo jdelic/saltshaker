@@ -12,6 +12,8 @@ concourse-keys-session_signing_key:
         - group: concourse
         - mode: '0640'
         - replace: False
+        - require_in:
+            - cmd: require-concourse-keys
 
 
 concourse-keys-host_key-public-copy:
@@ -24,6 +26,8 @@ concourse-keys-host_key-public-copy:
         - replace: True
         - require:
             - user: concourse-user
+        - require_in:
+            - cmd: require-concourse-keys
 
 
 concourse-keys-host_key:
@@ -38,14 +42,13 @@ concourse-keys-host_key:
             - file: concourse-keys-host_key-public-copy
             - file: concourse-keys-host_key-public
             - user: concourse-user
+        - require_in:
+            - cmd: require-concourse-keys
 
 
 require-concourse-keys:
-    test.nop:
-        - require:
-{% for key in ["host_key", "worker_key", "session_signing_key"] %}
-            - file: concourse-keys-{{key}}
-{% endfor %}
+    cmd.run:
+        - name: /bin/true
 
 
 authorized_worker_keys-must-exist:
@@ -168,9 +171,8 @@ concourse-server:
                 --peer-url http://{{pillar.get('concourse-server', {}).get('atc-ip',
                     grains['ip_interfaces'][pillar['ifassign']['internal']][pillar['ifassign'].get(
                         'internal-ip-index', 0)|int()])}}:{{pillar.get('concourse-server', {}).get('atc-port', 8080)}}
-        - use:
-            - require-concourse-keys
         - require:
+            - file: require-concourse-keys
             - file: concourse-install
             - file: authorized_worker_keys-must-exist
             - concourse-server-envvars

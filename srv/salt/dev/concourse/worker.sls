@@ -65,6 +65,7 @@ concourse-worker:
         - require:
             - file: concourse-install
             - file: concourse-worker-dir
+            - file: concourse-keys-worker_key
     service.running:
         - name: concourse-worker
         - sig: /usr/local/bin/concourse worker
