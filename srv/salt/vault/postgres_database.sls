@@ -76,4 +76,5 @@ vault-postgres-ready:
             - cmd: vault-sync-database
         - require:
             - cmd: vault-postgres
+            - cmd: consul-sync
 {% endif %}
