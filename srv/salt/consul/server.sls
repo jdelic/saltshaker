@@ -60,6 +60,8 @@ consul-execute-policy-{{loop.index}}:
         - status: 200
         - header_dict:
             X-Consul-Token: {{pillar['dynamicsecrets']['consul-acl-master-token']}}
+        - require:
+            - service: consul-server-service
     cmd.run:
         - name: >
             curl -i -s -X PUT -H "X-Consul-Token: $CONSUL_ACL_MASTER_TOKEN" \
