@@ -2,3 +2,8 @@
 consul-sync:
     cmd.run:
         - name: /bin/true
+
+
+consul-sync-network:
+    cmd.run:
+        - name: /bin/true

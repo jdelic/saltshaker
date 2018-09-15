@@ -48,7 +48,7 @@ hashes:
     pyrun35: sha256=8bf8b374f582bb53600dd846a0cdb38e18586bbda06261321d48df69ddbf730e
     terraform: sha256=84ccfb8e13b5fce63051294f787885b76a1fedef6bdbecf51c5e586c9e20c9b7
     vault: sha256=1681579a5a158a76e37de2854307d649b75ceddd663e71580df25baae036c267
-    vault-gpg-plugin: sha256=d10ac994faa0406e41dbdf7e8b93ae4bdc5f83ce71df83ef300ade4643ae5a21
-    vault-gpg-plugin-binary: sha256=141d99fd2c6358e9d3bb5ba8dd488cd70dd72ba9ef00128bf089a325aac43535
+    vault-gpg-plugin: sha256=5de768840cc4c6d1b13128a707f85bec2f2af802e583a4c519cc3f7886fd76e6
+    vault-gpg-plugin-binary: sha256=1a3cb5ef949ccea223df019b7dd7dd1de2af4ea4e2b14364790e90f6386e4911
     vault-ssh-helper: sha256=156ce8250725e64a3e4dc51018a18813dd44d1f2a6c853976bc20e1625d631a1
     fpmdeps: sha256=acddcc12840c6684631d30b32c314a8f73d9319f69c26411ad90a7aa70b0a1df

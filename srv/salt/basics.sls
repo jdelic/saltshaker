@@ -149,6 +149,14 @@ timezone-utc:
             - service: dbus
 
 
+# Provide the salt-master with an event so it knows that the highstate is done.
+# We use this, for example, to sync saltmine data.
+trigger-minion-sync:
+    event.wait:
+        - name: maurusnet/highstate/complete
+        - order: last
+
+
 #openssl:
 #    # this will upgrade the installed version from the basebox
 #    pkg.latest:
@@ -244,6 +252,7 @@ basics-internal-network-tcp:
         - connstate: NEW
         - proto: tcp
         - save: True
+        - order: 4
         - require:
             - sls: iptables
 
@@ -256,6 +265,7 @@ basics-internal-network-udp:
         - out-interface: {{pillar['ifassign']['internal']}}
         - proto: udp
         - save: True
+        - order: 4
         - require:
             - sls: iptables
 
