@@ -204,6 +204,19 @@ consul-server-service-reload:
             - file: consul-acl-config
         - require_in:  # ensure that all service registrations happen
             - cmd: consul-sync
+    http.wait_for_successful_query:
+        - name: http://169.254.1.1:8500/v1/agent/members
+        - wait_for: 10
+        - request_interval: 1
+        - raise_error: False  # only exists in 'tornado' backend
+        - backend: tornado
+        - status: 200
+        - header_dict:
+            X-Consul-Token: anonymous
+        - watch:
+            - service: consul-server-service-reload
+        - require_in:
+            - cmd: consul-sync
 
 
 consul-agent-absent:
