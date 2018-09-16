@@ -12,7 +12,7 @@ authserver-vault-approle:
         - name: >-
             /usr/local/bin/vault write auth/approle/role/authserver \
                 role_name=authserver \
-                policies=postgresql_authserver_fullaccess \
+                policies=postgresql_authserver_fullaccess,authserver_oauth2_write \
                 secret_id_num_uses=0 \
                 secret_id_ttl=0 \
                 period=24h \
@@ -58,7 +58,7 @@ authserver-vault-ssl-cert:
         - name: >-
             /usr/local/bin/vault write auth/cert/certs/authserver_database \
                 display_name="authserver" \
-                policies=postgresql_authserver_fullaccess \
+                policies=postgresql_authserver_fullaccess,authserver_oauth2_write \
                 certificate=@{{pillar['authserver']['vault-application-ca']}} \
                 allowed_names="authserver" \
                 ttl=3600
@@ -238,6 +238,20 @@ authserver-vault-postgresql-policy:
         - env:
             - VAULT_ADDR: "https://vault.service.consul:8200/"
         - unless: /usr/local/bin/vault policies | grep postgresql_authserver_fullaccess >/dev/null
+        - onlyif: /usr/local/bin/vault operator init -status >/dev/null
+        - require:
+            - cmd: vault-sync
+
+
+authserver-vault-oauth2-write-policy:
+    cmd.run:
+        - name: >-
+            echo 'path "secret/oauth2/*" {
+                capabilities = ["create", "read", "list", "delete", "update"]
+            }' | /usr/local/bin/vault policy write authserver_oauth2_write -
+        - env:
+            - VAULT_ADDR: "https://vault.service.consul:8200/"
+        - unless: /usr/local/bin/vault policies | grep authserver_oauth2_write >/dev/null
         - onlyif: /usr/local/bin/vault operator init -status >/dev/null
         - require:
             - cmd: vault-sync
