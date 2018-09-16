@@ -111,12 +111,12 @@ concourse-server-envvars{% if pillar['ci']['use-vault'] %}-template{% endif %}:
             CONCOURSE_POSTGRES_DATABASE="concourse"
             CONCOURSE_ENCRYPTION_KEY="{{pillar['dynamicsecrets']['concourse-encryption']}}"
             CONCOURSE_COOKIE_SECURE=true
-            CONCOURSE_OAUTH_DISPLAY_NAME=
-            CONCOURSE_OAUTH_CLIENT_ID=
-            CONCOURSE_OAUTH_CLIENT_SECRET=
-            CONCOURSE_OAUTH_AUTH_URL=
-            CONCOURSE_OAUTH_TOKEN_URL=
-            CONCOURSE_OAUTH_SCOPE=
+            CONCOURSE_OAUTH_DISPLAY_NAME="SSO Account"
+            CONCOURSE_OAUTH_CLIENT_ID="((oauth2_client_id))"
+            CONCOURSE_OAUTH_CLIENT_SECRET="((oauth2_client_secret))"
+            CONCOURSE_OAUTH_AUTH_URL="https://{{pillar['authserver']['hostname']}}/o2/authorize/"
+            CONCOURSE_OAUTH_TOKEN_URL="https://{{pillar['authserver']['hostname']}}/o2/token/"
+            CONCOURSE_OAUTH_SCOPE=ci_access
 
             {%- if pillar['ci'].get('use-vault', True) %}
             CONCOURSE_VAULT_URL="https://{{pillar['vault']['smartstack-hostname']}}:8200/"
@@ -129,7 +129,11 @@ concourse-server-envvars:
     cmd.run:
         - name: >-
             sed "s#((secret_id))#$(/usr/local/bin/vault write -f -format=json auth/approle/role/concourse/secret-id | \
-                jq -r .data.secret_id)#"  /etc/concourse/envvars.tpl > /etc/concourse/envvars
+                jq -r .data.secret_id)#"  /etc/concourse/envvars.tpl | \
+            sed "s#((oauth2_client_id))#$(/usr/local/bin/vault read -format=json secret/oauth2/concourse | \
+                jq -r .data.client_id)#" | \
+            sed "s#((oauth2_client_secret))#$(/usr/local/bin/vault read -format=json secret/oauth2/concourse | \
+                jq -r .data.client_secret#" > /etc/concourse/envvars
         - env:
             - VAULT_ADDR: "https://vault.service.consul:8200/"
             - VAULT_TOKEN: {{pillar['dynamicsecrets']['approle-auth-token']}}
