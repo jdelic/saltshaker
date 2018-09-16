@@ -1,7 +1,9 @@
 
 include:
     - dev.concourse.install
+    - dev.concourse.sync
     - vault.sync
+
 
 
 concourse-keys-session_signing_key:
@@ -179,6 +181,11 @@ concourse-server:
             - file: concourse-server
             - file: concourse-install  # restart on a change of the binary
             - concourse-server-envvars  # can be cmd or file
+            - file: concourse-servicedef-tsa
+            - file: concourse-servicedef-atc-internal
+            - file: concourse-servicedef-atc
+        - require_in:
+            - cmd: concourse-sync
 
 
 concourse-servicedef-tsa:
