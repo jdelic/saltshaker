@@ -5,6 +5,7 @@ include:
     - mn.cas.sync
     - vault.sync
 
+
 {% if pillar.get('authserver', {}).get('use-vault', False) %}
     {% if pillar.get('authserver', {}).get('vault-authtype', 'approle') == 'approle' %}
 authserver-vault-approle:
@@ -12,7 +13,7 @@ authserver-vault-approle:
         - name: >-
             /usr/local/bin/vault write auth/approle/role/authserver \
                 role_name=authserver \
-                policies=postgresql_authserver_fullaccess,authserver_secrets \
+                policies=postgresql_authserver_fullaccess,authserver_oauth2_write \
                 secret_id_num_uses=0 \
                 secret_id_ttl=0 \
                 period=24h \
@@ -22,7 +23,7 @@ authserver-vault-approle:
             - VAULT_ADDR: "https://vault.service.consul:8200/"
         - unless: /usr/local/bin/vault list auth/approle/role | grep authserver >/dev/null
         - require_in:
-            - cmd: authserver-config-secretid-sync
+            - cmd: authserver-sync-config-secretid
         - require:
             - cmd: vault-sync
 
@@ -37,7 +38,7 @@ authserver-vault-approle-roleid:
         - onchanges:
             - cmd: authserver-vault-approle
         - require_in:
-            - cmd: authserver-config-secretid-sync
+            - cmd: authserver-sync-config-secretid
         - require:
             - cmd: vault-sync
 
@@ -58,7 +59,7 @@ authserver-vault-ssl-cert:
         - name: >-
             /usr/local/bin/vault write auth/cert/certs/authserver_database \
                 display_name="authserver" \
-                policies=postgresql_authserver_fullaccess \
+                policies=postgresql_authserver_fullaccess,authserver_oauth2_write \
                 certificate=@{{pillar['authserver']['vault-application-ca']}} \
                 allowed_names="authserver" \
                 ttl=3600
@@ -80,6 +81,7 @@ authserver-vault-no-approle:
             - cmd: vault-sync
     {% endif %}
 
+
     {% if pillar.get('mailforwarder', {}).get('vault-authtype', 'approle') == 'approle' %}
 mailforwarder-vault-approle:
     cmd.run:
@@ -96,7 +98,7 @@ mailforwarder-vault-approle:
             - VAULT_ADDR: "https://vault.service.consul:8200/"
         - unless: /usr/local/bin/vault list auth/approle/role | grep mailforwarder >/dev/null
         - require_in:
-            - cmd: authserver-config-secretid-sync
+            - cmd: authserver-sync-config-secretid
         - require:
             - cmd: vault-sync
 
@@ -111,7 +113,7 @@ mailforwarder-vault-approle-roleid:
         - onchanges:
             - cmd: mailforwarder-vault-approle
         - require_in:
-            - cmd: authserver-config-secretid-sync
+            - cmd: authserver-sync-config-secretid
         - require:
             - cmd: vault-sync
 
@@ -171,7 +173,7 @@ dkimsigner-vault-approle:
             - VAULT_ADDR: "https://vault.service.consul:8200/"
         - unless: /usr/local/bin/vault list auth/approle/role | grep dkimsigner >/dev/null
         - require_in:
-            - cmd: authserver-config-secretid-sync
+            - cmd: authserver-sync-config-secretid
         - require:
             - cmd: vault-sync
 
@@ -186,7 +188,7 @@ dkimsigner-vault-approle-roleid:
         - onchanges:
             - cmd: dkimsigner-vault-approle
         - require_in:
-            - cmd: authserver-config-secretid-sync
+            - cmd: authserver-sync-config-secretid
         - require:
             - cmd: vault-sync
 
@@ -229,18 +231,6 @@ dkimsigner-vault-no-approle:
     {% endif %}
 
 
-authserver-vault-secrets-policy:
-    cmd.run:
-        - name: >-
-            echo 'path "secret/authserver/*" {
-                capabilities = ["create", "read", "update", "delete", "list"]
-            }' | /usr/local/bin/vault policy write authserver_secrets -
-        - env:
-            - VAULT_ADDR: "https://vault.service.consul:8200/"
-        - unless: /usr/local/bin/vault policies | grep authserver_secrets >/dev/null
-        - onlyif: /usr/local/bin/vault operator init -status >/dev/null
-
-
 authserver-vault-postgresql-policy:
     cmd.run:
         - name: >-
@@ -250,6 +240,20 @@ authserver-vault-postgresql-policy:
         - env:
             - VAULT_ADDR: "https://vault.service.consul:8200/"
         - unless: /usr/local/bin/vault policies | grep postgresql_authserver_fullaccess >/dev/null
+        - onlyif: /usr/local/bin/vault operator init -status >/dev/null
+        - require:
+            - cmd: vault-sync
+
+
+authserver-vault-oauth2-write-policy:
+    cmd.run:
+        - name: >-
+            echo 'path "secret/oauth2/*" {
+                capabilities = ["create", "read", "list", "delete", "update"]
+            }' | /usr/local/bin/vault policy write authserver_oauth2_write -
+        - env:
+            - VAULT_ADDR: "https://vault.service.consul:8200/"
+        - unless: /usr/local/bin/vault policies | grep authserver_oauth2_write >/dev/null
         - onlyif: /usr/local/bin/vault operator init -status >/dev/null
         - require:
             - cmd: vault-sync

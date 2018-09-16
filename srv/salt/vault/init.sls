@@ -451,6 +451,42 @@ vault-gpg-read-access-token:
             - cmd: vault-gpg-read-access-token-policy
         - require_in:
             - cmd: vault-sync
+
+
+vault-concourse-oauth2-read-policy:
+    cmd.run:
+        - name: >-
+            echo 'path "secret/oauth2/concourse/*" {
+                capabilities = ["read", "list"]
+            }' | /usr/local/bin/vault policy write oauth2_concourse_read_access -
+        - env:
+            - VAULT_ADDR: "https://vault.service.consul:8200/"
+        - unless: /usr/local/bin/vault policy list | grep oauth2_concourse_read_access >/dev/null
+        - onlyif: /usr/local/bin/vault operator init -status >/dev/null
+        - require:
+            - cmd: vault-init
+        - require_in:
+            - cmd: vault-sync
+
+
+vault-concourse-oauth2-read-token:
+    cmd.run:
+        - name: >-
+            /usr/local/bin/vault token revoke $TOKENID;
+            /usr/local/bin/vault token create \
+                -id=$TOKENID \
+                -display-name="oauth2-read" \
+                -policy=default -policy=oauth2_concourse_read_access \
+                -explicit-max-ttl=0
+        - env:
+            - VAULT_ADDR: "https://vault.service.consul:8200/"
+            - TOKENID: "{{pillar['dynamicsecrets']['concourse-oauth2-read']}}"
+        - unless: >-
+            /usr/local/bin/vault token lookup -format=json {{pillar['dynamicsecrets']['concourse-oauth2-read']}}
+        - require:
+            - cmd: vault-concourse-oauth2-read-policy
+        - require_in:
+            - cmd: vault-sync
 {% endif %}
 
 
