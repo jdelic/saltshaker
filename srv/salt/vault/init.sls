@@ -519,7 +519,7 @@ vault-concourse-oauth2-read-token:
         - unless: >-
             /usr/local/bin/vault token lookup -format=json {{pillar['dynamicsecrets']['concourse-oauth2-read']}}
         - require:
-            - cmd: vault-authserver-oauth2-read-policy
+            - cmd: vault-concourse-oauth2-read-policy
         - require_in:
             - cmd: vault-sync
 {% endif %}
