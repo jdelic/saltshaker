@@ -88,7 +88,7 @@ authserver-config-secretid:
         - watch_in:
             - service: authserver
         - require:
-            - cmd: authserver-config-secretid-sync
+            - cmd: authserver-sync-config-secretid
     {% endif %}
 {% else %}
     {% set x = config.__setitem__("DATABASE_URL", 'postgresql://%s:@postgresql.local:5432/%s'|format(pillar['authserver']['dbuser'],

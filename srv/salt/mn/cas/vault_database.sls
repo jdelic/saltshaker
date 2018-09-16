@@ -22,7 +22,7 @@ authserver-vault-approle:
             - VAULT_ADDR: "https://vault.service.consul:8200/"
         - unless: /usr/local/bin/vault list auth/approle/role | grep authserver >/dev/null
         - require_in:
-            - cmd: authserver-config-secretid-sync
+            - cmd: authserver-sync-config-secretid
         - require:
             - cmd: vault-sync
 
@@ -37,7 +37,7 @@ authserver-vault-approle-roleid:
         - onchanges:
             - cmd: authserver-vault-approle
         - require_in:
-            - cmd: authserver-config-secretid-sync
+            - cmd: authserver-sync-config-secretid
         - require:
             - cmd: vault-sync
 
@@ -96,7 +96,7 @@ mailforwarder-vault-approle:
             - VAULT_ADDR: "https://vault.service.consul:8200/"
         - unless: /usr/local/bin/vault list auth/approle/role | grep mailforwarder >/dev/null
         - require_in:
-            - cmd: authserver-config-secretid-sync
+            - cmd: authserver-sync-config-secretid
         - require:
             - cmd: vault-sync
 
@@ -111,7 +111,7 @@ mailforwarder-vault-approle-roleid:
         - onchanges:
             - cmd: mailforwarder-vault-approle
         - require_in:
-            - cmd: authserver-config-secretid-sync
+            - cmd: authserver-sync-config-secretid
         - require:
             - cmd: vault-sync
 
@@ -171,7 +171,7 @@ dkimsigner-vault-approle:
             - VAULT_ADDR: "https://vault.service.consul:8200/"
         - unless: /usr/local/bin/vault list auth/approle/role | grep dkimsigner >/dev/null
         - require_in:
-            - cmd: authserver-config-secretid-sync
+            - cmd: authserver-sync-config-secretid
         - require:
             - cmd: vault-sync
 
@@ -186,7 +186,7 @@ dkimsigner-vault-approle-roleid:
         - onchanges:
             - cmd: dkimsigner-vault-approle
         - require_in:
-            - cmd: authserver-config-secretid-sync
+            - cmd: authserver-sync-config-secretid
         - require:
             - cmd: vault-sync
 
