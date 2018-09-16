@@ -111,6 +111,12 @@ concourse-server-envvars{% if pillar['ci']['use-vault'] %}-template{% endif %}:
             CONCOURSE_POSTGRES_DATABASE="concourse"
             CONCOURSE_ENCRYPTION_KEY="{{pillar['dynamicsecrets']['concourse-encryption']}}"
             CONCOURSE_COOKIE_SECURE=true
+            CONCOURSE_OAUTH_DISPLAY_NAME=
+            CONCOURSE_OAUTH_CLIENT_ID=
+            CONCOURSE_OAUTH_CLIENT_SECRET=
+            CONCOURSE_OAUTH_AUTH_URL=
+            CONCOURSE_OAUTH_TOKEN_URL=
+            CONCOURSE_OAUTH_SCOPE=
 
             {%- if pillar['ci'].get('use-vault', True) %}
             CONCOURSE_VAULT_URL="https://{{pillar['vault']['smartstack-hostname']}}:8200/"
