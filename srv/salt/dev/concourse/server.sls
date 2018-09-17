@@ -177,7 +177,6 @@ concourse-server-envvars-oauth2:
             test "$CONCOURSE_OAUTH_CLIENT_SECRET" == "$(vault read -format=json secret/oauth2/concourse | \
                 jq -r .data.client_secret)"
         - require:
-            - file: concourse-server-envvars-approle
             - file: vault
             - cmd: concourse-sync-vault
             - cmd: concourse-server-envvars-approle
