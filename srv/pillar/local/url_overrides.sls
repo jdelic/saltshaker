@@ -23,7 +23,7 @@ repos:
 
 urls:
     concourse: http://fileserver.maurusnet.test/downloads/concourse/concourse_linux_amd64
-    consul: http://fileserver.maurusnet.test/downloads/consul/consul_1.2.2_linux_amd64.zip
+    consul: http://fileserver.maurusnet.test/downloads/consul/consul_1.2.3_linux_amd64.zip
     consul-esm: http://fileserver.maurusnet.test/downloads/consul-esm/consul-esm_0.2.0_linux_amd64.zip
     consul-replicate: http://fileserver.maurusnet.test/downloads/consul-replicate/consul-replicate_0.4.0_linux_amd64.zip
     consul-template: http://fileserver.maurusnet.test/downloads/consul-template/consul-template_0.19.5_linux_amd64.zip
@@ -39,7 +39,7 @@ urls:
 
 hashes:
     concourse: sha256=46ae0b791811a6b3f95d61745eec4360fd9e1e11d7ca20609bda9a71f4062676
-    consul: sha256=7fa3b287b22b58283b8bd5479291161af2badbc945709eb5412840d91b912060
+    consul: sha256=f97996296ef3905c38c504b35035fb731d3cfd9cad129c9523402a4229c709c5
     consul-esm: sha256=9a49a3c3d1b890ae738c73764354e36e4b13e90677b552f140f1033c1ae2a464
     consul-replicate: sha256=96c6651291c2f8e75d98d04b9b4653d8a02324edaa25783744d9ea1d8d411c61
     consul-template: sha256=e6b376701708b901b0548490e296739aedd1c19423c386eb0b01cfad152162af
