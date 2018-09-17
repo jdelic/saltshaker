@@ -164,7 +164,6 @@ concourse-server-envvars-oauth2:
             sed "s#((oauth2_client_secret))#$(/usr/local/bin/vault read -format=json secret/oauth2/concourse | \
                 jq -r .data.client_secret)#" > /etc/concourse/envvars;
             rm /etc/concourse/envtmp
-        - creates: /etc/concourse/envvars
         - env:
             - VAULT_ADDR: "https://vault.service.consul:8200/"
             - VAULT_TOKEN: {{pillar['dynamicsecrets']['concourse-oauth2-read']}}
