@@ -34,7 +34,7 @@ authserver-concourse-create-client:
                 --publish-to-vault secret/oauth2/concourse \
                 concourse-ci
         - unless: >
-            /usr/local/authserver/bin/envdir /etc/appconfig/authserver/env/ \
+            /usr/local/authserver/bin/envdir /etc/appconfig/authserver/env/
             /usr/local/authserver/bin/django-admin.py oauth2 list |
                 grep "concourse-ci" >/dev/null 2>/dev/null
         - require:
