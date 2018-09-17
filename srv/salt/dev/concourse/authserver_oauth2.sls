@@ -11,10 +11,10 @@ authserver-concourse-create-permissions:
             /usr/local/authserver/bin/envdir /etc/appconfig/authserver/env/
             /usr/local/authserver/bin/django-admin.py permissions create \
                 --name "CI access" ci_access
-        - unless:
+        - unless: >
             /usr/local/authserver/bin/envdir /etc/appconfig/authserver/env/
             /usr/local/authserver/bin/django-admin.py permissions list |
-                grep "ci_access" >dev/null 2>/dev/null
+                grep "ci_access" >/dev/null 2>/dev/null
         - require:
             - cmd: authserver-sync
             - cmd: vault-sync
@@ -41,5 +41,3 @@ authserver-concourse-create-client:
             - cmd: authserver-sync
         - require_in:
             - cmd: concourse-sync-oauth2
-
-
