@@ -9,3 +9,9 @@ concourse-sync:
 concourse-sync-oauth2:
     cmd.run:
         - name: /bin/true
+
+
+# Ensure that all Vault policies and tokens have been set up
+concourse-sync-vault:
+    cmd.run:
+        - name: /bin/true

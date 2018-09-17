@@ -19,7 +19,7 @@ authserver-concourse-create-permissions:
             - cmd: authserver-sync
             - cmd: vault-sync
         - require_in:
-            - concourse-sync-oauth2
+            - cmd: concourse-sync-oauth2
 
 
 authserver-concourse-create-client:
@@ -40,6 +40,6 @@ authserver-concourse-create-client:
         - require:
             - cmd: authserver-sync
         - require_in:
-            - concourse-sync-oauth2
+            - cmd: concourse-sync-oauth2
 
 
