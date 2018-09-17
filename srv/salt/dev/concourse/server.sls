@@ -149,6 +149,7 @@ concourse-server-envvars-approle:
         - require:
             - file: concourse-server-envvars-template
             - file: vault
+            - cmd: vault-sync
             - cmd: concourse-sync-vault
         - require_in:
             - cmd: concourse-server-envvars
