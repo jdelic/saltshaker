@@ -26,7 +26,7 @@ concourse-vault-approle:
         - require:
             - cmd: vault-sync
         - require_in:
-            - cmd: concouse-sync-vault
+            - cmd: concourse-sync-vault
 
 
 concourse-vault-approle-role-id:
@@ -39,7 +39,7 @@ concourse-vault-approle-role-id:
         - onchanges:
             - cmd: concourse-vault-approle
         - require_in:
-            - cmd: concouse-sync-vault
+            - cmd: concourse-sync-vault
 
 
 concourse-vault-secrets-policy:
@@ -55,7 +55,7 @@ concourse-vault-secrets-policy:
         - require:
             - cmd: vault-sync
         - require_in:
-            - cmd: concouse-sync-vault
+            - cmd: concourse-sync-vault
 
 
 vault-concourse-oauth2-read-policy:
@@ -71,7 +71,7 @@ vault-concourse-oauth2-read-policy:
         - require:
             - cmd: vault-sync
         - require_in:
-            - cmd: concouse-sync-vault
+            - cmd: concourse-sync-vault
 
 
 vault-concourse-oauth2-read-token:
@@ -91,5 +91,5 @@ vault-concourse-oauth2-read-token:
         - require:
             - cmd: vault-concourse-oauth2-read-policy
         - require_in:
-            - cmd: concouse-sync-vault
+            - cmd: concourse-sync-vault
 {% endif %}
