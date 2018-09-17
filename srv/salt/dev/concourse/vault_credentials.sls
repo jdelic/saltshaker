@@ -61,7 +61,7 @@ concourse-vault-secrets-policy:
 vault-concourse-oauth2-read-policy:
     cmd.run:
         - name: >-
-            echo 'path "secret/oauth2/concourse/*" {
+            echo 'path "secret/oauth2/concourse" {
                 capabilities = ["read", "list"]
             }' | /usr/local/bin/vault policy write oauth2_concourse_read_access -
         - env:
