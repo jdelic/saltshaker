@@ -117,17 +117,29 @@ concourse-server-envvars{% if pillar['ci']['use-vault'] %}-template{% endif %}:
             CONCOURSE_VAULT_CA_CERT="{{pillar['ssl']['service-rootca-cert']}}"
             CONCOURSE_VAULT_AUTH_BACKEND="approle"
             CONCOURSE_VAULT_AUTH_PARAM="role_id={{pillar['dynamicsecrets']['concourse-role-id']}},secret_id=((secret_id))"
+            CONCOURSE_OAUTH_DISPLAY_NAME="SSO Account"
+            CONCOURSE_OAUTH_CLIENT_ID="((oauth2_client_id))"
+            CONCOURSE_OAUTH_CLIENT_SECRET="((oauth2_client_secret))"
+            CONCOURSE_OAUTH_AUTH_URL="https://{{pillar['authserver']['hostname']}}/o2/authorize/"
+            CONCOURSE_OAUTH_TOKEN_URL="https://{{pillar['authserver']['hostname']}}/o2/token/"
+            CONCOURSE_OAUTH_USERINFO_URL="https://{{pillar['authserver']['hostname']}}/o2/fake-userinfo/"
 
 
 concourse-server-envvars:
     cmd.run:
+        - name: /bin/true
+
+
+concourse-server-envvars-approle:
+    cmd.run:
         - name: >-
+            touch /etc/concourse/envtmp;
+            chmod 600 /etc/concourse/envtmp;
             sed "s#((secret_id))#$(/usr/local/bin/vault write -f -format=json auth/approle/role/concourse/secret-id | \
-                jq -r .data.secret_id)#"  /etc/concourse/envvars.tpl > /etc/concourse/envvars
+                jq -r .data.secret_id)#"  /etc/concourse/envvars.tpl >/etc/concourse/envtmp
         - env:
             - VAULT_ADDR: "https://vault.service.consul:8200/"
             - VAULT_TOKEN: {{pillar['dynamicsecrets']['approle-auth-token']}}
-        - creates: /etc/concourse/envvars
         - unless: >-
             test -f /etc/concourse/envvars &&
             source /etc/concourse/envvars &&
@@ -138,6 +150,39 @@ concourse-server-envvars:
             - file: concourse-server-envvars-template
             - file: vault
             - cmd: vault-sync
+            - cmd: concourse-sync-vault
+        - require_in:
+            - cmd: concourse-server-envvars
+
+
+concourse-server-envvars-oauth2:
+    cmd.run:
+        - name: >-
+            touch /etc/concourse/envvars;
+            chmod 700 /etc/concourse/envvars;
+            sed "s#((oauth2_client_id))#$(/usr/local/bin/vault read -format=json secret/oauth2/concourse | \
+                jq -r .data.client_id)#" /etc/concourse/envtmp | \
+            sed "s#((oauth2_client_secret))#$(/usr/local/bin/vault read -format=json secret/oauth2/concourse | \
+                jq -r .data.client_secret)#" > /etc/concourse/envvars;
+            rm /etc/concourse/envtmp
+        - env:
+            - VAULT_ADDR: "https://vault.service.consul:8200/"
+            - VAULT_TOKEN: {{pillar['dynamicsecrets']['concourse-oauth2-read']}}
+        - onlyif: test -f /etc/concourse/envtmp
+        - unless:
+            test -f /etc/concourse/envvars &&
+            source /etc/concourse/envvars &&
+            test "$CONCOURSE_OAUTH_CLIENT_ID" == "$(vault read -format=json secret/oauth2/concourse | \
+                jq -r .data.client_id)" &&
+            test "$CONCOURSE_OAUTH_CLIENT_SECRET" == "$(vault read -format=json secret/oauth2/concourse | \
+                jq -r .data.client_secret)"
+        - require:
+            - file: vault
+            - cmd: concourse-sync-vault
+            - cmd: concourse-server-envvars-approle
+            - cmd: concourse-sync-oauth2
+        - require_in:
+            - cmd: concourse-server-envvars
             {% endif %}
 
 

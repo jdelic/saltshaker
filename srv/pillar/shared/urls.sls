@@ -23,8 +23,8 @@ repos:
 #           state for that!
 
 urls:
-    concourse: https://github.com/concourse/concourse/releases/download/v4.1.0/concourse_linux_amd64
-    consul: https://releases.hashicorp.com/consul/1.2.2/consul_1.2.2_linux_amd64.zip
+    concourse: https://github.com/concourse/concourse/releases/download/v4.2.1/concourse_linux_amd64
+    consul: https://releases.hashicorp.com/consul/1.2.3/consul_1.2.3_linux_amd64.zip
     consul-esm: https://releases.hashicorp.com/consul-esm/0.2.0/consul-esm_0.2.0_linux_amd64.zip
     consul-replicate: https://releases.hashicorp.com/consul-replicate/0.4.0/consul-replicate_0.4.0_linux_amd64.zip
     consul-template: https://releases.hashicorp.com/consul-template/0.19.5/consul-template_0.19.5_linux_amd64.zip
@@ -32,14 +32,14 @@ urls:
     nomad: https://releases.hashicorp.com/nomad/0.8.4/nomad_0.8.4_linux_amd64.zip
     pyrun35: https://downloads.egenix.com/python/egenix-pyrun-2.2.3-py3.5_ucs4-linux-x86_64.tgz
     terraform: https://releases.hashicorp.com/terraform/0.11.8/terraform_0.11.8_linux_amd64.zip
-    vault: https://releases.hashicorp.com/vault/0.11.0/vault_0.11.0_linux_amd64.zip
+    vault: https://releases.hashicorp.com/vault/0.11.1/vault_0.11.1_linux_amd64.zip
     vault-gpg-plugin: https://github.com/LeSuisse/vault-gpg-plugin/releases/download/v0.2.1/linux_amd64.zip
     vault-ssh-helper: https://releases.hashicorp.com/vault-ssh-helper/0.1.4/vault-ssh-helper_0.1.4_linux_amd64.zip
 
 
 hashes:
-    concourse: sha256=46ae0b791811a6b3f95d61745eec4360fd9e1e11d7ca20609bda9a71f4062676
-    consul: sha256=7fa3b287b22b58283b8bd5479291161af2badbc945709eb5412840d91b912060
+    concourse: sha256=e3cada9e536af9596cfb812dc4af37cbc9ff7e4ed6f3d3ee91a6b62a6356d02a
+    consul: sha256=f97996296ef3905c38c504b35035fb731d3cfd9cad129c9523402a4229c709c5
     consul-esm: sha256=9a49a3c3d1b890ae738c73764354e36e4b13e90677b552f140f1033c1ae2a464
     consul-replicate: sha256=96c6651291c2f8e75d98d04b9b4653d8a02324edaa25783744d9ea1d8d411c61
     consul-template: sha256=e6b376701708b901b0548490e296739aedd1c19423c386eb0b01cfad152162af
@@ -47,7 +47,7 @@ hashes:
     nomad: sha256=42fc455d09ea0085cc79d7be4fb2089a9ab7db3cc2e8047e8437855a81b090e9
     pyrun35: sha256=8bf8b374f582bb53600dd846a0cdb38e18586bbda06261321d48df69ddbf730e
     terraform: sha256=84ccfb8e13b5fce63051294f787885b76a1fedef6bdbecf51c5e586c9e20c9b7
-    vault: sha256=1681579a5a158a76e37de2854307d649b75ceddd663e71580df25baae036c267
+    vault: sha256=eb8d2461d0ca249c1f91005f878795998bdeafccfde0b9bae82343541ce65996
     vault-gpg-plugin: sha256=5de768840cc4c6d1b13128a707f85bec2f2af802e583a4c519cc3f7886fd76e6
     vault-gpg-plugin-binary: sha256=1a3cb5ef949ccea223df019b7dd7dd1de2af4ea4e2b14364790e90f6386e4911
     vault-ssh-helper: sha256=156ce8250725e64a3e4dc51018a18813dd44d1f2a6c853976bc20e1625d631a1
