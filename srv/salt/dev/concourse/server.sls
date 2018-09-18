@@ -122,6 +122,7 @@ concourse-server-envvars{% if pillar['ci']['use-vault'] %}-template{% endif %}:
             CONCOURSE_OAUTH_CLIENT_SECRET="((oauth2_client_secret))"
             CONCOURSE_OAUTH_AUTH_URL="https://{{pillar['authserver']['hostname']}}/o2/authorize/"
             CONCOURSE_OAUTH_TOKEN_URL="https://{{pillar['authserver']['hostname']}}/o2/token/"
+            CONCOURSE_OAUTH_USERINFO_URL="https://{{pillar['authserver']['hostname']}}/o2/fake-userinfo/"
 
 
 concourse-server-envvars:
