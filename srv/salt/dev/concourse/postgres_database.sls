@@ -1,6 +1,10 @@
 
 # this state should be run on a server role with postgressql.fast
 
+include:
+    - postgresql.sync
+
+
 concourse-db-role:
     postgres_user.present:
         - name: concourse
@@ -15,7 +19,7 @@ concourse-db-role:
         - replication: False
         - user: postgres
         - require:
-            - data-cluster-service
+            - cmd: postgresql-sync
     file.accumulated:
         - name: postgresql-hba-md5users-accumulator
         - filename: {{pillar['postgresql']['hbafile']}}
@@ -33,4 +37,3 @@ concourse-db:
         - order: 20  # see ORDER.md
         - require:
             - postgres_user: concourse-db-role
-            - data-cluster-service
