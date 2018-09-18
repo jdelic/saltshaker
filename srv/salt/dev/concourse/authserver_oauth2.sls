@@ -41,3 +41,19 @@ authserver-concourse-create-client:
             - cmd: authserver-sync
         - require_in:
             - cmd: concourse-sync-oauth2
+
+
+authserver-concourse-require-permissions:
+    cmd.run:
+        - name: >
+            /usr/local/authserver/bin/envdir /etc/appconfig/authserver/env
+            /usr/local/authserver/bin/django-admin.py permissions require concourse-ci ci_access
+        - unless: >
+            /usr/local/authserver/bin/envdir /etc/appconfig/authserver/env
+            /usr/local/authserver/bin/django-admin.py permissions show application concourse-ci |
+                grep "ci_access" >/dev/null 2>/dev/null
+        - require:
+            - cmd: authserver-concourse-create-client
+            - cmd: authserver-concourse-create-permissions
+        - require_in:
+            - cmd: concourse-sync-oauth2
