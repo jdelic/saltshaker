@@ -2,7 +2,9 @@
 
 duplicity-backup:
     enabled: True
-    gpg-key-id: 7CDC4589
+    encrypt-for-host: True
+    gpg-keys:
+        - 7CDC4589
     additional-options: --full-if-older-than 1M
     # enable-cleanup will run an additional cron job at the first of every month
     # removing backups older than a certain time (unless newer backups depend on them)
