@@ -119,6 +119,7 @@ base:
         - mn.appconfig
         - docker.authserver_dockerregistry  # empty unless a JWT key is configured
         - apache.webdav_permissions_py
+        - dev.concourse.authserver_oauth2
 
     'roles:loadbalancer':
         - match: grain

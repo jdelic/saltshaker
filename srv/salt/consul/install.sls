@@ -12,6 +12,10 @@
 # assign it to a node directly.
 #
 
+include:
+    - consul.sync
+
+
 {% set consul_user = "consul" %}
 {% set consul_group = "consul" %}
 
@@ -176,6 +180,8 @@ consul-all-in-recv:
         - require:
             - sls: iptables
             - cmd: consul-network-interface
+        - require_in:
+            - cmd: consul-sync-network
 
 
 # redirect ports from localhost
@@ -193,6 +199,8 @@ consul-all-localhost8500-dnat:
         - save: True
         - require:
             - sls: iptables
+        - require_in:
+            - cmd: consul-sync-network
 
 
 consul-all-localhost8500-snat:
@@ -208,6 +216,8 @@ consul-all-localhost8500-snat:
         - save: True
         - require:
             - sls: iptables
+        - require_in:
+            - cmd: consul-sync-network
 
 
 consul-all-localhost8600-dnat:
@@ -223,6 +233,8 @@ consul-all-localhost8600-dnat:
         - save: True
         - require:
             - sls: iptables
+        - require_in:
+            - cmd: consul-sync-network
 
 
 consul-all-localhost8600-snat:
@@ -238,7 +250,8 @@ consul-all-localhost8600-snat:
         - save: True
         - require:
             - sls: iptables
-
+        - require_in:
+            - cmd: consul-sync-network
 
 
 # open consul ports TCP
@@ -255,6 +268,8 @@ consul-tcp-in{{port}}-recv:
         - save: True
         - require:
             - sls: iptables
+        - require_in:
+            - cmd: consul-sync-network
 
 
 # allow us to talk to others
@@ -269,6 +284,8 @@ consul-tcp-out{{port}}-send:
         - save: True
         - require:
             - sls: iptables
+        - require_in:
+            - cmd: consul-sync-network
 {% endfor %}
 
 
@@ -285,6 +302,8 @@ consul-udp-in{{port}}-recv:
         - save: True
         - require:
             - sls: iptables
+        - require_in:
+            - cmd: consul-sync-network
 
 
 consul-udp-in{{port}}-send:
@@ -298,6 +317,8 @@ consul-udp-in{{port}}-send:
         - save: True
         - require:
             - sls: iptables
+        - require_in:
+            - cmd: consul-sync-network
 {% endfor %}
 
 

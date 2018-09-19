@@ -132,6 +132,7 @@ gpg-establish-trust-{{k}}:
 
 
 {% if pillar.get('gpg', {}).get('vault-create-perhost-key', False) %}
+# for some reason the key sometimes gets created 1 or 2 seconds in the future, so we sleep 2 as a work-around
 gpg-create-host-key:
     cmd.run:
         - name: >
@@ -141,7 +142,7 @@ gpg-create-host-key:
             generate=true
             real_name="{{grains['id']}}"
             key_bits=2048
-            exportable=true
+            exportable=true; sleep 2
         - unless: >
             /usr/local/bin/vault list gpg/keys | grep "{{grains['id']}}" >/dev/null
         - env:
@@ -154,6 +155,15 @@ gpg-create-host-key:
 
 gpg-import-host-key:
     cmd.run:
+        - unless: >
+            /usr/bin/gpg
+            --homedir {{keyloc}}
+            --no-default-keyring
+            --with-colons
+            --list-keys $(VAULT_TOKEN="{{pillar['dynamicsecrets']['gpg-read-token']}}" \
+                          /usr/local/bin/vault read \
+                              -field=fingerprint \
+                              "gpg/keys/{{grains['id']}}" 2>/dev/null) 2>/dev/null
         - name: >
             /usr/local/bin/vault read
             -field=key
@@ -170,22 +180,19 @@ gpg-import-host-key:
 gpg-establish-host-key-trust:
     cmd.run:
         - unless: >
-            /usr/local/bin/vault read
-            -field=key
-            "gpg/export/{{grains['id']}}" |
             /usr/bin/gpg
             --homedir {{keyloc}}
             --no-default-keyring
             --with-colons
-            --list-keys $(/usr/bin/gpg --no-default-keyring --homedir {{keyloc}} \
-              --import-options import-show --dry-run --with-colons --import |
-            head -1 | cut -d':' -f5 2>/dev/null) 2>/dev/null |
+            --list-keys $(VAULT_TOKEN="{{pillar['dynamicsecrets']['gpg-read-token']}}" \
+                          /usr/local/bin/vault read \
+                              -field=fingerprint \
+                              "gpg/keys/{{grains['id']}}" 2>/dev/null) 2>/dev/null |
             grep "pub:" | cut -d':' -f2 | grep "u" >/dev/null
         - name: >
-            echo "$(/usr/local/bin/vault read -field=key 'gpg/export/{{grains['id']}}' |
-                  /usr/bin/gpg --no-default-keyring --homedir {{keyloc}} \
-                  --import-options import-show --dry-run --with-colons --import |
-                  grep "fpr:" | head -1 | cut -d':' -f10 2>/dev/null):6:" |
+            echo "$(/usr/local/bin/vault read \
+                -field=fingerprint \
+                "gpg/keys/{{grains['id']}}" 2>/dev/null):6:" |
             /usr/bin/gpg
             --homedir=/etc/gpg-managed-keyring/
             --batch

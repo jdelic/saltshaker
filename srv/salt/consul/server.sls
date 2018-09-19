@@ -51,6 +51,17 @@ consul-policy-{{loop.index}}:
 
 
 consul-execute-policy-{{loop.index}}:
+    http.wait_for_successful_query:
+        - name: http://169.254.1.1:8500/v1/agent/members
+        - wait_for: 10
+        - request_interval: 1
+        - raise_error: False  # only exists in 'tornado' backend
+        - backend: tornado
+        - status: 200
+        - header_dict:
+            X-Consul-Token: {{pillar['dynamicsecrets']['consul-acl-master-token']}}
+        - require:
+            - service: consul-server-service
     cmd.run:
         - name: >
             curl -i -s -X PUT -H "X-Consul-Token: $CONSUL_ACL_MASTER_TOKEN" \
@@ -60,6 +71,7 @@ consul-execute-policy-{{loop.index}}:
             CONSUL_ACL_MASTER_TOKEN: {{pillar['dynamicsecrets']['consul-acl-master-token']}}
         - require:
             - file: consul-policy-{{loop.index}}
+            - http: consul-execute-policy-{{loop.index}}
         - require_in:
             - http: consul-server-service
         - watch:
@@ -117,6 +129,8 @@ consul-server-service:
             - file: consul-acl-config
             - file: consul-server-service  # if consul.service changes we want to *restart* (reload: False)
             - file: consul  # restart on a change of the binary
+        - require:
+            - cmd: consul-sync-network
     http.wait_for_successful_query:
         - name: http://169.254.1.1:8500/v1/agent/members
         - wait_for: 10
@@ -188,8 +202,21 @@ consul-server-service-reload:
             - file: /etc/consul/services.d*
             - file: consul-common-config
             - file: consul-acl-config
-        - watch_in:
-            - service: pdns-recursor-service
+        - require_in:  # ensure that all service registrations happen
+            - cmd: consul-sync
+    http.wait_for_successful_query:
+        - name: http://169.254.1.1:8500/v1/agent/members
+        - wait_for: 10
+        - request_interval: 1
+        - raise_error: False  # only exists in 'tornado' backend
+        - backend: tornado
+        - status: 200
+        - header_dict:
+            X-Consul-Token: anonymous
+        - watch:
+            - service: consul-server-service-reload
+        - require_in:
+            - cmd: consul-sync
 
 
 consul-agent-absent:

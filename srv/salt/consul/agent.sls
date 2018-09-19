@@ -51,6 +51,8 @@ consul-agent-service:
             - file: consul-common-config
             - file: consul-agent-service  # if consul.service changes we want to *restart* (reload: False)
             - file: consul  # restart on a change of the binary
+        - require:
+            - cmd: consul-sync-network
     http.wait_for_successful_query:
         - name: http://169.254.1.1:8500/v1/agent/members
         - wait_for: 10
@@ -62,6 +64,16 @@ consul-agent-service:
             X-Consul-Token: anonymous
         - watch:
             - service: consul-agent-service
+        - require_in:
+            - cmd: consul-sync
+    cmd.run:
+        - name: >
+            until
+                test $(curl -s -H 'X-Consul-Token: anonymous' http://169.254.1.1:8500/v1/agent/members \
+                        | jq 'length') -gt 0 || test ${count} -gt 10; do sleep 1; count=$((count+1)); done &&
+                test ${count} -lt 10
+        - env:
+            count: 0
         - require_in:
             - cmd: consul-sync
 
@@ -100,8 +112,8 @@ consul-agent-service-reload:
             # consul.install.consul-service-dir state.
             - file: /etc/consul/services.d*
             - file: consul-common-config
-        - watch_in:
-            - service: pdns-recursor-service
+        - require_in:  # ensure that all service registrations happen
+            - cmd: consul-sync
 
 
 consul-server-absent:

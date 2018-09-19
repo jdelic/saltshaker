@@ -82,7 +82,7 @@ base:
         - local.ssl
         - local.authserver
         - local.duplicity
-        # - local.url_overrides
-        - shared.urls
+        - local.url_overrides
+        # - shared.urls
 
 # vim: syntax=yaml

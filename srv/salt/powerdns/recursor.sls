@@ -60,6 +60,8 @@ pdns-dhclient-enforce-nameservers:
             supersede domain-name-servers 169.254.1.1;
         - require:
             - service: pdns-recursor-service
+        - require_in:
+            - cmd: powerdns-sync
 
 
 pdns-recursor-service:
