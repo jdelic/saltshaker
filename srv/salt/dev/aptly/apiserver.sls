@@ -71,3 +71,19 @@ aptly-servicedef:
         # no "require" for aptly-service because that would block consul from starting if
         # the aptly api server has no config file (which must be added manually) and therefor
         # doesn't start. As the consul service watches 'services.d*' it would be blocked.
+
+
+aptly-tcp-in{{port}}-recv:
+    iptables.append:
+        - table: filter
+        - chain: INPUT
+        - jump: ACCEPT
+        - source: '0/0'
+        - destination: {{ip}}
+        - dport: {{port}}
+        - match: state
+        - connstate: NEW
+        - proto: tcp
+        - save: True
+        - require:
+            - sls: iptables

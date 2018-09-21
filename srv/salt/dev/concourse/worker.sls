@@ -78,7 +78,7 @@ concourse-worker:
 
 
 # allow forwarding of outgoing dns/http/https traffic to the internet from concourse.ci/garden containers
-{% for port in ['53', '80', '443'] %}
+{% for port in ['53', '80', '443', '8100'] %}
 concourse-worker-tcp-out{{port}}-forward:
     iptables.append:
         - table: filter
