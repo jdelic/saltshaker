@@ -9,7 +9,7 @@ PORT     | SMARTSTACK | ASSIGNED SERVICE
   5433   |      X     | PostgreSQL secure (currently unused)
   6379   |      X     | Redis internal network (shared)
   6380   |            | Redis local cache (not shared)
-  8100   |            | aptly API (devserver, link local)
+  8100   |      X     | aptly API
   8200   |      X     | Vault
   8201   |      X     | Vault Goldfish UI
   8300   |            | consul raft

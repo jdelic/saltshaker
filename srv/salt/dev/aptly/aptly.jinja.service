@@ -1,0 +1,21 @@
+[Unit]
+Description=Aptly API
+Wants=basic.target
+After=basic.target network.target
+ConditionPathExists={{gpg_home}}
+ConditionPathExists=/etc/aptly/aptly_api.conf
+
+[Service]
+User=aptly
+Group=aptly
+Environment=GNUPGHOME={{gpg_home}}
+ExecStart=/usr/bin/aptly api serve -config=/etc/aptly/aptly_api.conf -listen={{ip}}:{{port}} -gpg-provider=gpg
+ExecReload=/bin/kill -HUP $MAINPID
+PIDFile=/run/aptly/aptly.pid
+KillMode=process
+Restart=on-failure
+StartLimitInterval=400
+RestartSec=30s
+
+[Install]
+WantedBy=multi-user.target
