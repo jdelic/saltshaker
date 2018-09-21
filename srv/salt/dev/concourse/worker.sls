@@ -56,7 +56,7 @@ concourse-worker:
             # tsa-host on 127.0.0.1 works because there is haproxy@internal proxying it
             arguments: >
                 --work-dir /srv/concourse-worker
-                --tsa-host 127.0.0.1
+                --tsa-host 127.0.0.1:{{pillar.get('concourse-server', {}).get('tsa-port', 2222)}}
                 --tsa-public-key /etc/concourse/host_key.pub
                 --tsa-worker-private-key /etc/concourse/private/worker_key.pem
                 --garden-network-pool {{pillar.get('ci', {}).get('garden-network-pool', '10.254.0.0/22')}}
@@ -78,7 +78,7 @@ concourse-worker:
 
 
 # allow forwarding of outgoing dns/http/https traffic to the internet from concourse.ci/garden containers
-{% for port in ['53', '80', '443'] %}
+{% for port in ['53', '80', '443', '8100'] %}
 concourse-worker-tcp-out{{port}}-forward:
     iptables.append:
         - table: filter

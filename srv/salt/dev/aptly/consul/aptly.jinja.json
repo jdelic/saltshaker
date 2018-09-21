@@ -1,0 +1,9 @@
+{
+    "service": {
+        "name": "aptly",
+        "tags": ["smartstack:internal", "smartstack:port:{{port}}", "smartstack:mode:http"],
+        "address": "{{ip}}",
+        "port": {{port}}
+        {# TODO: add service checks here? #}
+    }
+}

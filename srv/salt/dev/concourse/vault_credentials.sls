@@ -58,6 +58,20 @@ concourse-vault-secrets-policy:
             - cmd: concourse-sync-vault
 
 
+concourse-secret-mount:
+    cmd.run:
+        - name: >-
+              vault secrets enable -path=concourse kv
+        - env:
+            - VAULT_ADDR: "https://vault.service.consul:8200/"
+        - unless: /usr/local/bin/vault secrets list | grep concourse/ >/dev/null
+        - onlyif: /usr/local/bin/vault operator init -status >/dev/null
+        - require:
+            - cmd: vault-sync
+        - require_in:
+            - cmd: concourse-sync-vault
+
+
 vault-concourse-oauth2-read-policy:
     cmd.run:
         - name: >-
