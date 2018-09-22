@@ -20,6 +20,8 @@ gnupg:
         - pkgs:
             - gnupg1
             - gnupg
+            - gpgv1
+            - gpgv
 
 
 # this folder is needed by many commands and gpg fails in unexpected ways when it doesn't exist
