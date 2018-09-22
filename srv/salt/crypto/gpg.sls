@@ -17,7 +17,7 @@ gpg-access:
 
 gnupg:
     pkg.installed:
-        pkgs:
+        - pkgs:
             - gnupg1
             - gnupg
 
