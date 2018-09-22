@@ -11,7 +11,11 @@ aptly:
         - name: aptly
     file.managed:
         - name: /etc/aptly/aptly.example.conf
-        - source: salt://dev/aptly/aptly.example.conf
+        - source: salt://dev/aptly/aptly.example.jinja.conf
+        - template: jinja
+        - context:
+            example: True
+            rootdir: /srv/aptly/
         - makedirs: True
         - file_mode: '0644'
         - dir_mode: '0755'

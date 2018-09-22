@@ -35,6 +35,20 @@ aptly-storage:
             - user: aptly-user
 
 
+aptly-service-config:
+    file.managed:
+        - name: /etc/aptly/aptly_api.conf
+        - source: salt://dev/aptly/aptly.example.jinja.conf
+        - template: jinja
+        - context:
+            example: False
+            rootdir: /srv/aptly-api/
+        - replace: False  # once modified by the user don't overwrite
+        - makedirs: True
+        - file_mode: '0644'
+        - dir_mode: '0755'
+
+
 aptly-service:
     file.managed:
         - name: /etc/systemd/system/aptly.service
@@ -44,7 +58,10 @@ aptly-service:
         - mode: '0644'
         - template: jinja
         - context:
-            gpg_home: {{pillar['gpg']['shared-keyring-location']}}
+            # Temporarily use gnupg v1 until aptly supports v2
+            # https://github.com/aptly-dev/aptly/issues/657
+            # https://github.com/aptly-dev/aptly/pull/743
+            gpg_home: {{salt['file.join'](pillar['gpg']['shared-keyring-location'], 'v1')}}
             ip: {{ip}}
             port: {{port}}
         - require:
@@ -55,6 +72,7 @@ aptly-service:
         - require:
             - file: aptly-service
             - file: aptly-storage
+            - file: aptly-service-config
 
 
 aptly-servicedef:
