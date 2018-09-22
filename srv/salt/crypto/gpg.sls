@@ -142,9 +142,9 @@ gpg-{{k}}-v1:
             --verbose
             --homedir {{keylocv1}}
             --no-default-keyring
-            --keyring {{salt['file.join'](keyloc, "pubring.gpg")}}
-            --secret-keyring {{salt['file.join'](keyloc, "secring.gpg")}}
-            --trustdb {{salt['file.join'](keyloc, "trustdb.gpg")}}
+            --keyring {{salt['file.join'](keylocv1, "pubring.gpg")}}
+            --secret-keyring {{salt['file.join'](keylocv1, "secring.gpg")}}
+            --trustdb {{salt['file.join'](keylocv1, "trustdb.gpg")}}
             --batch
             --import {{keyloc}}/tmp/gpg-{{k}}.asc
         - require:
