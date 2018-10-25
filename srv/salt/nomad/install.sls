@@ -31,6 +31,7 @@ nomad-agent-config:
             datacenter: {{pillar['consul-cluster'].get('datacenter', 'default')}}
             # TODO: fix this when nomad 0.6 comes out with better network management
             internal_interface: {{pillar['ifassign']['internal']}}
+            consul_acl_token: {{pillar['dynamicsecrets']['consul-acl-token']}}
         - require:
             - file: nomad-service-dir
 
