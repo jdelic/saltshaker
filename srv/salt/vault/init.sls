@@ -333,12 +333,27 @@ vault-approle-access-token-renewal:
             - cmd: vault-sync
 
 
-vault-init-gpg-plugin:
+vault-install-gpg-plugin:
     cmd.run:
         - name: >-
             /usr/local/bin/vault plugin register \
                 -sha256={{pillar['hashes']['vault-gpg-plugin-binary'].split('=', 1)[1]}} \
-                -command=vault-gpg-plugin &&
+                -command=vault-gpg-plugin
+        - env:
+            - VAULT_ADDR: "https://vault.service.consul:8200/"
+        - unless: >-
+            /usr/local/bin/vault plugin list | grep "^gpg" >/dev/null
+        - onlyif: /usr/local/bin/vault operator init -status >/dev/null
+        - require:
+            - cmd: vault-init
+            - cmd: vault-plugin-gpg-setcap
+        - require_in:
+            - cmd: vault-sync
+
+
+vault-init-gpg-plugin:
+    cmd.run:
+        - name: >-
             /usr/local/bin/vault secrets enable -path=gpg -plugin-name=gpg plugin
         - env:
             - VAULT_ADDR: "https://vault.service.consul:8200/"
@@ -348,6 +363,7 @@ vault-init-gpg-plugin:
         - require:
             - cmd: vault-init
             - cmd: vault-plugin-gpg-setcap
+            - cmd: vault-install-gpg-plugin
         - require_in:
             - cmd: vault-sync
 
