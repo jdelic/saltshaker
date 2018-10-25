@@ -86,14 +86,12 @@ nomad-service:
         - name: nomad
         - sig: nomad
         - enable: True
-        - require:
-            - file: nomad-service
+        - watch:
+            - file: nomad-service  # if nomad-service changes we want to *restart* (reload: False)
+            - file: nomad  # restart on a change of the binary
             - file: nomad-server-config
             - file: nomad-agent-config
             - file: nomad-common-config
-        - watch:
-            - file: nomad-service  # if consul.service changes we want to *restart* (reload: False)
-            - file: nomad  # restart on a change of the binary
 
 
 # open nomad ports TCP https://www.nomadproject.io/docs/cluster/requirements.html
