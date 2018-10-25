@@ -32,12 +32,16 @@ consul_acl_create:
                             policy = \"read\"
                         }
 
-                        node \""|replace('\n', '')|replace('"', '\\"')}}{{data['id']}}{{"\" {
+                        node \""|replace('\n', '\\n')|replace('"', '\\"')}}{{data['id']}}{{"\" {
                             policy = \"write\"
                         }
 
                         service \"\" {
                             policy = \"write\"
                         }
-                    "|replace('\n', '')|replace('"', '\\"')}}"
+
+                        agent \""|replace('\n', '\\n')|replace('"', '\\"')}}{{data['id']}}{{"\" {
+                            policy = \"read\"
+                        }
+                    "|replace('\n', '\\n')|replace('"', '\\"')}}"
                 }
