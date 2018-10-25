@@ -338,7 +338,7 @@ vault-install-gpg-plugin:
         - name: >-
             /usr/local/bin/vault plugin register \
                 -sha256={{pillar['hashes']['vault-gpg-plugin-binary'].split('=', 1)[1]}} \
-                -command=vault-gpg-plugin
+                vault-gpg-plugin
         - env:
             - VAULT_ADDR: "https://vault.service.consul:8200/"
         - unless: >-
