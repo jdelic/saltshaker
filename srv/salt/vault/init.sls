@@ -336,8 +336,9 @@ vault-approle-access-token-renewal:
 vault-init-gpg-plugin:
     cmd.run:
         - name: >-
-            /usr/local/bin/vault write sys/plugins/catalog/gpg \
-                sha_256={{pillar['hashes']['vault-gpg-plugin-binary'].split('=', 1)[1]}} command=vault-gpg-plugin &&
+            /usr/local/bin/vault plugin register \
+                -sha256={{pillar['hashes']['vault-gpg-plugin-binary'].split('=', 1)[1]}} \
+                -command=vault-gpg-plugin &&
             /usr/local/bin/vault secrets enable -path=gpg -plugin-name=gpg plugin
         - env:
             - VAULT_ADDR: "https://vault.service.consul:8200/"
