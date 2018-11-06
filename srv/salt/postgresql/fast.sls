@@ -276,7 +276,7 @@ postgresql-backup-prescript:
             # The below command will fail if there are more table spaces than those configured in this Salt config.
             su -s /bin/bash -c "/usr/bin/pg_basebackup -D /secure/postgres-backup/backup \
                 --waldir /secure/postgres-backup/wal \
-                -X stream -R -T /secure/postgres/{{postgres_version}}/main=/secure/postgres-backup/backup-secure" postgres
+                -X stream -R -T /secure/postgres/main=/secure/postgres-backup/backup-secure" postgres
         - user: root
         - group: root
         - mode: '0750'
