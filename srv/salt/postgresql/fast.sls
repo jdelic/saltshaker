@@ -66,7 +66,7 @@ data-cluster:
 
 postgresql-hba-config:
     file.managed:
-        - name: {{pillar['postgresql']['hbafile']}}
+        - name: /etc/postgresql/{{postgres_version}}/main/{{pillar['postgresql']['hbafile']}}
         - source: salt://postgresql/pg_hba.jinja.conf
         - template: jinja
         - require:
