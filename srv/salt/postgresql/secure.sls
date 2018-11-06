@@ -2,8 +2,6 @@
 include:
     - postgresql.sync
 
-{% from 'postgresql/fast.sls' import postgres_version %}
-
 
 secure-base-dir:
     file.directory:
@@ -17,7 +15,7 @@ secure-base-dir:
 
 secure-tablespace-dir:
     file.directory:
-        - name: /secure/postgres/{{postgres_version}}/main
+        - name: /secure/postgres/main
         - user: postgres
         - group: postgres
         - mode: '0750'
@@ -29,7 +27,7 @@ secure-tablespace-dir:
 secure-tablespace:
     postgres_tablespace.present:
         - name: secure
-        - directory: /secure/postgres/{{postgres_version}}/main
+        - directory: /secure/postgres/main
         - db_user: postgres
         - user: postgres
         - require:
