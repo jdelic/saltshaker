@@ -56,7 +56,7 @@ data-cluster:
     cmd.run:
         - name: >
             /usr/bin/pg_createcluster -d /data/postgres/{{postgres_version}}/main --locale=en_US.utf-8 -e utf-8 -p 5432
-            10 main
+            {{postgres_version}} main
         - runas: root
         - unless: test -e /data/postgres/{{postgres_version}}/main
         - require:
@@ -176,7 +176,7 @@ data-cluster-config-ssl_client_ca:
 
 data-cluster-service:
     service.running:
-        - name: postgresql@10-main
+        - name: postgresql@{{postgres_version}}-main
         - sig: /usr/lib/postgresql/{{postgres_version}}/bin/postgres
         - enable: True
         - order: 15  # see ORDER.md
