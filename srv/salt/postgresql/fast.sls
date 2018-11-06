@@ -5,12 +5,12 @@ include:
     - postgresql.sync
 
 {% set postgres_version = pillar.get('postgresql', {}).get('version', '11') %}
-{% set port = pillar.get('postgresql', {}).get('bind-port', 5432)}}
+{% set port = pillar.get('postgresql', {}).get('bind-port', '5432') %}
 {% set ip = pillar.get('postgresql', {}).get(
               'bind-ip', grains['ip_interfaces'][pillar['ifassign']['internal']][pillar['ifassign'].get(
                   'internal-ip-index', 0
               )|int()]
-            )}}
+            ) %}
 
 
 postgresql-repo:
