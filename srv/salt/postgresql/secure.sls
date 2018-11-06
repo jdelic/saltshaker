@@ -23,7 +23,7 @@ secure-tablespace-dir:
         - require:
             - file: secure-base-dir
 
-
+{% if pillar.get('postgresql', {}).get('start-cluster', True) %}
 secure-tablespace:
     postgres_tablespace.present:
         - name: secure
@@ -35,5 +35,6 @@ secure-tablespace:
             - secure-tablespace-dir
         - require_in:
             - cmd: postgresql-sync
+{% endif %}
 
 # vim: syntax=yaml
