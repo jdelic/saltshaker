@@ -15,7 +15,7 @@ secure-base-dir:
 
 secure-tablespace-dir:
     file.directory:
-        - name: /secure/postgres/10/main
+        - name: /secure/postgres/main
         - user: postgres
         - group: postgres
         - mode: '0750'
@@ -27,7 +27,7 @@ secure-tablespace-dir:
 secure-tablespace:
     postgres_tablespace.present:
         - name: secure
-        - directory: /secure/postgres/10/main
+        - directory: /secure/postgres/main
         - db_user: postgres
         - user: postgres
         - require:
