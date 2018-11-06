@@ -7,7 +7,8 @@
 # directly, side-stepping smartstack.
 #
 
-{% if pillar['vault'].get('backend', '') == 'postgresql' %}
+{% if pillar['vault'].get('backend', '') == 'postgresql' and
+      pillar['vault'].get('create-database', False) %}
 
 include:
     - postgresql.sync

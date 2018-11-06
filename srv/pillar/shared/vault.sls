@@ -1,6 +1,7 @@
 vault:
     # Set this to 'True' to make this Salt config initialize Vault automatically
     initialize: True
+    create-database: True
 
     # On first setup and therefor for Salt states using Vault, this Salt config will
     # also *unseal* Vault the first time Vault is initialized (at which point it should
