@@ -4,7 +4,13 @@
 include:
     - postgresql.sync
 
-{% set postgres_version = "11" %}
+{% set postgres_version = pillar.get('postgresql', {}).get('version', '11') %}
+{% set port = pillar.get('postgresql', {}).get('bind-port', 5432)}}
+{% set ip = pillar.get('postgresql', {}).get(
+              'bind-ip', grains['ip_interfaces'][pillar['ifassign']['internal']][pillar['ifassign'].get(
+                  'internal-ip-index', 0
+              )|int()]
+            )}}
 
 
 postgresql-repo:
@@ -55,7 +61,8 @@ postgresql-step2:
 data-cluster:
     cmd.run:
         - name: >
-            /usr/bin/pg_createcluster -d /data/postgres/{{postgres_version}}/main --locale=en_US.utf-8 -e utf-8 -p 5432
+            /usr/bin/pg_createcluster -d /data/postgres/{{postgres_version}}/main --locale=en_US.utf-8 -e utf-8
+            -p {{port}}
             {{postgres_version}} main
         - runas: root
         - unless: test -e /data/postgres/{{postgres_version}}/main
@@ -77,11 +84,7 @@ data-cluster-config-base:
     file.append:
         - name: /etc/postgresql/{{postgres_version}}/main/postgresql.conf
         - text: |
-            listen_addresses = '{{pillar.get('postgresql', {}).get(
-                'bind-ip', grains['ip_interfaces'][pillar['ifassign']['internal']][pillar['ifassign'].get(
-                    'internal-ip-index', 0
-                )|int()]
-            )}}'
+            listen_addresses = '{{ip}}'
             max_wal_senders = 2  # minimum necessary for for hot backup without additional log shipping
             wal_keep_segments = 3  # just as a precaution.
             wal_level = replica
@@ -174,6 +177,7 @@ data-cluster-config-ssl_client_ca:
             - require-ssl-certificates
 {% endif %}
 
+{% if pillar.get('postgresql', {}).get('start-cluster', True) %}
 data-cluster-service:
     service.running:
         - name: postgresql@{{postgres_version}}-main
@@ -194,27 +198,6 @@ data-cluster-service:
             - cmd: postgresql-sync
 
 
-postgresql-in{{pillar.get('postgresql', {}).get('bind-port', 5432)}}-recv:
-    iptables.append:
-        - table: filter
-        - chain: INPUT
-        - jump: ACCEPT
-        - proto: tcp
-        - source: '0/0'
-        - in-interface: {{pillar['ifassign']['internal']}}
-        - destination: {{pillar.get('postgresql', {}).get(
-                'bind-ip', grains['ip_interfaces'][pillar['ifassign']['internal']][pillar['ifassign'].get(
-                    'internal-ip-index', 0
-                )|int()]
-            )}}
-        - dport: {{pillar.get('postgresql', {}).get('bind-port', 5432)}}
-        - match: state
-        - connstate: NEW
-        - save: True
-        - require:
-            - sls: iptables
-
-
 postgresql-servicedef:
     file.managed:
         - name: /etc/consul/services.d/postgresql.json
@@ -222,16 +205,30 @@ postgresql-servicedef:
         - mode: '0644'
         - template: jinja
         - context:
-            ip: {{pillar.get('postgresql', {}).get(
-                    'bind-ip', grains['ip_interfaces'][pillar['ifassign']['internal']][pillar['ifassign'].get(
-                        'internal-ip-index', 0
-                    )|int()]
-                )}}
-            port: {{pillar.get('postgresql', {}).get('bind-port', 5432)}}
+            ip: {{ip}}
+            port: {{port}}
         - require:
             - file: consul-service-dir
         - require_in:
             - service: data-cluster-service
+{% endif %}
+
+
+postgresql-in{{port}}-recv:
+    iptables.append:
+        - table: filter
+        - chain: INPUT
+        - jump: ACCEPT
+        - proto: tcp
+        - source: '0/0'
+        - in-interface: {{pillar['ifassign']['internal']}}
+        - destination: {{ip}}
+        - dport: {{port}}
+        - match: state
+        - connstate: NEW
+        - save: True
+        - require:
+            - sls: iptables
 
 
 {% if pillar.get('duplicity-backup', {}).get('enabled', False) %}
