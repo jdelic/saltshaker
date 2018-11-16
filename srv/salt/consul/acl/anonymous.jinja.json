@@ -2,15 +2,15 @@
     "ID": "anonymous",
     "Type": "client",
     "Rules": "{{"
-key \"\" {
+key_prefix \"\" {
     policy = \"deny\"
 }
 
-key \"oauth2-clients\" {
+key_prefix \"oauth2-clients\" {
     policy = \"read\"
 }
 
-key \"concourse/workers/sshpub\" {
+key_prefix \"concourse/workers/sshpub\" {
     policy = \"read\"
 }
 
@@ -18,7 +18,15 @@ node \"\" {
     policy = \"read\"
 }
 
-service \"\" {
+service_prefix \"\" {
+    policy = \"read\"
+}
+
+event_prefix \"\" {
+    policy = \"read\"
+}
+
+query_prefix \"\" {
     policy = \"read\"
 }
 

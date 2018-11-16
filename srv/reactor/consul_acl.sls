@@ -16,15 +16,15 @@ consul_acl_create:
                                 host=data['id'])}}",
                     "Name": "{{data['id']}}",
                     "Rules": "{{"
-                        key \"\" {
+                        key_prefix \"\" {
                             policy = \"deny\"
                         }
 
-                        key \"oauth2-clients\" {
+                        key_prefix \"oauth2-clients\" {
                             policy = \"write\"
                         }
 
-                        key \"concourse/workers/sshpub\" {
+                        key_prefix \"concourse/workers/sshpub\" {
                             policy = \"write\"
                         }
 
@@ -41,6 +41,14 @@ consul_acl_create:
                         }
 
                         agent \""|replace('\n', '\\n')|replace('"', '\\"')}}{{data['id']}}{{"\" {
+                            policy = \"read\"
+                        }
+
+                        event_prefix \"\" {
+                            policy = \"read\"
+                        }
+
+                        query_prefix \"\" {
                             policy = \"read\"
                         }
                     "|replace('\n', '\\n')|replace('"', '\\"')}}"
