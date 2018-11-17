@@ -258,7 +258,7 @@ def get_store():
     if store:
         return store
     else:
-        store = DynamicSecretsPillar(_DEFAULT_PATH, _CONSUL_URL)
+        store = DynamicSecretsPillar(_DEFAULT_PATH)
         return store
 
 
