@@ -167,7 +167,7 @@ consul-server-register-acl:
         - watch:
             - service: consul-server-service
     http.wait_for_successful_query:
-        - name: http://169.254.1.1:8500/v1/acl/info/{{pillar['dynamicsecrets']['consul-acl-token']}}
+        - name: http://169.254.1.1:8500/v1/acl/info/{{pillar['dynamicsecrets']['consul-acl-token']['accessor_id']}}
         - wait_for: 10
         - request_interval: 1
         - raise_error: False  # only exists in 'tornado' backend
