@@ -16,6 +16,8 @@ _log.info("dynamic secrets module loaded")
 
 _DEFAULT_PATH = "/etc/salt/dynamicsecrets.sqlite"
 _CONSUL_URL = "http://127.0.0.1:8500/"
+_CONSUL_TOKEN = None
+_CONSUL_TOKEN_SECRET = None
 
 
 try:
@@ -192,16 +194,29 @@ class DynamicSecretsPillar(DynamicSecretsStore):
             # uuid.uuid4() uses os.urandom(), so this should be reasonably unguessable
             self.save(secret_name, secret_type, str(uuid.uuid4()), host)
         elif secret_type == "consul-acl-token":
+            consul_token = None
+            if _CONSUL_TOKEN:
+               consul_token = _CONSUL_TOKEN
+            elif _CONSUL_TOKEN_SECRET:
+                if self.exists(_CONSUL_TOKEN_SECRET):
+                    consul_token = self.load(_CONSUL_TOKEN_SECRET)
+
+            if not consul_token:
+                _log.error("No ACL token for Consul in dynamicsecrets configuration")
             # creates a consul-acl-token without any policy attached to it
             resp = requests.put(
                 urljoin(_CONSUL_URL, "/v1/acl/token"),
+                headers={
+                    "X-Consul-Token": consul_token,
+                },
                 json={
                     "Description": secret_name,
                     "Policies": [],
                 }
             )
             if resp.status_code == 200 and resp.headers["Content-Type"] == "application/json":
-                self.save(secret_name, secret_type, "%s,%s" % (resp.json()["AccessorID"], resp.json()["SecretID"]))
+                self.save(secret_name, secret_type, "%s,%s" % (resp.json()["AccessorID"], resp.json()["SecretID"]),
+                          host)
             else:
                 _log.error("Invalid Consul response while creating %s (status_code=%s): %s",
                            secret_name, resp.status_code, resp.text)
@@ -241,12 +256,16 @@ def match_minion_id(minion_id, hostconfig):
 
 
 def __init__(opts):
-    global _DEFAULT_PATH
+    global _DEFAULT_PATH, _CONSUL_URL, _CONSUL_TOKEN, _CONSUL_TOKEN_SECRET
     # type: (Dict[str, Any]) -> None
     if "dynamicsecrets.path" in opts:
         _DEFAULT_PATH = opts["dynamicsecrets.path"]
     if "dynamicsecrets.consul_url" in opts:
         _CONSUL_URL = opts["dynamicsecrets.consul_url"]
+    if "dynamicsecrets.consul_token" in opts:
+        _CONSUL_TOKEN = opts["dynamicsecrets.consul_token"]
+    elif "dynamicsecrets.consul_token_secret" in opts:
+        _CONSUL_TOKEN_SECRET = opts["dynamicsecrets.consul_token_secret"]
 
 
 store = None  # type: DynamicSecretsPillar
