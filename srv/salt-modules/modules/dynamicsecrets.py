@@ -211,7 +211,7 @@ class DynamicSecretsPillar(DynamicSecretsStore):
                     "X-Consul-Token": consul_token,
                 },
                 json={
-                    "Description": secret_name,
+                    "Description": "%s for %s" % (secret_name, host),
                     "Policies": [],
                 }
             )
