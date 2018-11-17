@@ -1,3 +1,6 @@
+# TODO: for COnsul 1.4 replace this with a orchestrate reactor that runs
+# two states: one to create the agent policy and one to update the acl token
+
 consul_acl_create:
     runner.salt.cmd:
         - args:
