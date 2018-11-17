@@ -1,6 +1,6 @@
 {
-    "ID": "anonymous",
-    "Type": "client",
+    "Name": "anonymous",
+    "Description": "The anonymous policy",
     "Rules": "{{"
 key_prefix \"\" {
     policy = \"deny\"

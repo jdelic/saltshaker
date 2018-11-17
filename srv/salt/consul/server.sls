@@ -37,11 +37,10 @@ consul-policy-dir:
             - file: consul-basedir
 
 
-{% for fn in ["anonymous.jinja.json"] %}
-consul-policy-{{loop.index}}:
+consul-policy-anonymous:
     file.managed:
-        - name: /etc/consul/policies.d/{{fn|replace('.jinja', '')}}
-        - source: salt://consul/acl/{{fn}}
+        - name: /etc/consul/policies.d/anonymous.json
+        - source: salt://consul/acl/anonymous.jinja.json
         - template: jinja
         - user: {{consul_user}}
         - group: {{consul_group}}
@@ -50,7 +49,7 @@ consul-policy-{{loop.index}}:
             - file: consul-policy-dir
 
 
-consul-execute-policy-{{loop.index}}:
+consul-update-anonymous-policy:
     http.wait_for_successful_query:
         - name: http://169.254.1.1:8500/v1/agent/members
         - wait_for: 10
@@ -65,18 +64,34 @@ consul-execute-policy-{{loop.index}}:
     cmd.run:
         - name: >
             curl -i -s -X PUT -H "X-Consul-Token: $CONSUL_ACL_MASTER_TOKEN" \
-                --data @/etc/consul/policies.d/{{fn|replace('.jinja', '')}} \
-                http://169.254.1.1:8500/v1/acl/create
+                --data @/etc/consul/policies.d/anonymous.json \
+                http://169.254.1.1:8500/v1/acl/policy
         - env:
             CONSUL_ACL_MASTER_TOKEN: {{pillar['dynamicsecrets']['consul-acl-master-token']}}
+        - unless: consul acl policy list | grep "^anonymous" >/dev/null
         - require:
-            - file: consul-policy-{{loop.index}}
-            - http: consul-execute-policy-{{loop.index}}
+            - file: consul-policy-anonymous
+            - http: consul-update-anonymous-policy
         - require_in:
             - http: consul-server-service
         - watch:
             - service: consul-server-service
-{% endfor %}
+
+
+consul-update-anonymous-token:
+    cmd.run:
+        - name: >
+            curl -i -s -X PUT -H "X-Consul-Token: $CONSUL_ACL_MASTER_TOKEN" \
+                --data '{ "SecretID": "anonymous", "Policies": [{ "Name": "anonymous" }] }' \
+                http://169.254.1.1:8500/v1/acl/token/00000000-0000-0000-0000-000000000002
+        - env:
+            CONSUL_ACL_MASTER_TOKEN: {{pillar['dynamicsecrets']['consul-acl-master-token']}}
+        - require:
+            - cmd: consul-update-anonymous-policy
+        - require_in:
+            - http: consul-server-service
+        - watch:
+            - service: consul-server-service
 
 
 consul-acl-token-envvar:
