@@ -67,6 +67,7 @@ class DynamicSecretsStore(object):
                     secret TEXT,
                     host VARCHAR(255) NOT NULL DEFAULT "*",
                     secrettype VARCHAR(255),
+                    CONSTRAINT store_pk PRIMARY KEY (secretname, host)
                 )"""
                                )
 
