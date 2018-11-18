@@ -35,17 +35,12 @@ class ConsulAclToken(dict):
         super(ConsulAclToken, self).__init__(
             accessor_id=accessor_id,
             secret_id=secret_id,
-            AccessorID=accessor_id,
-            SecretID=secret_id,
             **kwargs
         )
 
     def __str__(self):
-        # type: () -> Dict[str, str]
-        return {
-            "AccessorID": self["accessor_id"],
-            "SecretID": self["secret_id"],
-        }
+        # type: () -> str
+        return self["accessor_id"]
 
 
 class DynamicSecretsStore(object):
