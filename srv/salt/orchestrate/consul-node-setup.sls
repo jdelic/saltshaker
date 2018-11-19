@@ -38,7 +38,7 @@ consul-acl-policy-create:
                             policy = \"write\"
                         }
 
-                        service \"\" {
+                        service_prefix \"\" {
                             policy = \"write\"
                         }
 
