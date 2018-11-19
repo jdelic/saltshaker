@@ -8,6 +8,7 @@ import sqlite3
 import requests
 
 from Crypto.PublicKey import RSA  # zeromq depends on pycrypto and salt depends on 0mq, so we know pycrypto exists
+from requests import RequestException
 from six.moves.urllib.parse import urljoin
 
 
@@ -30,13 +31,14 @@ else:
 
 
 class ConsulAclToken(dict):
-    def __init__(self, accessor_id = None, secret_id = None, **kwargs):
-        # type: (str, str, Any) -> None
+    def __init__(self, accessor_id = None, secret_id = None, consul_firstrun = False, **kwargs):
+        # type: (str, str, bool, Any) -> None
         super(ConsulAclToken, self).__init__(
             accessor_id=accessor_id,
             secret_id=secret_id,
             **kwargs
         )
+        self.firstrun = consul_firstrun
 
     def __str__(self):
         # type: () -> str
@@ -200,16 +202,19 @@ class DynamicSecretsPillar(DynamicSecretsStore):
             if not consul_token:
                 _log.error("No ACL token for Consul in dynamicsecrets configuration")
             # creates a consul-acl-token without any policy attached to it
-            resp = requests.put(
-                urljoin(_CONSUL_URL, "/v1/acl/token"),
-                headers={
-                    "X-Consul-Token": consul_token,
-                },
-                json={
-                    "Description": "%s for %s" % (secret_name, host),
-                    "Policies": [],
-                }
-            )
+            try:
+                resp = requests.put(
+                    urljoin(_CONSUL_URL, "/v1/acl/token"),
+                    headers={
+                        "X-Consul-Token": consul_token,
+                    },
+                    json={
+                        "Description": "%s for %s" % (secret_name, host),
+                        "Policies": [],
+                    }
+                )
+            except RequestException:
+                return ConsulAclToken("[Unavailable]", "[first run]", consul_firstrun=True)
             if resp.status_code == 200 and resp.headers["Content-Type"] == "application/json":
                 self.save(secret_name, secret_type, "%s,%s" % (resp.json()["AccessorID"], resp.json()["SecretID"]),
                           host)
@@ -252,8 +257,9 @@ def match_minion_id(minion_id, hostconfig):
 
 
 def __init__(opts):
-    global _DEFAULT_PATH, _CONSUL_URL, _CONSUL_TOKEN, _CONSUL_TOKEN_SECRET
     # type: (Dict[str, Any]) -> None
+    global _DEFAULT_PATH, _CONSUL_URL, _CONSUL_TOKEN, _CONSUL_TOKEN_SECRET
+
     if "dynamicsecrets.path" in opts:
         _DEFAULT_PATH = opts["dynamicsecrets.path"]
     if "dynamicsecrets.consul_url" in opts:

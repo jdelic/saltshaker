@@ -20,6 +20,18 @@ def ext_pillar(minion_id, pillar, **pillarconfig):
     # type: (str, str, Dict[str, Any]) -> Dict[str, Dict[str, Union[str, Dict[str, str]]]]
     db = __salt__['dynamicsecrets.get_store']()  # type: DynamicSecretsPillar
 
+    if minion_id == __opts__['id']:
+        if minion_id.endswith("_master"):
+            minion_id = minion_id[0:-7]
+        else:
+            if 'dynamicsecrets.master_host_value' in __opts__:
+                minion_id = __opts__['dynamicsecrets.master_host_value']
+            else:
+                from salt.exceptions import SaltConfigurationError
+                raise SaltConfigurationError("If you configure your master 'id', you must set "
+                                             "'dynamicsecrets.master_host_value' so dynamicsecrets can map secrets "
+                                             "generated on the master to the correct minion's host name.")
+
     # make sure all required secrets exist and filter them
     # according to the current minion's roles or host id
     this_node_secrets = {}
