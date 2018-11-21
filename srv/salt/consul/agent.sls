@@ -25,6 +25,18 @@ consul-acl-config:
             - file: consul-conf-dir
 
 
+consul-acl-agent-config:
+    file.managed:
+        - name: /etc/consul/conf.d/agent_acl.json
+        - source: salt://consul/acl/agent_acl.jinja.json
+        - user: {{consul_user}}
+        - group: {{consul_group}}
+        - mode: '0600'
+        - template: jinja
+        - context:
+            agent_acl_token: {{pillar['dynamicsecrets']['consul-acl-token']['secret_id']}}
+
+
 consul-agent-service:
     file.managed:
         - name: /etc/systemd/system/consul.service
@@ -50,6 +62,7 @@ consul-agent-service:
             - file: consul-agent-service
             - file: consul-common-config
             - file: consul-agent-service  # if consul.service changes we want to *restart* (reload: False)
+            - file: consul-acl-agent-config
             - file: consul  # restart on a change of the binary
         - require:
             - cmd: consul-sync-network

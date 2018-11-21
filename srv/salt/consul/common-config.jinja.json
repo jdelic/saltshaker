@@ -8,11 +8,5 @@
     "enable_syslog": true,
     "acl": {
         "enabled": true,
-        {% if not agent_acl_token.firstrun %}
-            "tokens": {
-                "agent": "{{agent_acl_token}}",
-                "default": "{{agent_acl_token}}"
-            }
-        {% endif %}
     }
 }

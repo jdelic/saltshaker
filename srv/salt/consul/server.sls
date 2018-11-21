@@ -27,6 +27,20 @@ consul-acl-config:
             - file: consul-conf-dir
 
 
+# on the server, to fix the chicken egg problem of the ACL initialization, we install the server
+# and run it, then install the ACL config and restart the server.
+consul-acl-server-config:
+    file.managed:
+        - name: /etc/consul/conf.d/agent_acl.json
+        - source: salt://consul/acl/agent_acl.jinja.json
+        - user: {{consul_user}}
+        - group: {{consul_group}}
+        - mode: '0600'
+        - template: jinja
+        - context:
+            agent_acl_token: {{pillar['dynamicsecrets']['consul-acl-token']['secret_id']}}
+
+
 consul-policy-dir:
     file.directory:
         - name: /etc/consul/policies.d
@@ -139,13 +153,9 @@ consul-server-service:
         - sig: consul
         - enable: True
         - init_delay: 2
-        - watch:
-            - file: consul-common-config
-            - file: consul-acl-config
-            - file: consul-server-service  # if consul.service changes we want to *restart* (reload: False)
-            - file: consul  # restart on a change of the binary
         - require:
             - cmd: consul-sync-network
+            - file: consul-common-config
     http.wait_for_successful_query:
         - name: http://169.254.1.1:8500/v1/agent/members
         - wait_for: 10
@@ -159,6 +169,34 @@ consul-server-service:
             - service: consul-server-service
         - require_in:
             - cmd: consul-sync
+
+
+consul-server-service-restart:
+    service.running:
+        - name: consul-server
+        - sig: consul
+        - enable: True
+        - init_delay: 2
+        - watch:
+            - file: consul-common-config
+            - file: consul-acl-config
+            - file: consul-acl-server-config
+            - file: consul-server-service  # if consul.service changes we want to *restart* (reload: False)
+            - file: consul  # restart on a change of the binary
+    http.wait_for_successful_query:
+        - name: http://169.254.1.1:8500/v1/agent/members
+        - wait_for: 10
+        - request_interval: 1
+        - raise_error: False  # only exists in 'tornado' backend
+        - backend: tornado
+        - status: 200
+        - header_dict:
+            X-Consul-Token: anonymous
+        - watch:
+            - service: consul-server-service-restart
+        - require_in:
+            - cmd: consul-sync
+
 
 
 consul-server-register-acl:
