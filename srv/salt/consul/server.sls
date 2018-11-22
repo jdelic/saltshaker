@@ -142,6 +142,8 @@ consul-server-service:
         - require:
             - cmd: consul-sync-network
             - file: consul-common-config
+            - file: consul-server-service
+            - file: consul-acl-config
     http.wait_for_successful_query:
         - name: http://169.254.1.1:8500/v1/agent/members
         - wait_for: 10
@@ -198,7 +200,6 @@ consul-server-service-restart:
             - service: consul-server-service-restart
         - require_in:
             - cmd: consul-sync
-
 
 
 consul-server-register-acl:
