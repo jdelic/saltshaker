@@ -27,20 +27,6 @@ consul-acl-config:
             - file: consul-conf-dir
 
 
-# on the server, to fix the chicken egg problem of the ACL initialization, we install the server
-# and run it, then install the ACL config and restart the server.
-consul-acl-server-config:
-    file.managed:
-        - name: /etc/consul/conf.d/agent_acl.json
-        - source: salt://consul/acl/agent_acl.jinja.json
-        - user: {{consul_user}}
-        - group: {{consul_group}}
-        - mode: '0600'
-        - template: jinja
-        - context:
-            agent_acl_token: {{pillar['dynamicsecrets']['consul-acl-token']['secret_id']}}
-
-
 consul-policy-dir:
     file.directory:
         - name: /etc/consul/policies.d
@@ -165,10 +151,26 @@ consul-server-service:
         - status: 200
         - header_dict:
             X-Consul-Token: anonymous
-        - watch:
+        - require:
             - service: consul-server-service
         - require_in:
             - cmd: consul-sync
+
+
+# on the server, to fix the chicken egg problem of the ACL initialization, we install the server
+# and run it, then install the ACL config and restart the server.
+consul-acl-server-config:
+    file.managed:
+        - name: /etc/consul/conf.d/agent_acl.json
+        - source: salt://consul/acl/agent_acl.jinja.json
+        - user: {{consul_user}}
+        - group: {{consul_group}}
+        - mode: '0600'
+        - template: jinja
+        - context:
+              agent_acl_token: {{pillar['dynamicsecrets']['consul-acl-token']['secret_id']}}
+        - require:
+              - http: consul-server-service
 
 
 consul-server-service-restart:
