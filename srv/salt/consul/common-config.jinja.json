@@ -7,6 +7,6 @@
     "raft_protocol": 3,
     "enable_syslog": true,
     "acl": {
-        "enabled": true,
+        "enabled": true
     }
 }
