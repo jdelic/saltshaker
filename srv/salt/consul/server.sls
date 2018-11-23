@@ -172,7 +172,7 @@ consul-acl-server-config:
         - context:
               agent_acl_token: {{pillar['dynamicsecrets']['consul-acl-token']['secret_id']}}
         - require:
-              - http: consul-server-service
+              - http: consul-server-register-acl
 
 
 consul-server-service-restart:
@@ -182,7 +182,6 @@ consul-server-service-restart:
         - enable: True
         - init_delay: 2
         - watch:
-            - file: consul-common-config
             - file: consul-acl-config
             - file: consul-acl-server-config
             - file: consul-server-service  # if consul.service changes we want to *restart* (reload: False)
@@ -256,8 +255,6 @@ consul-server-service-reload:
             # is no other state that matches "/etc/consul/services.d/*" whereas "/etc/consul/services.d*" will match the
             # consul.install.consul-service-dir state.
             - file: /etc/consul/services.d*
-            - file: consul-common-config
-            - file: consul-acl-config
         - require_in:  # ensure that all service registrations happen
             - cmd: consul-sync
     http.wait_for_successful_query:
