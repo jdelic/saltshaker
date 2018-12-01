@@ -112,11 +112,12 @@ gpg-{{k}}:
         # https://stackoverflow.com/questions/22136029/how-to-display-gpg-key-details-without-importing-it
         - unless: >
             /usr/bin/gpg
+            --batch
             --homedir {{keyloc}}
             --no-default-keyring
             --list-keys $(/usr/bin/gpg --no-default-keyring --homedir {{keyloc}} \
                 --import-options import-show --dry-run --with-colons --import \
-                {{keyloc}}/tmp/gpg-{{k}}.asc | head -1 | cut -d':' -f5 2>/dev/null) 2>/dev/null
+                {{keyloc}}/tmp/gpg-{{k}}.asc 2>/dev/null | head -1 | cut -d':' -f5) 2>/dev/null
         - name: >
             /usr/bin/gpg
             --verbose
@@ -134,11 +135,12 @@ gpg-{{k}}-v1:
         # https://stackoverflow.com/questions/22136029/how-to-display-gpg-key-details-without-importing-it
         - unless: >
             /usr/bin/gpg1
+            --batch
             --homedir {{keylocv1}}
             --no-default-keyring
             --list-keys $(/usr/bin/gpg --no-default-keyring --homedir {{keyloc}} \
                 --import-options import-show --dry-run --with-colons --import \
-                {{keyloc}}/tmp/gpg-{{k}}.asc | head -1 | cut -d':' -f5 2>/dev/null) 2>/dev/null
+                {{keyloc}}/tmp/gpg-{{k}}.asc 2>/dev/null | head -1 | cut -d':' -f5) 2>/dev/null
         - name: >
             /usr/bin/gpg1
             --verbose
@@ -160,14 +162,15 @@ gpg-establish-trust-{{k}}:
             --homedir {{keyloc}}
             --no-default-keyring
             --with-colons
-            --list-keys $(/usr/bin/gpg --no-default-keyring --homedir {{keyloc}} \
+            --list-keys $(/usr/bin/gpg --batch --no-default-keyring --homedir {{keyloc}} \
                 --import-options import-show --dry-run --with-colons --import \
-                {{keyloc}}/tmp/gpg-{{k}}.asc | head -1 | cut -d':' -f5 2>/dev/null) 2>/dev/null |
+                {{keyloc}}/tmp/gpg-{{k}}.asc 2>/dev/null | head -1 | cut -d':' -f5) 2>/dev/null |
             grep "pub:" | cut -d':' -f2 | grep "u" >/dev/null
         - name: >
-            echo "$(/usr/bin/gpg --no-default-keyring --homedir {{keyloc}} \
-                --import-options import-show --dry-run --with-colons --import {{keyloc}}/tmp/gpg-{{k}}.asc |
-                grep "fpr:" | head -1 | cut -d':' -f10 2>/dev/null):6:" |
+            echo "$(/usr/bin/gpg --batch --no-default-keyring --homedir {{keyloc}} \
+                --import-options import-show --dry-run --with-colons \
+                --import {{keyloc}}/tmp/gpg-{{k}}.asc 2>/dev/null |
+                grep "fpr:" | head -1 | cut -d':' -f10 ):6:" |
             /usr/bin/gpg
             --homedir={{keyloc}}
             --batch
@@ -183,12 +186,12 @@ gpg-establish-trust-{{k}}-v1:
             --homedir {{keylocv1}}
             --no-default-keyring
             --with-colons
-            --list-keys $(/usr/bin/gpg --no-default-keyring --homedir {{keyloc}} \
+            --list-keys $(/usr/bin/gpg --batch --no-default-keyring --homedir {{keyloc}} \
                 --import-options import-show --dry-run --with-colons --import \
-                {{keyloc}}/tmp/gpg-{{k}}.asc | head -1 | cut -d':' -f5 2>/dev/null) 2>/dev/null |
+                {{keyloc}}/tmp/gpg-{{k}}.asc 2>/dev/null | head -1 | cut -d':' -f5) 2>/dev/null |
             grep "pub:" | cut -d':' -f2 | grep "u" >/dev/null
         - name: >
-            echo "$(/usr/bin/gpg --no-default-keyring --homedir {{keyloc}} \
+            echo "$(/usr/bin/gpg --batch --no-default-keyring --homedir {{keyloc}} \
                 --import-options import-show --dry-run --with-colons --import {{keyloc}}/tmp/gpg-{{k}}.asc |
                 grep "fpr:" | head -1 | cut -d':' -f10 2>/dev/null):6:" |
             /usr/bin/gpg1
@@ -226,6 +229,7 @@ gpg-import-host-key:
     cmd.run:
         - unless: >
             /usr/bin/gpg
+            --batch
             --homedir {{keyloc}}
             --no-default-keyring
             --with-colons
@@ -250,6 +254,7 @@ gpg-establish-host-key-trust:
     cmd.run:
         - unless: >
             /usr/bin/gpg
+            --batch
             --homedir {{keyloc}}
             --no-default-keyring
             --with-colons
