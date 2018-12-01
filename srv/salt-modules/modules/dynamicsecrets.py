@@ -38,7 +38,7 @@ class ConsulAclToken(dict):
             secret_id=secret_id,
             **kwargs
         )
-        self.firstrun = consul_firstrun
+        self['firstrun'] = consul_firstrun
 
     def __str__(self):
         # type: () -> str
@@ -70,7 +70,7 @@ class DynamicSecretsStore(object):
 
     @staticmethod
     def _deserialize_secret(secret, secrettype):
-        # type: (str, str) -> Union[Dict[str, str], str]
+        # type: (str, str) -> Union[Dict[str, str], ConsulAclToken, str]
         if secrettype == "rsa":
             key = RSA.importKey(secret)
             return {
@@ -214,7 +214,7 @@ class DynamicSecretsPillar(DynamicSecretsStore):
                     }
                 )
             except RequestException:
-                return ConsulAclToken("[Unavailable]", "[first run]", consul_firstrun=True)
+                return ConsulAclToken("Unavailable", "first run", consul_firstrun=True)
             if resp.status_code == 200 and resp.headers["Content-Type"] == "application/json":
                 self.save(secret_name, secret_type, "%s,%s" % (resp.json()["AccessorID"], resp.json()["SecretID"]),
                           host)
