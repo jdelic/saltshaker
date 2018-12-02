@@ -63,6 +63,23 @@ consul-template-config:
             - file: consul-basedir
 
 
+{% if pillar['dynamicsecrets']['consul-acl-token']['firstrun'] %}
+# work around the insane hoops we have to jump through for
+# https://github.com/hashicorp/consul/issues/4977
+consul-template-firstrun-config:
+    cmd.run:
+        - name: >
+            sed "s#^\(\s*\)token =.*#\1token = \"$(jq -r .acl.tokens.agent /etc/consul/conf.d/agent_acl.json)\"#" \
+                /etc/consul/consul-template.conf > /etc/consul/consul-template.conf.new;
+            mv /etc/consul/consul-template.conf.new /etc/consul/consul-template.conf
+        - onlyif: grep "first run" /etc/consul/consul-template.conf
+        - require:
+            - file: consul-template-config
+        - require_in:
+            - service: consul-template-service
+{% endif %}
+
+
 consul-template-service:
     file.managed:
         - name: /etc/systemd/system/consul-template.service

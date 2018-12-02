@@ -159,48 +159,79 @@ consul-server-service:
             - cmd: consul-sync
 
 
-# on the server, to fix the chicken egg problem of the ACL initialization, we install the server
-# and run it, then install the ACL config and restart the server.
-consul-acl-server-config:
-    file.managed:
-        - name: /etc/consul/conf.d/agent_acl.json
-        - source: salt://consul/acl/agent_acl.jinja.json
-        - user: {{consul_user}}
-        - group: {{consul_group}}
-        - mode: '0600'
-        - template: jinja
-        - context:
-              agent_acl_token: {{pillar['dynamicsecrets']['consul-acl-token']['secret_id']}}
+{% if pillar['dynamicsecrets']['consul-acl-token']['firstrun'] %}
+# on the master server, to fix the chicken egg problem of the ACL initialization, we install the server
+# and run it, then install a temporary ACL config and restart the server.
+consul-tempacl-create-policy:
+    cmd.run:
+        - name: |+
+            cat <<EOT | curl -X PUT -d @- -H "X-Consul-Token: $CONSUL_ACL_MASTER_TOKEN" http://169.254.1.1:8500/v1/acl/policy
+                {
+                    "Name": "tempacl-policy-{{grains['id']|replace('.', '-')}}",
+                    "Description": "Agent policy for {{grains['id']}}",
+                    "Rules": "
+                        key_prefix \"\" {
+                            policy = \"deny\"
+                        }
+
+                        key_prefix \"oauth2-clients\" {
+                            policy = \"write\"
+                        }
+
+                        node \"\" {
+                            policy = \"read\"
+                        }
+
+                        node \"{{grains['id']}}\" {
+                            policy = \"write\"
+                        }
+
+                        service_prefix \"\" {
+                            policy = \"write\"
+                        }
+
+                        agent \"{{grains['id']}}\" {
+                            policy = \"read\"
+                        }
+
+                        event_prefix \"\" {
+                            policy = \"read\"
+                        }
+
+                        query_prefix \"\" {
+                            policy = \"read\"
+                        }
+                    "
+                }
+            EOT
+        - env:
+            CONSUL_ACL_MASTER_TOKEN: {{pillar['dynamicsecrets']['consul-acl-master-token']}}
+        - unless: test -f /etc/consul/conf.d/agent_acl.json
         - require:
-              - http: consul-server-register-acl
+            - http: consul-server-service
 
-
-consul-server-service-restart:
-    service.running:
-        - name: consul-server
-        - sig: consul
-        - enable: True
-        - init_delay: 2
-        - watch:
-            - file: consul-acl-config
-            - file: consul-acl-server-config
-            - file: consul-server-service  # if consul.service changes we want to *restart* (reload: False)
-            - file: consul  # restart on a change of the binary
-    http.wait_for_successful_query:
-        - name: http://169.254.1.1:8500/v1/agent/members
-        - wait_for: 10
-        - request_interval: 1
-        - raise_error: False  # only exists in 'tornado' backend
-        - backend: tornado
-        - status: 200
-        - header_dict:
-            X-Consul-Token: anonymous
-        - watch:
+consul-tempacl-server-config:
+    cmd.run:
+        - name: |+
+            cat << EOT | curl -X PUT -d @- -H "X-Consul-Token: $CONSUL_ACL_MASTER_TOKEN" http://169.254.1.1:8500/v1/acl/token/ | \
+                jq -M "{acl: {tokens: { agent: .SecretID, default: .SecretID } } }" > \
+                    /etc/consul/conf.d/agent_acl.json
+                {
+                    "Description": "Temp ACL provisioning token for {{grains['id']}}",
+                    "Policies": [
+                        { "Name": "tempacl-policy-{{grains['id']|replace('.', '-')}}" }
+                    ]
+                }
+            EOT
+        - creates: /etc/consul/conf.d/agent_acl.json
+        - env:
+            CONSUL_ACL_MASTER_TOKEN: {{pillar['dynamicsecrets']['consul-acl-master-token']}}
+        - require:
+            - cmd: consul-tempacl-create-policy
+        - watch_in:
             - service: consul-server-service-restart
-        - require_in:
-            - cmd: consul-sync
-
-
+{% else %}
+# when we have a server, we run it, then
 consul-server-register-acl:
     event.wait:
         - name: maurusnet/consul/installed
@@ -215,6 +246,48 @@ consul-server-register-acl:
         - status: 200
         - require:
             - event: consul-server-register-acl
+        - require_in:
+            - cmd: consul-sync
+
+
+consul-acl-server-config:
+    file.managed:
+        - name: /etc/consul/conf.d/agent_acl.json
+        - source: salt://consul/acl/agent_acl.jinja.json
+        - user: {{consul_user}}
+        - group: {{consul_group}}
+        - mode: '0600'
+        - template: jinja
+        - context:
+            agent_acl_token: {{pillar['dynamicsecrets']['consul-acl-token']['secret_id']}}
+        - require:
+            - http: consul-server-register-acl
+        - watch_in:
+            - service: consul-server-service-restart
+{% endif %}
+
+
+consul-server-service-restart:
+    service.running:
+        - name: consul-server
+        - sig: consul
+        - enable: True
+        - init_delay: 2
+        - watch:
+            - file: consul-acl-config
+            - file: consul-server-service  # if consul.service changes we want to *restart* (reload: False)
+            - file: consul  # restart on a change of the binary
+    http.wait_for_successful_query:
+        - name: http://169.254.1.1:8500/v1/agent/members
+        - wait_for: 10
+        - request_interval: 1
+        - raise_error: False  # only exists in 'tornado' backend
+        - backend: tornado
+        - status: 200
+        - header_dict:
+            X-Consul-Token: anonymous
+        - watch:
+            - service: consul-server-service-restart
         - require_in:
             - cmd: consul-sync
 
