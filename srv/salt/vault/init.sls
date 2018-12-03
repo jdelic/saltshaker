@@ -185,9 +185,6 @@ vault-init:
                         tee /dev/fd/5 /dev/fd/6 |
                         gpg --homedir {{keyloc}} \
                             --no-default-keyring \
-                            --keyring {{salt['file.join'](keyloc, "pubring.gpg")}} \
-                            --secret-keyring {{salt['file.join'](keyloc, "secring.gpg")}} \
-                            --trustdb {{salt['file.join'](keyloc, "trustdb.gpg")}} \
                             --batch \
                             --trusted-key {{long_id}} -a -e \
                             -r {{pillar['vault']['encrypt-vault-keys-with-gpg']}} >/root/vault_keys.txt.gpg;
