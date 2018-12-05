@@ -286,7 +286,7 @@ consul-server-service-restart:
         - status: 200
         - header_dict:
             X-Consul-Token: anonymous
-        - watch:
+        - require:
             - service: consul-server-service-restart
         - require_in:
             - cmd: consul-sync
