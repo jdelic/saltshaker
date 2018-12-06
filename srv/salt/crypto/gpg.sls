@@ -208,12 +208,12 @@ gpg-establish-trust-{{k}}-v1:
 gpg-create-host-key:
     cmd.run:
         - name: >
-            /usr/local/bin/vault write
-                "gpg/keys/{{grains['id']}}"
-                name="{{grains['id']}}"
-                generate=true
-                real_name="{{grains['id']}}"
-                key_bits=2048
+            /usr/local/bin/vault write \
+                "gpg/keys/{{grains['id']}}" \
+                name="{{grains['id']}}" \
+                generate=true \
+                real_name="{{grains['id']}}" \
+                key_bits=2048 \
                 exportable=true; sleep 2
         - unless: >
             /usr/local/bin/vault list gpg/keys | grep "{{grains['id']}}" >/dev/null
