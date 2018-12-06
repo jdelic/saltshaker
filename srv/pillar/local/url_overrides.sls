@@ -49,6 +49,5 @@ hashes:
     terraform: sha256=84ccfb8e13b5fce63051294f787885b76a1fedef6bdbecf51c5e586c9e20c9b7
     vault: sha256=75afb647d2ebeb46aafbf147ed1f1b379f6b8c9f909550dc2d0976cf153e8aa6
     vault-gpg-plugin: sha256=8826ea137898e572bef7d27b6544b4f46e42119c3c83f668858a529ff82ad8bd
-    vault-gpg-plugin-binary: sha256=caf479a6d6177cdca8d452e937e3d0ad41e65cf682652b6c287bcf115b5cbf98
     vault-ssh-helper: sha256=156ce8250725e64a3e4dc51018a18813dd44d1f2a6c853976bc20e1625d631a1
     fpmdeps: sha256=acddcc12840c6684631d30b32c314a8f73d9319f69c26411ad90a7aa70b0a1df
