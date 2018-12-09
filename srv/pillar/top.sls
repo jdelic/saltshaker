@@ -10,8 +10,8 @@ base:
         - shared.network
 
     'saltmaster.maurusnet.test':
-        - local.vault
         - shared.vault
+        - local.vault
         - shared.secrets.vault-dev
         - shared.secrets.vault-ssl
 
