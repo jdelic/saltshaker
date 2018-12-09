@@ -48,3 +48,5 @@ vault-setcap:
         - unless: getcap /usr/local/bin/vault | grep cap_ipc_lock >/dev/null
         - require:
             - file: vault
+        - require_in:
+            - cmd: vault-sync

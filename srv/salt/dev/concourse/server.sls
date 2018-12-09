@@ -3,7 +3,7 @@ include:
     - dev.concourse.install
     - dev.concourse.sync
     - vault.sync
-
+    - powerdns.sync
 
 
 concourse-keys-session_signing_key:
@@ -149,8 +149,7 @@ concourse-server-envvars-approle:
             test $? -eq 0
         - require:
             - file: concourse-server-envvars-template
-            - file: vault
-            - cmd: vault-sync
+            - cmd: powerdns-sync
             - cmd: concourse-sync-vault
         - require_in:
             - cmd: concourse-server-envvars
@@ -178,8 +177,6 @@ concourse-server-envvars-oauth2:
             test "$CONCOURSE_OAUTH_CLIENT_SECRET" == "$(vault read -format=json secret/oauth2/concourse | \
                 jq -r .data.client_secret)"
         - require:
-            - file: vault
-            - cmd: concourse-sync-vault
             - cmd: concourse-server-envvars-approle
             - cmd: concourse-sync-oauth2
         - require_in:

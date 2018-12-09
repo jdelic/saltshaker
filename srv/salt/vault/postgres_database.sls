@@ -12,6 +12,8 @@
 
 include:
     - postgresql.sync
+    - consul.sync
+    - powerdns.sync
 
 
 # only create this if the PostgreSQL backend is selected
@@ -70,7 +72,7 @@ vault-postgres-ready:
     cmd.run:
         - name: >
             until host postgresql.service.consul || test ${count} -gt 10; do sleep 1; count=$((count+1)); done &&
-            test ${count} -lt 10
+            test ${count} -lt 30
         - env:
             count: 0
         - require_in:
@@ -78,4 +80,5 @@ vault-postgres-ready:
         - require:
             - cmd: vault-postgres
             - cmd: consul-sync
+            - cmd: powerdns-sync
 {% endif %}

@@ -120,7 +120,6 @@ consul-common-config:
             encryption_key: {{pillar['dynamicsecrets']['consul-encryptionkey']}}
         - require:
             - file: consul-basedir
-            - cmd: consul-network-interface
             - user: consul
             - group: consul
             - file: consul-service-dir

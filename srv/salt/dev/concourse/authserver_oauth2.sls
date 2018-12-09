@@ -17,7 +17,6 @@ authserver-concourse-create-permissions:
                 grep "ci_access" >/dev/null 2>/dev/null
         - require:
             - cmd: authserver-sync
-            - cmd: vault-sync
         - require_in:
             - cmd: concourse-sync-oauth2
 
