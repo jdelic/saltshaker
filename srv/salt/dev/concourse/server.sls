@@ -128,7 +128,7 @@ concourse-server-envvars{% if pillar['ci']['use-vault'] %}-template{% endif %}:
 
 concourse-server-envvars:
     cmd.run:
-        - name: /bin/true
+        - name: /bin/true concourse-server-envvars
 
 
 concourse-server-envvars-approle:
