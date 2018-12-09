@@ -198,7 +198,7 @@ data-cluster-service:
 {% endif %}
         - require_in:
             - cmd: postgresql-sync
-
+{% endif %}
 
 postgresql-servicedef:
     file.managed:
@@ -212,6 +212,8 @@ postgresql-servicedef:
         - require:
             - file: consul-service-dir
         - require_in:
+            - cmd: postgresql-sync
+{% if pillar.get('postgresql', {}).get('start-cluster', True) %}
             - service: data-cluster-service
 {% endif %}
 
