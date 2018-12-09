@@ -30,7 +30,7 @@ consul-acl-policy-create:
                             policy = \"write\"
                         }
 
-                        node \"\" {
+                        node_prefix \"\" {
                             policy = \"read\"
                         }
 
@@ -43,7 +43,7 @@ consul-acl-policy-create:
                         }
 
                         agent \""|replace('\n', '\\n')|replace('"', '\\"')}}{{data['id']}}{{"\" {
-                            policy = \"read\"
+                            policy = \"write\"
                         }
 
                         event_prefix \"\" {
