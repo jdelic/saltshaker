@@ -72,7 +72,7 @@ consul-agent-service:
             until
                 test $(curl -s -H 'X-Consul-Token: anonymous' http://169.254.1.1:8500/v1/agent/members \
                         | jq 'length') -gt 0 || test ${count} -gt 10; do sleep 1; count=$((count+1)); done &&
-                test ${count} -lt 10
+                test ${count} -lt 30
         - env:
             count: 0
         - require_in:
@@ -91,6 +91,7 @@ consul-agent-register-acl:
         - status: 200
         - require:
             - event: consul-agent-register-acl
+            - cmd: consul-agent-service
         - require_in:
             - cmd: consul-sync
 
@@ -104,9 +105,9 @@ consul-acl-agent-config:
         - mode: '0600'
         - template: jinja
         - context:
-              agent_acl_token: {{pillar['dynamicsecrets']['consul-acl-token']['secret_id']}}
+            agent_acl_token: {{pillar['dynamicsecrets']['consul-acl-token']['secret_id']}}
         - require:
-              - http: consul-agent-register-acl
+            - event: consul-agent-register-acl
 
 
 consul-agent-service-reload:
