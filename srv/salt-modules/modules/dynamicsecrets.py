@@ -154,9 +154,33 @@ class DynamicSecretsPillar(DynamicSecretsStore):
         ])
         return pwstr
 
+    def get_type_from_config(self, secret_config):
+        # type: (Dict[str, Union[str, int, bool]]) -> str
+        secret_type = "password"
+        if "type" in secret_config:
+            if secret_config["type"] in ["password", "rsa", "uuid", "consul-acl-token"]:
+                secret_type = secret_config["type"]
+            else:
+                raise ValueError("Not a valid secret type: %s", secret_config["type"])
+        return secret_type
+
+    def get_consul_token(self):
+        # type: () -> str
+        global _CONSUL_TOKEN, _CONSUL_TOKEN_SECRET
+        consul_token = None
+        if _CONSUL_TOKEN:
+            consul_token = _CONSUL_TOKEN
+        elif _CONSUL_TOKEN_SECRET:
+            if self.exists(_CONSUL_TOKEN_SECRET):
+                consul_token = self.load(_CONSUL_TOKEN_SECRET)
+
+        if not consul_token:
+            raise ValueError("No ACL token for Consul in dynamicsecrets configuration")
+
+        return consul_token
+
     def create(self, secret_config, secret_name, host="*"):
         # type: (Dict[str, Union[str, int, bool]], str, str) -> Union[Dict[str, str], str]
-        secret_type = "password"
         encode = None
         length = 16
         if "encode" in secret_config:
@@ -168,12 +192,8 @@ class DynamicSecretsPillar(DynamicSecretsStore):
                 length = int(secret_config["length"])
             except ValueError:
                 raise ValueError("Not a valid length specification: %s", secret_config["length"])
-        if "type" in secret_config:
-            if secret_config["type"] in ["password", "rsa", "uuid", "consul-acl-token"]:
-                secret_type = secret_config["type"]
-            else:
-                raise ValueError("Not a valid secret type: %s", secret_config["type"])
 
+        secret_type = self.get_type_from_config(secret_config)
         if secret_type == "password":
             if encode == "base64":
                 self.save(secret_name, secret_type, base64.b64encode(os.urandom(length)), host)
@@ -192,21 +212,12 @@ class DynamicSecretsPillar(DynamicSecretsStore):
             # uuid.uuid4() uses os.urandom(), so this should be reasonably unguessable
             self.save(secret_name, secret_type, str(uuid.uuid4()), host)
         elif secret_type == "consul-acl-token":
-            consul_token = None
-            if _CONSUL_TOKEN:
-               consul_token = _CONSUL_TOKEN
-            elif _CONSUL_TOKEN_SECRET:
-                if self.exists(_CONSUL_TOKEN_SECRET):
-                    consul_token = self.load(_CONSUL_TOKEN_SECRET)
-
-            if not consul_token:
-                _log.error("No ACL token for Consul in dynamicsecrets configuration")
             # creates a consul-acl-token without any policy attached to it
             try:
                 resp = requests.put(
                     urljoin(_CONSUL_URL, "/v1/acl/token"),
                     headers={
-                        "X-Consul-Token": consul_token,
+                        "X-Consul-Token": self.get_consul_token(),
                     },
                     json={
                         "Description": "%s for %s" % (secret_name, host),
@@ -224,9 +235,27 @@ class DynamicSecretsPillar(DynamicSecretsStore):
 
         return self.load(secret_name, host)
 
+    def check(self, secret_config, secret_name, host="*"):
+        # type: (Dict[str, Union[str, int, bool]], str, str) -> bool
+        exists = self.exists(secret_name, host=host)
+        if exists and self.get_type_from_config(secret_config) == "consul-acl-token":
+            # check if token is still valid
+            resp = requests.get(
+                urljoin(_CONSUL_URL, "/v1/acl/token/%s" % self.load(secret_name, host)['accessor_id']),
+                headers={
+                    "X-Consul-Token": self.get_consul_token()
+                },
+            )
+            if resp.status_code == 200 and resp.headers["Content-Type"] == "application/json":
+                return True
+            else:
+                return False
+        else:
+            return exists
+
     def get_or_create(self, secret_config, secret_name, host="*"):
         # type: (Dict[str, Union[str, int, bool]], str, str) -> Union[Dict[str, str], str]
-        if self.exists(secret_name, host):
+        if self.check(secret_config, secret_name, host):
             return self.load(secret_name, host)
         else:
             return self.create(secret_config, secret_name, host)
