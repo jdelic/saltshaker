@@ -20,6 +20,10 @@ dovecot:
             - file: dovecot-ssl-cert
             - file: dovecot-ssl-key
 {% endif %}
+{% if pillar['imap']['sslcert'] == 'default' %}
+            - file: ssl-maincert-combined-certificate
+            - file: ssl-maincert-key
+{% endif %}
             - file: dovecot-sql-config
         - require:
             - file: sa-learn-pipe-script
