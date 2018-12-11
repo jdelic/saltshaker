@@ -63,11 +63,11 @@ consul-update-anonymous-policy:
             - service: consul-server-service
     cmd.run:
         - name: >
-            curl -i -s -X PUT -H "X-Consul-Token: $CONSUL_ACL_MASTER_TOKEN" \
+            curl -i -s -X PUT -H "X-Consul-Token: $CONSUL_HTTP_TOKEN" \
                 --data @/etc/consul/policies.d/anonymous.json \
                 http://169.254.1.1:8500/v1/acl/policy
         - env:
-            CONSUL_ACL_MASTER_TOKEN: {{pillar['dynamicsecrets']['consul-acl-master-token']}}
+            CONSUL_HTTP_TOKEN: {{pillar['dynamicsecrets']['consul-acl-master-token']}}
         - unless: consul acl policy list | grep "^anonymous" >/dev/null
         - require:
             - file: consul-policy-anonymous
@@ -81,11 +81,11 @@ consul-update-anonymous-policy:
 consul-update-anonymous-token:
     cmd.run:
         - name: >
-            curl -i -s -X PUT -H "X-Consul-Token: $CONSUL_ACL_MASTER_TOKEN" \
+            curl -i -s -X PUT -H "X-Consul-Token: $CONSUL_HTTP_TOKEN" \
                 --data '{ "SecretID": "anonymous", "Policies": [{ "Name": "anonymous" }] }' \
                 http://169.254.1.1:8500/v1/acl/token/00000000-0000-0000-0000-000000000002
         - env:
-            CONSUL_ACL_MASTER_TOKEN: {{pillar['dynamicsecrets']['consul-acl-master-token']}}
+            CONSUL_HTTP_TOKEN: {{pillar['dynamicsecrets']['consul-acl-master-token']}}
         - require:
             - cmd: consul-update-anonymous-policy
         - require_in:
