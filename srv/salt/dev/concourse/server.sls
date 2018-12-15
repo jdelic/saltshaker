@@ -87,7 +87,7 @@ concourse-authorized-key-consul-template-watcher:
             - file: authorized_worker_keys-template
 
 
-concourse-server-envvars{% if pillar['ci']['use-vault'] %}-template{% endif %}:
+concourse-server-envvars{% if pillar['ci'].get('use-vault', True) %}-template{% endif %}:
     file.managed:
     {% if pillar['ci']['use-vault'] %}
         - name: /etc/concourse/envvars.tpl
@@ -215,7 +215,6 @@ concourse-server:
         - require:
             - file: concourse-install
             - file: authorized_worker_keys-must-exist
-            - concourse-server-envvars
     service.running:
         - name: concourse-web
         - sig: /usr/local/bin/concourse_linux_amd64 web
