@@ -1,5 +1,7 @@
 
 include:
+    - consul.sync
+    - powerdns.sync
     - dev.concourse.install
 
 
@@ -30,6 +32,7 @@ concourse-worker_key-consul-submit:
         - unless: consul kv get -keys concourse/workers/sshpub/{{grains['id']}} | grep "{{grains['id']}}" >/dev/null
         - require:
             - file: concourse-keys-worker_key
+            - cmd: consul-sync
 
 
 concourse-worker-dir:
@@ -72,6 +75,7 @@ concourse-worker:
         - enable: True
         - require:
             - file: concourse-worker
+            - cmd: powerdns-sync
         - watch:
             - file: concourse-worker
             - file: concourse-install  # restart on a change of the binary

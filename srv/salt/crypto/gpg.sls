@@ -8,6 +8,7 @@
 
 
 include:
+    - powerdns.sync
     - vault.sync
 
 
@@ -222,6 +223,7 @@ gpg-create-host-key:
             - VAULT_ADDR: "https://vault.service.consul:8200/"
         - require:
             - file: vault
+            - cmd: powerdns-sync
             - cmd: vault-sync
 
 
