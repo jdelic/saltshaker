@@ -75,7 +75,7 @@ consul-agent-token-envvar:
 
 
 consul-service:
-    file.managed:
+    systemdunit.managed:
         - name: /etc/systemd/system/consul-server.service
         - source: salt://consul/consul.jinja.service
         - template: jinja
@@ -98,8 +98,8 @@ consul-service:
         - require:
             - cmd: consul-sync-network
             - file: consul-common-config
-            - file: consul-service
             - file: consul-acl-config
+            - systemdunit: consul-service
     http.wait_for_successful_query:
         - name: http://169.254.1.1:8500/v1/agent/members
         - wait_for: 10
@@ -200,8 +200,8 @@ consul-service-restart:
         - init_delay: 2
         - watch:
             - file: consul-acl-config
-            - file: consul-service  # if consul.service changes we want to *restart* (reload: False)
             - file: consul  # restart on a change of the binary
+            - systemdunit: consul-service  # if consul.service changes we want to *restart* (reload: False)
     http.wait_for_successful_query:
         - name: http://169.254.1.1:8500/v1/agent/members
         - wait_for: 10
@@ -225,14 +225,14 @@ consul-singlenode-snapshot-timer:
 
 
 consul-singlenode-snapshot-service:
-    file.managed:
+    systemdunit.managed:
         - name: /etc/systemd/system/consul-snapshot.service
         - source: salt://consul/consul-snapshot.service
     service.running:
         - name: consul-snapshot.timer
         - require:
             - file: consul-singlenode-snapshot-timer
-            - file: consul-singlenode-snapshot-service
+            - systemdunit: consul-singlenode-snapshot-service
             - service: consul-service
 {% endif %}
 
@@ -245,7 +245,7 @@ consul-service-reload:
         - reload: True  # makes Salt send a SIGHUP (systemctl reload consul) instead of restarting
         - init_delay: 1
         - require:
-            - file: consul-service
+            - systemdunit: consul-service  # if consul.service changes we want to *restart* (reload: False)
         - watch:
             # If we detect a change in the service definitions reload, don't restart. This matches STATE names not FILE
             # names, so this watch ONLY works on STATES named /etc/consul/services.d/[whatever]!

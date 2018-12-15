@@ -27,7 +27,7 @@ consul-acl-config:
 
 
 consul-service:
-    file.managed:
+    systemdunit.managed:
         - name: /etc/systemd/system/consul.service
         - source: salt://consul/consul.jinja.service
         - template: jinja
@@ -49,9 +49,9 @@ consul-service:
         - watch:
             - file: consul-acl-config
             - file: consul-common-config
-            - file: consul-service  # if consul.service changes we want to *restart* (reload: False)
             - file: consul-acl-agent-config
             - file: consul  # restart on a change of the binary
+            - systemdunit: consul-service  # if consul.service changes we want to *restart* (reload: False)
         - require:
             - cmd: consul-sync-network
     cmd.run:
@@ -75,7 +75,7 @@ consul-service-reload:
         - enable: True
         - reload: True  # makes Salt send a SIGHUP (systemctl reload consul) instead of restarting
         - require:
-            - file: consul-service
+            - systemdunit: consul-service  # if consul.service changes we want to *restart* (reload: False)
         - watch:
             # If we detect a change in the service definitions reload, don't restart. This matches STATE names not FILE
             # names, so this watch ONLY works on STATES named /etc/consul/services.d/[whatever]!

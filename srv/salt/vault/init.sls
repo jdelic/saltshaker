@@ -118,7 +118,7 @@ vault-config:
 
 
 vault-service:
-    file.managed:
+    systemdunit.managed:
         - name: /etc/systemd/system/vault.service
         - source: salt://vault/vault.jinja.service
         - template: jinja
@@ -139,7 +139,6 @@ vault-service:
             - cmd: consul-sync
             - cmd: powerdns-sync
             - file: vault-data-dir
-            - file: vault-service
             - file: vault-internal-servicedef
             {% if pillar['vault']['backend'] == 'postgresql' %}
                 {# when we're on the same machine as the PostgreSQL database, wait for it to come up and the #}
@@ -148,7 +147,7 @@ vault-service:
             - cmd: vault-sync-database
             {% endif %}
         - watch:
-            - file: vault-service
+            - systemdunit: vault-service
             - file: vault  # restart on a change of the binary
             - file: vault-ssl-cert  # restart when the SSL cert changes
             - file: vault-ssl-key
@@ -475,7 +474,7 @@ vault-service-reload:
         - enable: True
         - reload: True  # makes Salt send a SIGHUP (systemctl reload vault) instead of restarting
         - require:
-            - file: vault-service
+            - systemdunit: vault-service
         - watch:
             - file: /etc/vault/vault.conf
 

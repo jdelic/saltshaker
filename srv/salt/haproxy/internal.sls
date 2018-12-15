@@ -39,7 +39,7 @@ smartstack-internal:
                 {%- endif %}
             template: /etc/haproxy/haproxy-internal.jinja.cfg
         - require:
-            - file: haproxy-multi
+            - systemdunit: haproxy-multi
             - file: haproxy-config-template-internal
             - file: consul-template-dir
     service.enabled:  # haproxy will be started by the smartstack script rendered by consul-template (see command above)

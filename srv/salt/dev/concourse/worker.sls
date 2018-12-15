@@ -46,7 +46,7 @@ concourse-worker-dir:
 
 
 concourse-worker:
-    file.managed:
+    systemdunit.managed:
         - name: /etc/systemd/system/concourse-worker.service
         - source: salt://dev/concourse/concourse.jinja.service
         - template: jinja
@@ -74,10 +74,9 @@ concourse-worker:
         - sig: /usr/local/bin/concourse_linux_amd64 worker
         - enable: True
         - require:
-            - file: concourse-worker
             - cmd: powerdns-sync
         - watch:
-            - file: concourse-worker
+            - systemdunit: concourse-worker
             - file: concourse-install  # restart on a change of the binary
 
 

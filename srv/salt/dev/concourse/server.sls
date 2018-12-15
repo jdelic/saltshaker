@@ -185,7 +185,7 @@ concourse-server-envvars-oauth2:
 
 
 concourse-server:
-    file.managed:
+    systemdunit.managed:
         - name: /etc/systemd/system/concourse-web.service
         - source: salt://dev/concourse/concourse.jinja.service
         - template: jinja
@@ -220,7 +220,7 @@ concourse-server:
         - sig: /usr/local/bin/concourse_linux_amd64 web
         - enable: True
         - watch:
-            - file: concourse-server
+            - systemdunit: concourse-server
             - file: concourse-install  # restart on a change of the binary
             - concourse-server-envvars  # can be cmd or file
             - file: concourse-servicedef-tsa
@@ -245,7 +245,7 @@ concourse-servicedef-tsa:
                         'internal-ip-index', 0)|int()])}}
             port: {{pillar.get('concourse-server', {}).get('tsa-port', 2222)}}
         - require:
-            - file: concourse-server
+            - systemdunit: concourse-server
             - file: consul-service-dir
 
 
@@ -266,7 +266,7 @@ concourse-servicedef-atc-internal:
                 )}}
             port: {{pillar.get('concourse-server', {}).get('atc-port', 8080)}}
         - require:
-            - file: concourse-server
+            - systemdunit: concourse-server
             - file: consul-service-dir
 
 
@@ -288,7 +288,7 @@ concourse-servicedef-atc:
             port: {{pillar.get('concourse-server', {}).get('atc-port', 8080)}}
             hostname: {{pillar['ci']['hostname']}}
         - require:
-            - file: concourse-server
+            - systemdunit: concourse-server
             - file: consul-service-dir
 
 

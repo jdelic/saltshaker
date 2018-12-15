@@ -67,7 +67,7 @@ nomad-common-config:
 
 
 nomad-service:
-    file.managed:
+    systemdunit.managed:
         - name: /etc/systemd/system/nomad.service
         - source: salt://nomad/nomad.jinja.service
         - template: jinja
@@ -87,7 +87,7 @@ nomad-service:
         - sig: nomad
         - enable: True
         - watch:
-            - file: nomad-service  # if nomad-service changes we want to *restart* (reload: False)
+            - systemdunit: nomad-service  # if nomad-service changes we want to *restart* (reload: False)
             - file: nomad  # restart on a change of the binary
             - file: nomad-server-config
             - file: nomad-agent-config

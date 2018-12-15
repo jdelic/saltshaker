@@ -81,7 +81,7 @@ consul-template-firstrun-config:
 
 
 consul-template-service:
-    file.managed:
+    systemdunit.managed:
         - name: /etc/systemd/system/consul-template.service
         - source: salt://consul/consul-template.jinja.service
         - template: jinja
@@ -100,7 +100,7 @@ consul-template-service:
             - file: consul-template-servicerenderer
             - cmd: consul-sync
         - watch:
-            - file: consul-template-service
+            - systemdunit: consul-template-service
             - file: consul-template  # restart on a change of the binary
 
 

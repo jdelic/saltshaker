@@ -50,7 +50,7 @@ aptly-service-config:
 
 
 aptly-service:
-    file.managed:
+    systemdunit.managed:
         - name: /etc/systemd/system/aptly.service
         - source: salt://dev/aptly/aptly.jinja.service
         - user: root
@@ -70,7 +70,7 @@ aptly-service:
         - name: aptly
         - enable: True
         - require:
-            - file: aptly-service
+            - systemdunit: aptly-service
             - file: aptly-storage
             - file: aptly-service-config
 

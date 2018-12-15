@@ -41,7 +41,7 @@ smartstack-external:
                 {%- endif %}
             template: /etc/haproxy/haproxy-external.jinja.cfg
         - require:
-            - file: haproxy-multi
+            - systemdunit: haproxy-multi
             - file: haproxy-config-template-external
             - file: consul-template-dir
     service.enabled:  # haproxy will be started by the smartstack script rendered by consul-template (see command above)

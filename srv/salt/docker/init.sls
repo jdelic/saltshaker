@@ -19,7 +19,7 @@ docker:
 #     1. fix the docker0 bridge IP in place
 #     2.
 dockerd-systemd:
-    file.managed:
+    systemdunit.managed:
         - name: /lib/systemd/system/docker.service
         - source: salt://docker/docker.jinja.service
         - template: jinja
@@ -37,7 +37,7 @@ dockerd-service:
         - require:
             - pkg: docker
         - watch:
-            - file: dockerd-systemd
+            - systemdunit: dockerd-systemd
 
 
 # TODO: add a DROP rule to the FORWARD chain so not every container gets hooked up

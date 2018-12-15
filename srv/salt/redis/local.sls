@@ -18,6 +18,6 @@ redis-config:
         - name: redis@local
         - enable: True
         - require:
-            - file: redis-multi
+            - systemdunit: redis-multi
         - watch:
             - file: redis-config
