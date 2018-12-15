@@ -85,3 +85,14 @@ consul-acl-token-update:
                 }
         - require:
             - salt: consul-acl-policy-create
+
+
+consul-acl-install:
+    salt.state:
+        - name: ACL installation
+        - tgt: {{data['id']}}
+        - sls:
+            - consul.acl_install
+            - consul.template_acl_install
+        - require:
+            - salt: consul-acl-token-update

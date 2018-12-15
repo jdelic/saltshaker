@@ -7,7 +7,8 @@ After=basic.target network.target
 User=root
 Group=root
 Environment=GOMAXPROCS=2
-ExecStart=/usr/local/bin/consul-template -config /etc/consul/consul-template.conf -config /etc/consul/template.d
+ExecStart=/usr/local/bin/consul-template -config /etc/consul/consul-template.conf \
+    -config /etc/consul/consul-template-acl.conf -config /etc/consul/template.d
 ExecReload=/bin/kill -HUP $MAINPID
 PIDFile=/run/consul/consul-template.pid
 KillMode=process

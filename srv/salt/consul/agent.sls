@@ -5,6 +5,7 @@
 include:
     - consul.install
     - consul.sync
+    - consul.acl_install
 
 
 {% from 'consul/install.sls' import consul_user, consul_group %}
@@ -25,7 +26,7 @@ consul-acl-config:
             - file: consul-conf-dir
 
 
-consul-agent-service:
+consul-service:
     file.managed:
         - name: /etc/systemd/system/consul.service
         - source: salt://consul/consul.jinja.service
@@ -47,26 +48,12 @@ consul-agent-service:
         - init_delay: 2
         - watch:
             - file: consul-acl-config
-            - file: consul-agent-service
             - file: consul-common-config
-            - file: consul-agent-service  # if consul.service changes we want to *restart* (reload: False)
+            - file: consul-service  # if consul.service changes we want to *restart* (reload: False)
             - file: consul-acl-agent-config
             - file: consul  # restart on a change of the binary
         - require:
             - cmd: consul-sync-network
-    http.wait_for_successful_query:
-        - name: http://169.254.1.1:8500/v1/agent/members
-        - wait_for: 10
-        - request_interval: 1
-        - raise_error: False  # only exists in 'tornado' backend
-        - backend: tornado
-        - status: 200
-        - header_dict:
-            X-Consul-Token: anonymous
-        - watch:
-            - service: consul-agent-service
-        - require_in:
-            - cmd: consul-sync
     cmd.run:
         - name: >
             until
@@ -75,49 +62,20 @@ consul-agent-service:
                 test ${count} -lt 30
         - env:
             count: 0
+        - watch:
+            - service: consul-service
         - require_in:
             - cmd: consul-sync
 
 
-consul-agent-register-acl:
-    event.wait:
-        - name: maurusnet/consul/installed
-    http.wait_for_successful_query:
-        - name: http://169.254.1.1:8500/v1/acl/info/{{pillar['dynamicsecrets']['consul-acl-token']['secret_id']}}
-        - wait_for: 10
-        - request_interval: 1
-        - raise_error: False  # only exists in 'tornado' backend
-        - backend: tornado
-        - status: 200
-        - require:
-            - event: consul-agent-register-acl
-            - cmd: consul-agent-service
-        - require_in:
-            - cmd: consul-sync
-
-
-consul-acl-agent-config:
-    file.managed:
-        - name: /etc/consul/conf.d/agent_acl.json
-        - source: salt://consul/acl/agent_acl.jinja.json
-        - user: {{consul_user}}
-        - group: {{consul_group}}
-        - mode: '0600'
-        - template: jinja
-        - context:
-            agent_acl_token: {{pillar['dynamicsecrets']['consul-acl-token']['secret_id']}}
-        - require:
-            - event: consul-agent-register-acl
-
-
-consul-agent-service-reload:
+consul-service-reload:
     service.running:
         - name: consul
         - sig: consul
         - enable: True
         - reload: True  # makes Salt send a SIGHUP (systemctl reload consul) instead of restarting
         - require:
-            - file: consul-agent-service
+            - file: consul-service
         - watch:
             # If we detect a change in the service definitions reload, don't restart. This matches STATE names not FILE
             # names, so this watch ONLY works on STATES named /etc/consul/services.d/[whatever]!

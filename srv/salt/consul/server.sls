@@ -5,6 +5,7 @@
 include:
     - consul.install
     - consul.sync
+    - consul.acl_install  # during firstrun, this state is empty
 
 
 {% from 'consul/install.sls' import consul_user, consul_group %}
@@ -49,51 +50,6 @@ consul-policy-anonymous:
             - file: consul-policy-dir
 
 
-consul-update-anonymous-policy:
-    http.wait_for_successful_query:
-        - name: http://169.254.1.1:8500/v1/agent/members
-        - wait_for: 10
-        - request_interval: 1
-        - raise_error: False  # only exists in 'tornado' backend
-        - backend: tornado
-        - status: 200
-        - header_dict:
-            X-Consul-Token: {{pillar['dynamicsecrets']['consul-acl-master-token']}}
-        - require:
-            - service: consul-server-service
-    cmd.run:
-        - name: >
-            curl -i -s -X PUT -H "X-Consul-Token: $CONSUL_HTTP_TOKEN" \
-                --data @/etc/consul/policies.d/anonymous.json \
-                http://169.254.1.1:8500/v1/acl/policy
-        - env:
-            CONSUL_HTTP_TOKEN: {{pillar['dynamicsecrets']['consul-acl-master-token']}}
-        - unless: consul acl policy list | grep "^anonymous" >/dev/null
-        - require:
-            - file: consul-policy-anonymous
-            - http: consul-update-anonymous-policy
-        - require_in:
-            - http: consul-server-service
-        - watch:
-            - service: consul-server-service
-
-
-consul-update-anonymous-token:
-    cmd.run:
-        - name: >
-            curl -i -s -X PUT -H "X-Consul-Token: $CONSUL_HTTP_TOKEN" \
-                --data '{ "SecretID": "anonymous", "Policies": [{ "Name": "anonymous" }] }' \
-                http://169.254.1.1:8500/v1/acl/token/00000000-0000-0000-0000-000000000002
-        - env:
-            CONSUL_HTTP_TOKEN: {{pillar['dynamicsecrets']['consul-acl-master-token']}}
-        - require:
-            - cmd: consul-update-anonymous-policy
-        - require_in:
-            - http: consul-server-service
-        - watch:
-            - service: consul-server-service
-
-
 consul-acl-token-envvar:
     file.managed:
         - name: /etc/consul/acl_token_envvar
@@ -118,7 +74,7 @@ consul-agent-token-envvar:
             - file: consul-basedir
 
 
-consul-server-service:
+consul-service:
     file.managed:
         - name: /etc/systemd/system/consul-server.service
         - source: salt://consul/consul.jinja.service
@@ -142,7 +98,7 @@ consul-server-service:
         - require:
             - cmd: consul-sync-network
             - file: consul-common-config
-            - file: consul-server-service
+            - file: consul-service
             - file: consul-acl-config
     http.wait_for_successful_query:
         - name: http://169.254.1.1:8500/v1/agent/members
@@ -154,7 +110,7 @@ consul-server-service:
         - header_dict:
             X-Consul-Token: anonymous
         - require:
-            - service: consul-server-service
+            - service: consul-service
         - require_in:
             - cmd: consul-sync
 
@@ -162,6 +118,8 @@ consul-server-service:
 {% if pillar['dynamicsecrets']['consul-acl-token']['firstrun'] %}
 # on the master server, to fix the chicken egg problem of the ACL initialization, we install the server
 # and run it, then install a temporary ACL config and restart the server.
+# If we're not in firstrun, the inclusion of consul.acl_install at the top of this file will take care
+# of the ACL configuration.
 consul-tempacl-create-policy:
     cmd.run:
         - name: |+
@@ -208,7 +166,8 @@ consul-tempacl-create-policy:
             CONSUL_ACL_MASTER_TOKEN: {{pillar['dynamicsecrets']['consul-acl-master-token']}}
         - unless: test -f /etc/consul/conf.d/agent_acl.json
         - require:
-            - http: consul-server-service
+            - http: consul-service
+
 
 consul-tempacl-server-config:
     cmd.run:
@@ -229,45 +188,11 @@ consul-tempacl-server-config:
         - require:
             - cmd: consul-tempacl-create-policy
         - watch_in:
-            - service: consul-server-service-restart
-{% else %}
-# when we have a server, we run it, then
-consul-server-register-acl:
-    event.wait:
-        - name: maurusnet/consul/installed
-        - watch:
-            - service: consul-server-service
-    http.wait_for_successful_query:
-        - name: http://169.254.1.1:8500/v1/acl/info/{{pillar['dynamicsecrets']['consul-acl-token']['accessor_id']}}
-        - wait_for: 10
-        - request_interval: 1
-        - raise_error: False  # only exists in 'tornado' backend
-        - backend: tornado
-        - status: 200
-        - require:
-            - event: consul-server-register-acl
-        - require_in:
-            - cmd: consul-sync
-
-
-consul-acl-server-config:
-    file.managed:
-        - name: /etc/consul/conf.d/agent_acl.json
-        - source: salt://consul/acl/agent_acl.jinja.json
-        - user: {{consul_user}}
-        - group: {{consul_group}}
-        - mode: '0600'
-        - template: jinja
-        - context:
-            agent_acl_token: {{pillar['dynamicsecrets']['consul-acl-token']['secret_id']}}
-        - require:
-            - http: consul-server-register-acl
-        - watch_in:
-            - service: consul-server-service-restart
+            - service: consul-service-restart
 {% endif %}
 
 
-consul-server-service-restart:
+consul-service-restart:
     service.running:
         - name: consul-server
         - sig: consul
@@ -275,7 +200,7 @@ consul-server-service-restart:
         - init_delay: 2
         - watch:
             - file: consul-acl-config
-            - file: consul-server-service  # if consul.service changes we want to *restart* (reload: False)
+            - file: consul-service  # if consul.service changes we want to *restart* (reload: False)
             - file: consul  # restart on a change of the binary
     http.wait_for_successful_query:
         - name: http://169.254.1.1:8500/v1/agent/members
@@ -287,7 +212,7 @@ consul-server-service-restart:
         - header_dict:
             X-Consul-Token: anonymous
         - require:
-            - service: consul-server-service-restart
+            - service: consul-service-restart
         - require_in:
             - cmd: consul-sync
 
@@ -308,11 +233,11 @@ consul-singlenode-snapshot-service:
         - require:
             - file: consul-singlenode-snapshot-timer
             - file: consul-singlenode-snapshot-service
-            - service: consul-server-service
+            - service: consul-service
 {% endif %}
 
 
-consul-server-service-reload:
+consul-service-reload:
     service.running:
         - name: consul-server
         - sig: consul
@@ -320,7 +245,7 @@ consul-server-service-reload:
         - reload: True  # makes Salt send a SIGHUP (systemctl reload consul) instead of restarting
         - init_delay: 1
         - require:
-            - file: consul-server-service
+            - file: consul-service
         - watch:
             # If we detect a change in the service definitions reload, don't restart. This matches STATE names not FILE
             # names, so this watch ONLY works on STATES named /etc/consul/services.d/[whatever]!
@@ -328,6 +253,7 @@ consul-server-service-reload:
             # is no other state that matches "/etc/consul/services.d/*" whereas "/etc/consul/services.d*" will match the
             # consul.install.consul-service-dir state.
             - file: /etc/consul/services.d*
+            - file: consul-acl-agent-config
         - require_in:  # ensure that all service registrations happen
             - cmd: consul-sync
     http.wait_for_successful_query:
@@ -340,7 +266,7 @@ consul-server-service-reload:
         - header_dict:
             X-Consul-Token: anonymous
         - watch:
-            - service: consul-server-service-reload
+            - service: consul-service-reload
         - require_in:
             - cmd: consul-sync
 

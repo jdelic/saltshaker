@@ -1,5 +1,6 @@
 
 include:
+    - consul.template_acl_install
     - consul.sync
 
 
@@ -58,7 +59,6 @@ consul-template-config:
                         if pillar['vault'].get('pinned-ca-cert', 'default') == 'default'
                         else pillar['vault']['pinned-ca-cert']}}
             vault_url: https://{{pillar['vault']['smartstack-hostname']}}:8200/
-            consul_acl_token: {{pillar['dynamicsecrets']['consul-acl-token']['secret_id']}}
         - require:
             - file: consul-basedir
 
@@ -95,6 +95,7 @@ consul-template-service:
         - require:
             - file: consul-data-dir
             - file: consul-template-config
+            - file: consul-template-acl-config
             - file: consul-template-dir
             - file: consul-template-servicerenderer
             - cmd: consul-sync
@@ -116,6 +117,7 @@ consul-template-service-reload:
         - watch:
             - file: /etc/consul/template.d*
             - file: /etc/consul/consul-template.conf
+            - file: consul-template-acl-config
             - cmd: consul-template-servicerenderer
 
 
