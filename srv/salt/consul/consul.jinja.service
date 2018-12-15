@@ -2,8 +2,8 @@
 Description=Consul Agent
 Wants=basic.target
 After=basic.target network.target
-WantedBy=salt-master.service salt-minion.service
-Before=salt-master.service salt-minion.service
+WantedBy=pdns-recursor.service consul-template.service salt-master.service salt-minion.service
+Before=pdns-recursor.service consul-template.service salt-master.service salt-minion.service
 
 [Service]
 User={{user}}
