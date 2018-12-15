@@ -201,6 +201,7 @@ consul-service-restart:
         - watch:
             - file: consul-acl-config
             - file: consul  # restart on a change of the binary
+            - file: consul-acl-agent-config
             - systemdunit: consul-service  # if consul.service changes we want to *restart* (reload: False)
     http.wait_for_successful_query:
         - name: http://169.254.1.1:8500/v1/agent/members
@@ -253,7 +254,6 @@ consul-service-reload:
             # is no other state that matches "/etc/consul/services.d/*" whereas "/etc/consul/services.d*" will match the
             # consul.install.consul-service-dir state.
             - file: /etc/consul/services.d*
-            - file: consul-acl-agent-config
         - require_in:  # ensure that all service registrations happen
             - cmd: consul-sync
     http.wait_for_successful_query:
