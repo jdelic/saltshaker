@@ -23,15 +23,15 @@ repos:
 
 urls:
     concourse: http://fileserver.maurusnet.test/downloads/concourse/concourse_linux_amd64
-    consul: http://fileserver.maurusnet.test/downloads/consul/consul_1.4.0_linux_amd64.zip
-    consul-esm: http://fileserver.maurusnet.test/downloads/consul-esm/consul-esm_0.2.0_linux_amd64.zip
+    consul: http://fileserver.maurusnet.test/downloads/consul/consul_1.4.1_linux_amd64.zip
+    consul-esm: http://fileserver.maurusnet.test/downloads/consul-esm/consul-esm_0.3.2_linux_amd64.zip
     consul-replicate: http://fileserver.maurusnet.test/downloads/consul-replicate/consul-replicate_0.4.0_linux_amd64.zip
     consul-template: http://fileserver.maurusnet.test/downloads/consul-template/consul-template_0.19.5_linux_amd64.zip
     exxo: http://fileserver.maurusnet.test/downloads/exxo/exxo-0.0.7.tar.xz
-    nomad: http://fileserver.maurusnet.test/downloads/nomad/nomad_0.8.6_linux_amd64.zip
+    nomad: http://fileserver.maurusnet.test/downloads/nomad/nomad_0.8.7_linux_amd64.zip
     pyrun35: http://fileserver.maurusnet.test/downloads/exxo/egenix-pyrun-2.2.3-py3.5_ucs4-linux-x86_64.tgz
     terraform: http://fileserver.maurusnet.test/downloads/terraform/terraform_0.11.8_linux_amd64.zip
-    vault: http://fileserver.maurusnet.test/downloads/vault/vault_1.0.0_linux_amd64.zip
+    vault: http://fileserver.maurusnet.test/downloads/vault/vault_1.0.2_linux_amd64.zip
     vault-gpg-plugin: http://fileserver.maurusnet.test/downloads/vault-gpg-plugin/linux_amd64.zip
     vault-ssh-helper: http://fileserver.maurusnet.test/downloads/vault/vault-ssh-helper_0.1.4_linux_amd64.zip
     fpmdeps: http://fileserver.maurusnet.test/downloads/ruby/fpm+deps.zip
@@ -39,15 +39,15 @@ urls:
 
 hashes:
     concourse: sha256=e3cada9e536af9596cfb812dc4af37cbc9ff7e4ed6f3d3ee91a6b62a6356d02a
-    consul: sha256=41f8c3d63a18ef4e51372522c1e052618cdfcffa3d9f02dba0b50820e8279824
-    consul-esm: sha256=9a49a3c3d1b890ae738c73764354e36e4b13e90677b552f140f1033c1ae2a464
+    consul: sha256=965ecbfb2bb2443d5271ae5702b9fc80b8c5158654caa850107ecf4608eb2d11
+    consul-esm: sha256=88af7cc2645187c52da88300d12dd10a76133055de8fd68353c7bea5dec76644
     consul-replicate: sha256=96c6651291c2f8e75d98d04b9b4653d8a02324edaa25783744d9ea1d8d411c61
     consul-template: sha256=e6b376701708b901b0548490e296739aedd1c19423c386eb0b01cfad152162af
     exxo: sha256=ce3d6ae10d364c5a0726cce127602fe6fa5d042b11afd21d79502f8216b42e1e
-    nomad: sha256=7569561e4a8fdb283f36f9ff6ed7834be6b1f4a2149246f8bd3fb719265c800c
+    nomad: sha256=a5a3a507ee8048ab2337427824b5e7fd0c6c069ca5d2f545f13f742af0a707da
     pyrun35: sha256=8bf8b374f582bb53600dd846a0cdb38e18586bbda06261321d48df69ddbf730e
     terraform: sha256=84ccfb8e13b5fce63051294f787885b76a1fedef6bdbecf51c5e586c9e20c9b7
-    vault: sha256=75afb647d2ebeb46aafbf147ed1f1b379f6b8c9f909550dc2d0976cf153e8aa6
+    vault: sha256=5549714c24b61ea77a7afb30e1fbff6ec596cfd39dab7a2e6cf7e71432d616cc
     vault-gpg-plugin: sha256=8826ea137898e572bef7d27b6544b4f46e42119c3c83f668858a529ff82ad8bd
     vault-ssh-helper: sha256=156ce8250725e64a3e4dc51018a18813dd44d1f2a6c853976bc20e1625d631a1
     fpmdeps: sha256=acddcc12840c6684631d30b32c314a8f73d9319f69c26411ad90a7aa70b0a1df
