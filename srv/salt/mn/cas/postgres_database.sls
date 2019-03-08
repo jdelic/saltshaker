@@ -52,7 +52,6 @@ authserver-postgres:
 {% else %}
         - createroles: True
 {% endif %}
-        - createuser: False
         - encrypted: True
         - login: True
         - inherit: True

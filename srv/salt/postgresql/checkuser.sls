@@ -9,7 +9,6 @@ checkuser-postgres:
         - name: checkuser
         - createdb: False
         - createroles: False
-        - createuser: False
         - encrypted: True
         - login: True
         - inherit: True
