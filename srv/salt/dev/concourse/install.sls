@@ -60,14 +60,22 @@ concourse-keys-host_key-public:
 
 
 concourse-install:
-    file.managed:
+    # remove old versions of concourse
+    file.absent:
         - name: /usr/local/bin/concourse_linux_amd64
+    archive.extracted:
+        - name: /usr/local
         - source: {{pillar["urls"]["concourse"]}}
         - source_hash: {{pillar["hashes"]["concourse"]}}
+        - archive_format: tar
+        - unless: test -d /usr/local/concourse  # workaround for https://github.com/saltstack/salt/issues/42681
+        - if_missing: /usr/local/concourse
+        - enforce_toplevel: False
+    file.managed:
+        - name: /usr/local/concourse/bin/concourse
         - mode: '0755'
-        - user: concourse
-        - group: concourse
-        - replace: False
+        - user: root
+        - group: root
         - require:
             - user: concourse-user
             - file: concourse-keys-host_key-public

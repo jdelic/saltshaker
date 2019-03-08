@@ -116,7 +116,7 @@ concourse-server-envvars{% if pillar['ci'].get('use-vault', True) %}-template{% 
             CONCOURSE_VAULT_URL="https://{{pillar['vault']['smartstack-hostname']}}:8200/"
             CONCOURSE_VAULT_CA_CERT="{{pillar['ssl']['service-rootca-cert']}}"
             CONCOURSE_VAULT_AUTH_BACKEND="approle"
-            CONCOURSE_VAULT_AUTH_PARAM="role_id={{pillar['dynamicsecrets']['concourse-role-id']}},secret_id=((secret_id))"
+            CONCOURSE_VAULT_AUTH_PARAM="role_id:{{pillar['dynamicsecrets']['concourse-role-id']}},secret_id:((secret_id))"
             CONCOURSE_OAUTH_DISPLAY_NAME="SSO Account"
             CONCOURSE_OAUTH_CLIENT_ID="((oauth2_client_id))"
             CONCOURSE_OAUTH_CLIENT_SECRET="((oauth2_client_secret))"
