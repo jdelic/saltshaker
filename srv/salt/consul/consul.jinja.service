@@ -13,7 +13,7 @@ ExecStart=/usr/local/bin/consul agent -node "{{node_id}}" \
     -config-file=/etc/consul/common-config.json \
     -config-dir=/etc/consul/services.d -config-dir=/etc/consul/conf.d -data-dir=/run/consul \
     -pid-file=/run/consul/consul.pid {% if extra_parameters is defined %}{{extra_parameters}}{% endif %}
-    {%- for server, addr in salt['mine.get']('roles:consulserver', 'internal_ip', expr_form='grain').items() -%}
+    {%- for server, addr in salt['mine.get']('roles:consulserver', 'internal_ip', tgt_type='grain').items() -%}
         {%- if loop.first -%}
             {{" "}}\{{"\n"}}
         {%- endif -%}

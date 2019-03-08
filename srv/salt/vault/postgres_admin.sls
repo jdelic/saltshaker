@@ -13,7 +13,6 @@ vaultadmin:
         - name: {{pillar['vault']['managed-database-owner']}}
         - createdb: False
         - createroles: True
-        - createuser: True
         - encrypted: True
         - login: True
         - inherit: False
