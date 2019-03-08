@@ -20,7 +20,6 @@ vault-postgres:
         - name: {{pillar['vault']['postgres']['dbuser']}}
         - createdb: False
         - createroles: False
-        - createuser: False
         - encrypted: True
         - login: True
         - inherit: False
