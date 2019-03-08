@@ -41,7 +41,7 @@ duplicity-cron-backup-script:
             backup_target_url: {{pillar['duplicity-backup']['backup-target']}}
             gpg_keys: {{pillar['duplicity-backup']['gpg-keys']|tojson}}
             gpg_options: {{pillar['duplicity-backup'].get('gpg-options', '')}}
-            envvars: {{envvars}}
+            envvars: {{envvars|tojson}}
 
 
 duplicity-cron-cleanup-script:
@@ -57,7 +57,7 @@ duplicity-cron-cleanup-script:
             cron_enabled: {{pillar.get('duplicity-backup', {}).get('enable-cleanup-cron', False)}}
             cleanup_mode: {{pillar.get('duplicity-backup', {}).get('cleanup-mode', 'remove-older-than')}}
             cleanup_selector: {{pillar.get('duplicity-backup', {}).get('cleanup-selector', '1y')}}
-            envvars: {{envvars}}
+            envvars: {{envvars|tojson}}
 
 
 {% for crontype in ['hourly', 'daily'] %}
