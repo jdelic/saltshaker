@@ -171,8 +171,7 @@ class DynamicSecretsPillar(DynamicSecretsStore):
         if _CONSUL_TOKEN:
             consul_token = _CONSUL_TOKEN
         elif _CONSUL_TOKEN_SECRET:
-            if self.exists(_CONSUL_TOKEN_SECRET):
-                consul_token = self.load(_CONSUL_TOKEN_SECRET)
+            consul_token = self.get_or_create({"type": "uuid"}, _CONSUL_TOKEN_SECRET)
 
         if not consul_token:
             raise ValueError("No ACL token for Consul in dynamicsecrets configuration")
