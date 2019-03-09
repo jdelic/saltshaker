@@ -1,4 +1,5 @@
-{% if not pillar['dynamicsecrets'].get('consul-acl-token', {}).get('firstrun', True) %}
+# on first run this will not render a real consul ACL. This is taken care of in
+# consul.template.consul-template-firstrun-config
 consul-template-acl-config:
     file.managed:
         - name: /etc/consul/consul-template-acl.conf
@@ -8,4 +9,3 @@ consul-template-acl-config:
             consul_acl_token: {{pillar['dynamicsecrets']['consul-acl-token']['secret_id']}}
         - require:
             - file: consul-basedir
-{% endif %}

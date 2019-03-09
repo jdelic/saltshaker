@@ -70,13 +70,15 @@ consul-template-firstrun-config:
     cmd.run:
         - name: >
             sed "s#^\(\s*\)token =.*#\1token = \"$(jq -r .acl.tokens.agent /etc/consul/conf.d/agent_acl.json)\"#" \
-                /etc/consul/consul-template.conf > /etc/consul/consul-template.conf.new;
-            mv /etc/consul/consul-template.conf.new /etc/consul/consul-template.conf
-        - onlyif: grep "first run" /etc/consul/consul-template.conf
+                /etc/consul/consul-template-acl.conf > /etc/consul/consul-template-acl.conf.new;
+            mv /etc/consul/consul-template-acl.conf.new /etc/consul/consul-template-acl.conf
+        - onlyif: grep -q "first run" /etc/consul/consul-template-acl.conf
         - require:
             - file: consul-template-config
         - require_in:
             - service: consul-template-service
+        - watch_in:
+            - service: consul-template-service-reload
 {% endif %}
 
 

@@ -201,7 +201,9 @@ consul-service-restart:
         - watch:
             - file: consul-acl-config
             - file: consul  # restart on a change of the binary
+{% if not pillar['dynamicsecrets']['consul-acl-token']['firstrun'] %}
             - file: consul-acl-agent-config
+{% endif %}
             - systemdunit: consul-service  # if consul.service changes we want to *restart* (reload: False)
     http.wait_for_successful_query:
         - name: http://169.254.1.1:8500/v1/agent/members
