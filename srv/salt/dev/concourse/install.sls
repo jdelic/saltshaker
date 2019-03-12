@@ -59,10 +59,13 @@ concourse-keys-host_key-public:
             - file: concourse-config-folder
 
 
-concourse-install:
+concourse-remove-old:
     # remove old versions of concourse
     file.absent:
         - name: /usr/local/bin/concourse_linux_amd64
+
+
+concourse-install:
     archive.extracted:
         - name: /usr/local
         - source: {{pillar["urls"]["concourse"]}}
