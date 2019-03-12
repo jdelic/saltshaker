@@ -82,6 +82,7 @@ concourse-install:
         - require:
             - user: concourse-user
             - file: concourse-keys-host_key-public
+            - archive: concourse-install
 
 
 concourse-rsyslog:
