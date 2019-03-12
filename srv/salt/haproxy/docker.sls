@@ -35,5 +35,5 @@ smartstack-docker:
     service.enabled:  # haproxy will be started by the smartstack script rendered by consul-template (see command above)
         - name: haproxy@docker
         - require:
-            - file: haproxy-multi
+            - systemdunit: haproxy-multi
             - file: smartstack-internal
