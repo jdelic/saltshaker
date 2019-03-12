@@ -45,8 +45,7 @@ aptly-service-config:
             rootdir: /srv/aptly-api/
         - replace: False  # once modified by the user don't overwrite
         - makedirs: True
-        - file_mode: '0644'
-        - dir_mode: '0755'
+        - mode: '0644'
 
 
 aptly-service:
