@@ -65,10 +65,7 @@ consul-acl-token-update:
         - arg:
             - http.query
         - kwarg:
-            url: http://169.254.1.1:8500/v1/acl/token/{{salt['dynamicsecrets'].get_store().get_or_create(
-                  {
-                      "type": "consul-acl-token",
-                  },
+            url: http://169.254.1.1:8500/v1/acl/token/{{salt['dynamicsecrets'].get_store().load(
                   'consul-acl-token',
                   host=data['id'])['accessor_id']}}
             method: PUT
