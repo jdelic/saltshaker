@@ -27,8 +27,12 @@ include:
 
 # when we have a server, we run it, then
 consul-register-acl:
-    event.wait:
+    # notify the salt master to configure the unconfigured ACL token created by dynamicsecrets when the minion
+    # pillars were filled
+    event.send:
         - name: maurusnet/consul/installed
+    # this state then waits for the master orchestrator to do its job and attach the right policies to
+    # the unconfigured token. To do so we need consul to run already.
     http.wait_for_successful_query:
         - name: http://169.254.1.1:8500/v1/acl/info/{{pillar['dynamicsecrets']['consul-acl-token']['accessor_id']}}
         - wait_for: 10
@@ -38,6 +42,7 @@ consul-register-acl:
         - status: 200
         - require:
             - event: consul-register-acl
+            - service: consul-service
         - require_in:
             - cmd: consul-sync
 
@@ -53,11 +58,12 @@ consul-acl-agent-config:
         - context:
             agent_acl_token: {{pillar['dynamicsecrets']['consul-acl-token']['secret_id']}}
         - require:
-            - http: consul-register-acl
+            - event: consul-register-acl
             - file: consul-basedir
 
 
 {% if pillar['dynamicsecrets'].get('consul-acl-master-token', False) %}
+# these states only execute on consul servers and ensure correct config for the well-known tokens
 consul-update-anonymous-policy:
     http.wait_for_successful_query:
         - name: http://169.254.1.1:8500/v1/agent/members
