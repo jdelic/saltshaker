@@ -233,6 +233,20 @@ vault-init:
             - cmd: vault-sync
 
 
+vault-secret-kv-enabled:
+    cmd.run:
+        - name: /usr/local/bin/vault secrets enable -path=secret/ kv
+        - unless: /usr/local/vault secrets list | grep '^secret/' >/dev/null
+        - onlyif: /usr/local/bin/vault operator init -status >/dev/null
+        - env:
+            - VAULT_ADDR: "https://vault.service.consul:8200/"
+        - require:
+            - http: vault-service
+            - cmd: vault-init
+        - require_in:
+            - cmd: vault-sync
+
+
 # Vault clients configured by Salt should watch for this state using cmd.run:onchanges
 # and set up their CA certificate and policies
 vault-cert-auth-enabled:
@@ -250,6 +264,7 @@ vault-cert-auth-enabled:
             - cmd: vault-init
         - require_in:
             - cmd: vault-sync
+
 
 # Vault clients configured by Salt should watch for this state using cmd.run:onchanges
 # and set up their approles and policies
