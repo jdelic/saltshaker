@@ -2,8 +2,15 @@
 consul-sync:
     cmd.run:
         - name: /bin/true consul-sync
+        - require:
+            - cmd: consul-sync-ready
 
 
 consul-sync-network:
     cmd.run:
         - name: /bin/true consul-sync-network
+
+
+consul-sync-ready:
+    cmd.run:
+        - name: /bin/true consul-sync-ready

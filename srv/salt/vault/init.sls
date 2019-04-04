@@ -236,7 +236,7 @@ vault-init:
 vault-secret-kv-enabled:
     cmd.run:
         - name: /usr/local/bin/vault secrets enable -path=secret/ kv
-        - unless: /usr/local/vault secrets list | grep '^secret/' >/dev/null
+        - unless: /usr/local/bin/vault secrets list | grep '^secret/' >/dev/null
         - onlyif: /usr/local/bin/vault operator init -status >/dev/null
         - env:
             - VAULT_ADDR: "https://vault.service.consul:8200/"

@@ -19,14 +19,17 @@ authserver:
             - service: smartstack-internal
             - service: consul-template-service
             - file: authserver-servicedef-internal
-    http.wait_for_successful_query:
-        - name: http://{{pillar['authserver']['smartstack-hostname']}}:8999/health/
-        - wait_for: 10
-        - request_interval: 1
-        - raise_error: False  # only exists in 'tornado' backend
-        - backend: tornado
-        - status: 200
-        - require:
+    cmd.run:
+        - name: >
+            until test ${count} -gt 30; do
+                if curl -s --fail http://authserver.local:8999/health/; then
+                    break;
+                fi
+                sleep 1; count=$((count+1));
+            done; test ${count} -lt 30
+        - env:
+            count: 0
+        - onchanges:
             - service: authserver
         - require_in:
             - cmd: authserver-sync

@@ -11,7 +11,7 @@ include:
 {% from 'consul/install.sls' import consul_user, consul_group %}
 
 
-consul-acl-config:
+consul-acl-bootstrap=config:
     file.managed:
         - name: /etc/consul/conf.d/acl.json
         - source: salt://consul/acl/acl.jinja.json
@@ -47,25 +47,28 @@ consul-service:
         - enable: True
         - init_delay: 2
         - watch:
-            - file: consul-acl-config
+            - file: consul-acl-bootstrap-config
             - file: consul-common-config
-            - file: consul-acl-agent-config
             - file: consul  # restart on a change of the binary
             - systemdunit: consul-service  # if consul.service changes we want to *restart* (reload: False)
         - require:
             - cmd: consul-sync-network
+            - file: consul-acl-agent-config
     cmd.run:
         - name: >
-            until
-                test $(curl -s -H 'X-Consul-Token: anonymous' http://169.254.1.1:8500/v1/agent/members \
-                        | jq 'length') -gt 0 || test ${count} -gt 10; do sleep 1; count=$((count+1)); done &&
-                test ${count} -lt 30
+            until test ${count} -gt 30; do
+                if test $(curl -s -H 'X-Consul-Token: anonymous' http://169.254.1.1:8500/v1/agent/members \
+                            | jq 'length') -gt 0; then
+                    break;
+                fi
+                sleep 1; count=$((count+1));
+            done; test ${count} -lt 30
         - env:
             count: 0
-        - watch:
+        - onchanges:
             - service: consul-service
         - require_in:
-            - cmd: consul-sync
+            - cmd: consul-sync-ready
 
 
 consul-service-reload:
@@ -84,8 +87,24 @@ consul-service-reload:
             # consul.install.consul-service-dir state.
             - file: /etc/consul/services.d*
             - file: consul-common-config
+            - file: consul-acl-agent-config
         - require_in:  # ensure that all service registrations happen
             - cmd: consul-sync
+    cmd.run:
+        - name: >
+            until test ${count} -gt 30; do
+                if test $(curl -s -H 'X-Consul-Token: anonymous' http://169.254.1.1:8500/v1/agent/members \
+                            | jq 'length') -gt 0; then
+                    break;
+                fi
+                sleep 1; count=$((count+1));
+            done; test ${count} -lt 30
+        - env:
+            count: 0
+        - onchanges:
+            - service: consul-service-reload
+        - require_in:
+            - cmd: consul-sync-ready
 
 
 consul-server-absent:
