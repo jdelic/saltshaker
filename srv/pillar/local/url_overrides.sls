@@ -28,7 +28,7 @@ urls:
     consul-replicate: http://fileserver.maurusnet.test/downloads/consul-replicate/consul-replicate_0.4.0_linux_amd64.zip
     consul-template: http://fileserver.maurusnet.test/downloads/consul-template/consul-template_0.20.0_linux_amd64.zip
     exxo: http://fileserver.maurusnet.test/downloads/exxo/exxo-0.0.7.tar.xz
-    nomad: http://fileserver.maurusnet.test/downloads/nomad/nomad_0.8.7_linux_amd64.zip
+    nomad: http://fileserver.maurusnet.test/downloads/nomad/nomad_0.9.0_linux_amd64.zip
     pyrun35: http://fileserver.maurusnet.test/downloads/exxo/egenix-pyrun-2.2.3-py3.5_ucs4-linux-x86_64.tgz
     terraform: http://fileserver.maurusnet.test/downloads/terraform/terraform_0.11.13_linux_amd64.zip
     vault: http://fileserver.maurusnet.test/downloads/vault/vault_1.1.0_linux_amd64.zip
@@ -44,7 +44,7 @@ hashes:
     consul-replicate: sha256=96c6651291c2f8e75d98d04b9b4653d8a02324edaa25783744d9ea1d8d411c61
     consul-template: sha256=500fe023c89517f959175eb79e21c33df0acf7733d3f3681ec8c5238863caf86
     exxo: sha256=ce3d6ae10d364c5a0726cce127602fe6fa5d042b11afd21d79502f8216b42e1e
-    nomad: sha256=a5a3a507ee8048ab2337427824b5e7fd0c6c069ca5d2f545f13f742af0a707da
+    nomad: sha256=91fa6448494cc3eb3ad7b5d2a3e80c9531fdcc52e6723b891eb5cc17ee685c7f
     pyrun35: sha256=8bf8b374f582bb53600dd846a0cdb38e18586bbda06261321d48df69ddbf730e
     terraform: sha256=5925cd4d81e7d8f42a0054df2aafd66e2ab7408dbed2bd748f0022cfe592f8d2
     vault: sha256=65d665ee7ba08fb41a7113a2ae3c1d5fd7e0b530b59644ed7dc8a01870b2d73f
