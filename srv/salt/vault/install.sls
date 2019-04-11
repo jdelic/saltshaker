@@ -50,3 +50,12 @@ vault-setcap:
             - file: vault
         - require_in:
             - cmd: vault-sync
+
+
+vault-rsyslog:
+    file.managed:
+        - name: /etc/rsyslog.d/50-vault.rsyslog.conf
+        - source: salt://vault/50-vault.rsyslog.conf
+        - user: root
+        - group: root
+        - mode: '0644'

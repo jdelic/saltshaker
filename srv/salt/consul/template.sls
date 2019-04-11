@@ -139,4 +139,12 @@ consul-template-servicerenderer:
             - file: consul-template-servicerenderer
 
 
+consul-template-rsyslog:
+    file.managed:
+        - name: /etc/rsyslog.d/49-consul-template.rsyslog.conf
+        - source: salt://consul/49-consul-template.rsyslog.conf
+        - user: root
+        - group: root
+        - mode: '0644'
+
 # vim: syntax=yaml
