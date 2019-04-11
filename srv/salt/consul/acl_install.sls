@@ -25,6 +25,7 @@ include:
 
 {% from 'consul/install.sls' import consul_user, consul_group %}
 
+
 # when we have a server, we run it, then
 consul-register-acl:
     # notify the salt master to configure the unconfigured ACL token created by dynamicsecrets when the minion
@@ -61,7 +62,9 @@ consul-acl-agent-config:
         - context:
             agent_acl_token: {{pillar['dynamicsecrets']['consul-acl-token']['secret_id']}}
         - require:
-            - file: consul-basedir
+            - file: consul-conf-dir
+            - user: consul
+            - group: consul
 
 
 {% if pillar['dynamicsecrets'].get('consul-acl-master-token', False) %}
@@ -74,7 +77,7 @@ consul-update-anonymous-policy:
                 http://169.254.1.1:8500/v1/acl/policy
         - env:
             CONSUL_HTTP_TOKEN: {{pillar['dynamicsecrets']['consul-acl-master-token']}}
-        - unless: consul acl policy list | grep "^anonymous" >/dev/null
+        - unless: /usr/local/bin/consul acl policy list | grep "^anonymous" >/dev/null
         - require:
             - file: consul-policy-anonymous
             - cmd: consul-sync-ready

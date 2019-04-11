@@ -33,6 +33,18 @@ consul-network-interface:
 
 consul-data-dir:
     file.directory:
+        - name: /var/lib/consul
+        - makedirs: True
+        - user: {{consul_user}}
+        - group: {{consul_group}}
+        - mode: '0700'
+        - require:
+            - user: consul
+            - group: consul
+
+
+consul-run-dir:
+    file.directory:
         - name: /run/consul
         - makedirs: True
         - user: {{consul_user}}
@@ -154,6 +166,7 @@ consul:
         - require:
             - user: consul
             - file: consul-data-dir
+            - file: consul-run-dir
             - archive: consul
 
 

@@ -10,6 +10,7 @@ include:
 
 {% from 'consul/install.sls' import consul_user, consul_group %}
 
+{% set single_node_cluster = pillar['consul-cluster']['number-of-nodes'] == 1 %}
 
 consul-acl-bootstrap-config:
     file.managed:
@@ -83,8 +84,11 @@ consul-service:
             user: {{consul_user}}
             group: {{consul_group}}
             extra_parameters: -server -bootstrap-expect={{pillar['consul-cluster']['number-of-nodes']}} -ui
-            single_node_cluster: {% if pillar['consul-cluster']['number-of-nodes'] == 1 %}True{% else %}False{% endif %}
-            node_id: {{grains['id']}}
+            single_node_cluster: {% if single_node_cluster %}True{% else %}False{% endif %}
+            node_name: {{grains['id']}}
+    {% if single_node_cluster %}
+            node_id: {{pillar['dynamicsecrets']['consul-node-id']}}
+    {% endif %}
         - require:
             - file: consul
             - file: consul-agent-absent

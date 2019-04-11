@@ -11,7 +11,7 @@ include:
 {% from 'consul/install.sls' import consul_user, consul_group %}
 
 
-consul-acl-bootstrap=config:
+consul-acl-bootstrap-config:
     file.managed:
         - name: /etc/consul/conf.d/acl.json
         - source: salt://consul/acl/acl.jinja.json
@@ -54,6 +54,7 @@ consul-service:
         - require:
             - cmd: consul-sync-network
             - file: consul-acl-agent-config
+            - event: consul-register-acl
     cmd.run:
         - name: >
             until test ${count} -gt 30; do
@@ -68,7 +69,9 @@ consul-service:
         - onchanges:
             - service: consul-service
         - require_in:
-            - cmd: consul-sync-ready
+            # on consul.agent we use consul-sync instead of consul-sync-ready so that 'service: consul-service' can
+            # depend on 'event: consul-register-acl' since the consul agent may block until the ACLs get set up
+            - cmd: consul-sync
 
 
 consul-service-reload:
@@ -104,7 +107,7 @@ consul-service-reload:
         - onchanges:
             - service: consul-service-reload
         - require_in:
-            - cmd: consul-sync-ready
+            - cmd: consul-sync
 
 
 consul-server-absent:

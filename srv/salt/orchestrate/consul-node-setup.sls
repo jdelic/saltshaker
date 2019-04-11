@@ -93,3 +93,14 @@ consul-acl-install:
             - consul.template_acl_install
         - require:
             - salt: consul-acl-token-update
+
+
+# work around https://github.com/hashicorp/consul/issues/5651
+consul-template-reload:
+    salt.function:
+        - name: service.reload
+        - tgt: {{data['id']}}
+        - arg:
+            - consul-template
+        - require:
+            - salt: consul-acl-token-update

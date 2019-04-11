@@ -5,13 +5,14 @@ After=basic.target network.target
 WantedBy=pdns-recursor.service consul-template.service salt-master.service salt-minion.service
 Before=pdns-recursor.service consul-template.service salt-master.service salt-minion.service
 
+
 [Service]
 User={{user}}
 Group={{group}}
 Environment=GOMAXPROCS=2
-ExecStart=/usr/local/bin/consul agent -node "{{node_id}}" \
-    -config-file=/etc/consul/common-config.json \
-    -config-dir=/etc/consul/services.d -config-dir=/etc/consul/conf.d -data-dir=/run/consul \
+ExecStart=/usr/local/bin/consul agent -node "{{node_name}}" \
+    {% if node_id is defined %}-node-id "{{node_id}}"{% endif %} -config-file=/etc/consul/common-config.json \
+    -config-dir=/etc/consul/services.d -config-dir=/etc/consul/conf.d -data-dir=/var/lib/consul \
     -pid-file=/run/consul/consul.pid {% if extra_parameters is defined %}{{extra_parameters}}{% endif %}
     {%- for server, addr in salt['mine.get']('roles:consulserver', 'internal_ip', tgt_type='grain').items() -%}
         {%- if loop.first -%}

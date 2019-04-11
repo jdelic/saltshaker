@@ -95,7 +95,7 @@ consul-template-service:
         - sig: consul-template
         - enable: True
         - require:
-            - file: consul-data-dir
+            - file: consul-run-dir
             - file: consul-template-config
             - file: consul-template-acl-config
             - file: consul-template-dir
@@ -117,9 +117,10 @@ consul-template-service-reload:
             - file: consul-template-config
             - file: consul-template-dir
         - watch:
+            # this does NOT have to watch consul-template-acl-config as the reload is done via the
+            # orchestrator in consul-node-setup
             - file: /etc/consul/template.d*
             - file: /etc/consul/consul-template.conf
-            - file: consul-template-acl-config
             - cmd: consul-template-servicerenderer
 
 
