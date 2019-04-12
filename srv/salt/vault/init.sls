@@ -152,14 +152,17 @@ vault-service:
             - file: vault-ssl-cert  # restart when the SSL cert changes
             - file: vault-ssl-key
             - service: smartstack-internal
-    http.wait_for_successful_query:
-        - name: https://vault.service.consul:8200/v1/sys/health
-        - match: "initialized"
-        - wait_for: 10
-        - request_interval: 1
-        - raise_error: False  # only exists in 'tornado' backend
-        - backend: tornado
-        - watch:
+    cmd.run:
+        - name: >
+            until test ${count} -gt 30; do
+                if test curl --fail https://vault.service.consul:8200/v1/sys/health; then
+                    break;
+                fi
+                sleep 1; count=$((count+1));
+            done; test ${count} -lt 30
+        - env:
+            count: 0
+        - onchanges:
             - service: vault-service
         - require_in:
             - cmd: vault-sync
@@ -227,7 +230,7 @@ vault-init:
             - VAULT_ADDR: "https://vault.service.consul:8200/"
         - require:
             - file: managed-keyring
-            - http: vault-service
+            - cmd: vault-service
             - cmd: powerdns-sync
         - require_in:
             - cmd: vault-sync
@@ -241,7 +244,7 @@ vault-secret-kv-enabled:
         - env:
             - VAULT_ADDR: "https://vault.service.consul:8200/"
         - require:
-            - http: vault-service
+            - cmd: vault-service
             - cmd: vault-init
         - require_in:
             - cmd: vault-sync
@@ -260,7 +263,7 @@ vault-cert-auth-enabled:
         - env:
             - VAULT_ADDR: "https://vault.service.consul:8200/"
         - require:
-            - http: vault-service
+            - cmd: vault-service
             - cmd: vault-init
         - require_in:
             - cmd: vault-sync
@@ -276,7 +279,7 @@ vault-approle-auth-enabled:
         - env:
             - VAULT_ADDR: "https://vault.service.consul:8200/"
         - require:
-            - http: vault-service
+            - cmd: vault-service
             - cmd: vault-init
         - require_in:
             - cmd: vault-sync
