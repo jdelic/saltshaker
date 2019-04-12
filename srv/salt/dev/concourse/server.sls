@@ -90,9 +90,9 @@ concourse-authorized-key-consul-template-watcher:
 concourse-server-envvars{% if pillar['ci'].get('use-vault', True) %}-template{% endif %}:
     file.managed:
     {% if pillar['ci']['use-vault'] %}
-        - name: /etc/concourse/envvars.tpl
+        - name: /etc/concourse/envvars-web.tpl
     {% else %}
-        - name: /etc/concourse/envvars  # read by concourse.service using systemd's `EnvironmentFile=`
+        - name: /etc/concourse/envvars-web  # read by concourse.service using systemd's `EnvironmentFile=`
     {% endif %}
         - user: root
         - group: root
@@ -137,13 +137,13 @@ concourse-server-envvars-approle:
             touch /etc/concourse/envtmp;
             chmod 600 /etc/concourse/envtmp;
             sed "s#((secret_id))#$(/usr/local/bin/vault write -f -format=json auth/approle/role/concourse/secret-id | \
-                jq -r .data.secret_id)#"  /etc/concourse/envvars.tpl >/etc/concourse/envtmp
+                jq -r .data.secret_id)#"  /etc/concourse/envvars-web.tpl >/etc/concourse/envtmp
         - env:
             - VAULT_ADDR: "https://vault.service.consul:8200/"
             - VAULT_TOKEN: {{pillar['dynamicsecrets']['approle-auth-token']}}
         - unless: >-
-            test -f /etc/concourse/envvars &&
-            source /etc/concourse/envvars &&
+            test -f /etc/concourse/envvars-web &&
+            source /etc/concourse/envvars-web &&
             echo $CONCOURSE_VAULT_AUTH_PARAM | cut -d',' -f2 | cut -d'=' -f2 | \
                 vault write auth/approle/login role_id={{pillar['dynamicsecrets']['concourse-role-id']}} secret_id=- &&
             test $? -eq 0
@@ -158,20 +158,20 @@ concourse-server-envvars-approle:
 concourse-server-envvars-oauth2:
     cmd.run:
         - name: >-
-            touch /etc/concourse/envvars;
-            chmod 700 /etc/concourse/envvars;
+            touch /etc/concourse/envvars-web;
+            chmod 600 /etc/concourse/envvars-web;
             sed "s#((oauth2_client_id))#$(/usr/local/bin/vault read -format=json secret/oauth2/concourse | \
                 jq -r .data.client_id)#" /etc/concourse/envtmp | \
             sed "s#((oauth2_client_secret))#$(/usr/local/bin/vault read -format=json secret/oauth2/concourse | \
-                jq -r .data.client_secret)#" > /etc/concourse/envvars;
+                jq -r .data.client_secret)#" > /etc/concourse/envvars-web;
             rm /etc/concourse/envtmp
         - env:
             - VAULT_ADDR: "https://vault.service.consul:8200/"
             - VAULT_TOKEN: {{pillar['dynamicsecrets']['concourse-oauth2-read']}}
         - onlyif: test -f /etc/concourse/envtmp
         - unless:
-            test -f /etc/concourse/envvars &&
-            source /etc/concourse/envvars &&
+            test -f /etc/concourse/envvars-web &&
+            source /etc/concourse/envvars-web &&
             test "$CONCOURSE_OAUTH_CLIENT_ID" == "$(vault read -format=json secret/oauth2/concourse | \
                 jq -r .data.client_id)" &&
             test "$CONCOURSE_OAUTH_CLIENT_SECRET" == "$(vault read -format=json secret/oauth2/concourse | \
@@ -212,6 +212,8 @@ concourse-server:
                 --peer-url http://{{pillar.get('concourse-server', {}).get('atc-ip',
                     grains['ip_interfaces'][pillar['ifassign']['internal']][pillar['ifassign'].get(
                         'internal-ip-index', 0)|int()])}}:{{pillar.get('concourse-server', {}).get('atc-port', 8080)}}
+            environment_files:
+                - /etc/concourse/envvars-web
         - require:
             - file: concourse-install
             - file: authorized_worker_keys-must-exist
@@ -226,6 +228,7 @@ concourse-server:
             - file: concourse-servicedef-tsa
             - file: concourse-servicedef-atc-internal
             - file: concourse-servicedef-atc
+            - file: concourse-keys-session_signing_key
         - require_in:
             - cmd: concourse-sync
 
@@ -290,6 +293,27 @@ concourse-servicedef-atc:
         - require:
             - systemdunit: concourse-server
             - file: consul-service-dir
+
+
+fly-link-teams:
+    file.managed:
+        - name: /etc/concourse/flyhelper.sh
+        - source: salt://dev/concourse/helpers/flyhelper.sh
+        - user: root
+        - group: root
+        - mode: '0700'
+    cmd.run:
+        - name: >
+            /etc/concourse/flyhelper.sh set developers developers
+        - unless:
+            /etc/concourse/flyhelper.sh check developers developers
+        - env:
+            CONCOURSE_SYSOP_PASSWORD: {{pillar['dynamicsecrets']['concourse-sysop']}}
+            CONCOURSE_URL: {{pillar['ci']['protocol']}}://{{pillar['ci']['hostname']}}
+        - require:
+            - cmd: concourse-sync
+            - file: fly-link-teams
+            - file: fly-install
 
 
 concourse-tcp-in{{pillar.get('concourse-server', {}).get('tsa-port', 2222)}}-recv:
