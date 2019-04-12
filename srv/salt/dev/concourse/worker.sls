@@ -45,6 +45,19 @@ concourse-worker-dir:
             - user: concourse-user
 
 
+concourse-worker-envvars:
+    file.managed:
+        - name: /etc/concourse/envvars-worker
+        - user: root
+        - group: root
+        - mode: '0600'
+        - contents: |
+            CONCOURSE_GARDEN_NETWORK_POOL="{{pillar.get('ci', {}).get('garden-network-pool', '10.254.0.0/22')}}"
+            CONCOURSE_GARDEN_DOCKER_REGISTRY="{{pillar.get('ci', {}).get('garden-docker-registry',
+              'registry-1.docker.io')}}"
+            CONCOURSE_GARDEN_DNS_SERVER=169.254.1.1
+
+
 concourse-worker:
     systemdunit.managed:
         - name: /etc/systemd/system/concourse-worker.service
@@ -62,9 +75,8 @@ concourse-worker:
                 --tsa-host 127.0.0.1:{{pillar.get('concourse-server', {}).get('tsa-port', 2222)}}
                 --tsa-public-key /etc/concourse/host_key.pub
                 --tsa-worker-private-key /etc/concourse/private/worker_key.pem
-                --garden-network-pool {{pillar.get('ci', {}).get('garden-network-pool', '10.254.0.0/22')}}
-                --garden-docker-registry {{pillar.get('ci', {}).get('garden-docker-registry', 'registry-1.docker.io')}}
-                --garden-dns-server=169.254.1.1
+            environment_files:
+                - /etc/concourse/envvars-worker
         - require:
             - file: concourse-install
             - file: concourse-worker-dir
@@ -78,6 +90,7 @@ concourse-worker:
         - watch:
             - systemdunit: concourse-worker
             - file: concourse-install  # restart on a change of the binary
+            - file: concourse-worker-envvars
 
 
 # allow forwarding of outgoing dns/http/https traffic to the internet from concourse.ci/garden containers
