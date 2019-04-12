@@ -6,8 +6,9 @@ After=basic.target network.target
 [Service]
 User={{user}}
 Group={{group}}
-EnvironmentFile=-/etc/concourse/envvars
-EnvironmentFile=-/etc/concourse/oauth2_config
+{% for envvars in environment_files %}
+EnvironmentFile={{envvars}}
+{% endfor %}
 ExecStart=/usr/local/concourse/bin/concourse {{type}} {{arguments}}
 ExecReload=/bin/kill -HUP $MAINPID
 PIDFile=/run/concourse-{{type}}.pid
