@@ -88,10 +88,10 @@ fly-install:
     archive.extracted:
         - name: /usr/local/bin
         - source: {{pillar['urls']['concourse-fly']}}
-        - source_hash: {{pillar['hashes']['concounse-fly']}}
+        - source_hash: {{pillar['hashes']['concourse-fly']}}
         - archive_format: tar
         - if_missing: /usr/local/bin/fly
-        - enforce_topleve: False
+        - enforce_toplevel: False
     file.managed:
         - name: /usr/local/bin/fly
         - mode: '0755'
