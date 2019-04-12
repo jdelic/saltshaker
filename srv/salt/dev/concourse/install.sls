@@ -68,10 +68,9 @@ concourse-remove-old:
 concourse-install:
     archive.extracted:
         - name: /usr/local
-        - source: {{pillar["urls"]["concourse"]}}
-        - source_hash: {{pillar["hashes"]["concourse"]}}
+        - source: {{pillar['urls']['concourse']}}
+        - source_hash: {{pillar['hashes']['concourse']}}
         - archive_format: tar
-        - unless: test -d /usr/local/concourse  # workaround for https://github.com/saltstack/salt/issues/42681
         - if_missing: /usr/local/concourse
         - enforce_toplevel: False
     file.managed:
@@ -83,6 +82,24 @@ concourse-install:
             - user: concourse-user
             - file: concourse-keys-host_key-public
             - archive: concourse-install
+
+
+fly-install:
+    archive.extracted:
+        - name: /usr/local/bin
+        - source: {{pillar['urls']['concourse-fly']}}
+        - source_hash: {{pillar['hashes']['concounse-fly']}}
+        - archive_format: tar
+        - if_missing: /usr/local/bin/fly
+        - enforce_topleve: False
+    file.managed:
+        - name: /usr/local/bin/fly
+        - mode: '0755'
+        - user: root
+        - group: root
+        - require:
+            - user: concourse-user
+            - archive: fly-install
 
 
 concourse-rsyslog:
