@@ -4,6 +4,8 @@ include:
     - dev.concourse.sync
     - vault.sync
     - powerdns.sync
+    - haproxy.sync
+    - consul.sync
 
 
 concourse-keys-session_signing_key:
@@ -12,7 +14,7 @@ concourse-keys-session_signing_key:
         - contents_pillar: dynamicsecrets:concourse-signingkey:key
         - user: concourse
         - group: concourse
-        - mode: '0640'
+        - mode: '0600'
         - replace: False
         - require_in:
             - service: concourse-server
@@ -38,7 +40,7 @@ concourse-keys-host_key:
         - contents_pillar: dynamicsecrets:concourse-hostkey:key
         - user: concourse
         - group: concourse
-        - mode: '0640'
+        - mode: '0600'
         - replace: True
         - require:
             - file: concourse-keys-host_key-public-copy
@@ -229,6 +231,21 @@ concourse-server:
             - file: concourse-servicedef-atc-internal
             - file: concourse-servicedef-atc
             - file: concourse-keys-session_signing_key
+    cmd.run:
+        - name: >
+            until test ${count} -gt 30; do
+                if curl -s --fail {{pillar['ci']['protocol']}}://{{pillar['ci']['hostname']}}/api/v1/info; then
+                    break;
+                fi
+                sleep 1; count=$((count+1));
+            done; test ${count} -lt 30
+        - env:
+            count: 0
+        - onchanges:
+            - service: concourse-web
+        - require:
+            - cmd: consul-template-sync
+            - cmd: smartstack-sync
         - require_in:
             - cmd: concourse-sync
 
