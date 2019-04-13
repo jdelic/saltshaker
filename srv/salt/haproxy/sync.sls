@@ -15,3 +15,8 @@ smartstack-external-sync:
 smartstack-internal-sync:
     cmd.run:
         - name: /bin/true smartstack-internal-sync
+
+
+smartstack-docker-sync:
+    cmd.run:
+        - name: /bin/true smartstack-docker-sync
