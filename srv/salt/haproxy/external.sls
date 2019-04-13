@@ -1,6 +1,7 @@
 
 include:
     - haproxy.install
+    - haproxy.sync
 
 
 haproxy-config-template-external:
@@ -51,6 +52,8 @@ smartstack-external:
             {% if 'ssl' in pillar and 'maincert' in pillar['ssl'] %}
             - file: ssl-maincert
             {% endif %}
+        - require_in:
+            - cmd: smartstack-external-sync
 
 
 # This is probably overkill, since consul-template already runs the smartstack script with --open-iptables=conntrack

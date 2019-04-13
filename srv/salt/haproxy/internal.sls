@@ -5,6 +5,7 @@
 
 include:
     - haproxy.install
+    - haproxy.sync
 
 
 haproxy-config-template-internal:
@@ -46,6 +47,8 @@ smartstack-internal:
         - name: haproxy@internal
         - require:
             - file: smartstack-internal
+        - require_in:
+            - cmd: smartstack-internal-sync
 
 
 # vim: syntax=yaml
