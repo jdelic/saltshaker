@@ -155,7 +155,7 @@ vault-service:
     cmd.run:
         - name: >
             until test ${count} -gt 30; do
-                if test curl --fail https://vault.service.consul:8200/v1/sys/health; then
+                if curl -s --fail https://vault.service.consul:8200/v1/sys/health; then
                     break;
                 fi
                 sleep 1; count=$((count+1));
