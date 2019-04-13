@@ -3,6 +3,7 @@
 /usr/local/bin/fly -t salt_ciadmin login -n main -c ${CONCOURSE_URL} -u sysop -p ${CONCOURSE_SYSOP_PASSWORD}
 
 check() {
+    echo "check team $1 $2" >&2
     if /usr/local/bin/fly teams -t salt_ciadmin -d --json | \
           jq '.[]|.name + "=" + .auth.owner.groups[],.name + "=" + .auth.owner.users[]' | \
           grep "$1=oauth:$2" >/dev/null 2>/dev/null; then
@@ -15,6 +16,7 @@ check() {
 RETCODE=0
 
 setteam() {
+    echo "set team $1 $2" >&2
     if test "$(check $1 $2)" == "found"; then
         RETCODE=0
     else
