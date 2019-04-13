@@ -14,3 +14,8 @@ consul-sync-network:
 consul-sync-ready:
     cmd.run:
         - name: /bin/true consul-sync-ready
+
+
+consul-template-sync:
+    cmd.run:
+        - name: /bin/true consul-template-sync

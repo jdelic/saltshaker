@@ -104,6 +104,8 @@ consul-template-service:
         - watch:
             - systemdunit: consul-template-service
             - file: consul-template  # restart on a change of the binary
+        - require_in:
+            - cmd: consul-template-sync
 
 
 consul-template-service-reload:
@@ -122,6 +124,8 @@ consul-template-service-reload:
             - file: /etc/consul/template.d*
             - file: /etc/consul/consul-template.conf
             - cmd: consul-template-servicerenderer
+        - require_in:
+            - cmd: consul-template-sync
 
 
 consul-template-servicerenderer:
@@ -138,6 +142,8 @@ consul-template-servicerenderer:
             test ! -z "$(ls -A /etc/consul/renders)" && rm /etc/consul/renders/*; /bin/true
         - onchanges:
             - file: consul-template-servicerenderer
+        - require:
+            - file: consul-renders-dir
 
 
 consul-template-rsyslog:
