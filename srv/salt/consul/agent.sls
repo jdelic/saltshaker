@@ -39,6 +39,8 @@ consul-service:
         - require:
             - file: consul
             - file: consul-server-absent
+            # this is here so that the WantedBy in our systemd service definition is processed correctly
+            - pkg: pdns-recursor
         - unless:
             - sls: consul.server  # make consul.agent mutually exclusive with consul.server
     service.running:

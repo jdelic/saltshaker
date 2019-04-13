@@ -1,6 +1,6 @@
 [Unit]
 Description=Consul Template
-Wants=basic.target
+Wants=basic.target consul-server.service consul.service
 After=basic.target network.target
 
 [Service]

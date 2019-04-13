@@ -1,8 +1,11 @@
+[Install]
+WantedBy=pdns-recursor.service
+
+
 [Unit]
 Description=Consul Agent
 Wants=basic.target
 After=basic.target network.target
-WantedBy=pdns-recursor.service consul-template.service salt-master.service salt-minion.service
 Before=pdns-recursor.service consul-template.service salt-master.service salt-minion.service
 
 
