@@ -5,31 +5,38 @@ include:
     - dev.concourse.install
 
 
-concourse-keys-worker_key:
-    cmd.run:
-        - name: ssh-keygen -t rsa -f /etc/concourse/private/worker_key.pem -N ''
-        - runas: concourse
-        - creates:
-            - /etc/concourse/private/worker_key.pem
-            - /etc/concourse/private/worker_key.pem.pub
-        - require:
-            - file: concourse-private-config-folder
-            - user: concourse-user
+concourse-keys-worker_key-public:
     file.managed:
-        - name: /etc/concourse/private/worker_key.pem
+        - name: /etc/concourse/private/worker_key.pem.pub
+        - contents_pillar: dynamicsecrets:concourse-workerkey:public
         - user: concourse
         - group: concourse
-        - mode: '0640'
-        - replace: False
+        - mode: '0644'
+        - replace: True
         - require:
-            - cmd: concourse-keys-worker_key
+            - user: concourse-user
+            - file: concourse-private-config-folder
+
+
+concourse-keys-worker_key:
+    file.managed:
+        - name: /etc/concourse/private/worker_key.pem
+        - contents_pillar: dynamicsecrets:concourse-workerkey:key
+        - user: concourse
+        - group: concourse
+        - mode: '0600'
+        - replace: True
+        - require:
+            - file: concourse-keys-worker_key-public
+            - user: concourse-user
 
 
 # register the worker for the server
 concourse-worker_key-consul-submit:
     cmd.run:
         - name: consul kv put concourse/workers/sshpub/{{grains['id']}} @/etc/concourse/private/worker_key.pem.pub
-        - unless: consul kv get -keys concourse/workers/sshpub/{{grains['id']}} | grep "{{grains['id']}}" >/dev/null
+        - onchanges:
+            - file: concourse-keys-worker_key-public
         - require:
             - file: concourse-keys-worker_key
             - cmd: consul-sync
@@ -80,7 +87,7 @@ concourse-worker:
         - require:
             - file: concourse-install
             - file: concourse-worker-dir
-            - file: concourse-keys-worker_key
+            - cmd: concourse-worker_key-consul-submit
     service.running:
         - name: concourse-worker
         - sig: /usr/local/bin/concourse_linux_amd64 worker
