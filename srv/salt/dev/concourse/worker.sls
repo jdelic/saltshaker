@@ -119,6 +119,25 @@ concourse-worker-tcp-out{{port}}-forward:
 {% endfor %}
 
 
+# allow incoming connections from concourse TSA. Outgoing connections for the web/server node are
+# covered by basics.sls for the internal network
+{% for port in ['7777', '7788', '7799'] %}
+concourse-worker-tcp-in{{port}}-recv:
+    iptables.append:
+        - table: filter
+        - chain: INPUT
+        - jump: ACCEPT
+        - in-interface: {{pillar['ifassign']['internal']}}
+        - dport: {{port}}
+        - match: state
+        - connstate: NEW
+        - proto: tcp
+        - save: True
+        - require:
+            - sls: iptables
+{% endfor %}
+
+
 concourse-worker-udp-out53-forward:
     iptables.append:
         - table: filter
