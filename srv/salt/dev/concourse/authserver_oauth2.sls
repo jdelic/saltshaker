@@ -1,4 +1,4 @@
-
+{% if pillar.get('ci', {}).get('enabled', False) %}
 include:
     - dev.concourse.sync
     - mn.cas.sync
@@ -85,3 +85,4 @@ authserver-concourse-require-permissions:
             - cmd: authserver-concourse-create-permissions
         - require_in:
             - cmd: concourse-sync-oauth2
+{% endif %}

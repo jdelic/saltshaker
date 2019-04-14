@@ -2,8 +2,12 @@
 # This state sets up Docker Token auth for the Docker registry on a server with the authserver role
 #
 
-{% if pillar["dynamicsecrets"].get("dockerauth-jwt-key", None) %}
-    {% set registry_hostname = pillar['docker']['registry']['hostname'] %}
+{% if pillar.get('docker', {}).get('registry', {}).get('enabled', False) %}
+#FIXME: support new authserver commands and create JWT key correctly
+
+{% set registry_hostname = pillar['docker']['registry']['hostname'] %}
+
+
 
 docker-registry-tokenauth:
     cmd.run:
