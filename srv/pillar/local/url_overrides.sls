@@ -32,7 +32,7 @@ urls:
     nomad: http://fileserver.maurusnet.test/downloads/nomad/nomad_0.9.1_linux_amd64.zip
     pyrun35: http://fileserver.maurusnet.test/downloads/exxo/egenix-pyrun-2.2.3-py3.5_ucs4-linux-x86_64.tgz
     terraform: http://fileserver.maurusnet.test/downloads/terraform/terraform_0.11.13_linux_amd64.zip
-    vault: http://fileserver.maurusnet.test/downloads/vault/vault_1.1.0_linux_amd64.zip
+    vault: http://fileserver.maurusnet.test/downloads/vault/vault_1.1.2_linux_amd64.zip
     vault-gpg-plugin: http://fileserver.maurusnet.test/downloads/vault-gpg-plugin/linux_amd64.zip
     vault-ssh-helper: http://fileserver.maurusnet.test/downloads/vault/vault-ssh-helper_0.1.4_linux_amd64.zip
     fpmdeps: http://fileserver.maurusnet.test/downloads/ruby/fpm+deps.zip
