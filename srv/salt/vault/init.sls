@@ -153,9 +153,11 @@ vault-service:
             - file: vault-ssl-key
             - service: smartstack-internal
     cmd.run:
+        # any response code is fine, we just need the server to be there to continue with initialization etc.
         - name: >
             until test ${count} -gt 30; do
-                if curl -s --fail https://vault.service.consul:8200/v1/sys/health; then
+                RESP="$(curl -s -o /dev/null -w "%{http_code}" https://vault.service.consul:8200/v1/sys/health)"
+                if test "$RESP" -ge 200; then
                     break;
                 fi
                 sleep 1; count=$((count+1));
