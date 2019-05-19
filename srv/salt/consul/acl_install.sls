@@ -65,7 +65,7 @@ consul-acl-agent-config:
             - file: consul-conf-dir
             - user: consul
             - group: consul
-
+{% endif %}  # firstrun check
 
 {% if pillar['dynamicsecrets'].get('consul-acl-master-token', False) %}
 # these states only execute on consul servers and ensure correct config for the well-known tokens
@@ -98,5 +98,3 @@ consul-update-anonymous-token:
         - watch:
             - service: consul-service
 {% endif %}
-
-{% endif %}  # firstrun check
