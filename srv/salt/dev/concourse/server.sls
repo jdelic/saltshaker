@@ -211,9 +211,9 @@ concourse-server:
                 --tsa-host-key /etc/concourse/private/host_key.pem
                 --tsa-authorized-keys /etc/concourse/authorized_worker_keys
                 --external-url {{pillar['ci']['protocol']}}://{{pillar['ci']['hostname']}}
-                --peer-url http://{{pillar.get('concourse-server', {}).get('atc-ip',
+                --tsa-peer-address {{pillar.get('concourse-server', {}).get('atc-ip',
                     grains['ip_interfaces'][pillar['ifassign']['internal']][pillar['ifassign'].get(
-                        'internal-ip-index', 0)|int()])}}:{{pillar.get('concourse-server', {}).get('atc-port', 8080)}}
+                        'internal-ip-index', 0)|int()])}}
             environment_files:
                 - /etc/concourse/envvars-web
         - require:
