@@ -57,6 +57,7 @@ docker-registry:
         - require:
             - file: docker-registry-volume
             - cmd: docker-jwt-certificate
+            - service: dockerd-service
 
 
 docker-registry-servicedef:
