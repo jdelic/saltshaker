@@ -1,4 +1,9 @@
 
+include:
+    - haproxy.sync
+    - consul.sync
+    - docker.install
+
 docker-registry-volume:
     file.directory:
         - name: /srv/registry
@@ -23,6 +28,8 @@ docker-jwt-certificate:
         - creates: /srv/registry/docker_jwt.crt
         - require:
             - pkg: authclient
+            - cmd: smartstack-external-sync
+            - cmd: consul-template-sync
 
 
 docker-registry:
