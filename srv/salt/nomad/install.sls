@@ -4,6 +4,7 @@
 
 include:
     - nomad.client
+    - docker.install
 
 
 {% from 'nomad/client.sls' import nomad_user, nomad_group %}
@@ -18,7 +19,7 @@ nomad-docker-group-membership:
         - groups:
             - docker
         - require:
-             - sls: docker
+             - sls: docker.install
              - user: nomad-user
 
 
