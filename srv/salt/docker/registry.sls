@@ -70,7 +70,6 @@ docker-registry-servicedef:
             hostname: {{registry_hostname}}
             port: {{registry_port}}
         - require:
-            - docker_container: docker-registry
             - file: consul-service-dir
 
 
