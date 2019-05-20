@@ -2,4 +2,4 @@
 # state is run on the same server
 powerdns-sync:
     cmd.run:
-        - name: /bin/true
+        - name: /bin/true powerdns-sync

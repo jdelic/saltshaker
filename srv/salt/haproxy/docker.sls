@@ -31,9 +31,12 @@ smartstack-docker:
                 {%- endif %}
             template: /etc/haproxy/haproxy-internal.jinja.cfg
         - require:
+            - systemdunit: haproxy-multi
             - file: haproxy-config-template-internal
+            - file: consul-template-dir
     service.enabled:  # haproxy will be started by the smartstack script rendered by consul-template (see command above)
         - name: haproxy@docker
         - require:
-            - file: haproxy-multi
-            - file: smartstack-internal
+            - file: smartstack-docker
+        - require_in:
+            - cmd: smartstack-docker-sync

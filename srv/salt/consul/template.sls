@@ -1,5 +1,6 @@
 
 include:
+    - consul.template_acl_install
     - consul.sync
 
 
@@ -58,13 +59,31 @@ consul-template-config:
                         if pillar['vault'].get('pinned-ca-cert', 'default') == 'default'
                         else pillar['vault']['pinned-ca-cert']}}
             vault_url: https://{{pillar['vault']['smartstack-hostname']}}:8200/
-            consul_acl_token: {{pillar['dynamicsecrets']['consul-acl-token']['secret_id']}}
         - require:
             - file: consul-basedir
 
 
+{% if pillar['dynamicsecrets']['consul-acl-token']['firstrun'] %}
+# work around the insane hoops we have to jump through for
+# https://github.com/hashicorp/consul/issues/4977
+consul-template-firstrun-config:
+    cmd.run:
+        - name: >
+            sed "s#^\(\s*\)token =.*#\1token = \"$(jq -r .acl.tokens.agent /etc/consul/conf.d/agent_acl.json)\"#" \
+                /etc/consul/consul-template-acl.conf > /etc/consul/consul-template-acl.conf.new;
+            mv /etc/consul/consul-template-acl.conf.new /etc/consul/consul-template-acl.conf
+        - onlyif: grep -q "first run" /etc/consul/consul-template-acl.conf
+        - require:
+            - file: consul-template-config
+        - require_in:
+            - service: consul-template-service
+        - watch_in:
+            - service: consul-template-service-reload
+{% endif %}
+
+
 consul-template-service:
-    file.managed:
+    systemdunit.managed:
         - name: /etc/systemd/system/consul-template.service
         - source: salt://consul/consul-template.jinja.service
         - template: jinja
@@ -76,14 +95,17 @@ consul-template-service:
         - sig: consul-template
         - enable: True
         - require:
-            - file: consul-data-dir
+            - file: consul-run-dir
             - file: consul-template-config
+            - file: consul-template-acl-config
             - file: consul-template-dir
             - file: consul-template-servicerenderer
             - cmd: consul-sync
         - watch:
-            - file: consul-template-service
+            - systemdunit: consul-template-service
             - file: consul-template  # restart on a change of the binary
+        - require_in:
+            - cmd: consul-template-sync
 
 
 consul-template-service-reload:
@@ -97,9 +119,13 @@ consul-template-service-reload:
             - file: consul-template-config
             - file: consul-template-dir
         - watch:
+            # this does NOT have to watch consul-template-acl-config as the reload is done via the
+            # orchestrator in consul-node-setup
             - file: /etc/consul/template.d*
             - file: /etc/consul/consul-template.conf
             - cmd: consul-template-servicerenderer
+        - require_in:
+            - cmd: consul-template-sync
 
 
 consul-template-servicerenderer:
@@ -116,6 +142,16 @@ consul-template-servicerenderer:
             test ! -z "$(ls -A /etc/consul/renders)" && rm /etc/consul/renders/*; /bin/true
         - onchanges:
             - file: consul-template-servicerenderer
+        - require:
+            - file: consul-renders-dir
 
+
+consul-template-rsyslog:
+    file.managed:
+        - name: /etc/rsyslog.d/49-consul-template.rsyslog.conf
+        - source: salt://consul/49-consul-template.rsyslog.conf
+        - user: root
+        - group: root
+        - mode: '0644'
 
 # vim: syntax=yaml

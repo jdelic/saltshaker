@@ -59,18 +59,47 @@ concourse-keys-host_key-public:
             - file: concourse-config-folder
 
 
-concourse-install:
-    file.managed:
+concourse-remove-old:
+    # remove old versions of concourse
+    file.absent:
         - name: /usr/local/bin/concourse_linux_amd64
-        - source: {{pillar["urls"]["concourse"]}}
-        - source_hash: {{pillar["hashes"]["concourse"]}}
+
+
+concourse-install:
+    archive.extracted:
+        - name: /usr/local
+        - source: {{pillar['urls']['concourse']}}
+        - source_hash: {{pillar['hashes']['concourse']}}
+        - archive_format: tar
+        - if_missing: /usr/local/concourse
+        - enforce_toplevel: False
+    file.managed:
+        - name: /usr/local/concourse/bin/concourse
         - mode: '0755'
-        - user: concourse
-        - group: concourse
-        - replace: False
+        - user: root
+        - group: root
         - require:
             - user: concourse-user
             - file: concourse-keys-host_key-public
+            - archive: concourse-install
+
+
+fly-install:
+    archive.extracted:
+        - name: /usr/local/bin
+        - source: {{pillar['urls']['concourse-fly']}}
+        - source_hash: {{pillar['hashes']['concourse-fly']}}
+        - archive_format: tar
+        - if_missing: /usr/local/bin/fly
+        - enforce_toplevel: False
+    file.managed:
+        - name: /usr/local/bin/fly
+        - mode: '0755'
+        - user: root
+        - group: root
+        - require:
+            - user: concourse-user
+            - archive: fly-install
 
 
 concourse-rsyslog:

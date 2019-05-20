@@ -3,7 +3,9 @@ include:
     - dev.concourse.install
     - dev.concourse.sync
     - vault.sync
-
+    - powerdns.sync
+    - haproxy.sync
+    - consul.sync
 
 
 concourse-keys-session_signing_key:
@@ -12,7 +14,7 @@ concourse-keys-session_signing_key:
         - contents_pillar: dynamicsecrets:concourse-signingkey:key
         - user: concourse
         - group: concourse
-        - mode: '0640'
+        - mode: '0600'
         - replace: False
         - require_in:
             - service: concourse-server
@@ -38,7 +40,7 @@ concourse-keys-host_key:
         - contents_pillar: dynamicsecrets:concourse-hostkey:key
         - user: concourse
         - group: concourse
-        - mode: '0640'
+        - mode: '0600'
         - replace: True
         - require:
             - file: concourse-keys-host_key-public-copy
@@ -87,12 +89,12 @@ concourse-authorized-key-consul-template-watcher:
             - file: authorized_worker_keys-template
 
 
-concourse-server-envvars{% if pillar['ci']['use-vault'] %}-template{% endif %}:
+concourse-server-envvars{% if pillar['ci'].get('use-vault', True) %}-template{% endif %}:
     file.managed:
     {% if pillar['ci']['use-vault'] %}
-        - name: /etc/concourse/envvars.tpl
+        - name: /etc/concourse/envvars-web.tpl
     {% else %}
-        - name: /etc/concourse/envvars  # read by concourse.service using systemd's `EnvironmentFile=`
+        - name: /etc/concourse/envvars-web  # read by concourse.service using systemd's `EnvironmentFile=`
     {% endif %}
         - user: root
         - group: root
@@ -112,11 +114,11 @@ concourse-server-envvars{% if pillar['ci']['use-vault'] %}-template{% endif %}:
             CONCOURSE_ENCRYPTION_KEY="{{pillar['dynamicsecrets']['concourse-encryption']}}"
             CONCOURSE_COOKIE_SECURE=true
 
-            {%- if pillar['ci'].get('use-vault', True) %}
+{%- if pillar['ci'].get('use-vault', True) %}
             CONCOURSE_VAULT_URL="https://{{pillar['vault']['smartstack-hostname']}}:8200/"
             CONCOURSE_VAULT_CA_CERT="{{pillar['ssl']['service-rootca-cert']}}"
             CONCOURSE_VAULT_AUTH_BACKEND="approle"
-            CONCOURSE_VAULT_AUTH_PARAM="role_id={{pillar['dynamicsecrets']['concourse-role-id']}},secret_id=((secret_id))"
+            CONCOURSE_VAULT_AUTH_PARAM="role_id:{{pillar['dynamicsecrets']['concourse-role-id']}},secret_id:((secret_id))"
             CONCOURSE_OAUTH_DISPLAY_NAME="SSO Account"
             CONCOURSE_OAUTH_CLIENT_ID="((oauth2_client_id))"
             CONCOURSE_OAUTH_CLIENT_SECRET="((oauth2_client_secret))"
@@ -128,7 +130,7 @@ concourse-server-envvars{% if pillar['ci']['use-vault'] %}-template{% endif %}:
 
 concourse-server-envvars:
     cmd.run:
-        - name: /bin/true
+        - name: /bin/true concourse-server-envvars
 
 
 concourse-server-envvars-approle:
@@ -137,20 +139,19 @@ concourse-server-envvars-approle:
             touch /etc/concourse/envtmp;
             chmod 600 /etc/concourse/envtmp;
             sed "s#((secret_id))#$(/usr/local/bin/vault write -f -format=json auth/approle/role/concourse/secret-id | \
-                jq -r .data.secret_id)#"  /etc/concourse/envvars.tpl >/etc/concourse/envtmp
+                jq -r .data.secret_id)#"  /etc/concourse/envvars-web.tpl >/etc/concourse/envtmp
         - env:
             - VAULT_ADDR: "https://vault.service.consul:8200/"
             - VAULT_TOKEN: {{pillar['dynamicsecrets']['approle-auth-token']}}
         - unless: >-
-            test -f /etc/concourse/envvars &&
-            source /etc/concourse/envvars &&
+            test -f /etc/concourse/envvars-web &&
+            source /etc/concourse/envvars-web &&
             echo $CONCOURSE_VAULT_AUTH_PARAM | cut -d',' -f2 | cut -d'=' -f2 | \
                 vault write auth/approle/login role_id={{pillar['dynamicsecrets']['concourse-role-id']}} secret_id=- &&
             test $? -eq 0
         - require:
             - file: concourse-server-envvars-template
-            - file: vault
-            - cmd: vault-sync
+            - cmd: powerdns-sync
             - cmd: concourse-sync-vault
         - require_in:
             - cmd: concourse-server-envvars
@@ -159,36 +160,34 @@ concourse-server-envvars-approle:
 concourse-server-envvars-oauth2:
     cmd.run:
         - name: >-
-            touch /etc/concourse/envvars;
-            chmod 700 /etc/concourse/envvars;
+            touch /etc/concourse/envvars-web;
+            chmod 600 /etc/concourse/envvars-web;
             sed "s#((oauth2_client_id))#$(/usr/local/bin/vault read -format=json secret/oauth2/concourse | \
                 jq -r .data.client_id)#" /etc/concourse/envtmp | \
             sed "s#((oauth2_client_secret))#$(/usr/local/bin/vault read -format=json secret/oauth2/concourse | \
-                jq -r .data.client_secret)#" > /etc/concourse/envvars;
+                jq -r .data.client_secret)#" > /etc/concourse/envvars-web;
             rm /etc/concourse/envtmp
         - env:
             - VAULT_ADDR: "https://vault.service.consul:8200/"
             - VAULT_TOKEN: {{pillar['dynamicsecrets']['concourse-oauth2-read']}}
         - onlyif: test -f /etc/concourse/envtmp
         - unless:
-            test -f /etc/concourse/envvars &&
-            source /etc/concourse/envvars &&
+            test -f /etc/concourse/envvars-web &&
+            source /etc/concourse/envvars-web &&
             test "$CONCOURSE_OAUTH_CLIENT_ID" == "$(vault read -format=json secret/oauth2/concourse | \
                 jq -r .data.client_id)" &&
             test "$CONCOURSE_OAUTH_CLIENT_SECRET" == "$(vault read -format=json secret/oauth2/concourse | \
                 jq -r .data.client_secret)"
         - require:
-            - file: vault
-            - cmd: concourse-sync-vault
             - cmd: concourse-server-envvars-approle
             - cmd: concourse-sync-oauth2
         - require_in:
             - cmd: concourse-server-envvars
-            {% endif %}
+{% endif %}
 
 
 concourse-server:
-    file.managed:
+    systemdunit.managed:
         - name: /etc/systemd/system/concourse-web.service
         - source: salt://dev/concourse/concourse.jinja.service
         - template: jinja
@@ -212,24 +211,41 @@ concourse-server:
                 --tsa-host-key /etc/concourse/private/host_key.pem
                 --tsa-authorized-keys /etc/concourse/authorized_worker_keys
                 --external-url {{pillar['ci']['protocol']}}://{{pillar['ci']['hostname']}}
-                --peer-url http://{{pillar.get('concourse-server', {}).get('atc-ip',
+                --tsa-peer-address {{pillar.get('concourse-server', {}).get('atc-ip',
                     grains['ip_interfaces'][pillar['ifassign']['internal']][pillar['ifassign'].get(
-                        'internal-ip-index', 0)|int()])}}:{{pillar.get('concourse-server', {}).get('atc-port', 8080)}}
+                        'internal-ip-index', 0)|int()])}}
+            environment_files:
+                - /etc/concourse/envvars-web
         - require:
             - file: concourse-install
             - file: authorized_worker_keys-must-exist
-            - concourse-server-envvars
     service.running:
         - name: concourse-web
         - sig: /usr/local/bin/concourse_linux_amd64 web
         - enable: True
         - watch:
-            - file: concourse-server
+            - systemdunit: concourse-server
             - file: concourse-install  # restart on a change of the binary
             - concourse-server-envvars  # can be cmd or file
             - file: concourse-servicedef-tsa
             - file: concourse-servicedef-atc-internal
             - file: concourse-servicedef-atc
+            - file: concourse-keys-session_signing_key
+    cmd.run:
+        - name: >
+            until test ${count} -gt 30; do
+                if curl -s --fail {{pillar['ci']['protocol']}}://{{pillar['ci']['hostname']}}/api/v1/info; then
+                    break;
+                fi
+                sleep 1; count=$((count+1));
+            done; test ${count} -lt 30
+        - env:
+            count: 0
+        - onchanges:
+            - service: concourse-web
+        - require:
+            - cmd: consul-template-sync
+            - cmd: smartstack-sync
         - require_in:
             - cmd: concourse-sync
 
@@ -249,7 +265,7 @@ concourse-servicedef-tsa:
                         'internal-ip-index', 0)|int()])}}
             port: {{pillar.get('concourse-server', {}).get('tsa-port', 2222)}}
         - require:
-            - file: concourse-server
+            - systemdunit: concourse-server
             - file: consul-service-dir
 
 
@@ -270,7 +286,7 @@ concourse-servicedef-atc-internal:
                 )}}
             port: {{pillar.get('concourse-server', {}).get('atc-port', 8080)}}
         - require:
-            - file: concourse-server
+            - systemdunit: concourse-server
             - file: consul-service-dir
 
 
@@ -292,8 +308,29 @@ concourse-servicedef-atc:
             port: {{pillar.get('concourse-server', {}).get('atc-port', 8080)}}
             hostname: {{pillar['ci']['hostname']}}
         - require:
-            - file: concourse-server
+            - systemdunit: concourse-server
             - file: consul-service-dir
+
+
+fly-link-teams:
+    file.managed:
+        - name: /etc/concourse/flyhelper.sh
+        - source: salt://dev/concourse/helpers/flyhelper.sh
+        - user: root
+        - group: root
+        - mode: '0700'
+    cmd.run:
+        - name: >
+            /etc/concourse/flyhelper.sh set developers developers
+        - unless:
+            /etc/concourse/flyhelper.sh check developers developers
+        - env:
+            CONCOURSE_SYSOP_PASSWORD: {{pillar['dynamicsecrets']['concourse-sysop']}}
+            CONCOURSE_URL: {{pillar['ci']['protocol']}}://{{pillar['ci']['hostname']}}
+        - require:
+            - cmd: concourse-sync
+            - file: fly-link-teams
+            - file: fly-install
 
 
 concourse-tcp-in{{pillar.get('concourse-server', {}).get('tsa-port', 2222)}}-recv:

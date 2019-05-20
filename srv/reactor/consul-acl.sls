@@ -1,4 +1,4 @@
-# TODO: for COnsul 1.4 replace this with a orchestrate reactor that runs
+# for Consul 1.4 this is a orchestrate reactor that runs
 # two states: one to create the agent policy and one to update the acl token
 
 create-consul-acl-policy-and-token:

@@ -68,6 +68,7 @@ apache2-service:
         - enable: True
         - require:
             - pkg: apache2
+            - cmd: authnz-external-enable
 
 
 apache2-service-reload:

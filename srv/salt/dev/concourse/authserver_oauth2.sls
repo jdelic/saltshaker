@@ -1,4 +1,4 @@
-
+{% if pillar.get('ci', {}).get('enabled', False) %}
 include:
     - dev.concourse.sync
     - mn.cas.sync
@@ -17,7 +17,6 @@ authserver-concourse-create-permissions:
                 grep "ci_access" >/dev/null 2>/dev/null
         - require:
             - cmd: authserver-sync
-            - cmd: vault-sync
         - require_in:
             - cmd: concourse-sync-oauth2
 
@@ -43,6 +42,35 @@ authserver-concourse-create-client:
             - cmd: concourse-sync-oauth2
 
 
+authserver-concourse-create-group:
+    cmd.run:
+        - name: >
+            /usr/local/authserver/bin/envdir /etc/appconfig/authserver/env/
+            /usr/local/authserver/bin/django-admin.py group create developers
+        - unless: >
+            /usr/local/authserver/bin/envdir /etc/appconfig/authserver/env/
+            /usr/local/authserver/bin/django-admin.py group list | grep "developers" >/dev/null
+        - require:
+            - cmd: authserver-sync
+        - require_in:
+            - cmd: concourse-sync-oauth2
+
+
+authserver-concourse-assign-group-permission:
+    cmd.run:
+        - name: >
+            /usr/local/authserver/bin/envdir /etc/appconfig/authserver/env/
+            /usr/local/authserver/bin/django-admin.py permissions grant group developers ci_access
+        - unless: >
+            /usr/local/authserver/bin/envdir /etc/appconfig/authserver/env/
+            /usr/local/authserver/bin/django-admin.py permissions show group developers | grep "ci_access" >/dev/null
+        - require:
+            - cmd: authserver-concourse-create-permissions
+            - cmd: authserver-concourse-create-group
+        - require_in:
+            - cmd: concourse-sync-oauth2
+
+
 authserver-concourse-require-permissions:
     cmd.run:
         - name: >
@@ -57,3 +85,4 @@ authserver-concourse-require-permissions:
             - cmd: authserver-concourse-create-permissions
         - require_in:
             - cmd: concourse-sync-oauth2
+{% endif %}

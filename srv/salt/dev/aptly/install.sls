@@ -17,8 +17,7 @@ aptly:
             example: True
             rootdir: /srv/aptly/
         - makedirs: True
-        - file_mode: '0644'
-        - dir_mode: '0755'
+        - mode: '0644'
 
 
 # vim: syntax=yaml

@@ -54,7 +54,7 @@ base:
 #        - sentry
         - compilers
         - python.dev
-        - docker
+        - docker.install
 
     'roles:buildserver':
         - match: grain
@@ -69,7 +69,7 @@ base:
 
     'roles:apps':
         - match: grain
-        - docker
+        - docker.install
         - nomad.install
         - mn.appconfig
 

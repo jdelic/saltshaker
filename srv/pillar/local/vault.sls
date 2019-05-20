@@ -47,3 +47,6 @@ vault:
     # default_lease_ttl: (default: 30 days)
     # max_lease_ttl: (default: 1 year)
     hostname: vault.{{external_tld}}
+
+    # On local test machines, do not encrypt Vault keys
+    encrypt-vault-keys-with-gpg: False

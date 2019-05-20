@@ -30,7 +30,7 @@ consul-acl-policy-create:
                             policy = \"write\"
                         }
 
-                        node \"\" {
+                        node_prefix \"\" {
                             policy = \"read\"
                         }
 
@@ -43,7 +43,7 @@ consul-acl-policy-create:
                         }
 
                         agent \""|replace('\n', '\\n')|replace('"', '\\"')}}{{data['id']}}{{"\" {
-                            policy = \"read\"
+                            policy = \"write\"
                         }
 
                         event_prefix \"\" {
@@ -65,10 +65,7 @@ consul-acl-token-update:
         - arg:
             - http.query
         - kwarg:
-            url: http://169.254.1.1:8500/v1/acl/token/{{salt['dynamicsecrets'].get_store().get_or_create(
-                  {
-                      "type": "consul-acl-token",
-                  },
+            url: http://169.254.1.1:8500/v1/acl/token/{{salt['dynamicsecrets'].get_store().load(
                   'consul-acl-token',
                   host=data['id'])['accessor_id']}}
             method: PUT
@@ -85,3 +82,25 @@ consul-acl-token-update:
                 }
         - require:
             - salt: consul-acl-policy-create
+
+
+consul-acl-install:
+    salt.state:
+        - name: ACL installation
+        - tgt: {{data['id']}}
+        - sls:
+            - consul.acl_install
+            - consul.template_acl_install
+        - require:
+            - salt: consul-acl-token-update
+
+
+# work around https://github.com/hashicorp/consul/issues/5651
+consul-template-reload:
+    salt.function:
+        - name: service.reload
+        - tgt: {{data['id']}}
+        - arg:
+            - consul-template
+        - require:
+            - salt: consul-acl-token-update
