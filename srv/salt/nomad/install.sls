@@ -4,6 +4,7 @@
 
 include:
     - nomad.client
+    - docker.install
 
 
 {% from 'nomad/client.sls' import nomad_user, nomad_group %}
@@ -18,7 +19,7 @@ nomad-docker-group-membership:
         - groups:
             - docker
         - require:
-             - sls: docker
+             - sls: docker.install
              - user: nomad-user
 
 
@@ -29,9 +30,9 @@ nomad-agent-config:
         - template: jinja
         - context:
             datacenter: {{pillar['consul-cluster'].get('datacenter', 'default')}}
-            # TODO: fix this when nomad 0.6 comes out with better network management
+            # TODO: fix this when nomad 1.0 comes out with better network management
             internal_interface: {{pillar['ifassign']['internal']}}
-            consul_acl_token: {{pillar['dynamicsecrets']['consul-acl-token']}}
+            consul_acl_token: {{pillar['dynamicsecrets']['consul-acl-token']['secret_id']}}
         - require:
             - file: nomad-service-dir
 
@@ -67,7 +68,7 @@ nomad-common-config:
 
 
 nomad-service:
-    file.managed:
+    systemdunit.managed:
         - name: /etc/systemd/system/nomad.service
         - source: salt://nomad/nomad.jinja.service
         - template: jinja
@@ -87,7 +88,7 @@ nomad-service:
         - sig: nomad
         - enable: True
         - watch:
-            - file: nomad-service  # if nomad-service changes we want to *restart* (reload: False)
+            - systemdunit: nomad-service  # if nomad-service changes we want to *restart* (reload: False)
             - file: nomad  # restart on a change of the binary
             - file: nomad-server-config
             - file: nomad-agent-config

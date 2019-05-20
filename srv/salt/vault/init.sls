@@ -118,7 +118,7 @@ vault-config:
 
 
 vault-service:
-    file.managed:
+    systemdunit.managed:
         - name: /etc/systemd/system/vault.service
         - source: salt://vault/vault.jinja.service
         - template: jinja
@@ -139,7 +139,6 @@ vault-service:
             - cmd: consul-sync
             - cmd: powerdns-sync
             - file: vault-data-dir
-            - file: vault-service
             - file: vault-internal-servicedef
             {% if pillar['vault']['backend'] == 'postgresql' %}
                 {# when we're on the same machine as the PostgreSQL database, wait for it to come up and the #}
@@ -148,19 +147,24 @@ vault-service:
             - cmd: vault-sync-database
             {% endif %}
         - watch:
-            - file: vault-service
+            - systemdunit: vault-service
             - file: vault  # restart on a change of the binary
             - file: vault-ssl-cert  # restart when the SSL cert changes
             - file: vault-ssl-key
             - service: smartstack-internal
-    http.wait_for_successful_query:
-        - name: https://vault.service.consul:8200/v1/sys/health
-        - match: "initialized"
-        - wait_for: 10
-        - request_interval: 1
-        - raise_error: False  # only exists in 'tornado' backend
-        - backend: tornado
-        - watch:
+    cmd.run:
+        # any response code is fine, we just need the server to be there to continue with initialization etc.
+        - name: >
+            until test ${count} -gt 30; do
+                RESP="$(curl -s -o /dev/null -w "%{http_code}" https://vault.service.consul:8200/v1/sys/health)"
+                if test "$RESP" -ge 200; then
+                    break;
+                fi
+                sleep 1; count=$((count+1));
+            done; test ${count} -lt 30
+        - env:
+            count: 0
+        - onchanges:
             - service: vault-service
         - require_in:
             - cmd: vault-sync
@@ -185,9 +189,6 @@ vault-init:
                         tee /dev/fd/5 /dev/fd/6 |
                         gpg --homedir {{keyloc}} \
                             --no-default-keyring \
-                            --keyring {{salt['file.join'](keyloc, "pubring.gpg")}} \
-                            --secret-keyring {{salt['file.join'](keyloc, "secring.gpg")}} \
-                            --trustdb {{salt['file.join'](keyloc, "trustdb.gpg")}} \
                             --batch \
                             --trusted-key {{long_id}} -a -e \
                             -r {{pillar['vault']['encrypt-vault-keys-with-gpg']}} >/root/vault_keys.txt.gpg;
@@ -231,8 +232,22 @@ vault-init:
             - VAULT_ADDR: "https://vault.service.consul:8200/"
         - require:
             - file: managed-keyring
-            - http: vault-service
+            - cmd: vault-service
             - cmd: powerdns-sync
+        - require_in:
+            - cmd: vault-sync
+
+
+vault-secret-kv-enabled:
+    cmd.run:
+        - name: /usr/local/bin/vault secrets enable -path=secret/ kv
+        - unless: /usr/local/bin/vault secrets list | grep '^secret/' >/dev/null
+        - onlyif: /usr/local/bin/vault operator init -status >/dev/null
+        - env:
+            - VAULT_ADDR: "https://vault.service.consul:8200/"
+        - require:
+            - cmd: vault-service
+            - cmd: vault-init
         - require_in:
             - cmd: vault-sync
 
@@ -250,10 +265,11 @@ vault-cert-auth-enabled:
         - env:
             - VAULT_ADDR: "https://vault.service.consul:8200/"
         - require:
-            - http: vault-service
+            - cmd: vault-service
             - cmd: vault-init
         - require_in:
             - cmd: vault-sync
+
 
 # Vault clients configured by Salt should watch for this state using cmd.run:onchanges
 # and set up their approles and policies
@@ -265,7 +281,7 @@ vault-approle-auth-enabled:
         - env:
             - VAULT_ADDR: "https://vault.service.consul:8200/"
         - require:
-            - http: vault-service
+            - cmd: vault-service
             - cmd: vault-init
         - require_in:
             - cmd: vault-sync
@@ -337,7 +353,7 @@ vault-install-gpg-plugin:
     cmd.run:
         - name: >-
             /usr/local/bin/vault plugin register \
-                -sha256={{pillar['hashes']['vault-gpg-plugin-binary'].split('=', 1)[1]}} \
+                -sha256="$(cat /usr/local/lib/vault/linux_amd64.sha256sum | cut -d' ' -f1)" \
                 -command=vault-gpg-plugin gpg
         - env:
             - VAULT_ADDR: "https://vault.service.consul:8200/"
@@ -478,7 +494,7 @@ vault-service-reload:
         - enable: True
         - reload: True  # makes Salt send a SIGHUP (systemctl reload vault) instead of restarting
         - require:
-            - file: vault-service
+            - systemdunit: vault-service
         - watch:
             - file: /etc/vault/vault.conf
 

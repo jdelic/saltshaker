@@ -212,6 +212,13 @@ SCRIPT
         test.vm.provision :shell, run: 'always' do |s|
             s.inline = 'systemctl restart salt-minion; sleep 1'
         end
+
+        test.trigger.before :destroy do |trigger|
+            trigger.info = "Consul: leaving cluster"
+            trigger.run_remote = {
+                inline: "sudo consul leave"
+            }
+        end
     end
 
     # config.vm.define :dev do |dev|

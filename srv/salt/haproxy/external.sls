@@ -1,6 +1,7 @@
 
 include:
     - haproxy.install
+    - haproxy.sync
 
 
 haproxy-config-template-external:
@@ -41,7 +42,7 @@ smartstack-external:
                 {%- endif %}
             template: /etc/haproxy/haproxy-external.jinja.cfg
         - require:
-            - file: haproxy-multi
+            - systemdunit: haproxy-multi
             - file: haproxy-config-template-external
             - file: consul-template-dir
     service.enabled:  # haproxy will be started by the smartstack script rendered by consul-template (see command above)
@@ -51,6 +52,8 @@ smartstack-external:
             {% if 'ssl' in pillar and 'maincert' in pillar['ssl'] %}
             - file: ssl-maincert
             {% endif %}
+        - require_in:
+            - cmd: smartstack-external-sync
 
 
 # This is probably overkill, since consul-template already runs the smartstack script with --open-iptables=conntrack

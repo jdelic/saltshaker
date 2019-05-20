@@ -152,7 +152,7 @@ timezone-utc:
 # Provide the salt-master with an event so it knows that the highstate is done.
 # We use this, for example, to sync saltmine data.
 trigger-minion-sync:
-    event.wait:
+    event.send:
         - name: maurusnet/highstate/complete
         - order: last
 

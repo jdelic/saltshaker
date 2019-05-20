@@ -253,6 +253,19 @@ opensmtpd-service:
             - email-storage
         - watch:
             - file: opensmtpd-config
+            {% if pillar['smtp']['receiver']['sslcert'] != 'default' %}
+            - file: opensmtpd-receiver-sslcert
+            - file: opensmtpd-receiver-sslkey
+            {% endif %}
+            {% if pillar['smtp']['relay']['sslcert'] != 'default' %}
+            - file: opensmtpd-relay-sslcert
+            - file: opensmtpd-relay-sslkey
+            {% endif %}
+            {% if pillar['smtp']['relay']['sslcert'] == 'default' or
+                pillar['smtp']['receiver']['sslcert'] == 'default' %}
+            - file: ssl-maincert-combined-certificate
+            - file: ssl-maincert-key
+            {% endif %}
 
 
 opensmtpd-authserver-config:

@@ -1,24 +1,24 @@
 {
-    "ID": "anonymous",
-    "Type": "client",
+    "Name": "anonymous",
+    "Description": "The anonymous policy",
     "Rules": "{{"
-key \"\" {
+key_prefix \"\" {
     policy = \"deny\"
 }
 
-key \"oauth2-clients\" {
+key_prefix \"oauth2-clients\" {
     policy = \"read\"
 }
 
-key \"concourse/workers/sshpub\" {
+key_prefix \"concourse/workers/sshpub\" {
     policy = \"read\"
 }
 
-node \"\" {
+node_prefix \"\" {
     policy = \"read\"
 }
 
-service \"\" {
+service_prefix \"\" {
     policy = \"read\"
 }
 

@@ -1,12 +1,18 @@
 {
-    "acl_datacenter": "{{main_datacenter}}",
-    "acl_default_policy": "deny",
-    "acl_down_policy": "extend-cache",
-    "acl_ttl": "30s"
-{% if master_token is defined %}
-    ,"acl_master_token": "{{master_token}}"
-{% endif %}
-{% if agent_master_token is defined %}
-    ,"acl_agent_master_token": "{{agent_master_token}}"
-{% endif %}
+    "primary_datacenter": "{{main_datacenter}}",
+    "acl": {
+        "default_policy": "deny",
+        "down_policy": "extend-cache",
+        "token_ttl": "30s"
+        {% if master_token is defined or agent_master_token is defined %}
+            ,"tokens": {
+                {% if master_token is defined %}
+                    "master": "{{master_token}}"
+                {% endif %}
+                {% if agent_master_token is defined %}
+                    ,"agent_master": "{{agent_master_token}}"
+                {% endif %}
+            }
+        {% endif %}
+    }
 }

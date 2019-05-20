@@ -8,6 +8,7 @@
 
 
 include:
+    - powerdns.sync
     - vault.sync
 
 
@@ -108,93 +109,96 @@ gpg-{{k}}:
             - file: gpg2-agent-batchmode-config
             - pkg: gnupg
     cmd.run:
+        - unless: >
+            /usr/bin/gpg \
+                --batch \
+                --homedir {{keyloc}} \
+                --no-default-keyring \
+                --list-keys "$(/usr/bin/gpg --batch --no-tty --no-default-keyring --homedir {{keyloc}} \
+                    --import-options import-show --dry-run --with-colons --import \
+                    {{keyloc}}/tmp/gpg-{{k}}.asc 2>/dev/null | head -1 | cut -d':' -f5)" 2>/dev/null
         # more info here
         # https://stackoverflow.com/questions/22136029/how-to-display-gpg-key-details-without-importing-it
-        - unless: >
-            /usr/bin/gpg
-            --homedir {{keyloc}}
-            --no-default-keyring
-            --list-keys $(/usr/bin/gpg --no-default-keyring --homedir {{keyloc}} \
-                --import-options import-show --dry-run --with-colons --import \
-                {{keyloc}}/tmp/gpg-{{k}}.asc | head -1 | cut -d':' -f5 2>/dev/null) 2>/dev/null
         - name: >
-            /usr/bin/gpg
-            --verbose
-            --homedir {{keyloc}}
-            --no-default-keyring
-            --batch
-            --import {{keyloc}}/tmp/gpg-{{k}}.asc
+            /usr/bin/gpg \
+                --verbose \
+                --homedir {{keyloc}} \
+                --no-default-keyring \
+                --batch \
+                --import {{keyloc}}/tmp/gpg-{{k}}.asc
         - require:
             - file: gpg-{{k}}
 
 
 gpg-{{k}}-v1:
     cmd.run:
+        - unless: >
+            /usr/bin/gpg1 \
+                --batch \
+                --homedir {{keylocv1}} \
+                --no-default-keyring \
+                --list-keys "$(/usr/bin/gpg --no-default-keyring --homedir {{keyloc}} \
+                    --import-options import-show --dry-run --with-colons --import \
+                    {{keyloc}}/tmp/gpg-{{k}}.asc | head -1 | cut -d':' -f5 2>/dev/null)" 2>/dev/null
         # more info here
         # https://stackoverflow.com/questions/22136029/how-to-display-gpg-key-details-without-importing-it
-        - unless: >
-            /usr/bin/gpg1
-            --homedir {{keylocv1}}
-            --no-default-keyring
-            --list-keys $(/usr/bin/gpg --no-default-keyring --homedir {{keyloc}} \
-                --import-options import-show --dry-run --with-colons --import \
-                {{keyloc}}/tmp/gpg-{{k}}.asc | head -1 | cut -d':' -f5 2>/dev/null) 2>/dev/null
         - name: >
-            /usr/bin/gpg1
-            --verbose
-            --homedir {{keylocv1}}
-            --no-default-keyring
-            --keyring {{salt['file.join'](keylocv1, "pubring.gpg")}}
-            --secret-keyring {{salt['file.join'](keylocv1, "secring.gpg")}}
-            --trustdb {{salt['file.join'](keylocv1, "trustdb.gpg")}}
-            --batch
-            --import {{keyloc}}/tmp/gpg-{{k}}.asc
+            /usr/bin/gpg1 \
+                --verbose \
+                --homedir {{keylocv1}} \
+                --no-default-keyring \
+                --keyring {{salt['file.join'](keylocv1, "pubring.gpg")}} \
+                --secret-keyring {{salt['file.join'](keylocv1, "secring.gpg")}} \
+                --trustdb {{salt['file.join'](keylocv1, "trustdb.gpg")}} \
+                --batch \
+                --import {{keyloc}}/tmp/gpg-{{k}}.asc
         - require:
             - file: gpg-{{k}}
 
 
 gpg-establish-trust-{{k}}:
     cmd.run:
-        - unless: >
-            /usr/bin/gpg
-            --homedir {{keyloc}}
-            --no-default-keyring
-            --with-colons
-            --list-keys $(/usr/bin/gpg --no-default-keyring --homedir {{keyloc}} \
-                --import-options import-show --dry-run --with-colons --import \
-                {{keyloc}}/tmp/gpg-{{k}}.asc | head -1 | cut -d':' -f5 2>/dev/null) 2>/dev/null |
-            grep "pub:" | cut -d':' -f2 | grep "u" >/dev/null
+        - onlyif: >
+            /usr/bin/gpg \
+                --homedir {{keyloc}} \
+                --no-default-keyring \
+                --with-colons \
+                --list-keys "$(/usr/bin/gpg --batch --no-default-keyring --homedir {{keyloc}} \
+                    --import-options import-show --dry-run --with-colons --import \
+                    {{keyloc}}/tmp/gpg-{{k}}.asc 2>/dev/null | head -1 | cut -d':' -f5)" 2>/dev/null | \
+                grep "pub:" | cut -d':' -f2 | grep "-" >/dev/null
         - name: >
-            echo "$(/usr/bin/gpg --no-default-keyring --homedir {{keyloc}} \
-                --import-options import-show --dry-run --with-colons --import {{keyloc}}/tmp/gpg-{{k}}.asc |
+            echo "$(/usr/bin/gpg --batch --no-default-keyring --homedir {{keyloc}} \
+                --import-options import-show --dry-run --with-colons \
+                --import {{keyloc}}/tmp/gpg-{{k}}.asc |
                 grep "fpr:" | head -1 | cut -d':' -f10 2>/dev/null):6:" |
-            /usr/bin/gpg
-            --homedir={{keyloc}}
-            --batch
-            --import-ownertrust
+            /usr/bin/gpg \
+                --homedir={{keyloc}} \
+                --batch \
+                --import-ownertrust
         - require:
             - cmd: gpg-{{k}}
 
 
 gpg-establish-trust-{{k}}-v1:
     cmd.run:
-        - unless: >
-            /usr/bin/gpg1
-            --homedir {{keylocv1}}
-            --no-default-keyring
-            --with-colons
-            --list-keys $(/usr/bin/gpg --no-default-keyring --homedir {{keyloc}} \
-                --import-options import-show --dry-run --with-colons --import \
-                {{keyloc}}/tmp/gpg-{{k}}.asc | head -1 | cut -d':' -f5 2>/dev/null) 2>/dev/null |
-            grep "pub:" | cut -d':' -f2 | grep "u" >/dev/null
+        - onlyif: >
+            /usr/bin/gpg1 \
+                --homedir {{keylocv1}} \
+                --no-default-keyring \
+                --with-colons \
+                --list-keys "$(/usr/bin/gpg --batch --no-default-keyring --homedir {{keyloc}} \
+                    --import-options import-show --dry-run --with-colons --import \
+                    {{keyloc}}/tmp/gpg-{{k}}.asc | head -1 | cut -d':' -f5 2>/dev/null)" 2>/dev/null | \
+                grep "pub:" | cut -d':' -f2 | grep "-" >/dev/null
         - name: >
-            echo "$(/usr/bin/gpg --no-default-keyring --homedir {{keyloc}} \
+            echo "$(/usr/bin/gpg --batch --no-default-keyring --homedir {{keyloc}} \
                 --import-options import-show --dry-run --with-colons --import {{keyloc}}/tmp/gpg-{{k}}.asc |
                 grep "fpr:" | head -1 | cut -d':' -f10 2>/dev/null):6:" |
-            /usr/bin/gpg1
-            --homedir={{keylocv1}}
-            --batch
-            --import-ownertrust
+            /usr/bin/gpg1 \
+                --homedir={{keylocv1}} \
+                --batch \
+                --import-ownertrust
         - require:
             - cmd: gpg-{{k}}-v1
 {% endfor %}
@@ -205,13 +209,13 @@ gpg-establish-trust-{{k}}-v1:
 gpg-create-host-key:
     cmd.run:
         - name: >
-            /usr/local/bin/vault write
-            "gpg/keys/{{grains['id']}}"
-            name="{{grains['id']}}"
-            generate=true
-            real_name="{{grains['id']}}"
-            key_bits=2048
-            exportable=true; sleep 2
+            /usr/local/bin/vault write \
+                "gpg/keys/{{grains['id']}}" \
+                name="{{grains['id']}}" \
+                generate=true \
+                real_name="{{grains['id']}}" \
+                key_bits=2048 \
+                exportable=true; sleep 2
         - unless: >
             /usr/local/bin/vault list gpg/keys | grep "{{grains['id']}}" >/dev/null
         - env:
@@ -219,6 +223,7 @@ gpg-create-host-key:
             - VAULT_ADDR: "https://vault.service.consul:8200/"
         - require:
             - file: vault
+            - cmd: powerdns-sync
             - cmd: vault-sync
 
 
@@ -226,19 +231,21 @@ gpg-import-host-key:
     cmd.run:
         - unless: >
             /usr/bin/gpg
+            --batch
             --homedir {{keyloc}}
             --no-default-keyring
             --with-colons
-            --list-keys $(VAULT_TOKEN="{{pillar['dynamicsecrets']['gpg-read-token']}}" \
+            --list-keys "$(VAULT_TOKEN="$VAULT_READ_TOKEN" \
                           /usr/local/bin/vault read \
                               -field=fingerprint \
-                              "gpg/keys/{{grains['id']}}" 2>/dev/null) 2>/dev/null
+                              "gpg/keys/{{grains['id']}}" 2>/dev/null)" 2>/dev/null
         - name: >
             /usr/local/bin/vault read
             -field=key
             "gpg/export/{{grains['id']}}" |
             gpg --homedir {{keyloc}} --no-default-keyring --import
         - env:
+            - VAULT_READ_TOKEN: "{{pillar['dynamicsecrets']['gpg-read-token']}}"
             - VAULT_TOKEN: "{{pillar['dynamicsecrets']['gpg-auth-token']}}"
             - VAULT_ADDR: "https://vault.service.consul:8200/"
         - require:
@@ -248,16 +255,17 @@ gpg-import-host-key:
 
 gpg-establish-host-key-trust:
     cmd.run:
-        - unless: >
+        - onlyif: >
             /usr/bin/gpg
+            --batch
             --homedir {{keyloc}}
             --no-default-keyring
             --with-colons
-            --list-keys $(VAULT_TOKEN="{{pillar['dynamicsecrets']['gpg-read-token']}}" \
+            --list-keys "$(VAULT_TOKEN="$VAULT_READ_TOKEN" \
                           /usr/local/bin/vault read \
                               -field=fingerprint \
-                              "gpg/keys/{{grains['id']}}" 2>/dev/null) 2>/dev/null |
-            grep "pub:" | cut -d':' -f2 | grep "u" >/dev/null
+                              "gpg/keys/{{grains['id']}}" 2>/dev/null)" 2>/dev/null |
+            grep "pub:" | cut -d':' -f2 | grep "-" >/dev/null
         - name: >
             echo "$(/usr/local/bin/vault read \
                 -field=fingerprint \
@@ -267,6 +275,7 @@ gpg-establish-host-key-trust:
             --batch
             --import-ownertrust
         - env:
+            - VAULT_READ_TOKEN: "{{pillar['dynamicsecrets']['gpg-read-token']}}"
             - VAULT_TOKEN: "{{pillar['dynamicsecrets']['gpg-auth-token']}}"
             - VAULT_ADDR: "https://vault.service.consul:8200/"
         - require:

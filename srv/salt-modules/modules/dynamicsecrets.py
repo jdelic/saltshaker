@@ -5,14 +5,20 @@ import uuid
 import base64
 import logging
 import sqlite3
+import requests
 
 from Crypto.PublicKey import RSA  # zeromq depends on pycrypto and salt depends on 0mq, so we know pycrypto exists
+from requests import RequestException
+from six.moves.urllib.parse import urljoin
 
 
 _log = logging.getLogger(__name__)
 _log.info("dynamic secrets module loaded")
 
 _DEFAULT_PATH = "/etc/salt/dynamicsecrets.sqlite"
+_CONSUL_URL = "http://127.0.0.1:8500/"
+_CONSUL_TOKEN = None
+_CONSUL_TOKEN_SECRET = None
 
 
 try:
@@ -21,7 +27,22 @@ except ImportError:
     pass
 else:
     if typing.TYPE_CHECKING:
-        from typing import Union, Dict, List, Tuple, Any
+        from typing import Union, Dict, List, Tuple, Any, Optional
+
+
+class ConsulAclToken(dict):
+    def __init__(self, accessor_id = None, secret_id = None, consul_firstrun = False, **kwargs):
+        # type: (str, str, bool, Any) -> None
+        super(ConsulAclToken, self).__init__(
+            accessor_id=accessor_id,
+            secret_id=secret_id,
+            **kwargs
+        )
+        self['firstrun'] = consul_firstrun
+
+    def __str__(self):
+        # type: () -> str
+        return self["accessor_id"]
 
 
 class DynamicSecretsStore(object):
@@ -41,29 +62,37 @@ class DynamicSecretsStore(object):
                 CREATE TABLE store (
                     secretname VARCHAR(255),
                     secret TEXT,
-                    host VARCHAR(255) NOT NULL DEFAULT "*"
+                    host VARCHAR(255) NOT NULL DEFAULT "*",
+                    secrettype VARCHAR(255),
+                    CONSTRAINT store_pk PRIMARY KEY (secretname, host)
                 )"""
                                )
 
     @staticmethod
-    def _deserialize_secret(secret):
-        # type: (str) -> Union[Dict[str, str], str]
-        if secret.startswith("-----BEGIN RSA PRIVATE KEY"):
+    def _deserialize_secret(secret, secrettype):
+        # type: (str, str) -> Union[Dict[str, str], ConsulAclToken, str]
+        if secrettype == "rsa":
             key = RSA.importKey(secret)
             return {
                 "key": key.exportKey("PEM"),
                 "public": key.exportKey("OpenSSH"),
                 "public_pem": key.publickey().exportKey("PEM"),
             }
+        elif secrettype == "consul-acl-token":
+            accessor_id, secret_id = secret.split(",")
+            return ConsulAclToken(
+                accessor_id=accessor_id,
+                secret_id=secret_id
+            )
         else:
             return secret
 
-    def save(self, secret_name, secret, host="*"):
-        # type: (str, str, str) -> None
+    def save(self, secret_name, secret_type, secret, host="*"):
+        # type: (str, str, str, str) -> None
         c = self._conn.cursor()
         try:
-            c.execute("REPLACE INTO store (secretname, secret, host) VALUES (?, ?, ?)",
-                      (secret_name, secret, host,))
+            c.execute("REPLACE INTO store (secretname, secrettype, secret, host) VALUES (?, ?, ?, ?)",
+                      (secret_name, secret_type, secret, host,))
         finally:
             c.close()
 
@@ -71,12 +100,12 @@ class DynamicSecretsStore(object):
         # type: (str, str) -> Union[Dict[str, str], str]
         c = self._conn.cursor()
         try:
-            q = "SELECT secret FROM store WHERE secretname=? AND host=?"
+            q = "SELECT secret, secrettype FROM store WHERE secretname=? AND host=?"
             c.execute(q, (secret_name, host,))
             row = c.fetchone()
             if row is None:
                 raise KeyError("No such key '%s' for host '%s'" % (secret_name, host,))
-            return self._deserialize_secret(row[0])
+            return self._deserialize_secret(row[0], row[1])
         finally:
             c.close()
 
@@ -84,10 +113,10 @@ class DynamicSecretsStore(object):
         # type: (str) -> List[Tuple[Any, Any]]
         c = self._conn.cursor()
         try:
-            q = "SELECT secret, host FROM store WHERE secretname=?"
+            q = "SELECT secret, secrettype, host FROM store WHERE secretname=?"
             c.execute(q, (secret_name,))
             rows = c.fetchall()
-            ret = [(self._deserialize_secret(row[0]), row[1],) for row in rows]
+            ret = [(self._deserialize_secret(row[0], row[1]), row[2],) for row in rows]
             return ret
         finally:
             c.close()
@@ -125,9 +154,32 @@ class DynamicSecretsPillar(DynamicSecretsStore):
         ])
         return pwstr
 
+    def get_type_from_config(self, secret_config):
+        # type: (Dict[str, Union[str, int, bool]]) -> str
+        secret_type = "password"
+        if "type" in secret_config:
+            if secret_config["type"] in ["password", "rsa", "uuid", "consul-acl-token"]:
+                secret_type = secret_config["type"]
+            else:
+                raise ValueError("Not a valid secret type: %s", secret_config["type"])
+        return secret_type
+
+    def get_consul_token(self):
+        # type: () -> str
+        global _CONSUL_TOKEN, _CONSUL_TOKEN_SECRET
+        consul_token = None
+        if _CONSUL_TOKEN:
+            consul_token = _CONSUL_TOKEN
+        elif _CONSUL_TOKEN_SECRET:
+            consul_token = self.get_or_create({"type": "uuid"}, _CONSUL_TOKEN_SECRET)
+
+        if not consul_token:
+            raise ValueError("No ACL token for Consul in dynamicsecrets configuration")
+
+        return consul_token
+
     def create(self, secret_config, secret_name, host="*"):
         # type: (Dict[str, Union[str, int, bool]], str, str) -> Union[Dict[str, str], str]
-        secret_type = "password"
         encode = None
         length = 16
         if "encode" in secret_config:
@@ -139,17 +191,13 @@ class DynamicSecretsPillar(DynamicSecretsStore):
                 length = int(secret_config["length"])
             except ValueError:
                 raise ValueError("Not a valid length specification: %s", secret_config["length"])
-        if "type" in secret_config:
-            if secret_config["type"] in ["password", "rsa", "uuid"]:
-                secret_type = secret_config["type"]
-            else:
-                raise ValueError("Not a valid secret type: %s", secret_config["type"])
 
+        secret_type = self.get_type_from_config(secret_config)
         if secret_type == "password":
             if encode == "base64":
-                self.save(secret_name, base64.b64encode(os.urandom(length)), host)
+                self.save(secret_name, secret_type, base64.b64encode(os.urandom(length)), host)
             else:
-                self.save(secret_name, self._alphaencoding(os.urandom(length)), host)
+                self.save(secret_name, secret_type, self._alphaencoding(os.urandom(length)), host)
         elif secret_type == "rsa":
             if length < 2048:
                 keylen = 2048
@@ -158,16 +206,55 @@ class DynamicSecretsPillar(DynamicSecretsStore):
 
             key = RSA.generate(keylen)
             # Save only the private key to the database, we calculate the public key on read
-            self.save(secret_name, key.exportKey("PEM"), host)
+            self.save(secret_name, secret_type, key.exportKey("PEM"), host)
         elif secret_type == "uuid":
             # uuid.uuid4() uses os.urandom(), so this should be reasonably unguessable
-            self.save(secret_name, str(uuid.uuid4()), host)
+            self.save(secret_name, secret_type, str(uuid.uuid4()), host)
+        elif secret_type == "consul-acl-token":
+            # creates a consul-acl-token without any policy attached to it
+            try:
+                resp = requests.put(
+                    urljoin(_CONSUL_URL, "/v1/acl/token"),
+                    headers={
+                        "X-Consul-Token": self.get_consul_token(),
+                    },
+                    json={
+                        "Description": "%s for %s" % (secret_name, host),
+                        "Policies": [],
+                    }
+                )
+            except RequestException:
+                return ConsulAclToken("Unavailable", "first run", consul_firstrun=True)
+            if resp.status_code == 200 and resp.headers["Content-Type"] == "application/json":
+                self.save(secret_name, secret_type, "%s,%s" % (resp.json()["AccessorID"], resp.json()["SecretID"]),
+                          host)
+            else:
+                _log.error("Invalid Consul response while creating %s (status_code=%s): %s",
+                           secret_name, resp.status_code, resp.text)
 
         return self.load(secret_name, host)
 
+    def check(self, secret_config, secret_name, host="*"):
+        # type: (Dict[str, Union[str, int, bool]], str, str) -> bool
+        exists = self.exists(secret_name, host=host)
+        if exists and self.get_type_from_config(secret_config) == "consul-acl-token":
+            # check if token is still valid
+            resp = requests.get(
+                urljoin(_CONSUL_URL, "/v1/acl/token/%s" % self.load(secret_name, host)['accessor_id']),
+                headers={
+                    "X-Consul-Token": self.get_consul_token()
+                },
+            )
+            if resp.status_code == 200 and resp.headers["Content-Type"] == "application/json":
+                return True
+            else:
+                return False
+        else:
+            return exists
+
     def get_or_create(self, secret_config, secret_name, host="*"):
         # type: (Dict[str, Union[str, int, bool]], str, str) -> Union[Dict[str, str], str]
-        if self.exists(secret_name, host):
+        if self.check(secret_config, secret_name, host):
             return self.load(secret_name, host)
         else:
             return self.create(secret_config, secret_name, host)
@@ -198,10 +285,17 @@ def match_minion_id(minion_id, hostconfig):
 
 
 def __init__(opts):
-    global _DEFAULT_PATH
     # type: (Dict[str, Any]) -> None
+    global _DEFAULT_PATH, _CONSUL_URL, _CONSUL_TOKEN, _CONSUL_TOKEN_SECRET
+
     if "dynamicsecrets.path" in opts:
         _DEFAULT_PATH = opts["dynamicsecrets.path"]
+    if "dynamicsecrets.consul_url" in opts:
+        _CONSUL_URL = opts["dynamicsecrets.consul_url"]
+    if "dynamicsecrets.consul_token" in opts:
+        _CONSUL_TOKEN = opts["dynamicsecrets.consul_token"]
+    elif "dynamicsecrets.consul_token_secret" in opts:
+        _CONSUL_TOKEN_SECRET = opts["dynamicsecrets.consul_token_secret"]
 
 
 store = None  # type: DynamicSecretsPillar

@@ -19,7 +19,7 @@ redis-cache:
         - name: redis@cache
         - enable: True
         - require:
-            - file: redis-multi
+            - systemdunit: redis-multi
         - watch:
             - file: redis-cache
 

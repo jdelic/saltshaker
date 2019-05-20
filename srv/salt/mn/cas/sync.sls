@@ -1,7 +1,7 @@
 # This state ensures that authserver is up and running
 authserver-sync:
     cmd.run:
-        - name: /bin/true
+        - name: /bin/true authserver-sync
 
 
 # This is a helper state that is used to ensure that the authserver
@@ -12,14 +12,14 @@ authserver-sync:
 # all Vault policies.
 authserver-sync-vault:
     cmd.run:
-        - name: /bin/true
+        - name: /bin/true authserver-sync-vault
 
 
 dkimsigner-sync-vault:
     cmd.run:
-        - name: /bin/true
+        - name: /bin/true dkimsigner-sync-vault
 
 
 mailforwarder-sync-vault:
     cmd.run:
-        - name: /bin/true
+        - name: /bin/true mailforwarder-sync-vault

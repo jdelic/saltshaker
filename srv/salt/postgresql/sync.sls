@@ -2,4 +2,4 @@
 # state is run on the same server
 postgresql-sync:
     cmd.run:
-        - name: /bin/true
+        - name: /bin/true postgresql-sync

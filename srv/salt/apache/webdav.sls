@@ -63,6 +63,7 @@ apache2-webdav-basedir-{{sitecnt}}:
         - makedirs: True
         - require:
             - pkg: apache2
+            - file: secure-webdav-basedir
 
 
 apache2-webdav-logdir-{{sitecnt}}:
@@ -74,6 +75,7 @@ apache2-webdav-logdir-{{sitecnt}}:
         - makedirs: True
         - require:
             - pkg: apache2
+            - file: apache2-webdav-basedir-{{sitecnt}}
 
 
             {% for folderdef in config.get('folders', []) %}
@@ -88,6 +90,7 @@ apache2-webdav-folders-{{sitecnt}}-{{foldername}}-{{fdcnt}}-{{loop.index}}:
         - makedirs: True
         - require:
             - pkg: apache2
+            - file: apache2-webdav-basedir-{{sitecnt}}
                 {% endfor %}
             {% endfor %}
 
@@ -108,6 +111,7 @@ apache2-webdav-config-{{sitecnt}}:
         - require:
             - pkg: authclient
             - pkg: apache2
+            - file: apache2-webdav-logdir-{{sitecnt}}
 
 
 apache2-webdav-enable-site-{{sitecnt}}:
@@ -139,7 +143,6 @@ apache2-webdav-servicedef-{{site}}:
             - file: apache2-webdav-enable-site-{{sitecnt}}
             - service: apache2-service
             - file: consul-service-dir
-
         {% endfor %}
     {% endfor %}
 {% endif %}

@@ -33,6 +33,18 @@ consul-network-interface:
 
 consul-data-dir:
     file.directory:
+        - name: /var/lib/consul
+        - makedirs: True
+        - user: {{consul_user}}
+        - group: {{consul_group}}
+        - mode: '0700'
+        - require:
+            - user: consul
+            - group: consul
+
+
+consul-run-dir:
+    file.directory:
         - name: /run/consul
         - makedirs: True
         - user: {{consul_user}}
@@ -118,10 +130,8 @@ consul-common-config:
             consul_interface_ip: 169.254.1.1
             datacenter: {{pillar['consul-cluster']['datacenter']}}
             encryption_key: {{pillar['dynamicsecrets']['consul-encryptionkey']}}
-            agent_acl_token: {{pillar['dynamicsecrets']['consul-acl-token']}}
         - require:
             - file: consul-basedir
-            - cmd: consul-network-interface
             - user: consul
             - group: consul
             - file: consul-service-dir
@@ -156,6 +166,7 @@ consul:
         - require:
             - user: consul
             - file: consul-data-dir
+            - file: consul-run-dir
             - archive: consul
 
 

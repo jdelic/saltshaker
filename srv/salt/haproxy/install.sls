@@ -17,7 +17,7 @@ haproxy:
         - name: haproxy
         - enable: False
         - prereq:
-            - file: haproxy-multi
+            - systemdunit: haproxy-multi
     file.absent:
         - name: /etc/init.d/haproxy
         - require:
@@ -26,7 +26,7 @@ haproxy:
 
 # set up a systemd config that supports multiple haproxy instances on one machine
 haproxy-multi:
-    file.managed:
+    systemdunit.managed:
         - name: /etc/systemd/system/haproxy@.service
         - source: salt://haproxy/haproxy@.service
         - user: root
