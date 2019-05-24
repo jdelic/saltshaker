@@ -65,6 +65,7 @@ aptly-service:
             port: {{port}}
         - require:
             - file: aptly
+            - pkg: aptly
     service.running:
         - name: aptly
         - enable: True
