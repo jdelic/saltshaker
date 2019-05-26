@@ -209,6 +209,7 @@ consul-service-restart:
         - init_delay: 2
         - watch:
             - file: consul-acl-bootstrap-config
+            - file: consul-common-config
             - file: consul  # restart on a change of the binary
             - systemdunit: consul-service  # if consul.service changes we want to *restart* (reload: False)
     cmd.run:
