@@ -216,18 +216,6 @@ basics-tcp-out{{port}}-send:
 
 
 {% for port in udp %}
-# allow us to call others
-basics-udp-out{{port}}-send:
-    iptables.append:
-        - table: filter
-        - chain: OUTPUT
-        - jump: ACCEPT
-        - proto: udp
-        - dport: {{port}}
-        - save: True
-        - order: 2
-
-
 # allow others to answer. For UDP we make this stateless here to guarantee it works.
 basics-udp-out{{port}}-recv:
     iptables.append:
@@ -252,7 +240,7 @@ basics-internal-network-tcp:
         - connstate: NEW
         - proto: tcp
         - save: True
-        - order: 4
+        - order: 2
         - require:
             - sls: iptables
 
@@ -265,7 +253,7 @@ basics-internal-network-udp:
         - out-interface: {{pillar['ifassign']['internal']}}
         - proto: udp
         - save: True
-        - order: 4
+        - order: 2
         - require:
             - sls: iptables
 
