@@ -226,6 +226,18 @@ basics-udp-out{{port}}-recv:
         - sport: {{port}}
         - save: True
         - order: 2
+
+
+# allow us to talk to others. For UDP we make this stateless here to guarantee it works.
+basics-udp-out{{port}}-send:
+    iptables.append:
+        - table: filter
+        - chain: OUTPUT
+        - jump: ACCEPT
+        - proto: udp
+        - dport: {{port}}
+        - save: True
+        - order: 2
 {% endfor %}
 
 
