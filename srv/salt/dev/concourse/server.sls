@@ -233,12 +233,12 @@ concourse-server:
             - file: concourse-keys-session_signing_key
     cmd.run:
         - name: >
-            until test ${count} -gt 30; do
+            until test ${count} -gt 60; do
                 if curl -s --fail {{pillar['ci']['protocol']}}://{{pillar['ci']['hostname']}}/api/v1/info; then
                     break;
                 fi
                 sleep 1; count=$((count+1));
-            done; test ${count} -lt 30
+            done; test ${count} -lt 60
         - env:
             count: 0
         - onchanges:
