@@ -7,7 +7,7 @@ include:
 authserver:
     pkg.installed:
         - name: authserver
-        - fromrepo: mn-nightly
+        #- fromrepo: mn-nightly  # install nightly version instead of release
         - require:
             - appconfig: authserver-appconfig
     service.running:
