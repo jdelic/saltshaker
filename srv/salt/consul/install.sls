@@ -224,7 +224,7 @@ consul-udp-in{{port}}-recv:
         - chain: INPUT
         - jump: ACCEPT
         - in-interface: {{pillar['ifassign']['internal']}}
-        - sport: {{port}}
+        - dport: {{port}}
         - proto: udp
         - save: True
         - require:

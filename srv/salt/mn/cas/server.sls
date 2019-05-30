@@ -95,8 +95,10 @@ authserver-config-secretid:
             - cmd: authserver-sync-vault
     {% endif %}
 {% else %}
-    {% set x = config.__setitem__("DATABASE_URL", 'postgresql://%s:@postgresql.local:5432/%s'|format(pillar['authserver']['dbuser'],
-        pillar['authserver']['dbname'])) %}
+    {% set x = config.__setitem__("DATABASE_URL",
+            'postgresql://%s:@postgresql.local:5432/%s'|format(pillar['authserver']['dbuser'],
+                                                               pillar['authserver']['dbname'])
+        ) %}
 {% endif %}
 
 {% for envvar, value in config.items() %}
