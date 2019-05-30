@@ -217,7 +217,7 @@ consul-tcp-in{{port}}-recv:
 
 
 # open consul ports UDP
-{% for port in ['8301', '8600'] %}
+{% for port in ['8301', '8302', '8600'] %}
 consul-udp-in{{port}}-recv:
     iptables.append:
         - table: filter
