@@ -63,6 +63,7 @@ concourse-worker-envvars:
             CONCOURSE_GARDEN_DOCKER_REGISTRY="{{pillar.get('ci', {}).get('garden-docker-registry',
               'registry-1.docker.io')}}"
             CONCOURSE_GARDEN_DNS_SERVER=169.254.1.1
+            CONCOURSE_GARDEN_DESTROY_CONTAINERS_ON_STARTUP=1
 
 
 concourse-worker:
@@ -79,6 +80,8 @@ concourse-worker:
             # tsa-host on 127.0.0.1 works because there is haproxy@internal proxying it
             arguments: >
                 --work-dir /srv/concourse-worker
+                --bind-ip 127.0.0.1
+                --bind-port 7777
                 --tsa-host 127.0.0.1:{{pillar.get('concourse-server', {}).get('tsa-port', 2222)}}
                 --tsa-public-key /etc/concourse/host_key.pub
                 --tsa-worker-private-key /etc/concourse/private/worker_key.pem
