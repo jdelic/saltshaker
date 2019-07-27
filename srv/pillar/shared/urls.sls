@@ -23,8 +23,8 @@ repos:
 #           state for that!
 
 urls:
-    concourse: https://github.com/concourse/concourse/releases/download/v5.2.0/concourse-5.2.0-linux-amd64.tgz
-    concourse-fly: https://github.com/concourse/concourse/releases/download/v5.2.0/fly-5.2.0-linux-amd64.tgz
+    concourse: https://github.com/concourse/concourse/releases/download/v5.4.0/concourse-5.4.0-linux-amd64.tgz
+    concourse-fly: https://github.com/concourse/concourse/releases/download/v5.4.0/fly-5.4.0-linux-amd64.tgz
     consul: https://releases.hashicorp.com/consul/1.5.1/consul_1.5.1_linux_amd64.zip
     consul-esm: https://releases.hashicorp.com/consul-esm/0.3.2/consul-esm_0.3.2_linux_amd64.zip
     consul-replicate: https://releases.hashicorp.com/consul-replicate/0.4.0/consul-replicate_0.4.0_linux_amd64.zip

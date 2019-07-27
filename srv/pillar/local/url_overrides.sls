@@ -22,8 +22,8 @@ repos:
 
 
 urls:
-    concourse: http://fileserver.maurusnet.test/downloads/concourse/concourse-5.2.0-linux-amd64.tgz
-    concourse-fly: http://fileserver.maurusnet.test/downloads/concourse/fly-5.2.0-linux-amd64.tgz
+    concourse: http://fileserver.maurusnet.test/downloads/concourse/concourse-5.4.0-linux-amd64.tgz
+    concourse-fly: http://fileserver.maurusnet.test/downloads/concourse/fly-5.4.0-linux-amd64.tgz
     consul: http://fileserver.maurusnet.test/downloads/consul/consul_1.5.1_linux_amd64.zip
     consul-esm: http://fileserver.maurusnet.test/downloads/consul-esm/consul-esm_0.3.2_linux_amd64.zip
     consul-replicate: http://fileserver.maurusnet.test/downloads/consul-replicate/consul-replicate_0.4.0_linux_amd64.zip
