@@ -79,9 +79,9 @@ dbus:
     service.running
 
 
-stretch:
+buster:
     pkgrepo.managed:
-        - name: {{pillar['repos']['stretch']}}
+        - name: {{pillar['repos']['buster']}}
         - file: /etc/apt/sources.list
         {% if pillar['repos'].get('pgpkey', None) %}
         - key_url: {{pillar['repos']['pgpkey']}}
@@ -90,29 +90,30 @@ stretch:
         - order: 1  # execute this state early!
 
 
-saltstack-repo:
-    pkgrepo.managed:
-        - name: {{pillar['repos']['saltstack']}}
-        - file: /etc/apt/sources.list.d/saltstack.list
-        - key_url: salt://saltstack_0E08A149DE57BFBE.pgp.key
-        - order: 2  # execute this state early!
+# commented out until Saltstack releases for Debian 10
+#saltstack-repo:
+#    pkgrepo.managed:
+#        - name: {{pillar['repos']['saltstack']}}
+#        - file: /etc/apt/sources.list.d/saltstack.list
+#        - key_url: salt://saltstack_0E08A149DE57BFBE.pgp.key
+#        - order: 2  # execute this state early!
 
 
-updates-stretch:
+updates-buster:
     pkgrepo.managed:
         - name: {{pillar['repos']['stretch-updates']}}
         - file: /etc/apt/sources.list.d/stretch-updates.list
         - order: 2  # execute this state early!
 
 
-security-updates-stretch:
+security-updates-buster:
     pkgrepo.managed:
         - name: {{pillar['repos']['stretch-security']}}
         - file: /etc/apt/sources.list.d/stretch-security.list
         - order: 2  # execute this state early!
 
 
-backports-org-stretch:
+backports-org-buster:
     pkgrepo.managed:
         - name: {{pillar['repos']['stretch-backports']}}
         - file: /etc/apt/sources.list.d/stretch-backports.list

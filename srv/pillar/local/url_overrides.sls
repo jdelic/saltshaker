@@ -6,17 +6,17 @@
 repos:
     aptly: deb http://fileserver.maurusnet.test/aptly/ squeeze main
     aptly-nightly: deb http://fileserver.maurusnet.test/aptly-nightly/ nightly main
+    buster: deb http://fileserver.maurusnet.test/debian/ buster main
+    buster-backports: deb http://fileserver.maurusnet.test/debian/ buster-backports main
+    buster-security: deb http://fileserver.maurusnet.test/debian/security/ buster-updates main
+    buster-updates: deb http://fileserver.maurusnet.test/debian/ buster-updates main
     docker: deb http://fileserver.maurusnet.test/repo/ debian-stretch main
-    stretch: deb http://fileserver.maurusnet.test/debian/ stretch main
-    stretch-backports: deb http://fileserver.maurusnet.test/debian/ stretch-backports main
-    stretch-security: deb http://fileserver.maurusnet.test/debian/security/ stretch-updates main
-    stretch-updates: deb http://fileserver.maurusnet.test/debian/ stretch-updates main
     maurusnet-apps: deb http://fileserver.maurusnet.test/mn-nightly/ mn-nightly main
     maurusnet-opensmtpd: deb http://fileserver.maurusnet.test/mn-opensmtpd/ mn-opensmtpd main
     maurusnet-radicale: deb http://fileserver.maurusnet.test/mn-radicale/ mn-radicale main
-    postgresql: deb http://fileserver.maurusnet.test/postgresql/ stretch-pgdg main
+    postgresql: deb http://fileserver.maurusnet.test/postgresql/ buster-pgdg main
     saltstack: deb http://fileserver.maurusnet.test/apt/debian/9/amd64/latest stretch main
-    haproxy: deb http://fileserver.maurusnet.test/haproxy/ stretch-backports-1.9 main
+    haproxy: deb http://fileserver.maurusnet.test/haproxy/ buster-backports-2.0 main
 
     pgpkey: salt://mn/fileserver_ACADBD6B.pgp.key
 

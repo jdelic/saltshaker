@@ -6,17 +6,17 @@
 repos:
     aptly: deb http://repo.aptly.info/ squeeze main
     aptly-nightly: deb http://repo.aptly.info/ nightly main
-    docker: deb https://apt.dockerproject.org/repo debian-stretch main
-    stretch: deb http://ftp-stud.hs-esslingen.de/debian/ stretch main contrib
-    stretch-backports: deb http://ftp-stud.hs-esslingen.de/debian/ stretch-backports main
-    stretch-security: deb http://security.debian.org/ stretch/updates main
-    stretch-updates: deb http://ftp-stud.hs-esslingen.de/debian/ stretch-updates main
+    buster: deb http://ftp-stud.hs-esslingen.de/debian/ buster main contrib
+    buster-backports: deb http://ftp-stud.hs-esslingen.de/debian/ buster-backports main
+    buster-security: deb http://security.debian.org/ buster/updates main
+    buster-updates: deb http://ftp-stud.hs-esslingen.de/debian/ buster-updates main
+    docker: deb https://apt.dockerproject.org/repo debian-buster main
     maurusnet-apps: deb http://repo.maurus.net/release/stretch/ mn-release main
     maurusnet-opensmtpd: deb http://repo.maurus.net/stretch/opensmtpd/ mn-opensmtpd main
     maurusnet-radicale: deb http://repo.maurus.net/stretch/radicale/ mn-radicale main
-    postgresql: deb http://apt.postgresql.org/pub/repos/apt/ stretch-pgdg main
+    postgresql: deb http://apt.postgresql.org/pub/repos/apt/ buster-pgdg main
     saltstack: deb http://repo.saltstack.com/apt/debian/9/amd64/latest stretch main
-    haproxy: deb http://haproxy.debian.net stretch-backports-1.9 main
+    haproxy: deb http://haproxy.debian.net buster-backports-2.0 main
 
 #   pgpkey: Set this to a salt:// url if you need to deploy your own repo signing key
 #           If you need to deploy more than one key, you should really write your own
