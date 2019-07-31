@@ -25,15 +25,15 @@ repos:
 urls:
     concourse: https://github.com/concourse/concourse/releases/download/v5.4.0/concourse-5.4.0-linux-amd64.tgz
     concourse-fly: https://github.com/concourse/concourse/releases/download/v5.4.0/fly-5.4.0-linux-amd64.tgz
-    consul: https://releases.hashicorp.com/consul/1.5.1/consul_1.5.1_linux_amd64.zip
-    consul-esm: https://releases.hashicorp.com/consul-esm/0.3.2/consul-esm_0.3.2_linux_amd64.zip
+    consul: https://releases.hashicorp.com/consul/1.5.3/consul_1.5.3_linux_amd64.zip
+    consul-esm: https://releases.hashicorp.com/consul-esm/0.3.3/consul-esm_0.3.3_linux_amd64.zip
     consul-replicate: https://releases.hashicorp.com/consul-replicate/0.4.0/consul-replicate_0.4.0_linux_amd64.zip
-    consul-template: https://releases.hashicorp.com/consul-template/0.20.0/consul-template_0.20.0_linux_amd64.zip
+    consul-template: https://releases.hashicorp.com/consul-template/0.20.1/consul-template_0.20.1_linux_amd64.zip
     exxo: https://bintray.com/artifact/download/mbachry/exxo/exxo-0.0.7.tar.xz
-    nomad: https://releases.hashicorp.com/nomad/0.9.1/nomad_0.9.1_linux_amd64.zip
+    nomad: https://releases.hashicorp.com/nomad/0.9.4/nomad_0.9.4_linux_amd64.zip
     pyrun35: https://downloads.egenix.com/python/egenix-pyrun-2.2.3-py3.5_ucs4-linux-x86_64.tgz
-    terraform: https://releases.hashicorp.com/terraform/0.11.13/terraform_0.11.13_linux_amd64.zip
-    vault: https://releases.hashicorp.com/vault/1.1.2/vault_1.1.2_linux_amd64.zip
+    terraform: https://releases.hashicorp.com/terraform/0.12.6/terraform_0.12.6_linux_amd64.zip
+    vault: https://releases.hashicorp.com/vault/1.2.0/vault_1.2.0_linux_amd64.zip
     vault-gpg-plugin: https://github.com/LeSuisse/vault-gpg-plugin/releases/download/v0.2.2/linux_amd64.zip
     vault-ssh-helper: https://releases.hashicorp.com/vault-ssh-helper/0.1.4/vault-ssh-helper_0.1.4_linux_amd64.zip
 

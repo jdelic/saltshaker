@@ -24,15 +24,15 @@ repos:
 urls:
     concourse: http://fileserver.maurusnet.test/downloads/concourse/concourse-5.4.0-linux-amd64.tgz
     concourse-fly: http://fileserver.maurusnet.test/downloads/concourse/fly-5.4.0-linux-amd64.tgz
-    consul: http://fileserver.maurusnet.test/downloads/consul/consul_1.5.1_linux_amd64.zip
-    consul-esm: http://fileserver.maurusnet.test/downloads/consul-esm/consul-esm_0.3.2_linux_amd64.zip
+    consul: http://fileserver.maurusnet.test/downloads/consul/consul_1.5.3_linux_amd64.zip
+    consul-esm: http://fileserver.maurusnet.test/downloads/consul-esm/consul-esm_0.3.3_linux_amd64.zip
     consul-replicate: http://fileserver.maurusnet.test/downloads/consul-replicate/consul-replicate_0.4.0_linux_amd64.zip
-    consul-template: http://fileserver.maurusnet.test/downloads/consul-template/consul-template_0.20.0_linux_amd64.zip
+    consul-template: http://fileserver.maurusnet.test/downloads/consul-template/consul-template_0.20.1_linux_amd64.zip
     exxo: http://fileserver.maurusnet.test/downloads/exxo/exxo-0.0.7.tar.xz
-    nomad: http://fileserver.maurusnet.test/downloads/nomad/nomad_0.9.1_linux_amd64.zip
+    nomad: http://fileserver.maurusnet.test/downloads/nomad/nomad_0.9.4_linux_amd64.zip
     pyrun35: http://fileserver.maurusnet.test/downloads/exxo/egenix-pyrun-2.2.3-py3.5_ucs4-linux-x86_64.tgz
-    terraform: http://fileserver.maurusnet.test/downloads/terraform/terraform_0.11.13_linux_amd64.zip
-    vault: http://fileserver.maurusnet.test/downloads/vault/vault_1.1.2_linux_amd64.zip
+    terraform: http://fileserver.maurusnet.test/downloads/terraform/terraform_0.12.6_linux_amd64.zip
+    vault: http://fileserver.maurusnet.test/downloads/vault/vault_1.2.0_linux_amd64.zip
     vault-gpg-plugin: http://fileserver.maurusnet.test/downloads/vault-gpg-plugin/linux_amd64.zip
     vault-ssh-helper: http://fileserver.maurusnet.test/downloads/vault/vault-ssh-helper_0.1.4_linux_amd64.zip
     fpmdeps: http://fileserver.maurusnet.test/downloads/ruby/fpm+deps.zip
