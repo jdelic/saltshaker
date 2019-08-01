@@ -101,26 +101,26 @@ buster:
 
 updates-buster:
     pkgrepo.managed:
-        - name: {{pillar['repos']['stretch-updates']}}
-        - file: /etc/apt/sources.list.d/stretch-updates.list
+        - name: {{pillar['repos']['buster-updates']}}
+        - file: /etc/apt/sources.list.d/buster-updates.list
         - order: 2  # execute this state early!
 
 
 security-updates-buster:
     pkgrepo.managed:
-        - name: {{pillar['repos']['stretch-security']}}
-        - file: /etc/apt/sources.list.d/stretch-security.list
+        - name: {{pillar['repos']['buster-security']}}
+        - file: /etc/apt/sources.list.d/buster-security.list
         - order: 2  # execute this state early!
 
 
 backports-org-buster:
     pkgrepo.managed:
-        - name: {{pillar['repos']['stretch-backports']}}
-        - file: /etc/apt/sources.list.d/stretch-backports.list
+        - name: {{pillar['repos']['buster-backports']}}
+        - file: /etc/apt/sources.list.d/buster-backports.list
         - order: 2  # execute this state early!
     file.managed:
-        - name: /etc/apt/preferences.d/stretch-backports
-        - source: salt://etc_mods/stretch-backports
+        - name: /etc/apt/preferences.d/buster-backports
+        - source: salt://etc_mods/buster-backports
 
 
 maurusnet-opensmtpd:
@@ -168,9 +168,9 @@ trigger-minion-sync:
 #             - libssl1.0.0
 #        - install_recommends: False
 #        - order: 10  # see ORDER.md
-#        - fromrepo: stretch-backports
+#        - fromrepo: buster-backports
 #        - require:
-#            - pkgrepo: backports-org-stretch
+#            - pkgrepo: backports-org-buster
 
 
 # always allow ssh in
