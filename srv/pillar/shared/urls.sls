@@ -11,7 +11,7 @@ repos:
     buster-security: deb http://security.debian.org/debian-security buster/updates main
     buster-updates: deb http://ftp-stud.hs-esslingen.de/debian/ buster-updates main
     docker: deb https://download.docker.com/linux/debian buster stable
-    maurusnet-apps: deb http://repo.maurus.net/release/stretch/ mn-release main
+    maurusnet-apps: deb http://repo.maurus.net/nightly/buster/ mn-nightly main
     maurusnet-opensmtpd: deb http://repo.maurus.net/stretch/opensmtpd/ mn-opensmtpd main
     maurusnet-radicale: deb http://repo.maurus.net/stretch/radicale/ mn-radicale main
     postgresql: deb http://apt.postgresql.org/pub/repos/apt/ buster-pgdg main
