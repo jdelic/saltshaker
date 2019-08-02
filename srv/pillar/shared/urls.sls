@@ -10,7 +10,7 @@ repos:
     buster-backports: deb http://ftp-stud.hs-esslingen.de/debian/ buster-backports main
     buster-security: deb http://security.debian.org/ buster/updates main
     buster-updates: deb http://ftp-stud.hs-esslingen.de/debian/ buster-updates main
-    docker: deb https://apt.dockerproject.org/repo debian-buster main
+    docker: deb https://download.docker.com/linux/debian buster stable
     maurusnet-apps: deb http://repo.maurus.net/release/stretch/ mn-release main
     maurusnet-opensmtpd: deb http://repo.maurus.net/stretch/opensmtpd/ mn-opensmtpd main
     maurusnet-radicale: deb http://repo.maurus.net/stretch/radicale/ mn-radicale main

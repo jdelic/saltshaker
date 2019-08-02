@@ -10,7 +10,7 @@ repos:
     buster-backports: deb http://fileserver.maurusnet.test/debian/ buster-backports main
     buster-security: deb http://fileserver.maurusnet.test/debian/security/ buster-updates main
     buster-updates: deb http://fileserver.maurusnet.test/debian/ buster-updates main
-    docker: deb http://fileserver.maurusnet.test/repo/ debian-stretch main
+    docker: deb http://fileserver.maurusnet.test/repo/ buster stable
     maurusnet-apps: deb http://fileserver.maurusnet.test/mn-nightly/ mn-nightly main
     maurusnet-opensmtpd: deb http://fileserver.maurusnet.test/mn-opensmtpd/ mn-opensmtpd main
     maurusnet-radicale: deb http://fileserver.maurusnet.test/mn-radicale/ mn-radicale main
