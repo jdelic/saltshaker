@@ -8,7 +8,7 @@ repos:
     aptly-nightly: deb http://repo.aptly.info/ nightly main
     buster: deb http://ftp-stud.hs-esslingen.de/debian/ buster main contrib
     buster-backports: deb http://ftp-stud.hs-esslingen.de/debian/ buster-backports main
-    buster-security: deb http://security.debian.org/ buster/updates main
+    buster-security: deb http://security.debian.org/debian-security buster/updates main
     buster-updates: deb http://ftp-stud.hs-esslingen.de/debian/ buster-updates main
     docker: deb https://download.docker.com/linux/debian buster stable
     maurusnet-apps: deb http://repo.maurus.net/release/stretch/ mn-release main
