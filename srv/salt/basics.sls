@@ -150,6 +150,19 @@ timezone-utc:
             - service: dbus
 
 
+# enforce en_us.UTF8
+default-locale-gen:
+    locale.present:
+        - name: en_US.utf-8
+
+default-locale-set:
+    locale.system:
+        - name: en_US.utf-8
+        - require:
+            - locale: default-locale-gen
+        - order: 2
+
+
 # Provide the salt-master with an event so it knows that the highstate is done.
 # We use this, for example, to sync saltmine data.
 trigger-minion-sync:
