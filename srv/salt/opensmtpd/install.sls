@@ -3,7 +3,6 @@ opensmtpd:
     pkg.installed:
         - pkgs:
             - opensmtpd
-            - libmariadbclient18  # dependency of opensmtpd-extras
         - install_recommends: False
 
 
