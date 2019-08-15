@@ -7,22 +7,27 @@ Port 22
 #ListenAddress ::
 #ListenAddress 0.0.0.0
 Protocol 2
-# HostKeys for protocol version 2
-HostKey /etc/ssh/ssh_host_rsa_key
-HostKey /etc/ssh/ssh_host_dsa_key
-HostKey /etc/ssh/ssh_host_ecdsa_key
+# Supported HostKey algorithms by order of preference.
 HostKey /etc/ssh/ssh_host_ed25519_key
-#Privilege Separation is turned on for security
-UsePrivilegeSeparation yes
+HostKey /etc/ssh/ssh_host_rsa_key
+HostKey /etc/ssh/ssh_host_ecdsa_key
+
+# Password based logins are disabled - only public key based logins are allowed.
+AuthenticationMethods publickey
+
+# Use kernel sandbox mechanisms where possible in unprivileged processes
+# Systrace on OpenBSD, Seccomp on Linux, seatbelt on MacOSX/Darwin, rlimit elsewhere.
+UsePrivilegeSeparation sandbox
 
 # Harden as recommended https://stribika.github.io/2015/01/04/secure-secure-shell.html
-KexAlgorithms curve25519-sha256@libssh.org,diffie-hellman-group-exchange-sha256
+KexAlgorithms curve25519-sha256@libssh.org,ecdh-sha2-nistp521,ecdh-sha2-nistp384,ecdh-sha2-nistp256,diffie-hellman-group-exchange-sha256
 Ciphers chacha20-poly1305@openssh.com,aes256-gcm@openssh.com,aes128-gcm@openssh.com,aes256-ctr,aes192-ctr,aes128-ctr
-MACs hmac-sha2-512-etm@openssh.com,hmac-sha2-256-etm@openssh.com,hmac-ripemd160-etm@openssh.com,umac-128-etm@openssh.com,hmac-sha2-512,hmac-sha2-256,hmac-ripemd160,umac-128@openssh.com
+MACs hmac-sha2-512-etm@openssh.com,hmac-sha2-256-etm@openssh.com,umac-128-etm@openssh.com,hmac-sha2-512,hmac-sha2-256,umac-128@openssh.com
 
 # Logging
 SyslogFacility AUTH
-LogLevel INFO
+# LogLevel VERBOSE logs user's key fingerprint on login. Needed to have a clear audit track of which key was using to log in.
+LogLevel VERBOSE
 
 # Authentication:
 LoginGraceTime 120
@@ -72,7 +77,8 @@ TCPKeepAlive yes
 # Allow client to pass locale environment variables
 AcceptEnv LANG LC_*
 
-#Subsystem sftp /usr/lib/openssh/sftp-server
+# Log sftp level file access (read/write/etc.) that would not be easily logged otherwise.
+#Subsystem sftp  /usr/lib/ssh/sftp-server -f AUTHPRIV -l INFO
 
 # Set this to 'yes' to enable PAM authentication, account processing,
 # and session processing. If this is enabled, PAM authentication will
