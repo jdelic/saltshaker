@@ -11,9 +11,9 @@ opensmtpd:
             - opensmtpd-filter-greylistd
         - fromrepo: mn-opensmtpd
         - install_recommends: False
-        -   require:
-            -   pkg: greylistd
-
+        - require:
+            - pkg: greylistd
+            - pkg: no-exim
 
 # opensmtpd doesn't call initgroups() for filters so we can't put filter-greylistd
 # in the greylist group. Instead we just change greylistd to run as the opensmtpd user.

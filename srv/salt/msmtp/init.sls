@@ -4,7 +4,9 @@ include:
     - basics.noexim
 
 msmtp:
-    pkg.installed
+    pkg.installed:
+        - require:
+            - pkg: no-exim
 
 
 msmtp-config:
