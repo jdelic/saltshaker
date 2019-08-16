@@ -3,18 +3,12 @@ opensmtpd:
     pkg.installed:
         - pkgs:
             - opensmtpd
-        - install_recommends: False
-
-
-opensmtpd-extras:
-    pkg.installed:
-        - pkgs:
             - opensmtpd-extras
             - opensmtpd-filter-greylistd
         - fromrepo: mn-opensmtpd
-        - require:
-            - pkg: opensmtpd
-            - pkg: greylistd
+        - install_recommends: False
+        -   require:
+            -   pkg: greylistd
 
 
 # opensmtpd doesn't call initgroups() for filters so we can't put filter-greylistd
