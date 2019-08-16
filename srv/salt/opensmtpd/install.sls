@@ -1,4 +1,8 @@
 
+include:
+    - basics.noexim
+
+
 opensmtpd:
     pkg.installed:
         - pkgs:
