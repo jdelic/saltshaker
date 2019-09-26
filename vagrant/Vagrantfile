@@ -110,12 +110,20 @@ Vagrant.configure('2') do |config|
     config.ssh.forward_agent = true
 
     config.vm.define :master do |master|
-        master.vm.provider :libvirt do |lv|
-            #lv.customize ['modifyvm', :id, '--rtcuseutc', 'on']
-            lv.memory = 2048
+        if OS.windows?
+            master.vm.provider :virtualbox do |vb|
+                vb.memory = 2048
+            end
+            master.vm.box = 'debian/contrib-buster64'
+        else
+            master.vm.provider :libvirt do |lv|
+                #lv.customize ['modifyvm', :id, '--rtcuseutc', 'on']
+                lv.memory = 2048
+            end
+            master.vm.box = 'debian/buster64'
         end
 
-        master.vm.box = 'debian/buster64'
+
         #master.vm.box_url = $box_url
         master.vm.network :private_network,
                           :ip => '192.168.123.88',
@@ -200,12 +208,19 @@ SCRIPT
     end
 
     config.vm.define :test do |test|
-        test.vm.provider :libvirt do |lv|
-            #lv.customize ['modifyvm', :id, '--rtcuseutc', 'on']
-            #lv.memory = 1024
+        if OS.windows?
+            test.vm.provider :virtualbox do |vb|
+                vb.memory = 2048
+            end
+            test.vm.box = 'debian/contrib-buster64'
+        else
+            test.vm.provider :libvirt do |lv|
+                #lv.customize ['modifyvm', :id, '--rtcuseutc', 'on']
+                lv.memory = 2048
+            end
+            test.vm.box = 'debian/buster64'
         end
 
-        test.vm.box = 'debian/buster64'
         #test.vm.box_url = $box_url
         test.vm.network :private_network, ip: '192.168.123.162'
         test.vm.network :private_network, ip: '192.168.123.163'
