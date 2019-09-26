@@ -23,7 +23,7 @@ end
 
 # helper to enure no_root_squash which will otherwise prevent libvirt to host mounting
 def sync_folder(vmref, folder, hostpath, mounttype: nil)
-    if OS.windows?
+    if OS.windows? or OS.mac?
         vmref.vm.synced_folder folder, hostpath
     else
         $mtype = nil
@@ -110,7 +110,7 @@ Vagrant.configure('2') do |config|
     config.ssh.forward_agent = true
 
     config.vm.define :master do |master|
-        if OS.windows?
+        if OS.windows? or OS.mac?
             master.vm.provider :virtualbox do |vb|
                 vb.memory = 2048
             end
@@ -208,7 +208,7 @@ SCRIPT
     end
 
     config.vm.define :test do |test|
-        if OS.windows?
+        if OS.windows? or OS.mac?
             test.vm.provider :virtualbox do |vb|
                 vb.memory = 2048
             end
