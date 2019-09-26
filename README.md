@@ -79,7 +79,7 @@ Deploying this salt configuration requires you to:
   3. check out the saltshaker repository
      ```
      cd /opt
-     git clone https://bitbucket.org/jdelic/saltshaker
+     git clone https://github.com/jdelic/saltshaker
      ln -sv /opt/saltshaker/srv/salt /srv/salt
      ln -sv /opt/saltshaker/srv/pillar /srv/pillar
      ln -sv /opt/saltshaker/srv/reactor /srv/reactor
