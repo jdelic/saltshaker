@@ -41,6 +41,15 @@ def sync_folder(vmref, folder, hostpath, mounttype: nil)
 end
 
 
+def ip(d)
+    if OS.windows?
+        "192.168.56." + d
+    else
+        "192.168.123." + d
+    end
+end
+
+
 $box_url = 'https://s3-eu-central-1.amazonaws.com/jdelic/maurusnet-debian.box'
 
 # When I'm on a train or plane I like to use a local Debian mirror that I run off a Micro SD Card.
@@ -126,7 +135,7 @@ Vagrant.configure('2') do |config|
 
         #master.vm.box_url = $box_url
         master.vm.network :private_network,
-                          :ip => '192.168.123.88',
+                          :ip => ip('88'),
                           :libvirt__netmask => '255.255.255.0',
                           :libvirt__network_name => 'mnet_vagrant'
         master.vm.hostname = 'saltmaster.maurusnet.test'
@@ -150,7 +159,7 @@ Vagrant.configure('2') do |config|
                 touch /etc/salt/roles.d/consulserver
                 touch /etc/salt/roles.d/database
                 touch /etc/salt/roles.d/authserver
-                touch /etc/salt/roles.d/dev
+                #touch /etc/salt/roles.d/dev
 SCRIPT
         end
 
@@ -222,16 +231,16 @@ SCRIPT
         end
 
         #test.vm.box_url = $box_url
-        test.vm.network :private_network, ip: '192.168.123.162'
-        test.vm.network :private_network, ip: '192.168.123.163'
-        test.vm.network :private_network, ip: '192.168.123.164'
+        test.vm.network :private_network, ip: ip('162')
+        test.vm.network :private_network, ip: ip('163')
+        test.vm.network :private_network, ip: ip('164')
         test.vm.hostname = 'test.maurusnet.test'
 
         test.vm.synced_folder 'saltshaker/etc/salt-minion/minion.d', '/etc/salt/minion.d'
 
         test.vm.provision :shell do |s|
-            s.inline = <<SCRIPT
-                sh -c 'if ! grep -q 192.168.123.88 /etc/hosts; then echo "192.168.123.88        saltmaster.maurusnet.test saltmaster" >> /etc/hosts; fi'
+            s.inline = "sh -c 'if ! grep -q 192.168.123.88 /etc/hosts; then echo \"" + ip('88') + "        saltmaster.maurusnet.test saltmaster\" >> /etc/hosts; fi'"
+            s.inline +=<<SCRIPT
                 mkdir -p /etc/salt/roles.d
                 chown 700 /etc/salt/roles.d
                 #touch /etc/salt/roles.d/mail
