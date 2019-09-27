@@ -119,6 +119,10 @@ You should clone the saltshaker repository and then as a first step, replace
 the git submodule in `srv/pillar/shared/secrets` with your own **private Git
 repository**.
 
+You can find an example pillar that you can modify for your own use in the
+[saltshaker-secrets-example](https://github.com/jdelic/saltshaker-secrets-example)
+repository.
+
 For my salt states to work, you **must** provide your own`shared.secrets`
 pillar in `srv/pillar/shared/secrets` that **must** contain the following
 pillars, unless you rework the salt states to use different ones. I use a
