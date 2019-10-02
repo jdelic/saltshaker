@@ -23,8 +23,8 @@ repos:
 #           state for that!
 
 urls:
-    concourse: https://github.com/concourse/concourse/releases/download/v5.5.3/concourse-5.5.3-linux-amd64.tgz
-    concourse-fly: https://github.com/concourse/concourse/releases/download/v5.5.3/fly-5.5.3-linux-amd64.tgz
+    concourse: https://github.com/concourse/concourse/releases/download/v5.6.0/concourse-5.6.0-linux-amd64.tgz
+    concourse-fly: https://github.com/concourse/concourse/releases/download/v5.6.0/fly-5.6.0-linux-amd64.tgz
     consul: https://releases.hashicorp.com/consul/1.6.1/consul_1.6.1_linux_amd64.zip
     consul-esm: https://releases.hashicorp.com/consul-esm/0.3.3/consul-esm_0.3.3_linux_amd64.zip
     consul-replicate: https://releases.hashicorp.com/consul-replicate/0.4.0/consul-replicate_0.4.0_linux_amd64.zip
@@ -39,8 +39,8 @@ urls:
 
 
 hashes:
-    concourse: sha256=62f545529b3ea4d8f288d5101ff2a6e58c5208530fe6a19993d3199420d4ff6f
-    concourse-fly: sha256=49920a32a6beeaebddffd91094d10b806566d1160337781993b4a94bddcf2f66
+    concourse: sha256=c11d206ef546b45e656e75433d6aa0e57607ab5af4d76f955dc2d15e53218e22
+    concourse-fly: sha256=addf3a1fb8e888336310a918553578284c3a444bfba9fc369b526c00c62e2628
     consul: sha256=a8568ca7b6797030b2c32615b4786d4cc75ce7aee2ed9025996fe92b07b31f7e
     consul-esm: sha256=1553c59d0f93a467d8cf15135a5314f8058e8ca849b305c211dd9b9aaafbbf13
     consul-replicate: sha256=96c6651291c2f8e75d98d04b9b4653d8a02324edaa25783744d9ea1d8d411c61
