@@ -8,7 +8,6 @@ opensmtpd:
         - pkgs:
             - opensmtpd
             - opensmtpd-extras
-            - opensmtpd-filter-greylistd
         - fromrepo: mn-opensmtpd
         - install_recommends: False
         - require:
@@ -387,6 +386,7 @@ opensmtpd-relay-out25-send:
         - save: True
         - require:
             - sls: iptables
+
 
 opensmtpd-relay-out465-send:
     iptables.append:
