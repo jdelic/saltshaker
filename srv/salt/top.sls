@@ -34,6 +34,10 @@ base:
         - compilers
         - salt-master
 
+    'roles:vagrant':
+        - match: grain
+        - dev.dkms
+
     'roles:vault':
         - match: grain
         - vault
