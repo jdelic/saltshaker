@@ -153,11 +153,11 @@ timezone-utc:
 # enforce en_us.UTF8
 default-locale-gen:
     locale.present:
-        - name: en_US.utf-8
+        - name: en_US.UTF-8
 
 default-locale-set:
     locale.system:
-        - name: en_US.utf-8
+        - name: en_US.UTF-8
         - require:
             - locale: default-locale-gen
         - order: 2
