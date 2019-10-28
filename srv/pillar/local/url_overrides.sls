@@ -15,7 +15,7 @@ repos:
     maurusnet-opensmtpd: deb http://fileserver.maurusnet.test/mn-opensmtpd/ mn-opensmtpd main
     maurusnet-radicale: deb http://fileserver.maurusnet.test/mn-radicale/ mn-radicale main
     postgresql: deb http://fileserver.maurusnet.test/postgresql/ buster-pgdg main
-    saltstack: deb http://fileserver.maurusnet.test/apt/debian/9/amd64/latest stretch main
+    saltstack: deb http://fileserver.maurusnet.test/apt/debian/10/amd64/latest buster main
     haproxy: deb http://fileserver.maurusnet.test/haproxy/ buster-backports-2.0 main
 
     pgpkey: salt://mn/fileserver_ACADBD6B.pgp.key
