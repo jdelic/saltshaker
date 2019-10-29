@@ -176,12 +176,12 @@ SCRIPT
             salt.always_install = true
             salt.install_master = true
             salt.install_syndic = false
-            #salt.bootstrap_script = 'saltshaker/vagrant/bootstrap-salt.sh'
-            #salt.bootstrap_options = '-p salt-common -x python3'
-            #if $local_provision
+            salt.bootstrap_script = 'saltshaker/vagrant/bootstrap-salt.sh'
+            salt.bootstrap_options = '-x python3'
+            if $local_provision
                 # -l uses http instead of https
-            #    salt.bootstrap_options += "-x python3 -l -R fileserver.maurusnet.test"
-            #end
+                salt.bootstrap_options += " -l -R fileserver.maurusnet.test"
+            end
             salt.master_pub = 'saltshaker/vagrant/preseed-keys/saltmaster.maurusnet.test.pub'
             salt.master_key = 'saltshaker/vagrant/preseed-keys/saltmaster.maurusnet.test.pem'
             salt.minion_pub = 'saltshaker/vagrant/preseed-keys/saltmaster.maurusnet.test.pub'
@@ -201,11 +201,12 @@ SCRIPT
             salt.always_install = true
             salt.install_master = false
             salt.install_syndic = false
-            #salt.bootstrap_script = 'saltshaker/vagrant/bootstrap-salt.sh'
-            #if $local_provision
+            salt.bootstrap_script = 'saltshaker/vagrant/bootstrap-salt.sh'
+            salt.bootstrap_options = '-x python3'
+            if $local_provision
                 # -l uses http instead of https
-            #    salt.bootstrap_options = "-x python3 -l -R fileserver.maurusnet.test"
-            #end
+                salt.bootstrap_options = " -l -R fileserver.maurusnet.test"
+            end
             salt.minion_pub = 'saltshaker/vagrant/preseed-keys/saltmaster.maurusnet.test.pub'
             salt.minion_key = 'saltshaker/vagrant/preseed-keys/saltmaster.maurusnet.test.pem'
         end
@@ -269,10 +270,10 @@ SCRIPT
             salt.install_master = false
             salt.install_syndic = false
             salt.bootstrap_script = 'saltshaker/vagrant/bootstrap-salt.sh'
-            salt.bootstrap_options = '-p salt-common -x python3'
+            salt.bootstrap_options = '-x python3'
             if $local_provision
                 # -l uses http instead of https
-                salt.bootstrap_options = "-l -R fileserver.maurusnet.test"
+                salt.bootstrap_options += " -l -R fileserver.maurusnet.test"
             end
             salt.minion_key = 'saltshaker/vagrant/preseed-keys/test.maurusnet.test.pem'
             salt.minion_pub = 'saltshaker/vagrant/preseed-keys/test.maurusnet.test.pub'
