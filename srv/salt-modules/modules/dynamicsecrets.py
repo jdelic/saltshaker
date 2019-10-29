@@ -143,14 +143,12 @@ class DynamicSecretsPillar(DynamicSecretsStore):
         super(DynamicSecretsPillar, self).__init__(*args, **kwargs)
 
     def _alphaencoding(self, rndstring):
-        # type: (Union[str, bytes]) -> str
+        # type: (bytes) -> str
         pwstr = "".join([
             str(self._PWDICT[(c & 0xf0) >> 4]) +  # c >= 64 are 2 chars
             str(self._PWDICT[c & 0x0f])
             if c >= 64 else self._PWDICT[c]  # c < 64 is 1 char
-            for c in [
-                ord(b) for b in rndstring
-            ]
+            for c in rndstring
         ])
         return pwstr
 
