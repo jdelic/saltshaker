@@ -8,6 +8,8 @@ opensmtpd:
         - pkgs:
             - opensmtpd
             - opensmtpd-extras
+            - opensmtpd-filter-greylistd
+            - opensmtpd-filter-dnsbl
         - fromrepo: mn-opensmtpd
         - install_recommends: False
         - require:
