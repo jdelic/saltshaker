@@ -22,8 +22,8 @@ repos:
 
 
 urls:
-    concourse: http://fileserver.maurusnet.test/downloads/concourse/concourse-5.6.0-linux-amd64.tgz
-    concourse-fly: http://fileserver.maurusnet.test/downloads/concourse/fly-5.6.0-linux-amd64.tgz
+    concourse: http://fileserver.maurusnet.test/downloads/concourse/concourse-5.7.0-linux-amd64.tgz
+    concourse-fly: http://fileserver.maurusnet.test/downloads/concourse/fly-5.7.0-linux-amd64.tgz
     consul: http://fileserver.maurusnet.test/downloads/consul/consul_1.6.1_linux_amd64.zip
     consul-esm: http://fileserver.maurusnet.test/downloads/consul-esm/consul-esm_0.3.3_linux_amd64.zip
     consul-replicate: http://fileserver.maurusnet.test/downloads/consul-replicate/consul-replicate_0.4.0_linux_amd64.zip
@@ -39,8 +39,8 @@ urls:
 
 
 hashes:
-    concourse: sha256=c11d206ef546b45e656e75433d6aa0e57607ab5af4d76f955dc2d15e53218e22
-    concourse-fly: sha256=addf3a1fb8e888336310a918553578284c3a444bfba9fc369b526c00c62e2628
+    concourse: sha256=9a8e96210b187c846a7e9407d7bdc01ff20b7c0bbc047c81a78be58c35c6dec4
+    concourse-fly: sha256=cd65b4a3cdba60ddb59fdf961fcc981b94166219cd1a890698b0bcb22f4c0194
     consul: sha256=a8568ca7b6797030b2c32615b4786d4cc75ce7aee2ed9025996fe92b07b31f7e
     consul-esm: sha256=1553c59d0f93a467d8cf15135a5314f8058e8ca849b305c211dd9b9aaafbbf13
     consul-replicate: sha256=96c6651291c2f8e75d98d04b9b4653d8a02324edaa25783744d9ea1d8d411c61
