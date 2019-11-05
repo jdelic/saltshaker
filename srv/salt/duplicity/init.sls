@@ -23,10 +23,15 @@ duplicity-cron-config-folder:
     {% set x = envvars.__setitem__('GNUPGHOME', pillar['gpg']['shared-keyring-location']) %}
 {% endif %}
 
-{% set gpg_keys = pillar['duplicity-backup']['gpg-keys'] %}
+{# the following makes sure that the host gpg key comes first, as it has no passphrase #}
+{% set gpg_keys = [] %}
 {% if pillar['duplicity-backup'].get('encrypt-for-host', False) %}
     {% set x = gpg_keys.append(grains['id']) %}
 {% endif %}
+{% for gpg_key in pillar['duplicity-backup']['gpg-keys'] %}
+    {% set x = gpg_keys.append(gpg_key) %}
+{% endfor %}
+
 
 duplicity-cron-backup-script:
     file.managed:

@@ -96,6 +96,16 @@ openvpn-tcp-gateway-conf:
             - file: {{pillar['ssl']['service-rootca-cert']}}
 
 
+{% for proto in ['udp', 'tcp'] %}
+openvpn-{{proto}}-config-symlink:
+    file.symlink:
+        - name: /etc/openvpn/gateway-{{proto}}.conf
+        - target: /etc/openvpn/server/gateway-{{proto}}.conf
+        - require:
+            file: openvpn-{{proto}}-gateway-conf
+{% endfor %}
+
+
 openvpn-config-folder:
     file.directory:
         - name: /etc/openvpn/server
