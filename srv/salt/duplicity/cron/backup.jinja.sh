@@ -6,6 +6,10 @@
 export {{envvar}}="{{value}}"
 {% endfor %}
 
+if [ "$PASSPHRASE" = "" ]; then
+    PASSPHRASE=""
+fi
+
 if [ ! -e /etc/duplicity.d ]; then
     echo "configuration folder /etc/duplicity.d is missing"
     exit 1;
