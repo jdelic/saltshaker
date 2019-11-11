@@ -14,7 +14,7 @@ repos:
     maurusnet-apps: deb http://fileserver.maurusnet.test/mn-nightly/ mn-nightly main
     maurusnet-opensmtpd: deb http://fileserver.maurusnet.test/mn-opensmtpd/ mn-opensmtpd main
     maurusnet-radicale: deb http://fileserver.maurusnet.test/mn-radicale/ mn-radicale main
-    postgresql: deb http://fileserver.maurusnet.test/postgresql/ buster-pgdg main
+    postgresql: deb http://fileserver.maurusnet.test/postgresql/ buster-pgdg
     saltstack: deb http://fileserver.maurusnet.test/apt/debian/10/amd64/latest buster main
     haproxy: deb http://fileserver.maurusnet.test/haproxy/ buster-backports-2.0 main
 
