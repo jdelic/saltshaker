@@ -102,7 +102,7 @@ openvpn-{{proto}}-config-symlink:
         - name: /etc/openvpn/gateway-{{proto}}.conf
         - target: /etc/openvpn/server/gateway-{{proto}}.conf
         - require:
-            file: openvpn-{{proto}}-gateway-conf
+            - file: openvpn-{{proto}}-gateway-conf
 {% endfor %}
 
 
