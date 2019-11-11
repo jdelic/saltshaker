@@ -14,7 +14,7 @@ repos:
     maurusnet-apps: deb http://repo.maurus.net/release/stretch/ mn-release main
     maurusnet-opensmtpd: deb http://repo.maurus.net/stretch/opensmtpd/ mn-opensmtpd main
     maurusnet-radicale: deb http://repo.maurus.net/stretch/radicale/ mn-radicale main
-    postgresql: deb http://apt.postgresql.org/pub/repos/apt/ stretch-pgdg main
+    postgresql: deb http://apt.postgresql.org/pub/repos/apt/ stretch-pgdg
     saltstack: deb http://repo.saltstack.com/apt/debian/9/amd64/latest stretch main
     haproxy: deb http://haproxy.debian.net stretch-backports-1.9 main
 
