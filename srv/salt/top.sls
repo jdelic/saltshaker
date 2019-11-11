@@ -41,6 +41,7 @@ base:
     'roles:vault':
         - match: grain
         - vault
+        - vault.autounlock
         - mn.cas.vault_database
         - dev.concourse.vault_credentials
 
