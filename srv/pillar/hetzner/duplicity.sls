@@ -11,5 +11,5 @@ duplicity-backup:
     enable-cleanup-cron: True
     cleanup-cron-schedule: 0 10 1 * *
     cleanup-mode: remove-older-than
-    cleanup-selector: 1Y
+    cleanup-selector: 6M
     # backup-target is set in shared.secrets.live-backup
