@@ -13,6 +13,19 @@ include:
             ) %}
 
 
+postgresql-apt-pin:
+    file.managed:
+        - name: /etc/apt/preferences.d/postgresql
+        - source: salt://postgresql/apt-preferences/postgresql.jinja
+        - template: jinja
+        - context:
+            postgres_version: {{postgres_version}}
+        - user: root
+        - group: root
+        - mode: '0644'
+
+
+
 postgresql-repo:
     pkgrepo.managed:
         - humanname: PostgreSQL official repos
@@ -20,6 +33,8 @@ postgresql-repo:
         - name: {{pillar["repos"]["postgresql"]}} main {{postgres_version}}
         - file: /etc/apt/sources.list.d/postgresql.list
         - key_url: salt://postgresql/postgresql_44A07FCC7D46ACCC4CF8.pgp.key
+        - require:
+            - file: postgresql-apt-pin
 
 
 postgresql-step1:
