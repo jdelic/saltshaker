@@ -1,0 +1,11 @@
+# Pin the selected postgresql version from our pillars
+Package: postgresql
+Pin: version {{postgres_version}}*
+Pin-Priority: 600
+
+
+# make sure no packages are installed "accidentally", but only on explicit instruction
+# (default priority is 500)
+Package: *
+Pin: release o=apt.postgresql.org
+Pin-Priority: 200
