@@ -327,6 +327,7 @@ fly-link-teams:
         - env:
             CONCOURSE_SYSOP_PASSWORD: {{pillar['dynamicsecrets']['concourse-sysop']}}
             CONCOURSE_URL: {{pillar['ci']['protocol']}}://{{pillar['ci']['hostname']}}
+            HOME: /root/
         - require:
             - cmd: concourse-sync
             - file: fly-link-teams
