@@ -215,7 +215,7 @@ opensmtpd-config:
                 {% if pillar['smtp']['relay']['sslkey'] == 'default' -%}
                     {{pillar['ssl']['filenames']['default-cert-key']}}
                 {%- else -%}
-                    {{pillar['ssl']['relay']['sslkey']}}
+                    {{pillar['smtp']['relay']['sslkey']}}
                 {%- endif %}
             internal_relay_certificate: >
                 {% if pillar['smtp']['internal-relay']['sslcert'] == 'default' -%}
@@ -227,7 +227,7 @@ opensmtpd-config:
                 {% if pillar['smtp']['internal-relay']['sslkey'] == 'default' -%}
                     {{pillar['ssl']['filenames']['default-cert-key']}}
                 {%- else -%}
-                    {{pillar['ssl']['internal-relay']['sslkey']}}
+                    {{pillar['smtp']['internal-relay']['sslkey']}}
                 {%- endif %}
         - require:
             - pkg: opensmtpd
