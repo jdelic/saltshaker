@@ -3,6 +3,26 @@ Package: postgresql
 Pin: version {{postgres_version}}*
 Pin-Priority: 600
 
+Package: postgresql-{{postgres_version}}
+Pin: version {{postgres_version}}*
+Pin-Priority: 600
+
+Package: postgresql-client-{{postgres_version}}
+Pin: version {{postgres_version}}*
+Pin-Priority: 600
+
+Package: postgresql-common
+Pin: version {{postgres_version}}*
+Pin-Priority: 600
+
+Package: postgresql-client-common
+Pin: version {{postgres_version}}*
+Pin-Priority: 600
+
+Package: libpq5
+Pin: version {{postgres_version}}*
+Pin-Priority: 600
+
 
 # make sure no packages are installed "accidentally", but only on explicit instruction
 # (default priority is 500)
