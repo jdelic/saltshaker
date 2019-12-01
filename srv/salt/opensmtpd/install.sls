@@ -224,7 +224,7 @@ opensmtpd-config:
                     {{pillar['smtp']['internal-relay']['sslcert']}}
                 {%- endif %}
             internal_relay_keyfile: >
-                {% if pillar['smtp']['relay']['sslkey'] == 'default' -%}
+                {% if pillar['smtp']['internal-relay']['sslkey'] == 'default' -%}
                     {{pillar['ssl']['filenames']['default-cert-key']}}
                 {%- else -%}
                     {{pillar['ssl']['internal-relay']['sslkey']}}
