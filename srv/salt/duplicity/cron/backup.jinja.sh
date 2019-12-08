@@ -7,7 +7,7 @@ export {{envvar}}="{{value}}"
 {% endfor %}
 
 if [ "$PASSPHRASE" = "" ]; then
-    PASSPHRASE=""
+    export PASSPHRASE=""
 fi
 
 if [ ! -e /etc/duplicity.d ]; then
