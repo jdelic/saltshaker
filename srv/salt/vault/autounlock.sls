@@ -7,7 +7,7 @@
 vault-autounlock-script:
     file.managed:
         - name: /root/vault_unlock.sh
-        - template: salt://vault/vault_unlock.sh
+        - source: salt://vault/vault_unlock.sh
         - mode: '0700'
         - user: root
         - group: root
