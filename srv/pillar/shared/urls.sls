@@ -11,12 +11,14 @@ repos:
     buster-security: deb http://security.debian.org/debian-security buster/updates main
     buster-updates: deb http://ftp-stud.hs-esslingen.de/debian/ buster-updates main
     docker: deb https://download.docker.com/linux/debian buster stable
+    envoy: deb [arch=amd64] https://dl.bintray.com/tetrate/getenvoy-deb buster stable
+    haproxy: deb http://haproxy.debian.net buster-backports-2.0 main
     maurusnet-apps: deb http://repo.maurus.net/nightly/buster/ mn-nightly main
     maurusnet-opensmtpd: deb http://repo.maurus.net/buster/opensmtpd/ mn-opensmtpd main
     maurusnet-radicale: deb http://repo.maurus.net/stretch/radicale/ mn-radicale main
     postgresql: deb http://apt.postgresql.org/pub/repos/apt/ buster-pgdg
     saltstack: deb http://repo.saltstack.com/py3/debian/10/amd64/latest buster main
-    haproxy: deb http://haproxy.debian.net buster-backports-2.0 main
+
 
 #   pgpkey: Set this to a salt:// url if you need to deploy your own repo signing key
 #           If you need to deploy more than one key, you should really write your own

@@ -11,12 +11,13 @@ repos:
     buster-security: deb http://fileserver.maurusnet.test/debian/security/ buster-updates main
     buster-updates: deb http://fileserver.maurusnet.test/debian/ buster-updates main
     docker: deb http://fileserver.maurusnet.test/repo/ buster stable
+    envoy: deb [arch=amd64] http://fileserver.maurusnet.test/getenvoy-deb/ buster stable
+    haproxy: deb http://fileserver.maurusnet.test/haproxy/ buster-backports-2.0 main
     maurusnet-apps: deb http://fileserver.maurusnet.test/mn-nightly/ mn-nightly main
     maurusnet-opensmtpd: deb http://fileserver.maurusnet.test/mn-opensmtpd/ mn-opensmtpd main
     maurusnet-radicale: deb http://fileserver.maurusnet.test/mn-radicale/ mn-radicale main
     postgresql: deb http://fileserver.maurusnet.test/postgresql/ buster-pgdg
     saltstack: deb http://fileserver.maurusnet.test/apt/debian/10/amd64/latest buster main
-    haproxy: deb http://fileserver.maurusnet.test/haproxy/ buster-backports-2.0 main
 
     pgpkey: salt://mn/fileserver_ACADBD6B.pgp.key
 

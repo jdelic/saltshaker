@@ -8,6 +8,7 @@ base:
         - byobu
         - mn.users
         - roles
+        - consul.envoy
         - consul.template  # everything needs consul-template in smartstack
         - haproxy.internal  # everything needs local proxies in smartstack
         - powerdns.recursor
