@@ -10,7 +10,7 @@ haproxy-repo:
 haproxy:
     pkg.installed:
         - install_recommends: False
-        - fromrepo: buster-backports-2.0
+        - fromrepo: buster-backports-2.1
         - require:
             - pkgrepo: haproxy-repo
     service.dead:
