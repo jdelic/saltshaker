@@ -241,7 +241,8 @@ SCRIPT
         test.vm.network :private_network, ip: ip('164')
         test.vm.hostname = 'test.maurusnet.test'
 
-        test.vm.synced_folder 'saltshaker/etc/salt-minion/minion.d', '/etc/salt/minion.d'
+        sync_folder(test, '.', '/vagrant')
+        sync_folder(test, 'saltshaker/etc/salt-minion/minion.d', '/etc/salt/minion.d', mounttype: 'rsync')
 
         test.vm.provision :shell do |s|
             s.inline = "sh -c 'if ! grep -q 192.168.123.88 /etc/hosts; then echo \"" + ip('88') + "        saltmaster.maurusnet.test saltmaster\" >> /etc/hosts; fi'\n"
