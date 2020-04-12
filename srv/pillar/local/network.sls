@@ -7,9 +7,7 @@
 
 
 ifassign:
-    {% if iface_nat is defined %}
     nat: {{iface_nat}}
-    {% endif %}
     internal: {{iface_internal}}
     external: {{iface_external}}
     external-alt: {{iface_external2}}
