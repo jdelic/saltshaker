@@ -1,19 +1,21 @@
 #
 # vagrant-specific network config
 #
-# On vagrant VMs eth0 is always the unrouted local network. Specifically for VirtualBox its a "NAT-injection"
-# (not real NAT) device. Vagrant creates a socket forward for SSH services on that device.
+# On vagrant VMs the first network interface is always the unrouted local network. Specifically for VirtualBox its a
+# "NAT-injection" (not real NAT) device. Vagrant creates a socket forward for SSH services on that device. For libvirt
+# it's a separate bridge on the host system.
 #
 # Since this should be only used in test environments, we just plain allow all traffic on that device.
 #
 
+{% if pillar["ifassign"].get("nat", False) %}
 vagrant-eth0-recv:
     iptables.insert:
         - position: 2
         - table: filter
         - chain: INPUT
         - jump: ACCEPT
-        - in-interface: eth0
+        - in-interface: {{pillar["ifassign"]["nat"]}}
         - order: 1
         - save: True
         - require:
@@ -26,8 +28,9 @@ vagrant-eth0-send:
         - table: filter
         - chain: OUTPUT
         - jump: ACCEPT
-        - out-interface: eth0
+        - out-interface: {{pillar["ifassign"]["nat"]}}
         - order: 1
         - save: True
         - require:
             - pkg: iptables
+{% endif %}
