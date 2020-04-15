@@ -64,6 +64,7 @@ concourse-worker-envvars:
               'registry-1.docker.io')}}"
             CONCOURSE_GARDEN_DNS_SERVER=169.254.1.1
             CONCOURSE_GARDEN_DESTROY_CONTAINERS_ON_STARTUP=1
+            CONCOURSE_GARDEN_ALLOW_HOST_ACCESS=1
 
 
 concourse-worker:
