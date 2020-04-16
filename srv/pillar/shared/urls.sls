@@ -6,7 +6,7 @@
 repos:
     aptly: deb http://repo.aptly.info/ squeeze main
     aptly-nightly: deb http://repo.aptly.info/ nightly main
-    docker: deb https://apt.dockerproject.org/repo debian-stretch main
+    docker: deb https://download.docker.com/linux/debian stretch stable
     stretch: deb http://ftp-stud.hs-esslingen.de/debian/ stretch main contrib
     stretch-backports: deb http://ftp-stud.hs-esslingen.de/debian/ stretch-backports main
     stretch-security: deb http://security.debian.org/ stretch/updates main
