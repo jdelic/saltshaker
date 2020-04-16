@@ -6,7 +6,7 @@
 repos:
     aptly: deb http://fileserver.maurusnet.test/aptly/ squeeze main
     aptly-nightly: deb http://fileserver.maurusnet.test/aptly-nightly/ nightly main
-    docker: deb http://fileserver.maurusnet.test/repo/ debian-stretch main
+    docker: deb http://fileserver.maurusnet.test/repo/ buster main
     stretch: deb http://fileserver.maurusnet.test/debian/ stretch main
     stretch-backports: deb http://fileserver.maurusnet.test/debian/ stretch-backports main
     stretch-security: deb http://fileserver.maurusnet.test/debian/security/ stretch-updates main
