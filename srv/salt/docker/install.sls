@@ -15,7 +15,6 @@ docker:
             - docker-ce
             - docker-ce-cli
             - containerd.io
-        - fromrepo: debian-stretch
 
 
 # we install a modified docker.service to
