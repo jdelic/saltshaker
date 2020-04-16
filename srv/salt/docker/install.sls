@@ -7,11 +7,14 @@ docker:
         - humanname: Docker official
         - name: {{pillar["repos"]["docker"]}}
         - file: /etc/apt/sources.list.d/docker.list
-        - key_url: salt://docker/docker_0ADBF76221572C52609D.pgp.key
+        - key_url: salt://docker/docker_8D81803C0EBFCD88.pgp.key
         - require_in:
             - pkg: docker
     pkg.installed:
-        - name: docker-engine
+        - pkgs:
+            - docker-ce
+            - docker-ce-cli
+            - containerd.io
         - fromrepo: debian-stretch
 
 
