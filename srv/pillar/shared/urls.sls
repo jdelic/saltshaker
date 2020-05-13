@@ -25,32 +25,34 @@ repos:
 #           state for that!
 
 urls:
-    concourse: https://github.com/concourse/concourse/releases/download/v6.0.0/concourse-6.0.0-linux-amd64.tgz
-    concourse-fly: https://github.com/concourse/concourse/releases/download/v6.0.0/fly-6.0.0-linux-amd64.tgz
-    consul: https://releases.hashicorp.com/consul/1.7.2/consul_1.7.2_linux_amd64.zip
+    concourse: https://github.com/concourse/concourse/releases/download/v6.1.0/concourse-6.1.0-linux-amd64.tgz
+    concourse-fly: https://github.com/concourse/concourse/releases/download/v6.1.0/fly-6.1.0-linux-amd64.tgz
+    consul: https://releases.hashicorp.com/consul/1.7.3/consul_1.7.3_linux_amd64.zip
     consul-esm: https://releases.hashicorp.com/consul-esm/0.3.3/consul-esm_0.3.3_linux_amd64.zip
     consul-replicate: https://releases.hashicorp.com/consul-replicate/0.4.0/consul-replicate_0.4.0_linux_amd64.zip
-    consul-template: https://releases.hashicorp.com/consul-template/0.23.0/consul-template_0.23.0_linux_amd64.zip
+    consul-template: https://releases.hashicorp.com/consul-template/0.25.0/consul-template_0.25.0_linux_amd64.zip
     exxo: https://bintray.com/artifact/download/mbachry/exxo/exxo-0.0.7.tar.xz
-    nomad: https://releases.hashicorp.com/nomad/0.11.0/nomad_0.11.0_linux_amd64.zip
+    nomad: https://releases.hashicorp.com/nomad/0.11.1/nomad_0.11.1_linux_amd64.zip
+    nomad-autoscaler: https://releases.hashicorp.com/nomad-autoscaler/0.0.1-techpreview2/nomad-autoscaler_0.0.1-techpreview2_linux_amd64.zip
     pyrun35: https://downloads.egenix.com/python/egenix-pyrun-2.2.3-py3.5_ucs4-linux-x86_64.tgz
     terraform: https://releases.hashicorp.com/terraform/0.12.24/terraform_0.12.24_linux_amd64.zip
-    vault: https://releases.hashicorp.com/vault/1.4.0/vault_1.4.0_linux_amd64.zip
+    vault: https://releases.hashicorp.com/vault/1.4.1/vault_1.4.1_linux_amd64.zip
     vault-gpg-plugin: https://github.com/LeSuisse/vault-gpg-plugin/releases/download/v0.2.4/linux_amd64.zip
     vault-ssh-helper: https://releases.hashicorp.com/vault-ssh-helper/0.1.4/vault-ssh-helper_0.1.4_linux_amd64.zip
 
 
 hashes:
-    concourse: sha256=2bb10ccaed94897089e1bde764c6c1e0ee4820a9ccd2f7600be25646f271f7b0
-    concourse-fly: sha256=be12ddd8e01ebf906b76d272fe57da491f77c1327f7f92b5f6abd298cad4d43f
-    consul: sha256=5ab689cad175c08a226a5c41d16392bc7dd30ceaaf90788411542a756773e698
+    concourse: sha256=dff0da2453b823da0f57b96141a272df2f6163ff12f797603386a0218eccccae
+    concourse-fly: sha256=cce8d60986d4d5e032c9ea8a36ce0795a464ebea6df7d890c787865690b805e7
+    consul: sha256=453814aa5d0c2bc1f8843b7985f2a101976433db3e6c0c81782a3c21dd3f9ac3
     consul-esm: sha256=1553c59d0f93a467d8cf15135a5314f8058e8ca849b305c211dd9b9aaafbbf13
     consul-replicate: sha256=96c6651291c2f8e75d98d04b9b4653d8a02324edaa25783744d9ea1d8d411c61
-    consul-template: sha256=8f7fa4492d29930f4d621b8643d734cb3f4318c32cc088f7c68519ccd9f6f33f
+    consul-template: sha256=496da8d30242ab2804e17ef2fa41aeabd07fd90176986dff58bce1114638bb71
     exxo: sha256=ce3d6ae10d364c5a0726cce127602fe6fa5d042b11afd21d79502f8216b42e1e
-    nomad: sha256=cd76c59af28757ee916811baf92c2ea8daa9125052f76ebb21daf5e10ef2db21
+    nomad: sha256=711e98b89ac4f5540bf3d6273379999f6c4141529531c262222e63ce491f5176
+    nomad-autoscaler: sha256=d6ad76e1403bd20d02737aadd48dfe99c7f9b0f0e1656505d6f98f7a4e21b966
     pyrun35: sha256=8bf8b374f582bb53600dd846a0cdb38e18586bbda06261321d48df69ddbf730e
     terraform: sha256=602d2529aafdaa0f605c06adb7c72cfb585d8aa19b3f4d8d189b42589e27bf11
-    vault: sha256=8f739c4850bab35e971e27c8120908f48f247b07717d19aabad1110e9966cded
+    vault: sha256=d8266ae2a9a97dcdd3edaf5e05331f7d73dcd1c02470da9e1304c7823d30734a
     vault-gpg-plugin: sha256=d6ebf6457a7ccf3294c557d4b33b7ded66d74feb761e3e056ddced1fdaed4fba
     vault-ssh-helper: sha256=156ce8250725e64a3e4dc51018a18813dd44d1f2a6c853976bc20e1625d631a1
