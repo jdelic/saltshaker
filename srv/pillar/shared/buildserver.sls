@@ -9,3 +9,7 @@ ci:
     verify-database-ssl: verify-full
 
     use-vault: True
+
+
+concourse-server:
+    atc-port: 38080
