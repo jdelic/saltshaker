@@ -28,7 +28,7 @@ def create_user(username, groups=None, optional_groups=None, key_pillars=None, p
         if k in __pillar__['sshkeys']:
             ssh_keys.append(__pillar__['sshkeys'][k])
 
-    if len(names) > 0:
+    if len(ssh_keys) > 0:
         fn_auth = state(username).ssh_auth.manage
         fn_auth.require(st_user)
         fn_auth(user=username, ssh_keys=ssh_keys)
