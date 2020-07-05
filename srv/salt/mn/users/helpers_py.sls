@@ -23,15 +23,15 @@ def create_user(username, groups=None, optional_groups=None, key_pillars=None, p
         shell="/bin/bash"
     )
 
-    names = []
+    ssh_keys = []
     for k in key_pillars:
         if k in __pillar__['sshkeys']:
-            names.append(__pillar__['sshkeys'][k])
+            ssh_keys.append(__pillar__['sshkeys'][k])
 
     if len(names) > 0:
-        fn_auth = state(username).ssh_auth.present
+        fn_auth = state(username).ssh_auth.manage
         fn_auth.require(st_user)
-        fn_auth(user=username, names=names)
+        fn_auth(user=username, ssh_keys=ssh_keys)
 
     if enable_byobu:
         st_byobu = state('byobu-%s' % username).cmd.run
