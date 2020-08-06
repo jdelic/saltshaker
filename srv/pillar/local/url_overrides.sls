@@ -12,7 +12,7 @@ repos:
     buster-updates: deb http://fileserver.maurusnet.test/debian/ buster-updates main
     docker: deb http://fileserver.maurusnet.test/repo/ buster stable
     envoy: deb [arch=amd64] http://fileserver.maurusnet.test/getenvoy-deb/ buster stable
-    haproxy: deb http://fileserver.maurusnet.test/haproxy/ buster-backports-2.1 main
+    haproxy: deb http://fileserver.maurusnet.test/haproxy/ buster-backports-2.2 main
     maurusnet-apps: deb http://fileserver.maurusnet.test/mn-nightly/ mn-nightly main
     maurusnet-opensmtpd: deb http://fileserver.maurusnet.test/mn-opensmtpd/ mn-opensmtpd main
     maurusnet-radicale: deb http://fileserver.maurusnet.test/mn-radicale/ mn-radicale main
