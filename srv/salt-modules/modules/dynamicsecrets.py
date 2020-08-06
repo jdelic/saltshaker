@@ -7,7 +7,7 @@ import logging
 import sqlite3
 import requests
 
-from Crypto.PublicKey import RSA  # zeromq depends on pycrypto and salt depends on 0mq, so we know pycrypto exists
+from Cryptodome.PublicKey import RSA  # zeromq depends on pycrypto and salt depends on 0mq, so we know pycrypto exists
 from requests import RequestException
 from six.moves.urllib.parse import urljoin
 
