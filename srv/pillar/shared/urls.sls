@@ -37,6 +37,7 @@ urls:
     pyrun35: https://downloads.egenix.com/python/egenix-pyrun-2.2.3-py3.5_ucs4-linux-x86_64.tgz
     terraform: https://releases.hashicorp.com/terraform/0.14.2/terraform_0.14.2_linux_amd64.zip
     vault: https://releases.hashicorp.com/vault/1.6.0/vault_1.6.0_linux_amd64.zip
+    vault-auditor: https://releases.hashicorp.com/vault-auditor/1.0.2/vault-auditor_1.0.2_linux_amd64.zip
     vault-gpg-plugin: https://github.com/LeSuisse/vault-gpg-plugin/releases/download/v0.3.0/linux_amd64.zip
     vault-ssh-helper: https://releases.hashicorp.com/vault-ssh-helper/0.2.0/vault-ssh-helper_0.2.0_linux_amd64.zip
 
@@ -54,5 +55,6 @@ hashes:
     pyrun35: sha256=8bf8b374f582bb53600dd846a0cdb38e18586bbda06261321d48df69ddbf730e
     terraform: sha256=6f380c0c7a846f9e0aedb98a2073d2cbd7d1e2dc0e070273f9325f1b69e668b2
     vault: sha256=83048e2d1ebfea212fead42e474e947c3a3bccc5056a5158ed33f530f8325e39
+    vault-auditor: sha256=95b77f20d6015dfd612213b61b03e830d127f235f80533076326ebc753d94145
     vault-gpg-plugin: sha256=eee08f28f4be8889fefa097b45819eca857d374ee856d3cd803207ede0c559d3
     vault-ssh-helper: sha256=a88825a0cbf47aab9a8166930b4c7cb9dcfdc7b335fdcc2b2966b1baf5e251bf
