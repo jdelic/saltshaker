@@ -5,7 +5,7 @@ ci:
     enabled: True
     hostname: ci.{{external_tld}}
     protocol: https
-    garden-docker-registry: registry-1.docker.io
+    docker-registry: registry-1.docker.io
 
     # sets PostgreSQL SSL verify settings
     # verify-database-ssl: verify-full

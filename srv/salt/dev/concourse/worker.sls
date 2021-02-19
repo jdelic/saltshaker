@@ -59,12 +59,12 @@ concourse-worker-envvars:
         - group: root
         - mode: '0600'
         - contents: |
-            CONCOURSE_GARDEN_NETWORK_POOL="{{pillar.get('ci', {}).get('garden-network-pool', '10.254.0.0/22')}}"
-            CONCOURSE_GARDEN_DOCKER_REGISTRY="{{pillar.get('ci', {}).get('garden-docker-registry',
+            CONCOURSE_CONTAINERD_NETWORK_POOL="{{pillar.get('ci', {}).get('backend-network-pool', '10.254.0.0/22')}}"
+            CONCOURSE_CONTAINERD_DOCKER_REGISTRY="{{pillar.get('ci', {}).get('docker-registry',
               'registry-1.docker.io')}}"
-            CONCOURSE_GARDEN_DNS_SERVER=169.254.1.1
-            CONCOURSE_GARDEN_DESTROY_CONTAINERS_ON_STARTUP=1
-            CONCOURSE_GARDEN_ALLOW_HOST_ACCESS=1
+            CONCOURSE_CONTAINERD_DNS_SERVER=169.254.1.1
+            CONCOURSE_CONTAINERD_DESTROY_CONTAINERS_ON_STARTUP=1
+            CONCOURSE_CONTAINERD_ALLOW_HOST_ACCESS=1
 
 
 concourse-worker:
@@ -80,6 +80,7 @@ concourse-worker:
             group: root
             # tsa-host on 127.0.0.1 works because there is haproxy@internal proxying it
             arguments: >
+                --runtime containerd
                 --work-dir /srv/concourse-worker
                 --bind-ip 127.0.0.1
                 --bind-port 7777
@@ -111,7 +112,7 @@ concourse-worker-tcp-out{{port}}-forward:
         - table: filter
         - chain: FORWARD
         - jump: ACCEPT
-        - source: {{pillar.get('ci', {}).get('garden-network-pool', '10.254.0.0/22')}}
+        - source: {{pillar.get('ci', {}).get('backend-network-pool', '10.254.0.0/22')}}
         - destination: 0/0
         - dport: {{port}}
         - match: state
@@ -147,7 +148,7 @@ concourse-worker-udp-out53-forward:
         - table: filter
         - chain: FORWARD
         - jump: ACCEPT
-        - source: {{pillar.get('ci', {}).get('garden-network-pool', '10.254.0.0/22')}}
+        - source: {{pillar.get('ci', {}).get('backend-network-pool', '10.254.0.0/22')}}
         - destination: 0/0
         - dport: 53
         - match: state
@@ -163,8 +164,8 @@ concourse-allow-inter-container-traffic-recv:
         - table: filter
         - chain: INPUT
         - jump: ACCEPT
-        - source: {{pillar.get('ci', {}).get('garden-network-pool', '10.254.0.0/22')}}
-        - destination: {{pillar.get('ci', {}).get('garden-network-pool', '10.254.0.0/22')}}
+        - source: {{pillar.get('ci', {}).get('backend-network-pool', '10.254.0.0/22')}}
+        - destination: {{pillar.get('ci', {}).get('backend-network-pool', '10.254.0.0/22')}}
         - save: True
         - require:
             - sls: iptables
@@ -175,8 +176,8 @@ concourse-allow-inter-container-traffic-send:
         - table: filter
         - chain: OUTPUT
         - jump: ACCEPT
-        - source: {{pillar.get('ci', {}).get('garden-network-pool', '10.254.0.0/22')}}
-        - destination: {{pillar.get('ci', {}).get('garden-network-pool', '10.254.0.0/22')}}
+        - source: {{pillar.get('ci', {}).get('backend-network-pool', '10.254.0.0/22')}}
+        - destination: {{pillar.get('ci', {}).get('backend-network-pool', '10.254.0.0/22')}}
         - save: True
         - require:
             - sls: iptables
