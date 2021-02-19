@@ -179,7 +179,7 @@ class DynamicSecretsPillar(DynamicSecretsStore):
     def create(self, secret_config, secret_name, host="*"):
         # type: (Dict[str, Union[str, int, bool]], str, str) -> Union[Dict[str, str], str]
         encode = None
-        length = 16
+        length = 20
         if "encode" in secret_config:
             encode = secret_config["encode"]
             if encode not in ["base64", "alpha"]:
@@ -193,9 +193,9 @@ class DynamicSecretsPillar(DynamicSecretsStore):
         secret_type = self.get_type_from_config(secret_config)
         if secret_type == "password":
             if encode == "base64":
-                self.save(secret_name, secret_type, base64.b64encode(os.urandom(length)), host)
+                self.save(secret_name, secret_type, base64.b64encode(os.urandom(length)).decode("utf-8"), host)
             else:
-                self.save(secret_name, secret_type, self._alphaencoding(os.urandom(length)), host)
+                self.save(secret_name, secret_type, self._alphaencoding(os.urandom(length))[:length], host)
         elif secret_type == "rsa":
             if length < 2048:
                 keylen = 2048
