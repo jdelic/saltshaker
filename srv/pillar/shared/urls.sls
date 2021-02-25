@@ -30,13 +30,13 @@ urls:
     consul: https://releases.hashicorp.com/consul/1.9.3/consul_1.9.3_linux_amd64.zip
     consul-esm: https://releases.hashicorp.com/consul-esm/0.5.0/consul-esm_0.5.0_linux_amd64.zip
     consul-replicate: https://releases.hashicorp.com/consul-replicate/0.4.0/consul-replicate_0.4.0_linux_amd64.zip
-    consul-template: https://releases.hashicorp.com/consul-template/0.25.1/consul-template_0.25.1_linux_amd64.zip
+    consul-template: https://releases.hashicorp.com/consul-template/0.25.2/consul-template_0.25.2_linux_amd64.zip
     exxo: https://bintray.com/artifact/download/mbachry/exxo/exxo-0.0.7.tar.xz
-    nomad: https://releases.hashicorp.com/nomad/1.0.3/nomad_1.0.3_linux_amd64.zip
-    nomad-autoscaler: https://releases.hashicorp.com/nomad-autoscaler/0.2.1/nomad-autoscaler_0.2.1_linux_amd64.zip
+    nomad: https://releases.hashicorp.com/nomad/1.0.3/nomad_1.0.4_linux_amd64.zip
+    nomad-autoscaler: https://releases.hashicorp.com/nomad-autoscaler/0.3.0/nomad-autoscaler_0.3.0_linux_amd64.zip
     pyrun35: https://downloads.egenix.com/python/egenix-pyrun-2.2.3-py3.5_ucs4-linux-x86_64.tgz
     terraform: https://releases.hashicorp.com/terraform/0.14.7/terraform_0.14.7_linux_amd64.zip
-    vault: https://releases.hashicorp.com/vault/1.6.2/vault_1.6.2_linux_amd64.zip
+    vault: https://releases.hashicorp.com/vault/1.6.3/vault_1.6.3_linux_amd64.zip
     vault-auditor: https://releases.hashicorp.com/vault-auditor/1.0.3/vault-auditor_1.0.3_linux_amd64.zip
     vault-gpg-plugin: https://github.com/LeSuisse/vault-gpg-plugin/releases/download/v0.3.0/linux_amd64.zip
     vault-ssh-helper: https://releases.hashicorp.com/vault-ssh-helper/0.2.1/vault-ssh-helper_0.2.1_linux_amd64.zip
@@ -48,13 +48,13 @@ hashes:
     consul: sha256=2ec9203bf370ae332f6584f4decc2f25097ec9ef63852cd4ef58fdd27a313577
     consul-esm: sha256=96dae821bd3d1775048c9dbe8d6112ed645c9b912786c167ba9417f59509059d
     consul-replicate: sha256=96c6651291c2f8e75d98d04b9b4653d8a02324edaa25783744d9ea1d8d411c61
-    consul-template: sha256=58356ec125c85b9705dc7734ed4be8491bb4152d8a816fd0807aed5fbb128a7b
+    consul-template: sha256=9edf7cd9dfa0d83cd992e5501a480ea502968f15109aebe9ba2203648f3014db
     exxo: sha256=ce3d6ae10d364c5a0726cce127602fe6fa5d042b11afd21d79502f8216b42e1e
-    nomad: sha256=7af9291354a8ab90196306b5cb3270ca9bbc4fb4bc4ceb009951e114417822f0
-    nomad-autoscaler: sha256=fa796ad5c4168ebfdb41e4cd08e7aeaeaed4f55a1bdc106764f224954c32ae9e
+    nomad: sha256=dbb8b8b1366c8ea9504cc396f2c00a254e043b1fc9f39f39d9ef3398e454e840
+    nomad-autoscaler: sha256=9ba805d1d985cd98095af5825aa19d927d05ae52e1351278e37c03f5638829ac
     pyrun35: sha256=8bf8b374f582bb53600dd846a0cdb38e18586bbda06261321d48df69ddbf730e
     terraform: sha256=6b66e1faf0ad4ece28c42a1877e95bbb1355396231d161d78b8ca8a99accc2d7
-    vault: sha256=8eaac42a3b41ec45bd6498c3dc5a1aa9be2c1723c0a43cc68ac25a8cfcb49ded
+    vault: sha256=844adaf632391be41f945143de7dccfa9b39c52a72e8e22a5d6bad9c32404c46
     vault-auditor: sha256=14aebc65351e52ff705fd9a4f3fb89655bf3a87a6c67a86ff8aa67ef5ff4837f
     vault-gpg-plugin: sha256=eee08f28f4be8889fefa097b45819eca857d374ee856d3cd803207ede0c559d3
     vault-ssh-helper: sha256=fe26f62e5822bdf66ea4bf874d1a535ffca19af07a27ff3bcd7e344bc1af39fe
