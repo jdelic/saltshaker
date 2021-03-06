@@ -102,7 +102,7 @@ data-cluster-config-base:
         - text: |
             listen_addresses = '{{ip}}'
             max_wal_senders = 2  # minimum necessary for for hot backup without additional log shipping
-            wal_keep_segments = 3  # just as a precaution.
+            wal_keep_size = 128  # just as a precaution.
             wal_level = replica
             archive_mode = off  # we don't do log shipping, just hot backups, so we don't need archive_command
         - require:
