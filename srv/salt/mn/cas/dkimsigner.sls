@@ -43,9 +43,9 @@ dkimsigner-rsyslog:
     "APPLICATION_LOGLEVEL": "INFO",
 } %}
 {% if pillar['dkimsigner'].get('use-vault', False) %}
-    {% set x = config.__setitem__("VAULT_DATABASE_PATH", 'postgresql/creds/authserver_dkimsigner') %}
+    {% set config = config | set_dict_key_value("VAULT_DATABASE_PATH", 'postgresql/creds/authserver_dkimsigner') %}
     {% if pillar['dkimsigner'].get('vault-authtype', 'approle') == 'approle' %}
-        {% set x = config.__setitem__("VAULT_ROLEID", pillar['dynamicsecrets']['dkimsigner-role-id']) %}
+        {% set config = config | set_dict_key_value("VAULT_ROLEID", pillar['dynamicsecrets']['dkimsigner-role-id']) %}
 dkimsigner-config-secretid:
     cmd.run:
         - name: >-
@@ -64,7 +64,7 @@ dkimsigner-config-secretid:
             - service: dkimsigner
     {% endif %}
 {% else %}
-    {% set x = config.__setitem__("DATABASE_URL", 'postgresql://%s:@postgresql.local:5432/%s'|format(pillar['dkimsigner']['dbuser'],
+    {% set config = config | set_dict_key_value("DATABASE_URL", 'postgresql://%s:@postgresql.local:5432/%s'|format(pillar['dkimsigner']['dbuser'],
         pillar['authserver']['dbname'])) %}
 {% endif %}
 

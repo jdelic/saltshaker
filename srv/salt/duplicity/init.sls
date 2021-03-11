@@ -20,7 +20,7 @@ duplicity-cron-config-folder:
 
 {% set envvars = pillar['duplicity-backup'].get('envvars', {}) %}
 {% if 'GNUPGHOME' not in envvars %}
-    {% set x = envvars.__setitem__('GNUPGHOME', pillar['gpg']['shared-keyring-location']) %}
+    {% set envvars = envvars | set_dict_key_value('GNUPGHOME', pillar['gpg']['shared-keyring-location']) %}
 {% endif %}
 
 {# the following makes sure that the host gpg key comes first, as it has no passphrase #}
