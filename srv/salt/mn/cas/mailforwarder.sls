@@ -45,9 +45,9 @@ mailforwarder-rsyslog:
     "APPLICATION_LOGLEVEL": "INFO",
 } %}
 {% if pillar['mailforwarder'].get('use-vault', False) %}
-    {% set x = config.__setitem__("VAULT_DATABASE_PATH", 'postgresql/creds/authserver_mailforwarder') %}
+    {% set config = config | set_dict_key_value("VAULT_DATABASE_PATH", 'postgresql/creds/authserver_mailforwarder') %}
     {% if pillar['mailforwarder'].get('vault-authtype', 'approle') == 'approle' %}
-        {% set x = config.__setitem__("VAULT_ROLEID", pillar['dynamicsecrets']['mailforwarder-role-id']) %}
+        {% set config = config | set_dict_key_value("VAULT_ROLEID", pillar['dynamicsecrets']['mailforwarder-role-id']) %}
 mailforwarder-config-secretid:
     cmd.run:
         - name: >-
@@ -66,7 +66,7 @@ mailforwarder-config-secretid:
             - service: mailforwarder
     {% endif %}
 {% else %}
-    {% set x = config.__setitem__("DATABASE_URL", 'postgresql://%s:@postgresql.local:5432/%s'|format(pillar['mailforwarder']['dbuser'],
+    {% set config = config | set_dict_key_value("DATABASE_URL", 'postgresql://%s:@postgresql.local:5432/%s'|format(pillar['mailforwarder']['dbuser'],
         pillar['authserver']['dbname'])) %}
 {% endif %}
 
