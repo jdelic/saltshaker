@@ -32,7 +32,7 @@ urls:
     consul-replicate: https://releases.hashicorp.com/consul-replicate/0.4.0/consul-replicate_0.4.0_linux_amd64.zip
     consul-template: https://releases.hashicorp.com/consul-template/0.25.1/consul-template_0.25.1_linux_amd64.zip
     exxo: https://bintray.com/artifact/download/mbachry/exxo/exxo-0.0.7.tar.xz
-    nomad: https://releases.hashicorp.com/nomad/1.0.3/nomad_1.0.4_linux_amd64.zip
+    nomad: https://releases.hashicorp.com/nomad/1.0.4/nomad_1.0.4_linux_amd64.zip
     nomad-autoscaler: https://releases.hashicorp.com/nomad-autoscaler/0.3.0/nomad-autoscaler_0.3.0_linux_amd64.zip
     pyrun35: https://downloads.egenix.com/python/egenix-pyrun-2.2.3-py3.5_ucs4-linux-x86_64.tgz
     terraform: https://releases.hashicorp.com/terraform/0.14.7/terraform_0.14.7_linux_amd64.zip
