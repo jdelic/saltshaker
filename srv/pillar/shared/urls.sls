@@ -36,7 +36,7 @@ urls:
     nomad-autoscaler: https://releases.hashicorp.com/nomad-autoscaler/0.3.0/nomad-autoscaler_0.3.0_linux_amd64.zip
     pyrun35: https://downloads.egenix.com/python/egenix-pyrun-2.2.3-py3.5_ucs4-linux-x86_64.tgz
     terraform: https://releases.hashicorp.com/terraform/0.14.7/terraform_0.14.7_linux_amd64.zip
-    vault: https://releases.hashicorp.com/vault/1.6.3/vault_1.6.3_linux_amd64.zip
+    vault: https://releases.hashicorp.com/vault/1.7.0/vault_1.7.0_linux_amd64.zip
     vault-auditor: https://releases.hashicorp.com/vault-auditor/1.0.3/vault-auditor_1.0.3_linux_amd64.zip
     vault-gpg-plugin: https://github.com/LeSuisse/vault-gpg-plugin/releases/download/v0.3.0/linux_amd64.zip
     vault-ssh-helper: https://releases.hashicorp.com/vault-ssh-helper/0.2.1/vault-ssh-helper_0.2.1_linux_amd64.zip
@@ -54,7 +54,7 @@ hashes:
     nomad-autoscaler: sha256=9ba805d1d985cd98095af5825aa19d927d05ae52e1351278e37c03f5638829ac
     pyrun35: sha256=8bf8b374f582bb53600dd846a0cdb38e18586bbda06261321d48df69ddbf730e
     terraform: sha256=6b66e1faf0ad4ece28c42a1877e95bbb1355396231d161d78b8ca8a99accc2d7
-    vault: sha256=844adaf632391be41f945143de7dccfa9b39c52a72e8e22a5d6bad9c32404c46
+    vault: sha256=aad2f50635ef4e3f2495b0b6c855061c4047c795821fda886b326c1a71c71c35
     vault-auditor: sha256=14aebc65351e52ff705fd9a4f3fb89655bf3a87a6c67a86ff8aa67ef5ff4837f
     vault-gpg-plugin: sha256=eee08f28f4be8889fefa097b45819eca857d374ee856d3cd803207ede0c559d3
     vault-ssh-helper: sha256=fe26f62e5822bdf66ea4bf874d1a535ffca19af07a27ff3bcd7e344bc1af39fe
