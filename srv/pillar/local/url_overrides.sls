@@ -28,10 +28,10 @@ urls:
     consul: http://fileserver.maurusnet.test/downloads/consul/consul_1.9.4_linux_amd64.zip
     consul-esm: http://fileserver.maurusnet.test/downloads/consul-esm/consul-esm_0.5.0_linux_amd64.zip
     consul-replicate: http://fileserver.maurusnet.test/downloads/consul-replicate/consul-replicate_0.4.0_linux_amd64.zip
-    consul-template: http://fileserver.maurusnet.test/downloads/consul-template/consul-template_0.25.1_linux_amd64.zip
+    consul-template: http://fileserver.maurusnet.test/downloads/consul-template/consul-template_0.25.2_linux_amd64.zip
     exxo: http://fileserver.maurusnet.test/downloads/exxo/exxo-0.0.7.tar.xz
     nomad: http://fileserver.maurusnet.test/downloads/nomad/nomad_1.0.4_linux_amd64.zip
-    nomad-autoscaler: http://fileserver.maurusnet.test/downloads/nomad-autoscaler/nomad-autoscaler_0.3.0_linux_amd64.zip
+    nomad-autoscaler: http://fileserver.maurusnet.test/downloads/nomad-autoscaler/nomad-autoscaler_0.3.2_linux_amd64.zip
     pyrun35: http://fileserver.maurusnet.test/downloads/exxo/egenix-pyrun-2.2.3-py3.5_ucs4-linux-x86_64.tgz
     terraform: http://fileserver.maurusnet.test/downloads/terraform/terraform_0.14.7_linux_amd64.zip
     vault: http://fileserver.maurusnet.test/downloads/vault/vault_1.7.0_linux_amd64.zip
@@ -47,10 +47,10 @@ hashes:
     consul: sha256=da3919197ef33c4205bb7df3cc5992ccaae01d46753a72fe029778d7f52fb610
     consul-esm: sha256=96dae821bd3d1775048c9dbe8d6112ed645c9b912786c167ba9417f59509059d
     consul-replicate: sha256=96c6651291c2f8e75d98d04b9b4653d8a02324edaa25783744d9ea1d8d411c61
-    consul-template: sha256=58356ec125c85b9705dc7734ed4be8491bb4152d8a816fd0807aed5fbb128a7b
+    consul-template: sha256=9edf7cd9dfa0d83cd992e5501a480ea502968f15109aebe9ba2203648f3014db
     exxo: sha256=ce3d6ae10d364c5a0726cce127602fe6fa5d042b11afd21d79502f8216b42e1e
     nomad: sha256=dbb8b8b1366c8ea9504cc396f2c00a254e043b1fc9f39f39d9ef3398e454e840
-    nomad-autoscaler: sha256=9ba805d1d985cd98095af5825aa19d927d05ae52e1351278e37c03f5638829ac
+    nomad-autoscaler: sha256=5a60412ae60563f7c40108a9cf5c345b5525b03454825715beb8b21573dfbe65
     pyrun35: sha256=8bf8b374f582bb53600dd846a0cdb38e18586bbda06261321d48df69ddbf730e
     terraform: sha256=6b66e1faf0ad4ece28c42a1877e95bbb1355396231d161d78b8ca8a99accc2d7
     vault: sha256=aad2f50635ef4e3f2495b0b6c855061c4047c795821fda886b326c1a71c71c35
