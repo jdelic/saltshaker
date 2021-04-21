@@ -34,7 +34,7 @@ urls:
     nomad-autoscaler: http://fileserver.maurusnet.test/downloads/nomad-autoscaler/nomad-autoscaler_0.3.2_linux_amd64.zip
     pyrun35: http://fileserver.maurusnet.test/downloads/exxo/egenix-pyrun-2.2.3-py3.5_ucs4-linux-x86_64.tgz
     terraform: http://fileserver.maurusnet.test/downloads/terraform/terraform_0.15.0_linux_amd64.zip
-    vault: http://fileserver.maurusnet.test/downloads/vault/vault_1.7.0_linux_amd64.zip
+    vault: http://fileserver.maurusnet.test/downloads/vault/vault_1.7.1_linux_amd64.zip
     vault-auditor: http://fileserver.maurusnet.test/downloads/vault-auditor/vault-auditor_1.0.3_linux_amd64.zip
     vault-gpg-plugin: http://fileserver.maurusnet.test/downloads/vault-gpg-plugin/linux_amd64.zip
     vault-ssh-helper: http://fileserver.maurusnet.test/downloads/vault/vault-ssh-helper_0.2.1_linux_amd64.zip
@@ -53,7 +53,7 @@ hashes:
     nomad-autoscaler: sha256=5a60412ae60563f7c40108a9cf5c345b5525b03454825715beb8b21573dfbe65
     pyrun35: sha256=8bf8b374f582bb53600dd846a0cdb38e18586bbda06261321d48df69ddbf730e
     terraform: sha256=69c5db7bd6d4a5d3dd060678e5c3d9442e32610ed05879b4325e6aa4807d0529
-    vault: sha256=aad2f50635ef4e3f2495b0b6c855061c4047c795821fda886b326c1a71c71c35
+    vault: sha256=61795d2deeffddee0b556869097c997c5afccbde556d3a103ec273cc24523808
     vault-auditor: sha256=14aebc65351e52ff705fd9a4f3fb89655bf3a87a6c67a86ff8aa67ef5ff4837f
     vault-gpg-plugin: sha256=eee08f28f4be8889fefa097b45819eca857d374ee856d3cd803207ede0c559d3
     vault-ssh-helper: sha256=fe26f62e5822bdf66ea4bf874d1a535ffca19af07a27ff3bcd7e344bc1af39fe
