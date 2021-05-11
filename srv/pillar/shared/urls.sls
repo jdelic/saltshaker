@@ -33,9 +33,9 @@ urls:
     consul-template: https://releases.hashicorp.com/consul-template/0.25.1/consul-template_0.25.1_linux_amd64.zip
     exxo: https://bintray.com/artifact/download/mbachry/exxo/exxo-0.0.7.tar.xz
     nomad: https://releases.hashicorp.com/nomad/1.0.4/nomad_1.0.4_linux_amd64.zip
-    nomad-autoscaler: https://releases.hashicorp.com/nomad-autoscaler/0.3.2/nomad-autoscaler_0.3.2_linux_amd64.zip
+    nomad-autoscaler: https://releases.hashicorp.com/nomad-autoscaler/0.3.3/nomad-autoscaler_0.3.3_linux_amd64.zip
     pyrun35: https://downloads.egenix.com/python/egenix-pyrun-2.2.3-py3.5_ucs4-linux-x86_64.tgz
-    terraform: https://releases.hashicorp.com/terraform/0.15.0/terraform_0.15.0_linux_amd64.zip
+    terraform: https://releases.hashicorp.com/terraform/0.15.3/terraform_0.15.3_linux_amd64.zip
     vault: https://releases.hashicorp.com/vault/1.7.1/vault_1.7.1_linux_amd64.zip
     vault-auditor: https://releases.hashicorp.com/vault-auditor/1.0.3/vault-auditor_1.0.3_linux_amd64.zip
     vault-gpg-plugin: https://github.com/LeSuisse/vault-gpg-plugin/releases/download/v0.3.0/linux_amd64.zip
@@ -51,9 +51,9 @@ hashes:
     consul-template: sha256=58356ec125c85b9705dc7734ed4be8491bb4152d8a816fd0807aed5fbb128a7b
     exxo: sha256=ce3d6ae10d364c5a0726cce127602fe6fa5d042b11afd21d79502f8216b42e1e
     nomad: sha256=dbb8b8b1366c8ea9504cc396f2c00a254e043b1fc9f39f39d9ef3398e454e840
-    nomad-autoscaler: sha256=5a60412ae60563f7c40108a9cf5c345b5525b03454825715beb8b21573dfbe65
+    nomad-autoscaler: sha256=8d4f1fbcf93cf637e042f3dcd8894f8653f501cfb5de6978481b961c8a4ddfa4
     pyrun35: sha256=8bf8b374f582bb53600dd846a0cdb38e18586bbda06261321d48df69ddbf730e
-    terraform: sha256=69c5db7bd6d4a5d3dd060678e5c3d9442e32610ed05879b4325e6aa4807d0529
+    terraform: sha256=5ce5834fd74e3368ad7bdaac847f973e66e61acae469ee86b88da4c6d9f933d4
     vault: sha256=61795d2deeffddee0b556869097c997c5afccbde556d3a103ec273cc24523808
     vault-auditor: sha256=14aebc65351e52ff705fd9a4f3fb89655bf3a87a6c67a86ff8aa67ef5ff4837f
     vault-gpg-plugin: sha256=eee08f28f4be8889fefa097b45819eca857d374ee856d3cd803207ede0c559d3
