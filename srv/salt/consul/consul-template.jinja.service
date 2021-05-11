@@ -14,6 +14,7 @@ ExecReload=-/bin/bash -c '/usr/bin/rm /etc/consul/renders/*'
 ExecReload=/bin/kill -HUP $MAINPID
 PIDFile=/run/consul/consul-template.pid
 KillMode=process
+KillSignal=SIGINT
 Restart=on-failure
 # StartLimitInterval: try to restart for unlimited times, because this is an essential service!
 StartLimitInterval=0
