@@ -30,7 +30,7 @@ urls:
     consul: https://releases.hashicorp.com/consul/1.9.6/consul_1.9.6_linux_amd64.zip
     consul-esm: https://releases.hashicorp.com/consul-esm/0.5.0/consul-esm_0.5.0_linux_amd64.zip
     consul-replicate: https://releases.hashicorp.com/consul-replicate/0.4.0/consul-replicate_0.4.0_linux_amd64.zip
-    consul-template: https://releases.hashicorp.com/consul-template/0.25.1/consul-template_0.25.1_linux_amd64.zip
+    consul-template: https://releases.hashicorp.com/consul-template/0.26.0/consul-template_0.26.0_linux_amd64.zip
     exxo: https://bintray.com/artifact/download/mbachry/exxo/exxo-0.0.7.tar.xz
     nomad: https://releases.hashicorp.com/nomad/1.1.0/nomad_1.1.0_linux_amd64.zip
     nomad-autoscaler: https://releases.hashicorp.com/nomad-autoscaler/0.3.3/nomad-autoscaler_0.3.3_linux_amd64.zip
@@ -48,7 +48,7 @@ hashes:
     consul: sha256=f999955f135b3170108a0d1b7ca69a60dc80769e0b039f32f551fc8032d25f4b
     consul-esm: sha256=96dae821bd3d1775048c9dbe8d6112ed645c9b912786c167ba9417f59509059d
     consul-replicate: sha256=96c6651291c2f8e75d98d04b9b4653d8a02324edaa25783744d9ea1d8d411c61
-    consul-template: sha256=58356ec125c85b9705dc7734ed4be8491bb4152d8a816fd0807aed5fbb128a7b
+    consul-template: sha256=d4b1d8dc46289a4bdbb73301cd1dbdd9b41eddcab4103f006c5bf9637f7e4381
     exxo: sha256=ce3d6ae10d364c5a0726cce127602fe6fa5d042b11afd21d79502f8216b42e1e
     nomad: sha256=7c3b35520fc05e4aad49663564a852448f52ad58e3261040c9df2f6a44716736
     nomad-autoscaler: sha256=8d4f1fbcf93cf637e042f3dcd8894f8653f501cfb5de6978481b961c8a4ddfa4
