@@ -25,14 +25,14 @@ repos:
 #           state for that!
 
 urls:
-    concourse: https://github.com/concourse/concourse/releases/download/v7.3.1/concourse-7.3.1-linux-amd64.tgz
-    concourse-fly: https://github.com/concourse/concourse/releases/download/v7.3.1/fly-7.3.1-linux-amd64.tgz
-    consul: https://releases.hashicorp.com/consul/1.9.6/consul_1.9.6_linux_amd64.zip
+    concourse: https://github.com/concourse/concourse/releases/download/v7.3.2/concourse-7.3.2-linux-amd64.tgz
+    concourse-fly: https://github.com/concourse/concourse/releases/download/v7.3.2/fly-7.3.2-linux-amd64.tgz
+    consul: https://releases.hashicorp.com/consul/1.10.0/consul_1.10.0_linux_amd64.zip
     consul-esm: https://releases.hashicorp.com/consul-esm/0.5.0/consul-esm_0.5.0_linux_amd64.zip
     consul-replicate: https://releases.hashicorp.com/consul-replicate/0.4.0/consul-replicate_0.4.0_linux_amd64.zip
     consul-template: https://releases.hashicorp.com/consul-template/0.26.0/consul-template_0.26.0_linux_amd64.zip
     exxo: https://bintray.com/artifact/download/mbachry/exxo/exxo-0.0.7.tar.xz
-    nomad: https://releases.hashicorp.com/nomad/1.1.0/nomad_1.1.0_linux_amd64.zip
+    nomad: https://releases.hashicorp.com/nomad/1.1.1/nomad_1.1.1_linux_amd64.zip
     nomad-autoscaler: https://releases.hashicorp.com/nomad-autoscaler/0.3.3/nomad-autoscaler_0.3.3_linux_amd64.zip
     pyrun35: https://downloads.egenix.com/python/egenix-pyrun-2.2.3-py3.5_ucs4-linux-x86_64.tgz
     terraform: https://releases.hashicorp.com/terraform/1.0.0/terraform_1.0.0_linux_amd64.zip
@@ -43,14 +43,14 @@ urls:
 
 
 hashes:
-    concourse: sha256=085e20ef24bad0f40d35a6b8b86bf36c8c074ca1fe209febf745fe025b894184
-    concourse-fly: sha256=7667e48e38ff97cf0a7ae0a9038c2cbc7eda5f2cbbd9e2868768e7b0bfefd7de
-    consul: sha256=f999955f135b3170108a0d1b7ca69a60dc80769e0b039f32f551fc8032d25f4b
+    concourse: sha256=73ab38fc8ab1db6dbc059465cda7cae3927fdff8f32eb4d5bdde17fbb48ea481
+    concourse-fly: sha256=919f79a0c2c94b38738440a1bb9c0dfeb3b2bd126602a2a13e3d12b4830b8a5a
+    consul: sha256=7cd2e67ce2779c74ce18d880ccdfdc00a655eb71a6a7a956e6d3b71e7937ca0f
     consul-esm: sha256=96dae821bd3d1775048c9dbe8d6112ed645c9b912786c167ba9417f59509059d
     consul-replicate: sha256=96c6651291c2f8e75d98d04b9b4653d8a02324edaa25783744d9ea1d8d411c61
     consul-template: sha256=d4b1d8dc46289a4bdbb73301cd1dbdd9b41eddcab4103f006c5bf9637f7e4381
     exxo: sha256=ce3d6ae10d364c5a0726cce127602fe6fa5d042b11afd21d79502f8216b42e1e
-    nomad: sha256=7c3b35520fc05e4aad49663564a852448f52ad58e3261040c9df2f6a44716736
+    nomad: sha256=cbb4725e3e10b016b1682db8b0b54d1a1f60d84f0258aa488201dc71f20dc75c
     nomad-autoscaler: sha256=8d4f1fbcf93cf637e042f3dcd8894f8653f501cfb5de6978481b961c8a4ddfa4
     pyrun35: sha256=8bf8b374f582bb53600dd846a0cdb38e18586bbda06261321d48df69ddbf730e
     terraform: sha256=8be33cc3be8089019d95eb8f546f35d41926e7c1e5deff15792e969dde573eb5
