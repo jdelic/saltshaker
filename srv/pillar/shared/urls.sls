@@ -11,7 +11,7 @@ repos:
     buster-security: deb http://security.debian.org/debian-security buster/updates main
     buster-updates: deb http://ftp-stud.hs-esslingen.de/debian/ buster-updates main
     docker: deb https://download.docker.com/linux/debian buster stable
-    envoy: deb [arch=amd64] https://dl.bintray.com/tetrate/getenvoy-deb buster stable
+    envoy: deb [arch=amd64] https://deb.dl.getenvoy.io/public/deb/debian buster stable
     haproxy: deb http://haproxy.debian.net buster-backports-2.2 main
     maurusnet-apps: deb http://repo.maurus.net/nightly/buster/ mn-nightly main
     maurusnet-opensmtpd: deb http://repo.maurus.net/buster/opensmtpd/ mn-opensmtpd main
