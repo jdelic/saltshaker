@@ -6,17 +6,17 @@
 repos:
     aptly: deb http://repo.aptly.info/ squeeze main
     aptly-nightly: deb http://repo.aptly.info/ nightly main
-    buster: deb http://ftp-stud.hs-esslingen.de/debian/ buster main contrib
-    buster-backports: deb http://ftp-stud.hs-esslingen.de/debian/ buster-backports main
-    buster-security: deb http://security.debian.org/debian-security buster/updates main
-    buster-updates: deb http://ftp-stud.hs-esslingen.de/debian/ buster-updates main
-    docker: deb https://download.docker.com/linux/debian buster stable
-    envoy: deb [arch=amd64] https://deb.dl.getenvoy.io/public/deb/debian buster main
-    haproxy: deb http://haproxy.debian.net buster-backports-2.2 main
-    maurusnet-apps: deb http://repo.maurus.net/nightly/buster/ mn-nightly main
-    maurusnet-opensmtpd: deb http://repo.maurus.net/buster/opensmtpd/ mn-opensmtpd main
-    maurusnet-radicale: deb http://repo.maurus.net/stretch/radicale/ mn-radicale main
-    postgresql: deb http://apt.postgresql.org/pub/repos/apt/ buster-pgdg
+    buster: deb http://ftp-stud.hs-esslingen.de/debian/ bullseye main contrib
+    buster-backports: deb http://ftp-stud.hs-esslingen.de/debian/ bullseye-backports main
+    buster-security: deb http://security.debian.org/debian-security bullseye/updates main
+    buster-updates: deb http://ftp-stud.hs-esslingen.de/debian/ bullseye-updates main
+    docker: deb https://download.docker.com/linux/debian bullseye stable
+    envoy: deb [arch=amd64] https://deb.dl.getenvoy.io/public/deb/debian bullseye main
+    haproxy: deb http://haproxy.debian.net bullseye-backports-2.4 main
+    maurusnet-apps: deb http://repo.maurus.net/nightly/bullseye/ mn-nightly main
+    maurusnet-opensmtpd: deb http://repo.maurus.net/bullseye/opensmtpd/ mn-opensmtpd main
+    maurusnet-radicale: deb http://repo.maurus.net/bullseye/radicale/ mn-radicale main
+    postgresql: deb http://apt.postgresql.org/pub/repos/apt/ bullseye-pgdg
     saltstack: deb http://repo.saltstack.com/py3/debian/10/amd64/latest buster main
 
 
