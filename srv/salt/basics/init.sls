@@ -79,9 +79,9 @@ dbus:
     service.running
 
 
-buster:
+bullseye:
     pkgrepo.managed:
-        - name: {{pillar['repos']['buster']}}
+        - name: {{pillar['repos']['bullseye']}}
         - file: /etc/apt/sources.list
         {% if pillar['repos'].get('pgpkey', None) %}
         - key_url: {{pillar['repos']['pgpkey']}}
@@ -99,28 +99,28 @@ saltstack-repo:
         - order: 2  # execute this state early!
 
 
-updates-buster:
+updates-bullseye:
     pkgrepo.managed:
-        - name: {{pillar['repos']['buster-updates']}}
-        - file: /etc/apt/sources.list.d/buster-updates.list
+        - name: {{pillar['repos']['bullseye-updates']}}
+        - file: /etc/apt/sources.list.d/bullseye-updates.list
         - order: 2  # execute this state early!
 
 
-security-updates-buster:
+security-updates-bullseye:
     pkgrepo.managed:
-        - name: {{pillar['repos']['buster-security']}}
-        - file: /etc/apt/sources.list.d/buster-security.list
+        - name: {{pillar['repos']['bullseye-security']}}
+        - file: /etc/apt/sources.list.d/bullseye-security.list
         - order: 2  # execute this state early!
 
 
-backports-org-buster:
+backports-org-bullseye:
     pkgrepo.managed:
-        - name: {{pillar['repos']['buster-backports']}}
-        - file: /etc/apt/sources.list.d/buster-backports.list
+        - name: {{pillar['repos']['bullseye-backports']}}
+        - file: /etc/apt/sources.list.d/bullseye-backports.list
         - order: 2  # execute this state early!
     file.managed:
-        - name: /etc/apt/preferences.d/buster-backports
-        - source: salt://etc_mods/buster-backports
+        - name: /etc/apt/preferences.d/bullseye-backports
+        - source: salt://etc_mods/bullseye-backports
 
 
 maurusnet-opensmtpd:
@@ -169,21 +169,6 @@ trigger-minion-sync:
     event.send:
         - name: maurusnet/highstate/complete
         - order: last
-
-
-#openssl:
-#    # this will upgrade the installed version from the basebox
-#    pkg.latest:
-#        - pkgs:
-#             - openssl
-#             - openssl-blacklist
-#             - openssl-blacklist-extra
-#             - libssl1.0.0
-#        - install_recommends: False
-#        - order: 10  # see ORDER.md
-#        - fromrepo: buster-backports
-#        - require:
-#            - pkgrepo: backports-org-buster
 
 
 # always allow ssh in

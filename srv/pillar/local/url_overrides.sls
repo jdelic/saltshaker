@@ -6,18 +6,18 @@
 repos:
     aptly: deb http://fileserver.maurusnet.test/aptly/ squeeze main
     aptly-nightly: deb http://fileserver.maurusnet.test/aptly-nightly/ nightly main
-    buster: deb http://fileserver.maurusnet.test/debian/ buster main
-    buster-backports: deb http://fileserver.maurusnet.test/debian/ buster-backports main
-    buster-security: deb http://fileserver.maurusnet.test/debian/security/ buster-updates main
-    buster-updates: deb http://fileserver.maurusnet.test/debian/ buster-updates main
-    docker: deb http://fileserver.maurusnet.test/repo/ buster stable
-    envoy: deb [arch=amd64] http://fileserver.maurusnet.test/envoy/ buster main
-    haproxy: deb http://fileserver.maurusnet.test/haproxy/ buster-backports-2.2 main
+    bullseye: deb http://fileserver.maurusnet.test/debian/ bullseye main
+    bullseye-backports: deb http://fileserver.maurusnet.test/debian/ bullseye-backports main
+    bullseye-security: deb http://fileserver.maurusnet.test/debian/security/ bullseye-updates main
+    bullseye-updates: deb http://fileserver.maurusnet.test/debian/ bullseye-updates main
+    docker: deb http://fileserver.maurusnet.test/repo/ bullseye stable
+    envoy: deb [arch=amd64] http://fileserver.maurusnet.test/envoy/ bullseye main
+    haproxy: deb http://fileserver.maurusnet.test/haproxy/ bullseye-backports-2.2 main
     maurusnet-apps: deb http://fileserver.maurusnet.test/mn-nightly/ mn-nightly main
     maurusnet-opensmtpd: deb http://fileserver.maurusnet.test/mn-opensmtpd/ mn-opensmtpd main
     maurusnet-radicale: deb http://fileserver.maurusnet.test/mn-radicale/ mn-radicale main
-    postgresql: deb http://fileserver.maurusnet.test/postgresql/ buster-pgdg
-    saltstack: deb http://fileserver.maurusnet.test/apt/debian/10/amd64/latest buster main
+    postgresql: deb http://fileserver.maurusnet.test/postgresql/ bullseye-pgdg
+    saltstack: deb http://fileserver.maurusnet.test/apt/debian/10/amd64/latest bullseye main
 
     pgpkey: salt://mn/fileserver_ACADBD6B.pgp.key
 

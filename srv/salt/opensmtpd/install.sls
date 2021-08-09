@@ -8,7 +8,7 @@ opensmtpd:
         - pkgs:
             - opensmtpd
             - opensmtpd-extras
-        - fromrepo: buster-backports
+        #- fromrepo: bullseye-backports
         - install_recommends: False
         - require:
               - pkg: no-exim
