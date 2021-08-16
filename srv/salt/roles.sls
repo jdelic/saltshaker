@@ -2,10 +2,10 @@
 roledir:
     file.directory:
         - name: /etc/salt/roles.d
-        - user: root
+        - user: salt
         - group: root
-        - dir_mode: 700
-        - file_mode: 600
+        - dir_mode: 750
+        - file_mode: 660
         - recurse:
             - user
             - group
