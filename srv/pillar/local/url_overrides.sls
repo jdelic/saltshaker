@@ -8,8 +8,8 @@ repos:
     aptly-nightly: deb http://fileserver.maurusnet.test/aptly-nightly/ nightly main
     bullseye: deb http://fileserver.maurusnet.test/debian/ bullseye main
     bullseye-backports: deb http://fileserver.maurusnet.test/debian/ bullseye-backports main
-    bullseye-security: deb http://fileserver.maurusnet.test/debian/security/ bullseye-updates main
-    bullseye-updates: deb http://fileserver.maurusnet.test/debian/ bullseye-updates main
+    bullseye-security: deb http://fileserver.maurusnet.test/debian/security/ bullseye-security main
+    bullseye-updates: deb http://fileserver.maurusnet.test/debian/updates/ bullseye-updates main
     docker: deb http://fileserver.maurusnet.test/repo/ bullseye stable
     envoy: deb [arch=amd64] http://fileserver.maurusnet.test/envoy/ bullseye main
     haproxy: deb http://fileserver.maurusnet.test/haproxy/ bullseye-backports-2.2 main

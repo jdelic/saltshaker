@@ -8,8 +8,8 @@ repos:
     aptly-nightly: deb http://repo.aptly.info/ nightly main
     bullseye: deb http://ftp-stud.hs-esslingen.de/debian/ bullseye main contrib
     bullseye-backports: deb http://ftp-stud.hs-esslingen.de/debian/ bullseye-backports main
-    bullseye-security: deb http://security.debian.org/debian-security bullseye/updates main
-    bullseye-updates: deb http://ftp-stud.hs-esslingen.de/debian/ bullseye-updates main
+    bullseye-security: deb http://security.debian.org/debian-security bullseye-security main
+    bullseye-updates: deb http://deb.debian.org/debian bullseye-updates main
     docker: deb https://download.docker.com/linux/debian bullseye stable
     envoy: deb [arch=amd64] https://deb.dl.getenvoy.io/public/deb/debian bullseye main
     haproxy: deb http://haproxy.debian.net bullseye-backports-2.4 main
