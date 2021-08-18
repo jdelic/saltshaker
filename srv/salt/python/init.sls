@@ -10,9 +10,7 @@ python-packages:
         - pkgs:
             - python3
             - python3-pip
-            - python-docker
-            - python-pip
-            - python-setuptools
+            - python3-docker
             - python3-setuptools
             - python-pkg-resources
             - python-pip-whl
@@ -24,5 +22,5 @@ python-packages:
             - libxslt1.1
             - libfreetype6
             - libgd3
-            - python-distlib
+            - python3-distlib
         - install_recommends: False

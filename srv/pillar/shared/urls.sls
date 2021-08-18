@@ -17,7 +17,7 @@ repos:
     maurusnet-opensmtpd: deb http://repo.maurus.net/bullseye/opensmtpd/ mn-opensmtpd main
     maurusnet-radicale: deb http://repo.maurus.net/bullseye/radicale/ mn-radicale main
     postgresql: deb http://apt.postgresql.org/pub/repos/apt/ bullseye-pgdg
-    saltstack: deb http://repo.saltstack.com/py3/debian/10/amd64/latest buster main
+    #saltstack: deb http://repo.saltstack.com/py3/debian/11/amd64/latest bullseye main
 
 
 #   pgpkey: Set this to a salt:// url if you need to deploy your own repo signing key

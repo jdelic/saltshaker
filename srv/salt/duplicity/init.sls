@@ -4,8 +4,8 @@ duplicity:
     pkg.installed:
         - pkgs:
             - duplicity
-            - python-paramiko
-            - python-boto
+            - python3-paramiko
+            - python3-boto
         - install_recommends: False
 
 
