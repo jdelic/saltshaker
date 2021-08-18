@@ -30,7 +30,7 @@ postgresql-repo:
     pkgrepo.managed:
         - humanname: PostgreSQL official repos
         # PostgreSQL APT allows you to pin a version as a component
-        - name: {{pillar["repos"]["postgresql"]}} main {{postgres_version}}
+        - name: {{pillar["repos"]["postgresql"]}} {{postgres_version}}
         - file: /etc/apt/sources.list.d/postgresql.list
         - key_url: salt://postgresql/postgresql_44A07FCC7D46ACCC4CF8.pgp.key
         - require:

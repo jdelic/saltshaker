@@ -16,7 +16,7 @@ repos:
     maurusnet-apps: deb http://repo.maurus.net/nightly/bullseye/ mn-nightly main
     maurusnet-opensmtpd: deb http://repo.maurus.net/bullseye/opensmtpd/ mn-opensmtpd main
     maurusnet-radicale: deb http://repo.maurus.net/bullseye/radicale/ mn-radicale main
-    postgresql: deb http://apt.postgresql.org/pub/repos/apt/ bullseye-pgdg
+    postgresql: deb http://apt.postgresql.org/pub/repos/apt/ bullseye-pgdg main
     saltstack: deb http://repo.saltstack.com/py3/debian/11/amd64/latest bullseye main
 
 
