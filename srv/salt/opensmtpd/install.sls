@@ -54,6 +54,14 @@ greylistd-systemd-socket-user-override:
             SocketGroup=opensmtpd
 
 
+greylistd-systemd-override-reload:
+    module.run:
+        - name: service.systemctl_reload
+        - onchanges:
+            - file: greylistd-systemd-service-user-override
+            - file: greylistd-systemd-socket-user-override
+
+
 greylistd-modify-rundir:
     file.directory:
         - name: /run/greylistd
@@ -88,6 +96,7 @@ greylistd:
             - pkg: greylistd
             - file: greylistd-systemd-service-user-override
             - file: greylistd-systemd-socket-user-override
+            - module: greylistd-systemd-override-reload
             - file: greylistd-modify-rundir
             - file: greylistd-modify-libdir
 
