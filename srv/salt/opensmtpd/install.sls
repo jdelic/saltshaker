@@ -28,20 +28,30 @@ opensmtpd-filters:
 # opensmtpd doesn't call initgroups() for filters so we can't put filter-greylistd
 # in the greylist group. Instead we just change greylistd to run as the opensmtpd user.
 # This will not make us measurably more insecure, imho.
-greylistd-initd-user:
-    file.replace:
-        - name: /etc/init.d/greylistd
-        - pattern: ^user=greylist$
-        - repl: user=opensmtpd
-        - backup: False
+greylistd-systemd-service-user-override:
+    file.managed:
+        - name: /etc/systemd/system/greylistd.service.d/override.conf
+        - makedirs: True
+        - user: root
+        - group: root
+        - mode: 0644
+        - contents: |
+            [Service]
+            User=opensmtpd
+            Group=opensmtpd
 
 
-greylistd-initd-group:
-    file.replace:
-        - name: /etc/init.d/greylistd
-        - pattern: ^group=greylist$
-        - repl: group=opensmtpd
-        - backup: False
+greylistd-systemd-socket-user-override:
+    file.managed:
+        - name: /etc/systemd/system/greylistd.socket.d/override.conf
+        - makedirs: True
+        - user: root
+        - group: root
+        - mode: 0644
+        - contents: |
+            [Socket]
+            SocketUser=opensmtpd
+            SocketGroup=opensmtpd
 
 
 greylistd-modify-rundir:
@@ -76,8 +86,8 @@ greylistd:
         - enable: True
         - require:
             - pkg: greylistd
-            - file: greylistd-initd-user
-            - file: greylistd-initd-group
+            - file: greylistd-systemd-service-user-override
+            - file: greylistd-systemd-socket-user-override
             - file: greylistd-modify-rundir
             - file: greylistd-modify-libdir
 
