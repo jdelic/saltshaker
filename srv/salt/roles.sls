@@ -1,8 +1,13 @@
 
+{% set all_users = salt['user.list_users']() %}
 roledir:
     file.directory:
         - name: /etc/salt/roles.d
+{% if "salt" in all_users %}
         - user: salt
+{% else %}
+        - user: root
+{% endif %}
         - group: root
         - dir_mode: 750
         - file_mode: 660
