@@ -4,7 +4,7 @@
 class ExecutionFailure(Exception):
     def __init__(self, state, *args):
         self.state = state
-        super(ExecutionFailure, self).__init__(*args)
+        super().__init__(*args)
 
 
 def _propagate_changes(myret, theirret):

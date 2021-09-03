@@ -13,6 +13,7 @@ repos:
     docker: deb https://download.docker.com/linux/debian bullseye stable
     envoy: deb [arch=amd64] https://deb.dl.getenvoy.io/public/deb/debian bullseye main
     haproxy: deb http://haproxy.debian.net bullseye-backports-2.4 main
+    hashicorp: deb https://apt.releases.hashicorp.com bullseye main
     maurusnet-apps: deb http://repo.maurus.net/nightly/bullseye/ mn-nightly main
     maurusnet-opensmtpd: deb http://repo.maurus.net/bullseye/opensmtpd/ mn-opensmtpd main
     maurusnet-radicale: deb http://repo.maurus.net/bullseye/radicale/ mn-radicale main
