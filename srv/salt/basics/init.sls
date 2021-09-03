@@ -56,8 +56,10 @@ basic-required-packages:
             - apt-transport-s3
             - cron
             - dbus
+            - dbus-user-session
             - jq
             - curl
+            - systemd-timesyncd
         -  order: 1  # execute this state early, because later states need unzip
 
 
