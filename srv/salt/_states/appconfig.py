@@ -15,8 +15,9 @@ def _error(ret, err_msg):
 
 
 def _propagate_changes(myret, theirret):
-    if theirret["result"] is False:
-        raise ExecutionFailure(theirret)
+    if theirret["result"] is False and myret["result"]:
+        myret["result"] = False
+        myret["comment"] = "Substate %s failed" % theirret["name"]
 
     if theirret.get("changes", {}):
         myret["changes"][theirret["name"]] = theirret["changes"]
