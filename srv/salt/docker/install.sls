@@ -22,7 +22,7 @@ docker:
 #     2.
 dockerd-systemd:
     systemdunit.managed:
-        - name: /lib/systemd/system/docker.service
+        - name: /etc/systemd/system/docker.service.d/override.conf
         - source: salt://docker/docker.jinja.service
         - template: jinja
         - context:
