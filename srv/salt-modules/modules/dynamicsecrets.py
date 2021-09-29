@@ -7,7 +7,7 @@ import logging
 import sqlite3
 import requests
 
-from Crypto.PublicKey import RSA  # zeromq depends on pycrypto and salt depends on 0mq, so we know pycrypto exists
+from Cryptodome.PublicKey import RSA  # zeromq depends on pycrypto and salt depends on 0mq, so we know pycrypto exists
 from requests import RequestException
 from six.moves.urllib.parse import urljoin
 
@@ -143,14 +143,12 @@ class DynamicSecretsPillar(DynamicSecretsStore):
         super(DynamicSecretsPillar, self).__init__(*args, **kwargs)
 
     def _alphaencoding(self, rndstring):
-        # type: (Union[str, bytes]) -> str
+        # type: (bytes) -> str
         pwstr = "".join([
             str(self._PWDICT[(c & 0xf0) >> 4]) +  # c >= 64 are 2 chars
             str(self._PWDICT[c & 0x0f])
             if c >= 64 else self._PWDICT[c]  # c < 64 is 1 char
-            for c in [
-                ord(b) for b in rndstring
-            ]
+            for c in rndstring
         ])
         return pwstr
 
@@ -181,7 +179,7 @@ class DynamicSecretsPillar(DynamicSecretsStore):
     def create(self, secret_config, secret_name, host="*"):
         # type: (Dict[str, Union[str, int, bool]], str, str) -> Union[Dict[str, str], str]
         encode = None
-        length = 16
+        length = 20
         if "encode" in secret_config:
             encode = secret_config["encode"]
             if encode not in ["base64", "alpha"]:
@@ -195,9 +193,9 @@ class DynamicSecretsPillar(DynamicSecretsStore):
         secret_type = self.get_type_from_config(secret_config)
         if secret_type == "password":
             if encode == "base64":
-                self.save(secret_name, secret_type, base64.b64encode(os.urandom(length)), host)
+                self.save(secret_name, secret_type, base64.b64encode(os.urandom(length)).decode("utf-8"), host)
             else:
-                self.save(secret_name, secret_type, self._alphaencoding(os.urandom(length)), host)
+                self.save(secret_name, secret_type, self._alphaencoding(os.urandom(length))[:length], host)
         elif secret_type == "rsa":
             if length < 2048:
                 keylen = 2048
