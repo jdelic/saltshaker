@@ -15,7 +15,7 @@ repos:
     maurusnet-opensmtpd: deb http://repo.maurus.net/stretch/opensmtpd/ mn-opensmtpd main
     maurusnet-radicale: deb http://repo.maurus.net/stretch/radicale/ mn-radicale main
     postgresql: deb http://apt.postgresql.org/pub/repos/apt/ stretch-pgdg
-    saltstack: deb http://repo.saltstack.com/apt/debian/9/amd64/latest stretch main
+    saltstack: deb https://repo.saltproject.io/py3/debian/9/amd64/3003 stretch main
     haproxy: deb http://haproxy.debian.net stretch-backports-1.9 main
 
 #   pgpkey: Set this to a salt:// url if you need to deploy your own repo signing key
