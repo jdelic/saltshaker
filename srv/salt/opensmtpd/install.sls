@@ -260,6 +260,7 @@ opensmtpd-config:
         - require:
             - pkg: opensmtpd
             - file: opensmtpd-authserver-config
+            - file: opensmtpd-authserver-blacklist
             {% if pillar['smtp']['receiver']['sslcert'] != 'default' %}
             - file: opensmtpd-receiver-sslcert
             - file: opensmtpd-receiver-sslkey
@@ -298,6 +299,24 @@ opensmtpd-authserver-config:
     file.managed:
         - name: /etc/smtpd/postgresql.table.conf
         - source: salt://opensmtpd/postgresql.table.jinja.conf
+        - template: jinja
+        - makedirs: True
+        - mode: '0600'
+        - user: opensmtpd
+        - group: opensmtpd
+        - context:
+            dbname: {{pillar['authserver']['dbname']}}
+            # this is difficult to dedupe since pillars can't easily reference other pillars
+            dbuser: opensmtpd-authserver
+            dbpass: {{pillar['dynamicsecrets']['opensmtpd-authserver']}}
+        - require:
+            - pkg: opensmtpd
+
+
+opensmtpd-authserver-blacklist:
+    file.managed:
+        - name: /etc/smtpd/postgresql_blacklist.table.conf
+        - source: salt://opensmtpd/postgresql_blacklist.table.jinja.conf
         - template: jinja
         - makedirs: True
         - mode: '0600'
