@@ -1,7 +1,7 @@
 {% from 'shared/ssl.sls' import certificate_location, secret_key_location %}
 
 postgresql:
-    version: 13
+    version: 14
     bind-port: 5432
     start-cluster: True
 
