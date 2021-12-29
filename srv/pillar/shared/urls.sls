@@ -40,7 +40,7 @@ urls:
     terraform: https://releases.hashicorp.com/terraform/1.1.2/terraform_1.1.2_linux_amd64.zip
     vault: https://releases.hashicorp.com/vault/1.9.2/vault_1.9.2_linux_amd64.zip
     vault-auditor: https://releases.hashicorp.com/vault-auditor/1.0.3/vault-auditor_1.0.3_linux_amd64.zip
-    vault-gpg-plugin: https://github.com/LeSuisse/vault-gpg-plugin/releases/download/v0.4.0/linux_amd64.zip
+    vault-gpg-plugin: https://github.com/LeSuisse/vault-gpg-plugin/releases/download/v0.5.0/linux_amd64.zip
     vault-ssh-helper: https://releases.hashicorp.com/vault-ssh-helper/0.2.1/vault-ssh-helper_0.2.1_linux_amd64.zip
 
 
@@ -59,5 +59,5 @@ hashes:
     terraform: sha256=734efa82e2d0d3df8f239ce17f7370dabd38e535d21e64d35c73e45f35dfa95c
     vault: sha256=1e3eb5c225ff1825a59616ebbd4ac300e9d6eaefcae26253e49209350c0a5e71
     vault-auditor: sha256=14aebc65351e52ff705fd9a4f3fb89655bf3a87a6c67a86ff8aa67ef5ff4837f
-    vault-gpg-plugin: sha256=5ab3e34dae0ab7485499b10919786ef97440d0b75b3682ef9c559ed07dafc877
+    vault-gpg-plugin: sha256=f6ca9f3575802e46c723c9b2a21af261e37729a1c5e49a2977578f69d17d4aca
     vault-ssh-helper: sha256=fe26f62e5822bdf66ea4bf874d1a535ffca19af07a27ff3bcd7e344bc1af39fe
