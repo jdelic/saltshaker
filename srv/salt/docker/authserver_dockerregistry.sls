@@ -10,23 +10,23 @@ docker-registry-domain:
     cmd.run:
         - name: >-
             /usr/local/authserver/bin/envdir /etc/appconfig/authserver/env/ \
-                /usr/local/authserver/bin/django-admin.py domain --settings=authserver.settings \
+                /usr/local/authserver/bin/django-admin domain --settings=authserver.settings \
                     create --create-key jwt "{{registry_hostname}}"
         - unless: >-
             test $(/usr/local/authserver/bin/envdir /etc/appconfig/authserver/env/ \
-                       /usr/local/authserver/bin/django-admin.py domain --settings=authserver.settings \
+                       /usr/local/authserver/bin/django-admin domain --settings=authserver.settings \
                            list --format=json --include-parent-domain {{registry_hostname}} | jq length) -gt 0
 
 docker-registry-tokenauth:
     cmd.run:
         - name: >-
             /usr/local/authserver/bin/envdir /etc/appconfig/authserver/env/ \
-                /usr/local/authserver/bin/django-admin.py dockerauth --settings=authserver.settings \
+                /usr/local/authserver/bin/django-admin dockerauth --settings=authserver.settings \
                     registry create --name "Main Registry" --client-id "{{registry_hostname}}" \
                         --domain "{{registry_hostname}}"
         - unless: >-
             /usr/local/authserver/bin/envdir /etc/appconfig/authserver/env/ \
-                /usr/local/authserver/bin/django-admin.py dockerauth --settings=authserver.settings \
+                /usr/local/authserver/bin/django-admin dockerauth --settings=authserver.settings \
                     registry list | grep -q "{{registry_hostname}}"
         - require:
             - cmd: docker-registry-domain
