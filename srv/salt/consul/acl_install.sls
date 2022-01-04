@@ -44,6 +44,8 @@ consul-register-acl:
         - raise_error: False  # only exists in 'tornado' backend
         - backend: tornado
         - status: 200
+        - header_dict:
+            X-Consul-Token: {{pillar['dynamicsecrets']['consul-acl-master-token']}}
         - require:
             - event: consul-register-acl
             - service: consul-service
