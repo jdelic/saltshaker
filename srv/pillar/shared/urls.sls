@@ -36,7 +36,7 @@ urls:
     nomad-autoscaler: https://releases.hashicorp.com/nomad-autoscaler/0.3.6/nomad-autoscaler_0.3.6_linux_amd64.zip
     nomad-pack: https://releases.hashicorp.com/nomad-pack/0.0.1-techpreview2/nomad-pack_0.0.1-techpreview2_linux_amd64.zip
     terraform: https://releases.hashicorp.com/terraform/1.1.7/terraform_1.1.7_linux_amd64.zip
-    vault: https://releases.hashicorp.com/vault/1.9.4/vault_1.9.4_linux_amd64.zip
+    vault: https://releases.hashicorp.com/vault/1.10.0/vault_1.10.0_linux_amd64.zip
     vault-auditor: https://releases.hashicorp.com/vault-auditor/1.0.3/vault-auditor_1.0.3_linux_amd64.zip
     vault-gpg-plugin: https://github.com/LeSuisse/vault-gpg-plugin/releases/download/v0.5.0/linux_amd64.zip
     vault-ssh-helper: https://releases.hashicorp.com/vault-ssh-helper/0.2.1/vault-ssh-helper_0.2.1_linux_amd64.zip
@@ -53,7 +53,7 @@ hashes:
     nomad-autoscaler: sha256=2f3a55078f2c993a751b9e644dd07573ee2183871f21274159d5c7e4860f6421
     nomad-pack: sha256=d4ad91494f8b8bff58a27181fc7a0b6fc9fd47967aba92e107b549c17bf1f4f2
     terraform: sha256=e4add092a54ff6febd3325d1e0c109c9e590dc6c38f8bb7f9632e4e6bcca99d4
-    vault: sha256=9be49dc07a1b73cc78dd5e5cca88588758bb1994fd954ae2c983eb5986887db5
+    vault: sha256=ec06473d79e77c05700f051278c54b0f7b6f2df64f57f630a0690306323f1175
     vault-auditor: sha256=14aebc65351e52ff705fd9a4f3fb89655bf3a87a6c67a86ff8aa67ef5ff4837f
     vault-gpg-plugin: sha256=f6ca9f3575802e46c723c9b2a21af261e37729a1c5e49a2977578f69d17d4aca
     vault-ssh-helper: sha256=fe26f62e5822bdf66ea4bf874d1a535ffca19af07a27ff3bcd7e344bc1af39fe
