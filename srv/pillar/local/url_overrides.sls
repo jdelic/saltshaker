@@ -17,7 +17,7 @@ repos:
     maurusnet-opensmtpd: deb http://fileserver.maurusnet.test/mn-opensmtpd/ mn-opensmtpd main
     maurusnet-radicale: deb http://fileserver.maurusnet.test/mn-radicale/ mn-radicale main
     postgresql: deb http://fileserver.maurusnet.test/postgresql/ bullseye-pgdg
-    saltstack: deb http://fileserver.maurusnet.test/apt/debian/10/amd64/latest bullseye main
+    saltstack: deb http://fileserver.maurusnet.test/apt/debian/11/amd64/latest bullseye main
 
     pgpkey: salt://mn/fileserver_ACADBD6B.pgp.key
 
