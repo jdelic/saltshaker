@@ -310,7 +310,9 @@ authserver-vault-postgresql-connection:
             /usr/local/bin/vault write postgresql/config/{{pillar['authserver']['dbname']}} \
                 plugin_name=postgresql-database-plugin \
                 allowed_roles="authserver_fullaccess,authserver_mailforwarder,authserver_dkimsigner" \
-                connection_url="postgresql://{{pillar['authserver']['dbuser']}}:{{pillar['dynamicsecrets']['authserver']}}@postgresql.service.consul:5432/?sslmode=verify-full"
+                connection_url="postgresql://{{'{{'}}username{{'}}'}}:{{'{{'}}password{{'}}'}}@postgresql.service.consul:5432/?sslmode=verify-full" \
+                username="{{pillar['authserver']['dbuser']}}" \
+                password="{{pillar['dynamicsecrets']['authserver']}}"
         - onlyif: /usr/local/bin/vault operator init -status >/dev/null
         - unless: /usr/local/bin/vault list postgresql/config | grep authserver >/dev/null
         - env:
