@@ -27,6 +27,7 @@ authserver-concourse-create-client:
             /usr/local/authserver/bin/envdir /etc/appconfig/authserver/env/
             /usr/local/authserver/bin/django-admin oauth2 create \
                 --skip-authorization \
+                --skip-pkce \
                 --redirect-uri https://{{pillar['ci']['hostname']}}/sky/issuer/callback \
                 --client-type confidential \
                 --grant-type authorization-code \
