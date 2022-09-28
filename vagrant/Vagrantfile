@@ -50,21 +50,19 @@ def ip(d)
 end
 
 
-$box_url = 'https://s3-eu-central-1.amazonaws.com/jdelic/maurusnet-debian.box'
-
 # When I'm on a train or plane I like to use a local Debian mirror that I run off a Micro SD Card.
 # The shell script below sets a Debian VM to load everything from there when you set $local_provision
 # to true.
 $local_provision = false
 $remote_provision_script = <<SCRIPT
-        wget -O - https://repo.saltstack.com/apt/debian/9/amd64/latest/SALTSTACK-GPG-KEY.pub | sudo apt-key add -
-        sh -c 'echo deb http://repo.saltstack.com/apt/debian/9/amd64/latest stretch main > /etc/apt/sources.list.d/saltstack.list'
+        wget -O - https://repo.saltstack.com/apt/debian/11/amd64/latest/SALTSTACK-GPG-KEY.pub | sudo apt-key add -
+        sh -c 'echo deb http://repo.saltstack.com/apt/debian/11/amd64/latest bullseye main > /etc/apt/sources.list.d/saltstack.list'
         apt-get update
 SCRIPT
 $local_provision_script = <<SCRIPT
         sh -c 'echo 192.168.56.10 fileserver.maurusnet.test httpredir.debian.org >> /etc/hosts'
-        sh -c 'echo deb http://fileserver.maurusnet.test/debian/ stretch main > /etc/apt/sources.list'
-        sh -c 'echo deb http://fileserver.maurusnet.test/apt/debian/9/amd64/latest stretch main > /etc/apt/sources.list.d/saltstack.list'
+        sh -c 'echo deb http://fileserver.maurusnet.test/debian/ bullseye main > /etc/apt/sources.list'
+        sh -c 'echo deb http://fileserver.maurusnet.test/apt/debian/11/amd64/latest bullseye main > /etc/apt/sources.list.d/saltstack.list'
         wget -q -O - http://fileserver.maurusnet.test/dev_apt_signing.public.pgp | apt-key add -
         apt-get update
         sh -c 'apt-get install ca-certificates'
@@ -123,13 +121,13 @@ Vagrant.configure('2') do |config|
             master.vm.provider :virtualbox do |vb|
                 vb.memory = 2048
             end
-            master.vm.box = 'debian/contrib-buster64'
+            master.vm.box = 'debian/contrib-bullseye64'
         else
             master.vm.provider :libvirt do |lv|
                 #lv.customize ['modifyvm', :id, '--rtcuseutc', 'on']
                 lv.memory = 2048
             end
-            master.vm.box = 'debian/buster64'
+            master.vm.box = 'debian/bullseye64'
         end
 
 
@@ -138,7 +136,7 @@ Vagrant.configure('2') do |config|
                           :ip => ip('88'),
                           :libvirt__netmask => '255.255.255.0',
                           :libvirt__network_name => 'mnet_vagrant'
-        master.vm.hostname = 'saltmaster.maurusnet.test'
+        master.vm.hostname = 'saltmaster11.maurusnet.test'
 
         sync_folder(master, '.', '/vagrant')
         sync_folder(master, 'saltshaker/srv/salt', '/srv/salt')
@@ -187,7 +185,7 @@ SCRIPT
             salt.minion_pub = 'saltshaker/vagrant/preseed-keys/saltmaster.maurusnet.test.pub'
             salt.minion_key = 'saltshaker/vagrant/preseed-keys/saltmaster.maurusnet.test.pem'
             salt.seed_master = {
-                'saltmaster.maurusnet.test' => salt.minion_pub,
+                'saltmaster11.maurusnet.test' => salt.minion_pub,
                 'test.maurusnet.test' => 'saltshaker/vagrant/preseed-keys/test.maurusnet.test.pub'
             }
         end
@@ -226,13 +224,13 @@ SCRIPT
             test.vm.provider :virtualbox do |vb|
                 vb.memory = 2048
             end
-            test.vm.box = 'debian/contrib-buster64'
+            test.vm.box = 'debian/contrib-bullseye64'
         else
             test.vm.provider :libvirt do |lv|
                 #lv.customize ['modifyvm', :id, '--rtcuseutc', 'on']
                 lv.memory = 2048
             end
-            test.vm.box = 'debian/buster64'
+            test.vm.box = 'debian/bullseye64'
         end
 
         #test.vm.box_url = $box_url
@@ -245,7 +243,7 @@ SCRIPT
         sync_folder(test, 'saltshaker/etc/salt-minion/minion.d', '/etc/salt/minion.d', mounttype: 'rsync')
 
         test.vm.provision :shell do |s|
-            s.inline = "sh -c 'if ! grep -q " + ip('88') + " /etc/hosts; then echo \"" + ip('88') + "        saltmaster.maurusnet.test saltmaster\" >> /etc/hosts; fi'\n"
+            s.inline = "sh -c 'if ! grep -q " + ip('88') + " /etc/hosts; then echo \"" + ip('88') + "        saltmaster11.maurusnet.test saltmaster11\" >> /etc/hosts; fi'\n"
             s.inline +=<<SCRIPT
                 mkdir -p /etc/salt/roles.d
                 chown 700 /etc/salt/roles.d
