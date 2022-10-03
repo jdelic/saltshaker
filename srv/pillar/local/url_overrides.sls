@@ -29,12 +29,12 @@ urls:
     consul: http://fileserver.maurusnet.test/downloads/consul/consul_1.13.2_linux_amd64.zip
     consul-esm: http://fileserver.maurusnet.test/downloads/consul-esm/consul-esm_0.6.1_linux_amd64.zip
     consul-replicate: http://fileserver.maurusnet.test/downloads/consul-replicate/consul-replicate_0.4.0_linux_amd64.zip
-    consul-template: http://fileserver.maurusnet.test/downloads/consul-template/consul-template_0.29.2_linux_amd64.zip
+    consul-template: http://fileserver.maurusnet.test/downloads/consul-template/consul-template_0.29.4_linux_amd64.zip
     nomad: http://fileserver.maurusnet.test/downloads/nomad/nomad_1.3.5_linux_amd64.zip
     nomad-autoscaler: http://fileserver.maurusnet.test/downloads/nomad-autoscaler/nomad-autoscaler_0.3.7_linux_amd64.zip
     nomad-pack: http://fileserver.maurusnet.test/downloads/nomad-pack/nomad-pack_0.0.1-techpreview2_linux_amd64.zip
     terraform: http://fileserver.maurusnet.test/downloads/terraform/terraform_1.3.1_linux_amd64.zip
-    vault: http://fileserver.maurusnet.test/downloads/vault/vault_1.11.3_linux_amd64.zip
+    vault: http://fileserver.maurusnet.test/downloads/vault/vault_1.11.4_linux_amd64.zip
     vault-auditor: http://fileserver.maurusnet.test/downloads/vault-auditor/vault-auditor_1.0.3_linux_amd64.zip
     vault-gpg-plugin: http://fileserver.maurusnet.test/downloads/vault-gpg-plugin/linux_amd64.zip
     vault-ssh-helper: http://fileserver.maurusnet.test/downloads/vault/vault-ssh-helper_0.2.1_linux_amd64.zip
@@ -48,12 +48,12 @@ hashes:
     consul: sha256=a72e88cbfec6c0fb3620cd58314ff0b42fc9d605a5192d6a568a417180f0b35f
     consul-esm: sha256=d46a1797ecf511719d0b6e0220d7493a0dd3d559b15a81538d09f40522953e61
     consul-replicate: sha256=96c6651291c2f8e75d98d04b9b4653d8a02324edaa25783744d9ea1d8d411c61
-    consul-template: sha256=88d57a227967da2f7c14f702245adcf30d80ec59354ed43c8778eb7296c9d4db
+    consul-template: sha256=7e27ad0a0642fe869097d5c516304889f51e5e52f53f5b5d8d2d0a601feef8d5
     nomad: sha256=a4bf189e6a84c4bc7d6090529c87b32e6b4b09b47163514d33305aa867d7c4dc
     nomad-autoscaler: sha256=11d3c8a5d16020514a55775f5b83fc8f1a08e2a2274f97b06700a5d9877346b4
     nomad-pack: sha256=d4ad91494f8b8bff58a27181fc7a0b6fc9fd47967aba92e107b549c17bf1f4f2
     terraform: sha256=0847b14917536600ba743a759401c45196bf89937b51dd863152137f32791899
-    vault: sha256=b433413ce524f26abe6292f7fc95f267e809daeacdf7ba92b68dead322f92deb
+    vault: sha256=8764a55bdd69faedaaf5d50325d5e6806041e6305b1e66454b46dc6426d26556
     vault-auditor: sha256=14aebc65351e52ff705fd9a4f3fb89655bf3a87a6c67a86ff8aa67ef5ff4837f
     vault-gpg-plugin: sha256=f6ca9f3575802e46c723c9b2a21af261e37729a1c5e49a2977578f69d17d4aca
     vault-ssh-helper: sha256=fe26f62e5822bdf66ea4bf874d1a535ffca19af07a27ff3bcd7e344bc1af39fe
