@@ -64,7 +64,6 @@ data-base-dir:
 postgresql-step2:
     pkg.installed:
         - pkgs:
-            - postgresql
             - postgresql-{{postgres_version}}
             - postgresql-client-{{postgres_version}}
             - libpq5
