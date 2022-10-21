@@ -6,7 +6,7 @@ check() {
     echo "check team $1 $2" >&2
     if /usr/local/bin/fly teams -t salt_ciadmin -d --json | \
           jq '.[]|.name + "=" + .auth.owner.groups[],.name + "=" + .auth.owner.users[]' | \
-          grep "$1=oauth:$2" >/dev/null 2>/dev/null; then
+          grep "$1=oidc:$2" >/dev/null 2>/dev/null; then
         echo "found"
     else
         echo "not found";
