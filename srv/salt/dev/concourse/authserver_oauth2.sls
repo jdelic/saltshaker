@@ -21,17 +21,34 @@ authserver-concourse-create-permissions:
             - cmd: concourse-sync-oauth2
 
 
+authserver-concourse-create-domain:
+    cmd.run:
+        - name: >
+            /usr/local/authserver/bin/envdir /etc/appconfig/authserver/env/
+            /usr/local/authserver/bin/django-admin domain create \
+                --create-key jwt \
+                {{pillar['ci']['hostname']}}
+        - unless: >
+              /usr/local/authserver/bin/envdir /etc/appconfig/authserver/env/
+              /usr/local/authserver/bin/django-admin domain list |
+                  grep -q "{{pillar['ci']['hostname']}}"
+        - require:
+            - cmd: authserver-sync
+        - require_in:
+              - cmd: concourse-sync-oauth2
+
+
 authserver-concourse-create-client:
     cmd.run:
         - name: >
             /usr/local/authserver/bin/envdir /etc/appconfig/authserver/env/
             /usr/local/authserver/bin/django-admin oauth2 create \
                 --skip-authorization \
-                --skip-pkce \
                 --redirect-uri https://{{pillar['ci']['hostname']}}/sky/issuer/callback \
                 --client-type confidential \
                 --grant-type authorization-code \
                 --publish-to-vault secret/oauth2/concourse \
+                --domain {{pillar['ci']['hostname']}} \
                 concourse-ci
         - unless: >
             /usr/local/authserver/bin/envdir /etc/appconfig/authserver/env/
@@ -39,6 +56,7 @@ authserver-concourse-create-client:
                 grep "concourse-ci" >/dev/null 2>/dev/null
         - require:
             - cmd: authserver-sync
+            - cmd: authserver-concourse-create-domain
         - require_in:
             - cmd: concourse-sync-oauth2
 

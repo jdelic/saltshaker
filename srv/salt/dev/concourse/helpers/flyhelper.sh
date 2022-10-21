@@ -20,7 +20,7 @@ setteam() {
     if test "$(check $1 $2)" == "found"; then
         RETCODE=0
     else
-        /usr/local/bin/fly set-team --non-interactive -t salt_ciadmin -n "$1" --oauth-group="$2"
+        /usr/local/bin/fly set-team --non-interactive -t salt_ciadmin -n "$1" --oidc-group="$2"
         RETCODE=$?
     fi
 }
