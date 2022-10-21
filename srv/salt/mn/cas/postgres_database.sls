@@ -40,6 +40,16 @@ authserver-postgres:
         - require:
             - cmd: postgresql-sync
             - postgres_user: authserver-postgres
+    postgres_privileges.present:
+        - name: {{pillar['authserver']['dbuser']}}
+        - object_name: public
+        - object_type: schema
+        - privileges:
+            - CREATE
+        - user: postgres
+        - maintenance_db: {{pillar['authserver']['dbname']}}
+        - require:
+            - postgres_database: authserver-postgres
 
 
 {% for user in ['dkimsigner', 'mailforwarder'] %}

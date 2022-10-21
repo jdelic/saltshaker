@@ -36,3 +36,13 @@ concourse-db:
         - order: 20  # see ORDER.md
         - require:
             - postgres_user: concourse-db-role
+    postgres_privileges.present:
+        - name: concourse
+        - object_name: public
+        - object_type: schema
+        - privileges:
+            - CREATE
+        - user: postgres
+        - maintenance_db: concourse
+        - require:
+            - postgres_database: concourse
