@@ -32,7 +32,7 @@ urls:
     consul-esm: https://releases.hashicorp.com/consul-esm/0.6.1/consul-esm_0.6.1_linux_amd64.zip
     consul-replicate: https://releases.hashicorp.com/consul-replicate/0.4.0/consul-replicate_0.4.0_linux_amd64.zip
     consul-template: https://releases.hashicorp.com/consul-template/0.29.5/consul-template_0.29.5_linux_amd64.zip
-    nomad: https://releases.hashicorp.com/nomad/1.4.1/nomad_1.4.1_linux_amd64.zip
+    nomad: https://releases.hashicorp.com/nomad/1.4.2/nomad_1.4.2_linux_amd64.zip
     nomad-autoscaler: https://releases.hashicorp.com/nomad-autoscaler/0.3.7/nomad-autoscaler_0.3.7_linux_amd64.zip
     nomad-pack: https://releases.hashicorp.com/nomad-pack/0.0.1-techpreview.3/nomad-pack_0.0.1-techpreview.3_linux_amd64.zip
     terraform: https://releases.hashicorp.com/terraform/1.3.3/terraform_1.3.3_linux_amd64.zip
@@ -50,7 +50,7 @@ hashes:
     consul-esm: sha256=d46a1797ecf511719d0b6e0220d7493a0dd3d559b15a81538d09f40522953e61
     consul-replicate: sha256=96c6651291c2f8e75d98d04b9b4653d8a02324edaa25783744d9ea1d8d411c61
     consul-template: sha256=24aa8c67a2ac95c03524d62dd0e1815359e8c9689324b48e9c75ed2b6e25a5c8
-    nomad: sha256=f9327818a97fc2f29b6a9283c3175cd13ba6c774c15ee5683035c23b9a3640fa
+    nomad: sha256=6e24efd6dfba0ba2df31347753f615cae4d3632090e68fc90933e51e640f7afc
     nomad-autoscaler: sha256=11d3c8a5d16020514a55775f5b83fc8f1a08e2a2274f97b06700a5d9877346b4
     nomad-pack: sha256=825cbe6f6053ad4eab4bc298a901cb957b6331fdb3db4b6a896e620a2b96f3c3
     terraform: sha256=fa5cbf4274c67f2937cabf1a6544529d35d0b8b729ce814b40d0611fd26193c1
