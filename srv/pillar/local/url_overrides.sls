@@ -24,17 +24,17 @@ repos:
 
 urls:
     acme: http://fileserver.maurusnet.test/downloads/acmesh/3.0.4.zip
-    concourse: http://fileserver.maurusnet.test/downloads/concourse/concourse-7.9.0-linux-amd64.tgz
-    concourse-fly: http://fileserver.maurusnet.test/downloads/concourse/fly-7.9.0-linux-amd64.tgz
-    consul: http://fileserver.maurusnet.test/downloads/consul/consul_1.14.3_linux_amd64.zip
-    consul-esm: http://fileserver.maurusnet.test/downloads/consul-esm/consul-esm_0.6.2_linux_amd64.zip
+    concourse: http://fileserver.maurusnet.test/downloads/concourse/concourse-7.9.1-linux-amd64.tgz
+    concourse-fly: http://fileserver.maurusnet.test/downloads/concourse/fly-7.9.1-linux-amd64.tgz
+    consul: http://fileserver.maurusnet.test/downloads/consul/consul_1.15.0_linux_amd64.zip
+    consul-esm: http://fileserver.maurusnet.test/downloads/consul-esm/consul-esm_0.7.1_linux_amd64.zip
     consul-replicate: http://fileserver.maurusnet.test/downloads/consul-replicate/consul-replicate_0.4.0_linux_amd64.zip
     consul-template: http://fileserver.maurusnet.test/downloads/consul-template/consul-template_0.30.0_linux_amd64.zip
-    nomad: http://fileserver.maurusnet.test/downloads/nomad/nomad_1.4.3_linux_amd64.zip
+    nomad: http://fileserver.maurusnet.test/downloads/nomad/nomad_1.5.0_linux_amd64.zip
     nomad-autoscaler: http://fileserver.maurusnet.test/downloads/nomad-autoscaler/nomad-autoscaler_0.3.7_linux_amd64.zip
     nomad-pack: http://fileserver.maurusnet.test/downloads/nomad-pack/nomad-pack_0.0.1-techpreview.3_linux_amd64.zip
-    terraform: http://fileserver.maurusnet.test/downloads/terraform/terraform_1.3.7_linux_amd64.zip
-    vault: http://fileserver.maurusnet.test/downloads/vault/vault_1.12.2_linux_amd64.zip
+    terraform: http://fileserver.maurusnet.test/downloads/terraform/terraform_1.3.9_linux_amd64.zip
+    vault: http://fileserver.maurusnet.test/downloads/vault/vault_1.13.0_linux_amd64.zip
     vault-auditor: http://fileserver.maurusnet.test/downloads/vault-auditor/vault-auditor_1.0.3_linux_amd64.zip
     vault-gpg-plugin: http://fileserver.maurusnet.test/downloads/vault-gpg-plugin/linux_amd64.zip
     vault-ssh-helper: http://fileserver.maurusnet.test/downloads/vault/vault-ssh-helper_0.2.1_linux_amd64.zip
@@ -43,17 +43,17 @@ urls:
 
 hashes:
     acme: sha256=8f02886f809df01ef79ef3314f09876b04cc144a9460d4e5755a32bcb2dc1c84
-    concourse: sha256=12d6005990dad14496d5a4949ad6c18217589cd8a4bbaf36bf1f45740dba0c56
-    concourse-fly: sha256=262677ed6b211d1258da4d46153b1049722d48640ef428078daf42b0357633c3
-    consul: sha256=2971959d50fae1aa3f6b624219c85e0a4f34cd7232ea14d77d3cfb05f9ce7b8f
-    consul-esm: sha256=b1bc366a3a59ff3d78d6cdb2359b1a5d88e2aaf6efc7e378d615f2254c8d78fb
+    concourse: sha256=da17ce61a5a0b64b74b7a53cb28c37437ea04b880ee8e6649bf112f32724ec4e
+    concourse-fly: sha256=6cf7acfcde78a980339cba1534c01be28d360306e5c76c60c5546e3847434eb7
+    consul: sha256=62a358ff2c3c08d19f15a92ea3130b05b547ab5a767ae13454eab7655a718c24
+    consul-esm: sha256=bc1d8c351d277bb1e93d3d2a209b9282ee5d84e3a82ce3c38281f40318b5268f
     consul-replicate: sha256=96c6651291c2f8e75d98d04b9b4653d8a02324edaa25783744d9ea1d8d411c61
     consul-template: sha256=c78db0f0eecc4d314a5130e3b4c8bd17086c6cd9080c4caf69c606de67cbe212
-    nomad: sha256=15ab8fd2da071d93852f59b9a8833e3a764986ef8140c6b11f87621391e63902
+    nomad: sha256=3f629ca10452f755580d238f95c0844d7ee9d9c3715f54fb4403fc85b219b720
     nomad-autoscaler: sha256=11d3c8a5d16020514a55775f5b83fc8f1a08e2a2274f97b06700a5d9877346b4
     nomad-pack: sha256=825cbe6f6053ad4eab4bc298a901cb957b6331fdb3db4b6a896e620a2b96f3c3
-    terraform: sha256=b8cf184dee15dfa89713fe56085313ab23db22e17284a9a27c0999c67ce3021e
-    vault: sha256=116c143de377a77a7ea455a367d5e9fe5290458e8a941a6e2dd85d92aaedba67
+    terraform: sha256=53048fa573effdd8f2a59b726234c6f450491fe0ded6931e9f4c6e3df6eece56
+    vault: sha256=69c1ce6dd383bb342c4f861a51a91413eb05e1324159e4395532e42a8a59af9d
     vault-auditor: sha256=14aebc65351e52ff705fd9a4f3fb89655bf3a87a6c67a86ff8aa67ef5ff4837f
     vault-gpg-plugin: sha256=f6ca9f3575802e46c723c9b2a21af261e37729a1c5e49a2977578f69d17d4aca
     vault-ssh-helper: sha256=fe26f62e5822bdf66ea4bf874d1a535ffca19af07a27ff3bcd7e344bc1af39fe
