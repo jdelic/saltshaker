@@ -121,13 +121,13 @@ Vagrant.configure('2') do |config|
             master.vm.provider :virtualbox do |vb|
                 vb.memory = 2048
             end
-            master.vm.box = 'debian/contrib-bullseye64'
+            master.vm.box = 'debian/contrib-bookworm64'
         else
             master.vm.provider :libvirt do |lv|
                 #lv.customize ['modifyvm', :id, '--rtcuseutc', 'on']
                 lv.memory = 2048
             end
-            master.vm.box = 'debian/bullseye64'
+            master.vm.box = 'debian/bookworm64'
         end
 
 
