@@ -8,7 +8,7 @@ opensmtpd:
         - pkgs:
             - opensmtpd
             - opensmtpd-extras
-        #- fromrepo: bullseye-backports
+        #- fromrepo: bookworm-backports
         - install_recommends: False
         - require:
               - pkg: no-exim

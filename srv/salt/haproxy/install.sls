@@ -10,7 +10,7 @@ haproxy-repo:
 haproxy:
     pkg.installed:
         - install_recommends: False
-        - fromrepo: bullseye-backports-2.4
+        - fromrepo: bookworm-backports-2.8
         - require:
             - pkgrepo: haproxy-repo
     service.dead:

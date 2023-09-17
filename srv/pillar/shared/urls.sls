@@ -6,18 +6,17 @@
 repos:
     aptly: deb http://repo.aptly.info/ squeeze main
     aptly-nightly: deb http://repo.aptly.info/ nightly main
-    bullseye: deb http://ftp-stud.hs-esslingen.de/debian/ bullseye main contrib
-    bullseye-backports: deb http://ftp-stud.hs-esslingen.de/debian/ bullseye-backports main
-    bullseye-security: deb http://security.debian.org/debian-security bullseye-security main
-    bullseye-updates: deb http://deb.debian.org/debian bullseye-updates main
-    docker: deb https://download.docker.com/linux/debian bullseye stable
-    envoy: deb [arch=amd64] https://deb.dl.getenvoy.io/public/deb/debian bullseye main
-    haproxy: deb http://haproxy.debian.net bullseye-backports-2.4 main
-    maurusnet-apps: deb http://repo.maurus.net/nightly/bullseye/ mn-nightly main
-    maurusnet-opensmtpd: deb http://repo.maurus.net/bullseye/opensmtpd/ mn-opensmtpd main
-    maurusnet-radicale: deb http://repo.maurus.net/bullseye/radicale/ mn-radicale main
-    postgresql: deb http://apt.postgresql.org/pub/repos/apt/ bullseye-pgdg main
-    saltstack: deb [signed-by=/usr/share/keyrings/salt-archive-keyring.gpg arch=amd64] https://repo.saltproject.io/py3/debian/11/amd64/latest bullseye main
+    bookworm: deb http://ftp-stud.hs-esslingen.de/debian/ bookworm main contrib
+    bookworm-backports: deb http://ftp-stud.hs-esslingen.de/debian/ bookworm-backports main
+    bookworm-security: deb http://security.debian.org/debian-security bookworm-security main
+    bookworm-updates: deb http://deb.debian.org/debian bookworm-updates main
+    docker: deb https://download.docker.com/linux/debian bookworm stable
+    haproxy: deb [signed-by=/usr/share/keyrings/haproxy.debian.net.gpg] http://haproxy.debian.net bookworm-backports-2.8 main
+    maurusnet-apps: deb http://repo.maurus.net/nightly/bookworm/ mn-nightly main
+    maurusnet-opensmtpd: deb http://repo.maurus.net/bookworm/opensmtpd/ mn-opensmtpd main
+    maurusnet-radicale: deb http://repo.maurus.net/bookworm/radicale/ mn-radicale main
+    postgresql: deb http://apt.postgresql.org/pub/repos/apt/ bookworm-pgdg main
+    saltstack: deb [signed-by=/etc/apt/keyrings/salt-archive-keyring.gpg arch=amd64] https://repo.saltproject.io/py3/debian/11/amd64/latest bookworm main
 
 
 #   pgpkey: Set this to a salt:// url if you need to deploy your own repo signing key

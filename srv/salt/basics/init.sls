@@ -81,9 +81,9 @@ dbus:
     service.running
 
 
-bullseye:
+bookworm:
     pkgrepo.managed:
-        - name: {{pillar['repos']['bullseye']}}
+        - name: {{pillar['repos']['bookworm']}}
         - file: /etc/apt/sources.list
         {% if pillar['repos'].get('pgpkey', None) %}
         - key_url: {{pillar['repos']['pgpkey']}}
@@ -100,28 +100,28 @@ saltstack-repo:
         - order: 2  # execute this state early!
 
 
-updates-bullseye:
+updates-bookworm:
     pkgrepo.managed:
-        - name: {{pillar['repos']['bullseye-updates']}}
-        - file: /etc/apt/sources.list.d/bullseye-updates.list
+        - name: {{pillar['repos']['bookworm-updates']}}
+        - file: /etc/apt/sources.list.d/bookworm-updates.list
         - order: 2  # execute this state early!
 
 
-security-updates-bullseye:
+security-updates-bookworm:
     pkgrepo.managed:
-        - name: {{pillar['repos']['bullseye-security']}}
-        - file: /etc/apt/sources.list.d/bullseye-security.list
+        - name: {{pillar['repos']['bookworm-security']}}
+        - file: /etc/apt/sources.list.d/bookworm-security.list
         - order: 2  # execute this state early!
 
 
-backports-org-bullseye:
+backports-org-bookworm:
     pkgrepo.managed:
-        - name: {{pillar['repos']['bullseye-backports']}}
-        - file: /etc/apt/sources.list.d/bullseye-backports.list
+        - name: {{pillar['repos']['bookworm-backports']}}
+        - file: /etc/apt/sources.list.d/bookworm-backports.list
         - order: 2  # execute this state early!
     file.managed:
-        - name: /etc/apt/preferences.d/bullseye-backports
-        - source: salt://etc_mods/bullseye-backports
+        - name: /etc/apt/preferences.d/bookworm-backports
+        - source: salt://etc_mods/bookworm-backports
 
 
 maurusnet-opensmtpd:

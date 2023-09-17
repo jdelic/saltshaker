@@ -6,18 +6,17 @@
 repos:
     aptly: deb http://fileserver.maurusnet.test/aptly/ squeeze main
     aptly-nightly: deb http://fileserver.maurusnet.test/aptly-nightly/ nightly main
-    bullseye: deb http://fileserver.maurusnet.test/debian/ bullseye main
-    bullseye-backports: deb http://fileserver.maurusnet.test/debian/ bullseye-backports main
-    bullseye-security: deb http://fileserver.maurusnet.test/debian/security/ bullseye-security main
-    bullseye-updates: deb http://fileserver.maurusnet.test/debian/updates/ bullseye-updates main
-    docker: deb http://fileserver.maurusnet.test/repo/ bullseye stable
-    envoy: deb [arch=amd64] http://fileserver.maurusnet.test/envoy/ bullseye main
-    haproxy: deb http://fileserver.maurusnet.test/haproxy/ bullseye-backports-2.2 main
+    bookworm: deb http://fileserver.maurusnet.test/debian/ bookworm main
+    bookworm-backports: deb http://fileserver.maurusnet.test/debian/ bookworm-backports main
+    bookworm-security: deb http://fileserver.maurusnet.test/debian/security/ bookworm-security main
+    bookworm-updates: deb http://fileserver.maurusnet.test/debian/updates/ bookworm-updates main
+    docker: deb http://fileserver.maurusnet.test/repo/ bookworm stable
+    haproxy: deb http://fileserver.maurusnet.test/haproxy/ bookworm-backports-2.8 main
     maurusnet-apps: deb http://fileserver.maurusnet.test/mn-nightly/ mn-nightly main
     maurusnet-opensmtpd: deb http://fileserver.maurusnet.test/mn-opensmtpd/ mn-opensmtpd main
     maurusnet-radicale: deb http://fileserver.maurusnet.test/mn-radicale/ mn-radicale main
-    postgresql: deb http://fileserver.maurusnet.test/postgresql/ bullseye-pgdg
-    saltstack: deb http://fileserver.maurusnet.test/apt/debian/11/amd64/latest bullseye main
+    postgresql: deb http://fileserver.maurusnet.test/postgresql/ bookworm-pgdg
+    saltstack: deb http://fileserver.maurusnet.test/apt/debian/11/amd64/latest bookworm main
 
     pgpkey: salt://mn/fileserver_ACADBD6B.pgp.key
 

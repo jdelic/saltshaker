@@ -40,7 +40,7 @@ postgresql-repo:
 postgresql-step1:
     pkg.installed:
         - name: postgresql-common
-        - fromrepo: bullseye-pgdg
+        - fromrepo: bookworm-pgdg
         - require:
             - pkgrepo: postgresql-repo
         - install_recommends: False
@@ -68,7 +68,7 @@ postgresql-step2:
             - postgresql-client-{{postgres_version}}
             - libpq5
         - install_recommends: False
-        - fromrepo: bullseye-pgdg
+        - fromrepo: bookworm-pgdg
         - require:
             - postgresql-step1
 
