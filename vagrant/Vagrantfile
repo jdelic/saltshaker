@@ -55,8 +55,8 @@ end
 # to true.
 $local_provision = false
 $remote_provision_script = <<SCRIPT
-        mkdir /etc/apt/keyrings
-        wget -q -O /etc/apt/keyrings/salt-archive-keyring-2023.gpg https://repo.saltproject.io/salt/py3/debian/11/amd64/SALT-PROJECT-GPG-PUBKEY-2023.gpg
+        mkdir -p /etc/apt/keyrings
+        wget -O /etc/apt/keyrings/salt-archive-keyring-2023.gpg https://repo.saltproject.io/salt/py3/debian/11/amd64/SALT-PROJECT-GPG-PUBKEY-2023.gpg
         sh -c 'echo deb [signed-by=/etc/apt/keyrings/salt-archive-keyring-2023.gpg arch=amd64] https://repo.saltproject.io/salt/py3/debian/11/amd64/latest bullseye main > /etc/apt/sources.list.d/salt.list'
         apt update
 SCRIPT
@@ -201,7 +201,7 @@ SCRIPT
             salt.install_master = false
             salt.install_syndic = false
             salt.bootstrap_script = 'saltshaker/vagrant/bootstrap-salt.sh'
-            salt.bootstrap_options = '-x python3'
+            salt.bootstrap_options = '-x python3 -r'
             if $local_provision
                 # -l uses http instead of https
                 salt.bootstrap_options = " -l -R fileserver.maurusnet.test"
