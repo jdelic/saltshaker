@@ -16,7 +16,7 @@ vagrant-eth0-recv:
         - chain: INPUT
         - jump: ACCEPT
         - in-interface: {{pillar["ifassign"]["nat"]}}
-        - order: 1
+        - order: 3
         - save: True
         - require:
             - pkg: iptables
@@ -29,7 +29,7 @@ vagrant-eth0-send:
         - chain: OUTPUT
         - jump: ACCEPT
         - out-interface: {{pillar["ifassign"]["nat"]}}
-        - order: 1
+        - order: 3
         - save: True
         - require:
             - pkg: iptables

@@ -139,7 +139,7 @@ maurusnet-opensmtpd:
         - file: /etc/apt/sources.list.d/mn-opensmtpd.list
         - key_url: salt://mn/packaging_authority_A78049AF.pgp.key
         - aptkey: False
-        - order: 2
+        - order: 10
 
 
 maurusnet-apps:
@@ -149,7 +149,7 @@ maurusnet-apps:
         - file: /etc/apt/sources.list.d/mn-apps.list
         - key_url: salt://mn/packaging_authority_A78049AF.pgp.key
         - aptkey: False
-        - order: 2
+        - order: 10
 
 
 # enforce UTC
