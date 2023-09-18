@@ -8,12 +8,13 @@
 python-packages:
     pkg.installed:
         - pkgs:
+            - python-is-python3
             - python3
             - python3-pip
             - python3-docker
             - python3-setuptools
-            - python-pkg-resources
-            - python-pip-whl
+            - python3-pkg-resources
+            - python3-pip-whl
             - python3-virtualenv
             - virtualenv
             - gettext
