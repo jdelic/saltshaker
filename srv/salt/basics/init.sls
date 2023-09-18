@@ -60,7 +60,7 @@ basic-required-packages:
             - jq
             - curl
             - systemd-timesyncd
-        -  order: 1  # execute this state early, because later states need unzip
+        -  order: 9  # execute this state early, because later states need unzip
 
 
 empty-crontab:
@@ -196,7 +196,7 @@ openssh-in22-recv:
         - save: True
         - require:
             - sls: iptables
-        - order: 2
+        - order: 4
 
 
 # NETWORK SERVICES ON THE INTERNET ===========================================
@@ -221,7 +221,7 @@ basics-tcp-out{{port}}-send:
         - connstate: NEW
         - proto: tcp
         - save: True
-        - order: 2
+        - order: 4
 {% endfor %}
 
 
@@ -235,7 +235,7 @@ basics-udp-out{{port}}-recv:
         - proto: udp
         - sport: {{port}}
         - save: True
-        - order: 2
+        - order: 4
 
 
 # allow us to talk to others. For UDP we make this stateless here to guarantee it works.
@@ -247,7 +247,7 @@ basics-udp-out{{port}}-send:
         - proto: udp
         - dport: {{port}}
         - save: True
-        - order: 2
+        - order: 4
 {% endfor %}
 
 
@@ -262,7 +262,7 @@ basics-internal-network-tcp:
         - connstate: NEW
         - proto: tcp
         - save: True
-        - order: 2
+        - order: 4
         - require:
             - sls: iptables
 
@@ -275,7 +275,7 @@ basics-internal-network-udp:
         - out-interface: {{pillar['ifassign']['internal']}}
         - proto: udp
         - save: True
-        - order: 2
+        - order: 4
         - require:
             - sls: iptables
 
