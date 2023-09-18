@@ -33,6 +33,7 @@ postgresql-repo:
         - name: {{pillar["repos"]["postgresql"]}} {{postgres_version}}
         - file: /etc/apt/sources.list.d/postgresql.list
         - key_url: salt://postgresql/postgresql_44A07FCC7D46ACCC4CF8.pgp.key
+        - aptkey: False
         - require:
             - file: postgresql-apt-pin
 

@@ -5,6 +5,7 @@
 #        - name: {{pillar['repos']['maurusnet-radicale']}}
 #        - file: /etc/apt/sources.list.d/mn-radicale.list
 #        - key_url: salt://mn/packaging_authority_A78049AF.pgp.key
+#        - aptkey: False
 
 
 radicale:

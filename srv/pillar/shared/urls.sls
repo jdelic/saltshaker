@@ -4,19 +4,19 @@
 # mirror if you have such a thing
 
 repos:
-    aptly: deb http://repo.aptly.info/ squeeze main
-    aptly-nightly: deb http://repo.aptly.info/ nightly main
+    aptly: deb [signed-by=/etc/apt/keyrings/aptly-archive.gpg arch=amd64] http://repo.aptly.info/ squeeze main
+    aptly-nightly: deb [signed-by=/etc/apt/keyrings/aptly-nightly-archive.gpg arch=amd64] http://repo.aptly.info/ nightly main
     bookworm: deb http://ftp-stud.hs-esslingen.de/debian/ bookworm main contrib
     bookworm-backports: deb http://ftp-stud.hs-esslingen.de/debian/ bookworm-backports main
     bookworm-security: deb http://security.debian.org/debian-security bookworm-security main
     bookworm-updates: deb http://deb.debian.org/debian bookworm-updates main
-    docker: deb https://download.docker.com/linux/debian bookworm stable
-    haproxy: deb [signed-by=/usr/share/keyrings/haproxy.debian.net.gpg] http://haproxy.debian.net bookworm-backports-2.8 main
-    maurusnet-apps: deb http://repo.maurus.net/nightly/bookworm/ mn-nightly main
-    maurusnet-opensmtpd: deb http://repo.maurus.net/bookworm/opensmtpd/ mn-opensmtpd main
-    maurusnet-radicale: deb http://repo.maurus.net/bookworm/radicale/ mn-radicale main
-    postgresql: deb http://apt.postgresql.org/pub/repos/apt/ bookworm-pgdg main
-    saltstack: deb [signed-by=/etc/apt/keyrings/salt-archive-keyring.gpg arch=amd64] https://repo.saltproject.io/py3/debian/11/amd64/latest bookworm main
+    docker: deb [signed-by=/etc/apt/keyrings/docker-archive.gpg arch=amd64] https://download.docker.com/linux/debian bookworm stable
+    haproxy: deb [signed-by=/etc/apt/keyrings/haproxy.debian.net.gpg arch=amd64] http://haproxy.debian.net bookworm-backports-2.8 main
+    maurusnet-apps: deb [signed-by=/etc/apt/keyrings/maurusnet-package-archive.gpg arch=amd64] http://repo.maurus.net/nightly/bookworm/ mn-nightly main
+    maurusnet-opensmtpd: deb [signed-by=/etc/apt/keyrings/maurusnet-package-archive.gpg arch=amd64] http://repo.maurus.net/bookworm/opensmtpd/ mn-opensmtpd main
+    maurusnet-radicale: deb [signed-by=/etc/apt/keyrings/maurusnet-package-archive.gpg arch=amd64] http://repo.maurus.net/bookworm/radicale/ mn-radicale main
+    postgresql: deb [signed-by=/etc/apt/keyrings/postgresql-archive.gpg arch=amd64] http://apt.postgresql.org/pub/repos/apt/ bookworm-pgdg main
+    saltstack: deb [signed-by=/etc/apt/keyrings/salt-archive-keyring.gpg arch=amd64] https://repo.saltproject.io/py3/debian/11/amd64/latest bullseye main
 
 
 #   pgpkey: Set this to a salt:// url if you need to deploy your own repo signing key

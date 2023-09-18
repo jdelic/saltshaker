@@ -5,6 +5,7 @@ aptly:
         - name: {{pillar["repos"]["aptly"]}}
         - file: /etc/apt/sources.list.d/aptly.list
         - key_url: salt://dev/aptly/aptly_A0546A43624A8331.pgp.key
+        - aptkey: False
         - require_in:
             - pkg: aptly
     pkg.installed:

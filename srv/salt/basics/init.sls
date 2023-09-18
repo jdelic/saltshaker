@@ -81,14 +81,21 @@ dbus:
     service.running
 
 
+no-sourceslist:
+    file.managed:
+        - name: /etc/apt/sources.list
+        - contents: ""
+        - order: 1
+
+
 bookworm:
     pkgrepo.managed:
         - name: {{pillar['repos']['bookworm']}}
-        - file: /etc/apt/sources.list
+        - file: /etc/apt/sources.list.d/bookworm.list
         {% if pillar['repos'].get('pgpkey', None) %}
         - key_url: {{pillar['repos']['pgpkey']}}
+        - aptkey: False
         {% endif %}
-        - consolidate: True
         - order: 1  # execute this state early!
 
 
@@ -97,6 +104,7 @@ saltstack-repo:
         - name: {{pillar['repos']['saltstack']}}
         - file: /etc/apt/sources.list.d/salt.list
         - key_url: salt://saltstack_0E08A149DE57BFBE.pgp.key
+        - aptkey: False
         - order: 2  # execute this state early!
 
 
@@ -130,6 +138,7 @@ maurusnet-opensmtpd:
         - name: {{pillar['repos']['maurusnet-opensmtpd']}}
         - file: /etc/apt/sources.list.d/mn-opensmtpd.list
         - key_url: salt://mn/packaging_authority_A78049AF.pgp.key
+        - aptkey: False
         - order: 2
 
 
@@ -139,6 +148,7 @@ maurusnet-apps:
         - name: {{pillar['repos']['maurusnet-apps']}}
         - file: /etc/apt/sources.list.d/mn-apps.list
         - key_url: salt://mn/packaging_authority_A78049AF.pgp.key
+        - aptkey: False
         - order: 2
 
 
