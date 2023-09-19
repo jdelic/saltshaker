@@ -103,7 +103,7 @@ saltstack-repo:
     pkgrepo.managed:
         - name: {{pillar['repos']['saltstack']}}
         - file: /etc/apt/sources.list.d/salt.list
-        - key_url: salt://saltstack_0E08A149DE57BFBE.pgp.key
+        - key_url: salt://saltstack_64CBBC8173D76B3F.pgp.key
         - aptkey: False
         - order: 2  # execute this state early!
 
