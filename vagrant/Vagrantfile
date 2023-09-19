@@ -167,7 +167,6 @@ Vagrant.configure('2') do |config|
                 touch /etc/salt/roles.d/consulserver
                 touch /etc/salt/roles.d/database
                 touch /etc/salt/roles.d/authserver
-                chown -R salt:salt /etc/salt
                 #touch /etc/salt/roles.d/dev
 SCRIPT
         end
@@ -197,6 +196,10 @@ SCRIPT
             }
         end
 
+        master.vm.provision :shell, run: 'always' do |s|
+            s.inline = 'chown -R salt:salt /etc/salt; systemctl restart salt-master;'
+        end
+
         master.vm.provision :salt do |salt|
             salt.run_highstate = true
             salt.colorize = true
@@ -221,8 +224,7 @@ SCRIPT
         # We have to restart salt-master because the dynamicsecrets pillar is on the same
         # vboxsf mount and needs to be loaded.
         master.vm.provision :shell, run: 'always' do |s|
-            s.inline = 'systemctl restart salt-master;'
-            s.inline += 'systemctl restart salt-minion; sleep 1'
+            s.inline = 'systemctl restart salt-minion; sleep 1'
         end
     end
 
@@ -264,6 +266,7 @@ SCRIPT
                 #touch /etc/salt/roles.d/apps
                 #touch /etc/salt/roles.d/loadbalancer
                 chown 600 /etc/salt/roles.d/*
+                chown -R salt:salt /etc/salt
 SCRIPT
         end
 
