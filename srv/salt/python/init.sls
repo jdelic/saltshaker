@@ -12,6 +12,7 @@ python-packages:
             - python3
             - python3-pip
             - python3-docker
+            - python3-jinja2
             - python3-setuptools
             - python3-pkg-resources
             - python3-pip-whl

@@ -137,6 +137,7 @@ consul-template-servicerenderer:
         - mode: '0644'
         - require:
             - file: consul-basedir
+            - pkg: python-packages
     cmd.run:
         - name: >
             test ! -z "$(ls -A /etc/consul/renders)" && rm /etc/consul/renders/*; /bin/true
