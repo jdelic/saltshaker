@@ -60,6 +60,7 @@ basic-required-packages:
             - jq
             - curl
             - systemd-timesyncd
+            - gpg
         -  order: 9  # execute this state early, because later states need unzip
 
 
@@ -99,37 +100,37 @@ bookworm:
         - order: 1  # execute this state early!
 
 
-saltstack-repo:
-    pkgrepo.managed:
-        - name: {{pillar['repos']['saltstack']}}
-        - file: /etc/apt/sources.list.d/salt.list
-        - key_url: salt://saltstack_64CBBC8173D76B3F.pgp.key
-        - aptkey: False
-        - order: 2  # execute this state early!
-
-
 updates-bookworm:
     pkgrepo.managed:
         - name: {{pillar['repos']['bookworm-updates']}}
         - file: /etc/apt/sources.list.d/bookworm-updates.list
-        - order: 2  # execute this state early!
+        - order: 1  # execute this state early!
 
 
 security-updates-bookworm:
     pkgrepo.managed:
         - name: {{pillar['repos']['bookworm-security']}}
         - file: /etc/apt/sources.list.d/bookworm-security.list
-        - order: 2  # execute this state early!
+        - order: 1  # execute this state early!
 
 
 backports-org-bookworm:
     pkgrepo.managed:
         - name: {{pillar['repos']['bookworm-backports']}}
         - file: /etc/apt/sources.list.d/bookworm-backports.list
-        - order: 2  # execute this state early!
+        - order: 1  # execute this state early!
     file.managed:
         - name: /etc/apt/preferences.d/bookworm-backports
         - source: salt://etc_mods/bookworm-backports
+
+
+saltstack-repo:
+    pkgrepo.managed:
+        - name: {{pillar['repos']['saltstack']}}
+        - file: /etc/apt/sources.list.d/salt.list
+        - key_url: salt://saltstack_64CBBC8173D76B3F.pgp.key
+        - aptkey: False
+        - order: 10  # execute this state early!
 
 
 maurusnet-opensmtpd:
