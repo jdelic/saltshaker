@@ -59,6 +59,8 @@ $remote_provision_script = <<SCRIPT
         wget -O /etc/apt/keyrings/salt-archive-keyring-2023.gpg https://repo.saltproject.io/salt/py3/debian/11/amd64/SALT-PROJECT-GPG-PUBKEY-2023.gpg
         sh -c 'echo deb [signed-by=/etc/apt/keyrings/salt-archive-keyring-2023.gpg arch=amd64] https://repo.saltproject.io/salt/py3/debian/11/amd64/latest bullseye main > /etc/apt/sources.list.d/salt.list'
         apt update
+        groupadd -g 110 salt
+        useradd -g salt -M -d /opt/saltstack/salt -s /usr/sbin/nologin salt
 SCRIPT
 $local_provision_script = <<SCRIPT
         sh -c 'echo 192.168.56.10 fileserver.maurusnet.test httpredir.debian.org >> /etc/hosts'
@@ -110,6 +112,8 @@ LT3JzWgyD0oWFp7ASoxVoe4Q2Yq479PiubIy6wgz17F060cF
 -----END CERTIFICATE-----
 EOF'
         sh -c 'update-ca-certificates'
+        groupadd -g 110 salt
+        useradd -g salt -M -d /opt/saltstack/salt -s /usr/sbin/nologin salt
 SCRIPT
 
 
@@ -163,6 +167,7 @@ Vagrant.configure('2') do |config|
                 touch /etc/salt/roles.d/consulserver
                 touch /etc/salt/roles.d/database
                 touch /etc/salt/roles.d/authserver
+                chown -R salt:salt /etc/salt
                 #touch /etc/salt/roles.d/dev
 SCRIPT
         end
