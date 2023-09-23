@@ -1,9 +1,6 @@
 # creates a vaultadmin role that can be used to create dynamic credentials
 # from the Vault postgresql secret backend
 
-{% if pillar['vault'].get('backend', '') == 'postgresql' and
-      pillar['vault'].get('create-database', False) %}
-
 include:
     - postgresql.sync
 
@@ -22,6 +19,5 @@ vaultadmin:
         - user: postgres
         - require:
             - cmd: postgresql-sync
-{% endif %}
 
 # vim: syntax=yaml
