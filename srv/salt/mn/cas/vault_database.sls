@@ -239,7 +239,7 @@ authserver-vault-postgresql-policy:
             }' | /usr/local/bin/vault policy write postgresql_authserver_fullaccess -
         - env:
             - VAULT_ADDR: "https://vault.service.consul:8200/"
-        - unless: /usr/local/bin/vault policies | grep postgresql_authserver_fullaccess >/dev/null
+        - unless: /usr/local/bin/vault policy list | grep postgresql_authserver_fullaccess >/dev/null
         - onlyif: /usr/local/bin/vault operator init -status >/dev/null
         - require:
             - cmd: vault-sync
@@ -255,7 +255,7 @@ authserver-vault-oauth2-write-policy:
             }' | /usr/local/bin/vault policy write authserver_oauth2_write -
         - env:
             - VAULT_ADDR: "https://vault.service.consul:8200/"
-        - unless: /usr/local/bin/vault policies | grep authserver_oauth2_write >/dev/null
+        - unless: /usr/local/bin/vault policy list | grep authserver_oauth2_write >/dev/null
         - onlyif: /usr/local/bin/vault operator init -status >/dev/null
         - require:
             - cmd: vault-sync
@@ -271,7 +271,7 @@ mailforwarder-vault-postgresql-policy:
             }' | /usr/local/bin/vault policy write postgresql_authserver_mailforwarder -
         - env:
             - VAULT_ADDR: "https://vault.service.consul:8200/"
-        - unless: /usr/local/bin/vault policies | grep postgresql_authserver_mailforwarder >/dev/null
+        - unless: /usr/local/bin/vault policy list | grep postgresql_authserver_mailforwarder >/dev/null
         - onlyif: /usr/local/bin/vault operator init -status >/dev/null
         - require:
             - cmd: vault-sync
@@ -285,7 +285,7 @@ dkimsigner-vault-postgresql-policy:
             }' | /usr/local/bin/vault policy write postgresql_authserver_dkimsigner -
         - env:
             - VAULT_ADDR: "https://vault.service.consul:8200/"
-        - unless: /usr/local/bin/vault policies | grep postgresql_authserver_dkimsigner >/dev/null
+        - unless: /usr/local/bin/vault policy list | grep postgresql_authserver_dkimsigner >/dev/null
         - onlyif: /usr/local/bin/vault operator init -status >/dev/null
         - require:
             - cmd: vault-sync
@@ -310,9 +310,9 @@ authserver-vault-postgresql-connection:
             /usr/local/bin/vault write postgresql/config/{{pillar['authserver']['dbname']}} \
                 plugin_name=postgresql-database-plugin \
                 allowed_roles="authserver_fullaccess,authserver_mailforwarder,authserver_dkimsigner" \
-                connection_url="postgresql://{{'{{'}}username{{'}}'}}:{{'{{'}}password{{'}}'}}@postgresql.service.consul:5432/?sslmode=verify-full" \
-                username="{{pillar['authserver']['dbuser']}}" \
-                password="{{pillar['dynamicsecrets']['authserver']}}"
+                connection_url="postgresql://{{'{{'}}username{{'}}'}}:{{'{{'}}password{{'}}'}}@postgresql.service.consul:5432/{{pillar['authserver']['dbname']}}?sslmode=verify-full" \
+                username="{{pillar['vault']['managed-database-owner']}}" \
+                password="{{pillar['dynamicsecrets']['vault-db-credential-admin']}}"
         - onlyif: /usr/local/bin/vault operator init -status >/dev/null
         - unless: /usr/local/bin/vault list postgresql/config | grep authserver >/dev/null
         - env:
@@ -351,7 +351,7 @@ authserver-vault-postgresql-role:
         - unless: /usr/local/bin/vault list postgresql/roles | grep authserver_fullaccess >/dev/null
         - require:
             - cmd: vault-sync
-            - cmd: authserver-vault-postgresql-backend
+            - cmd: authserver-vault-postgresql-connection
         - require_in:
             - cmd: authserver-sync-vault
 
