@@ -26,6 +26,7 @@ authserver-postgres:
             - {{pillar['vault']['managed-database-owner']}}
         - require:
             - service: data-cluster-service
+            - cmd: postgresql-sync
     file.accumulated:
         - name: postgresql-hba-md5users-accumulator
         - filename: {{pillar['postgresql']['hbafile']}}
@@ -40,7 +41,6 @@ authserver-postgres:
         - user: postgres
         - order: 20  # see ORDER.md
         - require:
-            - cmd: postgresql-sync
             - postgres_extuser: authserver-postgres
     postgres_privileges.present:
         - name: {{pillar['authserver']['dbuser']}}
