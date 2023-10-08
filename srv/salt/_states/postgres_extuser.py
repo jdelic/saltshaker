@@ -191,6 +191,7 @@ def present(
     db_port=None,
     db_user=None,
     with_admin_option=None,
+    require=None,
 ):
     """
     Ensure that the named user is present with the specified privileges
@@ -300,7 +301,7 @@ def present(
     user_ret = __states__["postgres_user.present"](
         name, createdb, createroles, encrypted, superuser, replication, inherit, login, password,
         default_password, refresh_password, valid_until, groups, user, maintenance_db, db_password,
-        db_host, db_port, db_user)
+        db_host, db_port, db_user, require=require)
 
     log.debug(user_ret)
     _propagate_changes(ret, user_ret)
