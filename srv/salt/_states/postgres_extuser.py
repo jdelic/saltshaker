@@ -1,7 +1,15 @@
 import logging
+import os
+
+import salt.utils.files
+import salt.utils.itertools
+import salt.utils.odict
+import salt.utils.path
+import salt.utils.stringutils
+
 
 log = logging.getLogger(__name__)
-
+_DEFAULT_COMMAND_TIMEOUT_SECS = 0
 
 class ExecutionFailure(Exception):
     def __init__(self, state, *args):
@@ -24,6 +32,142 @@ def _propagate_changes(myret, theirret):
         myret["changes"][theirret["name"]] = theirret["changes"]
     if theirret.get("pchanges", {}):
         myret["pchanges"][theirret["name"]] = theirret["pchanges"]
+
+
+def _find_pg_binary(util):
+    """
+    .. versionadded:: 2016.3.2
+
+    Helper function to locate various psql related binaries
+    """
+    pg_bin_dir = __salt__["config.option"]("postgres.bins_dir")
+    util_bin = salt.utils.path.which(util)
+    if not util_bin:
+        if pg_bin_dir:
+            return salt.utils.path.which(os.path.join(pg_bin_dir, util))
+    else:
+        return util_bin
+
+
+def _connection_defaults(user=None, host=None, port=None, maintenance_db=None):
+    """
+    Returns a tuple of (user, host, port, db) with config, pillar, or default
+    values assigned to missing values.
+    """
+    if not user:
+        user = __salt__["config.option"]("postgres.user")
+    if not host:
+        host = __salt__["config.option"]("postgres.host")
+    if not port:
+        port = __salt__["config.option"]("postgres.port")
+    if not maintenance_db:
+        maintenance_db = __salt__["config.option"]("postgres.maintenance_db")
+
+    return (user, host, port, maintenance_db)
+
+
+def _run_psql(cmd, runas=None, password=None, host=None, port=None, user=None):
+    """
+    Helper function to call psql, because the password requirement
+    makes this too much code to be repeated in each function below
+    """
+    kwargs = {
+        "reset_system_locale": False,
+        "clean_env": True,
+        "timeout": __salt__["config.option"](
+            "postgres.timeout", default=_DEFAULT_COMMAND_TIMEOUT_SECS
+        ),
+    }
+    if runas is None:
+        if not host:
+            host = __salt__["config.option"]("postgres.host")
+        if not host or host.startswith("/"):
+            if "FreeBSD" in __grains__["os_family"]:
+                runas = "postgres"
+            elif "OpenBSD" in __grains__["os_family"]:
+                runas = "_postgresql"
+            else:
+                runas = "postgres"
+
+    if user is None:
+        user = runas
+
+    if runas:
+        kwargs["runas"] = runas
+
+    if password is None:
+        password = __salt__["config.option"]("postgres.pass")
+    if password is not None:
+        pgpassfile = salt.utils.files.mkstemp(text=True)
+        with salt.utils.files.fopen(pgpassfile, "w") as fp_:
+            fp_.write(
+                salt.utils.stringutils.to_str(
+                    "{}:{}:*:{}:{}".format(
+                        "localhost" if not host or host.startswith("/") else host,
+                        port if port else "*",
+                        user if user else "*",
+                        password,
+                    )
+                )
+            )
+            __salt__["file.chown"](pgpassfile, runas, "")
+            kwargs["env"] = {"PGPASSFILE": pgpassfile}
+
+    ret = __salt__["cmd.run_all"](cmd, python_shell=False, **kwargs)
+
+    if ret.get("retcode", 0) != 0:
+        log.error("Error connecting to Postgresql server")
+    if password is not None and not __salt__["file.remove"](pgpassfile):
+        log.warning("Remove PGPASSFILE failed")
+
+    return ret
+
+
+def _psql_cmd(*args, **kwargs):
+    """
+    Return string with fully composed psql command.
+
+    Accepts optional keyword arguments: user, host, port and maintenance_db,
+    as well as any number of positional arguments to be added to the end of
+    the command.
+    """
+    (user, host, port, maintenance_db) = _connection_defaults(
+        kwargs.get("user"),
+        kwargs.get("host"),
+        kwargs.get("port"),
+        kwargs.get("maintenance_db"),
+    )
+    _PSQL_BIN = _find_pg_binary("psql")
+    cmd = [
+        _PSQL_BIN,
+        "--no-align",
+        "--no-readline",
+        "--no-psqlrc",
+        "--no-password",
+    ]  # Never prompt, handled in _run_psql.
+    if user:
+        cmd += ["--username", user]
+    if host:
+        cmd += ["--host", host]
+    if port:
+        cmd += ["--port", str(port)]
+    if not maintenance_db:
+        maintenance_db = "postgres"
+    cmd.extend(["--dbname", maintenance_db])
+    cmd.extend(args)
+    return cmd
+
+
+def _psql_prepare_and_run(
+        cmd, host=None, port=None, maintenance_db=None, password=None, runas=None, user=None
+):
+    rcmd = _psql_cmd(
+        host=host, user=user, port=port, maintenance_db=maintenance_db, *cmd
+    )
+    cmdret = _run_psql(
+        rcmd, runas=runas, password=password, host=host, port=port, user=user
+    )
+    return cmdret
 
 
 def present(
@@ -163,12 +307,12 @@ def present(
 
     if with_admin_option:
         for assign_to in with_admin_option:
-            grant_ret = __salt__['postgres.psql_query'](
-                f"WITH updated AS (GRANT \"{name}\" TO \"{assign_to}\" WITH ADMIN OPTION) SELECT * FROM updated;",
+            grant_ret = _psql_prepare_and_run(
+                ["-c", f"GRANT \"{name}\" TO \"{assign_to}\" WITH ADMIN OPTION;"],
                 user=db_user, host=db_host, port=db_port, maintenance_db=maintenance_db, password=db_password,
                 runas=user,
             )
             log.debug(grant_ret)
-            ret["changes"][f"{name}-grant"] = "Assigned"
+            ret["changes"][f"ADMIN OPTION FOR {assign_to}"] = name
 
     return ret
