@@ -19,6 +19,7 @@ _DEFAULT_PATH = "/etc/salt/dynamicsecrets.sqlite"
 _CONSUL_URL = "http://127.0.0.1:8500/"
 _CONSUL_TOKEN = None
 _CONSUL_TOKEN_SECRET = None
+_CONSUL_TIMEOUT = 2
 
 
 try:
@@ -141,7 +142,6 @@ class DynamicSecretsPillar(DynamicSecretsStore):
 
     def __init__(self, *args, **kwargs):
         super(DynamicSecretsPillar, self).__init__(*args, **kwargs)
-
     def _alphaencoding(self, rndstring):
         # type: (bytes) -> str
         pwstr = "".join([
@@ -219,7 +219,8 @@ class DynamicSecretsPillar(DynamicSecretsStore):
                     json={
                         "Description": "%s for %s" % (secret_name, host),
                         "Policies": [],
-                    }
+                    },
+                    timeout=_CONSUL_TIMEOUT,
                 )
             except RequestException:
                 return ConsulAclToken("Unavailable", "first run", consul_firstrun=True)
@@ -242,6 +243,7 @@ class DynamicSecretsPillar(DynamicSecretsStore):
                 headers={
                     "X-Consul-Token": self.get_consul_token()
                 },
+                timeout=_CONSUL_TIMEOUT,
             )
             if resp.status_code == 200 and resp.headers["Content-Type"] == "application/json":
                 return True
@@ -294,6 +296,8 @@ def __init__(opts):
         _CONSUL_TOKEN = opts["dynamicsecrets.consul_token"]
     elif "dynamicsecrets.consul_token_secret" in opts:
         _CONSUL_TOKEN_SECRET = opts["dynamicsecrets.consul_token_secret"]
+    if "dynamicsecrets.consul_timeout" in opts:
+        _CONSUL_TIMEOUT = float(opts["dynamicsecrets.consul_timeout"])
 
 
 store = None  # type: DynamicSecretsPillar
