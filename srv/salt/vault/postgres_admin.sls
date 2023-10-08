@@ -3,6 +3,7 @@
 
 include:
     - postgresql.sync
+    - vault.sync
 
 
 vaultadmin:
@@ -17,6 +18,8 @@ vaultadmin:
         - replication: False
         - password: {{pillar['dynamicsecrets']['vault-db-credential-admin']}}
         - user: postgres
+        - require_in:
+            - cmd: vault-database-sync
         - require:
             - cmd: postgresql-sync
 

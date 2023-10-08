@@ -3,14 +3,14 @@
 
 include:
     - postgresql.sync
-
+    - vault.sync
 
 # only create this if the PostgreSQL backend is selected
 authserver-postgres:
     postgres_extuser.present:
         - name: {{pillar['authserver']['dbuser']}}
         - createdb: False
-{% if pillar['authserver'].get('use-vault', False) %}
+{% if pillar['authserver'].get('use-vault', False) and pillar.get('postgresql', {}).get('version', 16) < 16 %}
         - createroles: True
 {% else %}
         - createroles: False
@@ -22,11 +22,16 @@ authserver-postgres:
         - replication: False
         - password: {{pillar['dynamicsecrets']['authserver']}}
         - user: postgres
+{% if pillar['authserver'].get('use-vault', False) and pillar.get('postgresql', {}).get('version', 16) >= 16 %}
         - with_admin_option:
             - {{pillar['vault']['managed-database-owner']}}
+{% endif %}
         - require:
             - service: data-cluster-service
             - cmd: postgresql-sync
+{% if pillar['authserver'].get('use-vault', False) %}
+            - cmd: vault-database-sync
+{% endif %}
     file.accumulated:
         - name: postgresql-hba-md5users-accumulator
         - filename: {{pillar['postgresql']['hbafile']}}
@@ -59,10 +64,10 @@ authserver-postgres:
     postgres_extuser.present:
         - name: {{pillar[user]['dbuser']}}
         - createdb: False
-{% if pillar[user].get('use-vault', False) %}
-        - createroles: False
-{% else %}
+{% if pillar['authserver'].get('use-vault', False) and pillar.get('postgresql', {}).get('version', 16) < 16 %}
         - createroles: True
+{% else %}
+        - createroles: False
 {% endif %}
         - encrypted: True
         - login: True
@@ -71,10 +76,15 @@ authserver-postgres:
         - replication: False
         - password: {{pillar['dynamicsecrets'][user]}}
         - user: postgres
+{% if pillar['authserver'].get('use-vault', False) and pillar.get('postgresql', {}).get('version', 16) >= 16 %}
         - with_admin_option:
             - {{pillar['vault']['managed-database-owner']}}
+{% endif %}
         - require:
             - cmd: postgresql-sync
+{% if pillar['authserver'].get('use-vault', False) %}
+            - cmd: vault-database-sync
+{% endif %}
     # by default all users are allowed to create new tables in the 'public' schema in
     # a database. So we make sure to revoke that right, if we happen to have it because
     # the PostgreSQL server might not be hardened by using a database template that does
