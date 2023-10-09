@@ -199,7 +199,7 @@ SCRIPT
         end
 
         master.vm.provision :shell, run: 'always' do |s|
-            s.inline = 'chown -R salt:salt /etc/salt; systemctl restart salt-master;'
+            s.inline = 'chown -R salt:salt /etc/salt; systemctl restart salt-master; sleep 1'
         end
 
         master.vm.provision :salt do |salt|
