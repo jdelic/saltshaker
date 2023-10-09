@@ -19,7 +19,7 @@ vaultadmin:
         - password: {{pillar['dynamicsecrets']['vault-db-credential-admin']}}
         - user: postgres
         - require_in:
-            - cmd: vault-database-sync
+            - cmd: vault-sync-database
         - require:
             - cmd: postgresql-sync
 

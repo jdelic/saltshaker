@@ -320,6 +320,7 @@ authserver-vault-postgresql-connection:
         - require:
             - cmd: vault-sync
             - cmd: authserver-vault-postgresql-backend
+            - cmd: authserver-sync-database
         - require_in:
             - cmd: authserver-sync-vault
 

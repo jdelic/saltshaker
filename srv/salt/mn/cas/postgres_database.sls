@@ -4,6 +4,7 @@
 include:
     - postgresql.sync
     - vault.sync
+    - mn.cas.sync
 
 # only create this if the PostgreSQL backend is selected
 authserver-postgres:
@@ -30,7 +31,7 @@ authserver-postgres:
             - service: data-cluster-service
             - cmd: postgresql-sync
 {% if pillar['authserver'].get('use-vault', False) %}
-            - cmd: vault-database-sync
+            - cmd: vault-sync-database
 {% endif %}
     file.accumulated:
         - name: postgresql-hba-md5users-accumulator
@@ -55,6 +56,8 @@ authserver-postgres:
             - CREATE
         - user: postgres
         - maintenance_db: {{pillar['authserver']['dbname']}}
+        - require_in:
+            - cmd: authserver-sync-database
         - require:
             - postgres_database: authserver-postgres
 
@@ -83,7 +86,7 @@ authserver-postgres:
         - require:
             - cmd: postgresql-sync
 {% if pillar['authserver'].get('use-vault', False) %}
-            - cmd: vault-database-sync
+            - cmd: vault-sync-database
 {% endif %}
     # by default all users are allowed to create new tables in the 'public' schema in
     # a database. So we make sure to revoke that right, if we happen to have it because
@@ -97,6 +100,8 @@ authserver-postgres:
             - CONNECT
         - user: postgres
         - maintenance_db: {{pillar['authserver']['dbname']}}
+        - require_in:
+            - cmd: authserver-sync-database
         - require:
             - postgres_extuser: {{user}}-postgres
 
@@ -110,6 +115,8 @@ authserver-postgres:
             - CREATE
         - user: postgres
         - maintenance_db: {{pillar['authserver']['dbname']}}
+        - require_in:
+            - cmd: authserver-sync-database
         - require:
             - postgres_extuser: {{user}}-postgres
 
@@ -123,6 +130,8 @@ authserver-postgres:
             - USAGE
         - user: postgres
         - maintenance_db: {{pillar['authserver']['dbname']}}
+        - require_in:
+            - cmd: authserver-sync-database
         - require:
             - postgres_extuser: {{user}}-postgres
 {% endfor %}
