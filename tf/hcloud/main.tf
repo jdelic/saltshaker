@@ -15,57 +15,97 @@ provider "hcloud" {
     token = var.hcloud_token
 }
 
+data "template_file" "saltmaster-config" {
+    template = file("${path.module}/../../etc/salt-master/master.d/saltshaker.conf")
+}
+
+data "template_file" "saltmaster-init" {
+    template = file("${path.module}/../salt-master.cloud-init.yml")
+    vars = {
+        saltmaster_config = data.template_file.saltmaster-config.rendered
+    }
+}
+
 locals {
     server_config = {
         saltmaster = {
             server_type = "cx11"
             backup = 0
             additional_ipv4 = 0
-            ipv6_only = 1
+            ipv6_only = 0
+            internal_only = 0
+            ptr = "saltmaster.maurus.net"
+            user_data = data.template_file.saltmaster-init.rendered
         }
-        db = {
+/*        db = {
             server_type = "cx21"
             backup = 1
             additional_ipv4 = 0
             ipv6_only = 1
+            internal_only = 1
+            ptr = null
         }
         dev = {
             server_type = "cx31"
             backup = 0
             additional_ipv4 = 0
             ipv6_only = 1
+            internal_only = 1
+            ptr = null
         }
         mail = {
             server_type = "cpx21"
             backup = 1
             additional_ipv4 = 1
             ipv6_only = 0
+            internal_only = 0
+            ptr = "mail.maurus.net"
         }
         apps1 = {
             server_type = "cx21"
             backup = 0
             additional_ipv4 = 0
             ipv6_only = 1
+            internal_only = 1
+            ptr = null
         }
         apps2 = {
             server_type = "cx21"
             backup = 0
             additional_ipv4 = 0
             ipv6_only = 1
+            internal_only = 1
+            ptr = null
         }
         apps3 = {
             server_type = "cx21"
             backup = 0
             additional_ipv4 = 0
             ipv6_only = 1
+            internal_only = 1
+            ptr = null
         }
         backup = {
             server_type = "bx11"
-            ipv6_only = 0
-            additional_ipv4 = 0
             backup = 0
-        }
+            additional_ipv4 = 0
+            ipv6_only = 1
+            internal_only = 1
+            ptr = null
+        } */
     }
+}
+
+resource "hcloud_network" "internal" {
+    name = "private-network"
+    ip_range = "10.0.0.0/20"
+}
+
+resource "hcloud_network_subnet" "internal-subnet" {
+  type = "cloud"
+  network_id = hcloud_network.internal.id
+  network_zone = "eu-central"
+  ip_range = "10.0.1.0/24"
 }
 
 resource "hcloud_server" "servers" {
@@ -77,18 +117,18 @@ resource "hcloud_server" "servers" {
     location = "hel1"
     ssh_keys = ["symbiont laptop key"]
 
-    public_net {
-        ipv4_enabled = each.value.ipv6_only == 1 ? false : true
-        ipv6_enabled = true
+    network {
+        network_id = hcloud_network.internal.id
     }
 
-    backups = each.value.backup == 1 ? true : false
-}
+    public_net {
+        ipv4_enabled = each.value.ipv6_only == 1 ? false : true
+        ipv6_enabled = each.value.internal_only == 1 ? false : true
+    }
 
-resource "hcloud_server_network" "ipv6" {
-    for_each = { for k, v in local.server_config : k => v if v.ipv6_only == 1 }
-    server_id  = hcloud_server.servers[each.key].id
-    network_id = hcloud_network.this.id
+    user_data = lookup(each.value, "user_data", null)
+
+    backups = each.value.backup == 1 ? true : false
 }
 
 resource "hcloud_floating_ip" "additional_ipv4" {
@@ -97,12 +137,7 @@ resource "hcloud_floating_ip" "additional_ipv4" {
     server_id = hcloud_server.servers[each.key].id
 }
 
-resource "hcloud_network" "this" {
-    name = "private-network"
-    ip_range = "10.0.0.0/24"
-}
-
-resource "hcloud_load_balancer" "app_lb" {
+/*resource "hcloud_load_balancer" "app_lb" {
     name = "app-load-balancer"
     location = "hel1"
     load_balancer_type = "lb11"
@@ -113,7 +148,7 @@ resource "hcloud_load_balancer_target" "app_targets" {
     load_balancer_id = hcloud_load_balancer.app_lb.id
     type = "server"
     server_id = hcloud_server.servers[each.key].id
-}
+}*/
 
 output "ip_addresses" {
     value = {
@@ -122,6 +157,7 @@ output "ip_addresses" {
                 s.ipv4_address != "" ? s.ipv4_address : null,
                 s.ipv6_address
             ],
+            [s.network.ip],
             [for ip in hcloud_floating_ip.additional_ipv4 : ip.ip_address if ip.server_id == s.id]
         )
     }
