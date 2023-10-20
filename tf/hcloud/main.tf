@@ -129,6 +129,9 @@ resource "hcloud_server" "servers" {
     user_data = lookup(each.value, "user_data", null)
 
     backups = each.value.backup == 1 ? true : false
+
+    # important as per hcloud docs as there's a race condition otherwise
+    depends_on = [hcloud_network_subnet.internal-subnet]
 }
 
 resource "hcloud_floating_ip" "additional_ipv4" {
@@ -157,7 +160,7 @@ output "ip_addresses" {
                 s.ipv4_address != "" ? s.ipv4_address : null,
                 s.ipv6_address
             ],
-            [s.network.ip],
+            flatten(s.network.*.ip),
             [for ip in hcloud_floating_ip.additional_ipv4 : ip.ip_address if ip.server_id == s.id]
         )
     }
