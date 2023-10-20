@@ -32,7 +32,7 @@ urls:
     nomad: http://fileserver.maurusnet.test/downloads/nomad/nomad_1.6.2_linux_amd64.zip
     nomad-autoscaler: http://fileserver.maurusnet.test/downloads/nomad-autoscaler/nomad-autoscaler_0.3.7_linux_amd64.zip
     nomad-pack: http://fileserver.maurusnet.test/downloads/nomad-pack/nomad-pack_0.0.1-techpreview.3_linux_amd64.zip
-    terraform: http://fileserver.maurusnet.test/downloads/terraform/terraform_1.6.1_linux_amd64.zip
+    terraform: http://fileserver.maurusnet.test/downloads/terraform/terraform_1.6.2_linux_amd64.zip
     vault: http://fileserver.maurusnet.test/downloads/vault/vault_1.15.0_linux_amd64.zip
     vault-auditor: http://fileserver.maurusnet.test/downloads/vault-auditor/vault-auditor_1.0.3_linux_amd64.zip
     vault-gpg-plugin: http://fileserver.maurusnet.test/downloads/vault-gpg-plugin/linux_amd64.zip
@@ -51,7 +51,7 @@ hashes:
     nomad: sha256=f6f879a359a667a6b1ca4366abd8383d89118dabd0d28af5bbc4721685ff17b8
     nomad-autoscaler: sha256=11d3c8a5d16020514a55775f5b83fc8f1a08e2a2274f97b06700a5d9877346b4
     nomad-pack: sha256=825cbe6f6053ad4eab4bc298a901cb957b6331fdb3db4b6a896e620a2b96f3c3
-    terraform: sha256=d1a778850cc44d9348312c9527f471ea1b7a9213205bb5091ec698f3dc92e2a6
+    terraform: sha256=107142241b12ff78b6eb9c419757d406a8714704f7928750a662ba19de055e98
     vault: sha256=b69c209f05c1ccfa012a60090adfca1607c8fad14728a5a208979a1706b6cd46
     vault-auditor: sha256=14aebc65351e52ff705fd9a4f3fb89655bf3a87a6c67a86ff8aa67ef5ff4837f
     vault-gpg-plugin: sha256=943c17330e9933863be7de8a6fc69e00bd871aef4d62a36404b384278d87cfc5
