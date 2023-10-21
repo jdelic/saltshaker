@@ -1,7 +1,7 @@
 # importable variables for reuse
-{% set iface_internal = 'eth0' %}
-{% set iface_external = 'eth1' %}
-{% set iface_external2 = 'eth2' %}
+{% set iface_internal = 'ens10' %}
+{% set iface_external = 'eth0' %}
+{% set iface_external2 = 'eth1' %}
 
 ifassign:
     internal: {{iface_internal}}
