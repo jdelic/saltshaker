@@ -18,7 +18,7 @@ vault:
     sslkey: {{salt['file.join'](secret_key_location, 'vault.key')}}
 
     s3:
-        bucket: maurusnet-vault
+        bucket: maurusnet-dev-vault
         aws-region: eu-central-1
         # S3 secrets config moved to saltshaker-secrets
 
