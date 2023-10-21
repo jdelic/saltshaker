@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 
 # This script template takes a list of dicts describing services in Consul,
 # rendered directly into this script by consul-template and then
@@ -49,7 +49,7 @@ import argparse
 import subprocess
 import contextlib
 
-from collections import Iterable
+from collections.abc import Iterable
 
 
 # The Go template is in the comments (yes, this works and therefor keeps

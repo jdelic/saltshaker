@@ -47,6 +47,16 @@ vault-postgres:
         - order: 20  # see ORDER.md
         - require:
             - postgres_user: vault-postgres
+    postgres_privileges.present:
+        - name: {{pillar['vault']['postgres']['dbuser']}}
+        - object_name: public
+        - object_type: schema
+        - privileges:
+            - CREATE
+        - user: postgres
+        - maintenance_db: {{pillar['vault']['postgres']['dbname']}}
+        - require:
+            - postgres_database: vault-postgres
     cmd.script:
         - name: salt://vault/vault_postgresql_db.jinja.sh
         - template: jinja
@@ -59,10 +69,11 @@ vault-postgres:
         - order: 20  # see ORDER.md
         - onchanges:
             - postgres_database: vault-postgres
+            - postgres_privileges: vault-postgres
         - env:
             - PGPASSWORD: {{pillar['dynamicsecrets']['secure-vault']}}
         - require:
-            - postgres_database: vault-postgres
+            - postgres_privileges: vault-postgres
         - require_in:
             - cmd: vault-sync-database
 

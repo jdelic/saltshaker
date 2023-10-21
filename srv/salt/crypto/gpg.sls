@@ -19,9 +19,7 @@ gpg-access:
 gnupg:
     pkg.installed:
         - pkgs:
-            - gnupg1
             - gnupg
-            - gpgv1
             - gpgv
 
 
@@ -38,19 +36,6 @@ gpg-root-home:
 gpg-shared-keyring-location:
     file.directory:
         - name: {{keyloc}}
-        - makedirs: True
-        - user: root
-        - group: gpg-access
-        - mode: '0710'
-        - require:
-            - group: gpg-access
-
-
-# This is a temp thing, but some packages still need gnupg 1.x. Since the keyring format has
-# changed for gnupg 2.1+, we keep an old version of the managed keyring in [keyloc]/v1
-gpg-shared-keyring-location-v1:
-    file.directory:
-        - name: {{keylocv1}}
         - makedirs: True
         - user: root
         - group: gpg-access
@@ -130,32 +115,6 @@ gpg-{{k}}:
             - file: gpg-{{k}}
 
 
-gpg-{{k}}-v1:
-    cmd.run:
-        - unless: >
-            /usr/bin/gpg1 \
-                --batch \
-                --homedir {{keylocv1}} \
-                --no-default-keyring \
-                --list-keys "$(/usr/bin/gpg --no-default-keyring --homedir {{keyloc}} \
-                    --import-options import-show --dry-run --with-colons --import \
-                    {{keyloc}}/tmp/gpg-{{k}}.asc | head -1 | cut -d':' -f5 2>/dev/null)" 2>/dev/null
-        # more info here
-        # https://stackoverflow.com/questions/22136029/how-to-display-gpg-key-details-without-importing-it
-        - name: >
-            /usr/bin/gpg1 \
-                --verbose \
-                --homedir {{keylocv1}} \
-                --no-default-keyring \
-                --keyring {{salt['file.join'](keylocv1, "pubring.gpg")}} \
-                --secret-keyring {{salt['file.join'](keylocv1, "secring.gpg")}} \
-                --trustdb {{salt['file.join'](keylocv1, "trustdb.gpg")}} \
-                --batch \
-                --import {{keyloc}}/tmp/gpg-{{k}}.asc
-        - require:
-            - file: gpg-{{k}}
-
-
 gpg-establish-trust-{{k}}:
     cmd.run:
         - onlyif: >
@@ -178,29 +137,6 @@ gpg-establish-trust-{{k}}:
                 --import-ownertrust
         - require:
             - cmd: gpg-{{k}}
-
-
-gpg-establish-trust-{{k}}-v1:
-    cmd.run:
-        - onlyif: >
-            /usr/bin/gpg1 \
-                --homedir {{keylocv1}} \
-                --no-default-keyring \
-                --with-colons \
-                --list-keys "$(/usr/bin/gpg --batch --no-default-keyring --homedir {{keyloc}} \
-                    --import-options import-show --dry-run --with-colons --import \
-                    {{keyloc}}/tmp/gpg-{{k}}.asc | head -1 | cut -d':' -f5 2>/dev/null)" 2>/dev/null | \
-                grep "pub:" | cut -d':' -f2 | grep "-" >/dev/null
-        - name: >
-            echo "$(/usr/bin/gpg --batch --no-default-keyring --homedir {{keyloc}} \
-                --import-options import-show --dry-run --with-colons --import {{keyloc}}/tmp/gpg-{{k}}.asc |
-                grep "fpr:" | head -1 | cut -d':' -f10 2>/dev/null):6:" |
-            /usr/bin/gpg1 \
-                --homedir={{keylocv1}} \
-                --batch \
-                --import-ownertrust
-        - require:
-            - cmd: gpg-{{k}}-v1
 {% endfor %}
 
 

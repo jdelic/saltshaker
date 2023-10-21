@@ -5,13 +5,22 @@
 xen-hypervisor:
     pkg.installed:
         - pkgs:
-            - xen-hypervisor-4.8-amd64
+            - xen-hypervisor-4.11-amd64
             - xen-system-amd64
             - xen-tools
-            - xen-utils-4.8
+            - xen-utils-4.11
             - xen-utils-common
             - xenstore-utils
-            - libxen-4.8
+            - libxencall1
+            - libxendevicemodel1
+            - libxenevtchn1
+            - libxenforeignmemory1
+            - libxengnttab1
+            - libxenmisc4.11
+            - libxenstore3.0
+            - libxentoolcore1
+            - libxentoollog1
+            - libyajl2
             - libxenstore3.0
             - ipxe-qemu
             - qemu-system

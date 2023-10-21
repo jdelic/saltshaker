@@ -1,40 +1,65 @@
 
+include:
+    - basics.noexim
+
+
 opensmtpd:
     pkg.installed:
         - pkgs:
             - opensmtpd
-            - libmariadbclient18  # dependency of opensmtpd-extras
+            - opensmtpd-extras
+        #- fromrepo: bookworm-backports
         - install_recommends: False
+        - require:
+              - pkg: no-exim
 
 
-opensmtpd-extras:
+opensmtpd-filters:
     pkg.installed:
         - pkgs:
-            - opensmtpd-extras
             - opensmtpd-filter-greylistd
+            - opensmtpd-filter-dnsbl
         - fromrepo: mn-opensmtpd
+        - install_recommends: False
         - require:
-            - pkg: opensmtpd
             - pkg: greylistd
 
 
 # opensmtpd doesn't call initgroups() for filters so we can't put filter-greylistd
 # in the greylist group. Instead we just change greylistd to run as the opensmtpd user.
 # This will not make us measurably more insecure, imho.
-greylistd-initd-user:
-    file.replace:
-        - name: /etc/init.d/greylistd
-        - pattern: ^user=greylist$
-        - repl: user=opensmtpd
-        - backup: False
+greylistd-systemd-service-user-override:
+    file.managed:
+        - name: /etc/systemd/system/greylistd.service.d/override.conf
+        - makedirs: True
+        - user: root
+        - group: root
+        - mode: 0644
+        - contents: |
+            [Service]
+            User=opensmtpd
+            Group=opensmtpd
 
 
-greylistd-initd-group:
-    file.replace:
-        - name: /etc/init.d/greylistd
-        - pattern: ^group=greylist$
-        - repl: group=opensmtpd
-        - backup: False
+greylistd-systemd-socket-user-override:
+    file.managed:
+        - name: /etc/systemd/system/greylistd.socket.d/override.conf
+        - makedirs: True
+        - user: root
+        - group: root
+        - mode: 0644
+        - contents: |
+            [Socket]
+            SocketUser=opensmtpd
+            SocketGroup=opensmtpd
+
+
+greylistd-systemd-override-reload:
+    module.run:
+        - name: service.systemctl_reload
+        - onchanges:
+            - file: greylistd-systemd-service-user-override
+            - file: greylistd-systemd-socket-user-override
 
 
 greylistd-modify-rundir:
@@ -69,8 +94,9 @@ greylistd:
         - enable: True
         - require:
             - pkg: greylistd
-            - file: greylistd-initd-user
-            - file: greylistd-initd-group
+            - file: greylistd-systemd-service-user-override
+            - file: greylistd-systemd-socket-user-override
+            - module: greylistd-systemd-override-reload
             - file: greylistd-modify-rundir
             - file: greylistd-modify-libdir
 
@@ -390,6 +416,7 @@ opensmtpd-relay-out25-send:
         - save: True
         - require:
             - sls: iptables
+
 
 opensmtpd-relay-out465-send:
     iptables.append:

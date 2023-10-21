@@ -18,12 +18,12 @@
 
 iptables:
     pkg.installed:
-        - order: 1
+        - order: 2
 
 
 iptables-persistent:
     pkg.installed:
-        - order: 1
+        - order: 2
 
 
 # always allow local connections
@@ -34,7 +34,7 @@ localhost-recv:
         - chain: INPUT
         - jump: ACCEPT
         - in-interface: lo
-        - order: 1
+        - order: 3
         - save: True
         - require:
             - pkg: iptables
@@ -47,7 +47,7 @@ localhost-send:
         - chain: OUTPUT
         - jump: ACCEPT
         - out-interface: lo
-        - order: 1
+        - order: 3
         - save: True
         - require:
             - pkg: iptables
@@ -62,7 +62,7 @@ icmp-recv:
         - proto: icmp
         - icmp-type: any
         - source: 0/0
-        - order: 2
+        - order: 4
         - save: True
         - require:
             - pkg: iptables
@@ -76,7 +76,7 @@ icmp-send:
         - proto: icmp
         - icmp-type: any
         - destination: 0/0
-        - order: 2
+        - order: 4
         - save: True
         - require:
             - pkg: iptables
@@ -91,7 +91,7 @@ icmp-forward:
         - icmp-type: any
         - source: 0/0
         - destination: 0/0
-        - order: 2
+        - order: 4
         - save: True
         - require:
             - pkg: iptables
@@ -108,7 +108,7 @@ drop-confused-tcp-packets:
         - match: state
         - connstate: NEW
         - tcp-flags: '! FIN,SYN,RST,ACK SYN'
-        - order: 3
+        - order: 5
         - save: True
         - require:
             - pkg: iptables
@@ -122,7 +122,7 @@ iptables-default-allow-related-established-input:
         - jump: ACCEPT
         - match: state
         - connstate: ESTABLISHED,RELATED
-        - order: 2  # this is order "2" so it executes together with basics.sls
+        - order: 4  # this is order "2" so it executes together with basics.sls
         - save: True
         - require:
             - pkg: iptables
@@ -136,7 +136,7 @@ iptables-default-allow-related-established-output:
         - jump: ACCEPT
         - match: state
         - connstate: ESTABLISHED,RELATED
-        - order: 2  # this is order "2" so it executes together with basics.sls
+        - order: 4  # this is order "2" so it executes together with basics.sls
         - save: True
         - require:
             - pkg: iptables
@@ -151,7 +151,7 @@ iptables-default-allow-related-established-forward:
         - jump: ACCEPT
         - match: state
         - connstate: ESTABLISHED,RELATED
-        - order: 2  # this is order "2" so it executes together with basics.sls
+        - order: 4  # this is order "2" so it executes together with basics.sls
         - save: True
         - require:
             - pkg: iptables
@@ -163,7 +163,7 @@ iptables-default-input-drop:
         - policy: DROP
         - table: filter
         - chain: INPUT
-        - order: 3
+        - order: 5
         - save: True
         - require:
             - pkg: iptables
@@ -174,7 +174,7 @@ iptables-default-output-drop:
         - policy: DROP
         - table: filter
         - chain: OUTPUT
-        - order: 3
+        - order: 5
         - save: True
         - require:
             - pkg: iptables
@@ -185,7 +185,7 @@ iptables-default-forward-drop:
         - policy: DROP
         - table: filter
         - chain: FORWARD
-        - order: 3
+        - order: 5
         - save: True
         - require:
             - pkg: iptables

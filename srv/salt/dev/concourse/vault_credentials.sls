@@ -50,7 +50,7 @@ concourse-vault-secrets-policy:
             }' | /usr/local/bin/vault policy write concourse_secrets -
         - env:
             - VAULT_ADDR: "https://vault.service.consul:8200/"
-        - unless: /usr/local/bin/vault policies | grep concourse_secrets >/dev/null
+        - unless: /usr/local/bin/vault policy list | grep concourse_secrets >/dev/null
         - onlyif: /usr/local/bin/vault operator init -status >/dev/null
         - require:
             - cmd: vault-sync

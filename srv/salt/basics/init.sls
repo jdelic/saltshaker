@@ -18,6 +18,7 @@ include:
     - iptables  # forces "order: 1"
     - crypto
     - rsyslog
+    - .nounup
 
 
 # enforce that Debian packages can't launch daemons while salt runs
@@ -56,9 +57,12 @@ basic-required-packages:
             - apt-transport-s3
             - cron
             - dbus
+            - dbus-user-session
             - jq
             - curl
-        -  order: 1  # execute this state early, because later states need unzip
+            - systemd-timesyncd
+            - gpg
+        -  order: 9  # execute this state early, because later states need unzip
 
 
 empty-crontab:
@@ -79,47 +83,55 @@ dbus:
     service.running
 
 
-stretch:
+no-sourceslist:
+    file.managed:
+        - name: /etc/apt/sources.list
+        - contents: ""
+        - order: 1
+
+
+bookworm:
     pkgrepo.managed:
-        - name: {{pillar['repos']['stretch']}}
-        - file: /etc/apt/sources.list
+        - name: {{pillar['repos']['bookworm']}}
+        - file: /etc/apt/sources.list.d/bookworm.list
         {% if pillar['repos'].get('pgpkey', None) %}
         - key_url: {{pillar['repos']['pgpkey']}}
+        - aptkey: False
         {% endif %}
-        - consolidate: True
         - order: 1  # execute this state early!
+
+
+updates-bookworm:
+    pkgrepo.managed:
+        - name: {{pillar['repos']['bookworm-updates']}}
+        - file: /etc/apt/sources.list.d/bookworm-updates.list
+        - order: 1  # execute this state early!
+
+
+security-updates-bookworm:
+    pkgrepo.managed:
+        - name: {{pillar['repos']['bookworm-security']}}
+        - file: /etc/apt/sources.list.d/bookworm-security.list
+        - order: 1  # execute this state early!
+
+
+backports-org-bookworm:
+    pkgrepo.managed:
+        - name: {{pillar['repos']['bookworm-backports']}}
+        - file: /etc/apt/sources.list.d/bookworm-backports.list
+        - order: 1  # execute this state early!
+    file.managed:
+        - name: /etc/apt/preferences.d/bookworm-backports
+        - source: salt://etc_mods/bookworm-backports
 
 
 saltstack-repo:
     pkgrepo.managed:
         - name: {{pillar['repos']['saltstack']}}
-        - file: /etc/apt/sources.list.d/saltstack.list
-        - key_url: salt://saltstack_0E08A149DE57BFBE.pgp.key
-        - order: 2  # execute this state early!
-
-
-updates-stretch:
-    pkgrepo.managed:
-        - name: {{pillar['repos']['stretch-updates']}}
-        - file: /etc/apt/sources.list.d/stretch-updates.list
-        - order: 2  # execute this state early!
-
-
-security-updates-stretch:
-    pkgrepo.managed:
-        - name: {{pillar['repos']['stretch-security']}}
-        - file: /etc/apt/sources.list.d/stretch-security.list
-        - order: 2  # execute this state early!
-
-
-backports-org-stretch:
-    pkgrepo.managed:
-        - name: {{pillar['repos']['stretch-backports']}}
-        - file: /etc/apt/sources.list.d/stretch-backports.list
-        - order: 2  # execute this state early!
-    file.managed:
-        - name: /etc/apt/preferences.d/stretch-backports
-        - source: salt://etc_mods/stretch-backports
+        - file: /etc/apt/sources.list.d/salt.list
+        - key_url: salt://saltstack_64CBBC8173D76B3F.pgp.key
+        - aptkey: False
+        - order: 10  # execute this state early!
 
 
 maurusnet-opensmtpd:
@@ -128,7 +140,8 @@ maurusnet-opensmtpd:
         - name: {{pillar['repos']['maurusnet-opensmtpd']}}
         - file: /etc/apt/sources.list.d/mn-opensmtpd.list
         - key_url: salt://mn/packaging_authority_A78049AF.pgp.key
-        - order: 2
+        - aptkey: False
+        - order: 10
 
 
 maurusnet-apps:
@@ -137,16 +150,30 @@ maurusnet-apps:
         - name: {{pillar['repos']['maurusnet-apps']}}
         - file: /etc/apt/sources.list.d/mn-apps.list
         - key_url: salt://mn/packaging_authority_A78049AF.pgp.key
-        - order: 2
+        - aptkey: False
+        - order: 10
 
 
 # enforce UTC
 timezone-utc:
     cmd.run:
         - name: timedatectl set-timezone UTC
-        - unless: test "$(readlink /etc/localtime)" = "../usr/share/zoneinfo/UTC"
+        - unless: test "$(readlink /etc/localtime)" = "/usr/share/zoneinfo/Etc/UTC"
         - require:
             - service: dbus
+
+
+# enforce en_us.UTF8
+default-locale-gen:
+    locale.present:
+        - name: en_US.UTF-8
+
+default-locale-set:
+    locale.system:
+        - name: en_US.UTF-8
+        - require:
+            - locale: default-locale-gen
+        - order: 2
 
 
 # Provide the salt-master with an event so it knows that the highstate is done.
@@ -155,21 +182,6 @@ trigger-minion-sync:
     event.send:
         - name: maurusnet/highstate/complete
         - order: last
-
-
-#openssl:
-#    # this will upgrade the installed version from the basebox
-#    pkg.latest:
-#        - pkgs:
-#             - openssl
-#             - openssl-blacklist
-#             - openssl-blacklist-extra
-#             - libssl1.0.0
-#        - install_recommends: False
-#        - order: 10  # see ORDER.md
-#        - fromrepo: stretch-backports
-#        - require:
-#            - pkgrepo: backports-org-stretch
 
 
 # always allow ssh in
@@ -186,7 +198,7 @@ openssh-in22-recv:
         - save: True
         - require:
             - sls: iptables
-        - order: 2
+        - order: 4
 
 
 # NETWORK SERVICES ON THE INTERNET ===========================================
@@ -211,7 +223,7 @@ basics-tcp-out{{port}}-send:
         - connstate: NEW
         - proto: tcp
         - save: True
-        - order: 2
+        - order: 4
 {% endfor %}
 
 
@@ -225,7 +237,7 @@ basics-udp-out{{port}}-recv:
         - proto: udp
         - sport: {{port}}
         - save: True
-        - order: 2
+        - order: 4
 
 
 # allow us to talk to others. For UDP we make this stateless here to guarantee it works.
@@ -237,7 +249,7 @@ basics-udp-out{{port}}-send:
         - proto: udp
         - dport: {{port}}
         - save: True
-        - order: 2
+        - order: 4
 {% endfor %}
 
 
@@ -252,7 +264,7 @@ basics-internal-network-tcp:
         - connstate: NEW
         - proto: tcp
         - save: True
-        - order: 2
+        - order: 4
         - require:
             - sls: iptables
 
@@ -265,7 +277,7 @@ basics-internal-network-udp:
         - out-interface: {{pillar['ifassign']['internal']}}
         - proto: udp
         - save: True
-        - order: 2
+        - order: 4
         - require:
             - sls: iptables
 

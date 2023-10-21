@@ -9,7 +9,7 @@ base:
         - shared.gpg
         - shared.network
 
-    'saltmaster.maurusnet.test':
+    'saltmaster*.maurusnet.test':
         - shared.vault
         - local.vault
         - shared.secrets.vault-dev

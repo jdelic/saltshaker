@@ -38,12 +38,14 @@ consul-register-acl:
     # this state then waits for the master orchestrator to do its job and attach the right policies to
     # the unconfigured token. To do so we need consul to run already.
     http.wait_for_successful_query:
-        - name: http://169.254.1.1:8500/v1/acl/info/{{pillar['dynamicsecrets']['consul-acl-token']['accessor_id']}}
+        - name: http://169.254.1.1:8500/v1/acl/token/self
         - wait_for: 10
         - request_interval: 1
         - raise_error: False  # only exists in 'tornado' backend
         - backend: tornado
         - status: 200
+        - header_dict:
+            X-Consul-Token: {{pillar['dynamicsecrets']['consul-acl-token']['secret_id']}}
         - require:
             - event: consul-register-acl
             - service: consul-service

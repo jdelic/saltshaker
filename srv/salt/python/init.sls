@@ -8,14 +8,14 @@
 python-packages:
     pkg.installed:
         - pkgs:
+            - python-is-python3
             - python3
             - python3-pip
-            - python-docker
-            - python-pip
-            - python-setuptools
+            - python3-docker
+            - python3-jinja2
             - python3-setuptools
-            - python-pkg-resources
-            - python-pip-whl
+            - python3-pkg-resources
+            - python3-pip-whl
             - python3-virtualenv
             - virtualenv
             - gettext
@@ -24,5 +24,5 @@ python-packages:
             - libxslt1.1
             - libfreetype6
             - libgd3
-            - python-distlib
+            - python3-distlib
         - install_recommends: False

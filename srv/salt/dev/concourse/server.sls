@@ -119,13 +119,11 @@ concourse-server-envvars{% if pillar['ci'].get('use-vault', True) %}-template{% 
             CONCOURSE_VAULT_CA_CERT="{{pillar['ssl']['service-rootca-cert']}}"
             CONCOURSE_VAULT_AUTH_BACKEND="approle"
             CONCOURSE_VAULT_AUTH_PARAM="role_id:{{pillar['dynamicsecrets']['concourse-role-id']}},secret_id:((secret_id))"
-            CONCOURSE_OAUTH_DISPLAY_NAME="SSO Account"
-            CONCOURSE_OAUTH_CLIENT_ID="((oauth2_client_id))"
-            CONCOURSE_OAUTH_CLIENT_SECRET="((oauth2_client_secret))"
-            CONCOURSE_OAUTH_AUTH_URL="https://{{pillar['authserver']['hostname']}}/o2/authorize/"
-            CONCOURSE_OAUTH_TOKEN_URL="https://{{pillar['authserver']['hostname']}}/o2/token/"
-            CONCOURSE_OAUTH_USERINFO_URL="https://{{pillar['authserver']['hostname']}}/o2/fake-userinfo/"
-            CONCOURSE_OAUTH_GROUPS_KEY="groups"
+            CONCOURSE_OIDC_DISPLAY_NAME="SSO Account (OpenIDC)"
+            CONCOURSE_OIDC_CLIENT_ID="((oauth2_client_id))"
+            CONCOURSE_OIDC_CLIENT_SECRET="((oauth2_client_secret))"
+            CONCOURSE_OIDC_ISSUER="https://{{pillar['authserver']['hostname']}}/o2"
+            CONCOURSE_OIDC_GROUPS_KEY="groups"
 
 
 concourse-server-envvars:

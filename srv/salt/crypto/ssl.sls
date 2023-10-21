@@ -95,13 +95,6 @@ install-certificates-{{salt['file.basename'](cert)}}:
         - require:
             - file: localca-location
 
-symlink-certificates-{{salt['file.basename'](cert)}}:
-    file.symlink:
-        - name: {{salt['file.join'](pillar['ssl']['localca-links-location'],
-                                    salt['file.basename'](cert))}}
-        - target: {{salt['file.join'](pillar['ssl']['localca-location'], salt['file.basename'](cert))}}
-        - require:
-            - file: install-certificates-{{salt['file.basename'](cert)}}
 
 add-certificate-{{salt['file.basename'](cert)}}:
     file.append:

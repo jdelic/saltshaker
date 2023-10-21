@@ -9,9 +9,12 @@ executed in the correct order:
 
 Tier | Description
 -----|-----------------------------------------------------
-   1 | Reserved for baseline iptables states
+   1 | Reserved for baseline repository states
    2 | Reserved for baseline iptables states
    3 | Reserved for baseline iptables states
+   4 | Reserved for baseline iptables states
+   5 | Reserved for baseline iptables states
+   9 | Reserved for base package install
   10 | Pull package install jobs to the front of the queue
   15 | Pull database server jobs to the front of the queue
   20 | Pull database setup jobs to the front of the queue

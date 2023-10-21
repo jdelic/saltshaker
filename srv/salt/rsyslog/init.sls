@@ -36,32 +36,35 @@ rsyslog:
             - pkg: rsyslog
 
 
-salt-log-dir:
-    file.directory:
-        - name: /var/log/salt
-        - makedirs: True
-        - user: root
-        - group: adm
-        - mode: '2740'
+# TODO: figure out if salt-master/minion should use rsyslog instead of file logging
+#       The config below breaks logging with the Debian-packaged Salt as salt-master runs
+#       as root and won't have access to /var/log/salt once salt-log-dir runs.
+#salt-log-dir:
+#    file.directory:
+#        - name: /var/log/salt
+#        - makedirs: True
+#        - user: salt
+#        - group: adm
+#        - mode: '2740'
 
 
-salt-master-logging:
-    file.managed:
-        - name: /etc/rsyslog.d/40-salt-master.conf
-        - source: salt://rsyslog/40-salt.rsyslog.jinja.conf
-        - template: jinja
-        - context:
-            source: master
-        - require:
-            - file: /etc/rsyslog.d
+#salt-master-logging:
+#    file.managed:
+#        - name: /etc/rsyslog.d/40-salt-master.conf
+#        - source: salt://rsyslog/40-salt.rsyslog.jinja.conf
+#        - template: jinja
+#        - context:
+#            source: master
+#        - require:
+#            - file: /etc/rsyslog.d
 
 
-salt-minion-logging:
-    file.managed:
-        - name: /etc/rsyslog.d/40-salt-minion.conf
-        - source: salt://rsyslog/40-salt.rsyslog.jinja.conf
-        - template: jinja
-        - context:
-            source: minion
-        - require:
-            - file: /etc/rsyslog.d
+#salt-minion-logging:
+#    file.managed:
+#        - name: /etc/rsyslog.d/40-salt-minion.conf
+#        - source: salt://rsyslog/40-salt.rsyslog.jinja.conf
+#        - template: jinja
+#        - context:
+#            source: minion
+#        - require:
+#            - file: /etc/rsyslog.d

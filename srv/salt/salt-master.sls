@@ -1,7 +1,7 @@
 
 salt-master:
     pkg.installed:
-        - order: 2
+        - order: 10
         - require:
             - pkgrepo: saltstack-repo
     service:

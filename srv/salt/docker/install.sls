@@ -8,6 +8,7 @@ docker:
         - name: {{pillar["repos"]["docker"]}}
         - file: /etc/apt/sources.list.d/docker.list
         - key_url: salt://docker/docker_8D81803C0EBFCD88.pgp.key
+        - aptkey: False
         - require_in:
             - pkg: docker
     pkg.installed:

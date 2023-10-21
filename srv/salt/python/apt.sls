@@ -9,6 +9,6 @@
 python-apt-packages:
     pkg.installed:
         - pkgs:
-            - python-apt
+            - python3-apt
             - debconf-utils
-            - python-pycurl
+            - python3-pycurl

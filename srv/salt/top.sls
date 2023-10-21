@@ -34,9 +34,14 @@ base:
         - compilers
         - salt-master
 
+    'roles:vagrant':
+        - match: grain
+        - dev.dkms
+
     'roles:vault':
         - match: grain
         - vault
+        - vault.autounlock
         - mn.cas.vault_database
         - dev.concourse.vault_credentials
 
@@ -95,7 +100,7 @@ base:
     # every node that's not a mailserver routes through a mailserver via smartstack
     'not G@roles:mail':
         - match: compound
-        - ssmtp
+        - msmtp
 
     'roles:mail':
         - match: grain
@@ -106,7 +111,7 @@ base:
         - mail.storage
         - mn.cas.dkimsigner
         - mn.cas.mailforwarder
-        - ssmtp.not
+        - msmtp.not
 
     'roles:pim':
         - match: grain
