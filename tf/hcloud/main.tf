@@ -28,7 +28,7 @@ data "template_file" "saltmaster-init" {
 
 locals {
     server_config = {
-        saltmaster.maurus.net = {
+        "saltmaster.maurus.net" = {
             server_type = "cx11"
             backup = 0
             additional_ipv4 = 0
@@ -37,7 +37,7 @@ locals {
             ptr = "saltmaster.maurus.net"
             user_data = data.template_file.saltmaster-init.rendered
         }
-/*        db.maurusnet.internal = {
+/*        "db.maurusnet.internal" = {
             server_type = "cx21"
             backup = 1
             additional_ipv4 = 0
@@ -45,7 +45,7 @@ locals {
             internal_only = 1
             ptr = null
         }
-        dev.maurusnet.internal = {
+        "dev.maurusnet.internal" = {
             server_type = "cx31"
             backup = 0
             additional_ipv4 = 0
@@ -53,7 +53,7 @@ locals {
             internal_only = 1
             ptr = null
         }
-        mail.maurus.net = {
+        "mail.maurus.net" = {
             server_type = "cpx21"
             backup = 1
             additional_ipv4 = 1
@@ -61,7 +61,7 @@ locals {
             internal_only = 0
             ptr = "mail.maurus.net"
         }
-        apps1.maurusnet.internal = {
+        "apps1.maurusnet.internal" = {
             server_type = "cx21"
             backup = 0
             additional_ipv4 = 0
@@ -69,7 +69,7 @@ locals {
             internal_only = 1
             ptr = null
         }
-        apps2.maurusnet.internal = {
+        "apps2.maurusnet.internal" = {
             server_type = "cx21"
             backup = 0
             additional_ipv4 = 0
@@ -77,7 +77,7 @@ locals {
             internal_only = 1
             ptr = null
         }
-        apps3.maurusnet.internal = {
+        "apps3.maurusnet.internal" = {
             server_type = "cx21"
             backup = 0
             additional_ipv4 = 0
