@@ -8,18 +8,23 @@ def create_user(username, groups=None, optional_groups=None, key_pillars=None, p
     if create_default_group and username not in groups:
         _groups.insert(0, username)
 
-    st_group = state("groups-%s" % username).group
-    st_group.present(names=_groups)
+    _groupstates = []
+    for g in _groups:
+        st_group = state("groups-%s=%s" % (username, g)).group
+        st_group.present(name=g)
+        _groupstates.append(st_group)
 
     st_user = state(username).user
-    st_user.require(st_group)
+
+    for gs in _groupstates:
+        st_user.require(gs)
 
     st_user.present(
         groups=_groups,
         optional_groups=optional_groups,
         home='/home/%s' % username,
         password=password,
-        usergroup=create_default_group,
+        usergroup=False,
         shell="/bin/bash"
     )
 
