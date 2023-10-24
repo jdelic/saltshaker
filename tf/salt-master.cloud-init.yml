@@ -46,7 +46,7 @@ runcmd:
 final_message: |
     Next steps:
         - cd /srv
-        - git clone -b feature/bookworm https://github.com/jdelic/saltshaker
+        - git clone -b env/hcloud https://github.com/jdelic/saltshaker
         - ln -sv /srv/saltshaker/srv/salt /srv/salt
         - ln -sv /srv/saltshaker/srv/salt-modules /srv/salt-modules
         - ln -sv /srv/saltshaker/srv/pillar /srv/pillar
