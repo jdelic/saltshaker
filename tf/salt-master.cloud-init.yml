@@ -47,10 +47,6 @@ final_message: |
     Next steps:
         - cd /srv
         - git clone -b env/hcloud https://github.com/jdelic/saltshaker
-        - ln -sv /srv/saltshaker/srv/salt /srv/salt
-        - ln -sv /srv/saltshaker/srv/salt-modules /srv/salt-modules
-        - ln -sv /srv/saltshaker/srv/pillar /srv/pillar
-        - ln -sv /etc/saltshaker/srv/reactor /srv/reactor
-        - cd saltshaker
-        - git submodule init; git submodule update
+        - /srv/saltshaker/setup_srv_salt.sh
+        - chown -R salt:salt /etc/salt
         - salt-call state.highstate
