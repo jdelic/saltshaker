@@ -28,13 +28,13 @@ data "template_file" "saltmaster-init" {
 
 locals {
     server_config = {
-        "saltmaster.maurus.net" = {
+        "symbiont.maurus.net" = {
             server_type = "cx11"
             backup = 0
             additional_ipv4 = 0
             ipv6_only = 0
             internal_only = 0
-            ptr = "saltmaster.maurus.net"
+            ptr = "symbiont.maurus.net"
             user_data = data.template_file.saltmaster-init.rendered
         }
 /*        "db.maurusnet.internal" = {
