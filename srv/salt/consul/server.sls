@@ -83,12 +83,12 @@ consul-service:
         - context:
             user: {{consul_user}}
             group: {{consul_group}}
-            extra_parameters: -server -bootstrap-expect={{pillar['consul-cluster']['number-of-nodes']}} -ui
+            extra_parameters: -server -bootstrap -ui
             single_node_cluster: {% if single_node_cluster %}True{% else %}False{% endif %}
             node_name: {{grains['id']}}
-    {% if single_node_cluster %}
+{% if single_node_cluster %}
             node_id: {{pillar['dynamicsecrets']['consul-node-id']}}
-    {% endif %}
+{% endif %}
         - require:
             - file: consul
             - file: consul-agent-absent
@@ -230,7 +230,7 @@ consul-service-restart:
             - cmd: consul-sync-ready
 
 
-{% if pillar['consul-cluster']['number-of-nodes'] == 1 %}
+{% if single_node_cluster %}
 consul-singlenode-snapshot-timer:
     file.managed:
         - name: /etc/systemd/system/consul-snapshot.timer
