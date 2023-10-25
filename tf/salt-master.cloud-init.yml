@@ -40,7 +40,7 @@ runcmd:
     - /usr/bin/bash /run/salt-bootstrap/bootstrap-salt.sh -r -x python3 -M
     - /usr/bin/bash -c 'until [ "/opt/saltstack/salt/salt-key --list=un | grep -q saltmaster" ]; do sleep 1; done;'
     - /opt/saltstack/salt/salt-key --list=un
-    - /opt/saltstack/salt/salt-key -y -a saltmaster
+    - /opt/saltstack/salt/salt-key -y -a ${hostname}
 
 
 final_message: |

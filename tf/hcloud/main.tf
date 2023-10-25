@@ -23,6 +23,7 @@ data "template_file" "saltmaster-init" {
     template = file("${path.module}/../salt-master.cloud-init.yml")
     vars = {
         saltmaster_config = data.template_file.saltmaster-config.rendered
+        hostname = "symbiont.maurus.net"
     }
 }
 
