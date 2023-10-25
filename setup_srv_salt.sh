@@ -15,4 +15,7 @@ ln -sv /srv/saltshaker/srv/salt /srv/salt
 ln -sv /srv/saltshaker/srv/salt-modules /srv/salt-modules
 ln -sv /srv/saltshaker/srv/pillar /srv/pillar
 ln -sv /etc/saltshaker/srv/reactor /srv/reactor
+chown -R salt:salt /etc/salt
+salt-call saltutil.sync_all
+systemctl restart salt-master
 popd

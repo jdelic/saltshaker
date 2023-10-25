@@ -48,5 +48,4 @@ final_message: |
         - cd /srv
         - git clone -b env/hcloud https://github.com/jdelic/saltshaker
         - /srv/saltshaker/setup_srv_salt.sh
-        - chown -R salt:salt /etc/salt
         - salt-call state.highstate
