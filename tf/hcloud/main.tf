@@ -29,24 +29,20 @@ data "template_file" "saltmaster-init" {
 
 locals {
     server_config = {
-        "symbiont.maurus.net" = {
-            server_type = "cx11"
-            backup = 0
-            additional_ipv4 = 0
-            ipv6_only = 0
-            internal_only = 0
-            ptr = "symbiont.maurus.net"
-            user_data = data.template_file.saltmaster-init.rendered
-        }
-/*        "db.maurusnet.internal" = {
+        "db.maurusnet.internal" = {
             server_type = "cx21"
             backup = 1
             additional_ipv4 = 0
             ipv6_only = 1
             internal_only = 1
             ptr = null
+            user_data = templatefile("${path.module}/../salt-minion.cloud-init.yml", {
+                    saltmaster_ip = flatten(hcloud_server.saltmaster.network.*.ip)[0],
+                    roles = ["database", "vault", "authserver"]
+                },
+            )
         }
-        "dev.maurusnet.internal" = {
+/*        "dev.maurusnet.internal" = {
             server_type = "cx31"
             backup = 0
             additional_ipv4 = 0
@@ -109,6 +105,27 @@ resource "hcloud_network_subnet" "internal-subnet" {
   ip_range = "10.0.1.0/24"
 }
 
+resource "hcloud_server" "saltmaster" {
+    name = "symbiont.maurus.net"
+    server_type = "cx11"
+    image = "debian-12"
+    location = "hel1"
+    ssh_keys = ["symbiont laptop key"]
+
+    network {
+        network_id = hcloud_network.internal.id
+    }
+
+    public_net {
+        ipv4_enabled = true
+        ipv6_enabled = true
+    }
+
+    user_data = data.template_file.saltmaster-init.rendered
+
+    backups = true
+}
+
 resource "hcloud_server" "servers" {
     for_each = local.server_config
 
@@ -132,7 +149,7 @@ resource "hcloud_server" "servers" {
     backups = each.value.backup == 1 ? true : false
 
     # important as per hcloud docs as there's a race condition otherwise
-    depends_on = [hcloud_network_subnet.internal-subnet]
+    depends_on = [hcloud_network_subnet.internal-subnet, hcloud_server.saltmaster]
 }
 
 resource "hcloud_floating_ip" "additional_ipv4" {
@@ -156,7 +173,7 @@ resource "hcloud_load_balancer_target" "app_targets" {
 
 output "ip_addresses" {
     value = {
-        for s in hcloud_server.servers : s.name => concat(
+        for s in merge({"symbiont.maurus.net" = hcloud_server.saltmaster}, hcloud_server.servers) : s.name => concat(
             [
                 s.ipv4_address != "" ? s.ipv4_address : null,
                 s.ipv6_address
