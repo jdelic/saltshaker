@@ -99,10 +99,10 @@ resource "hcloud_network" "internal" {
 }
 
 resource "hcloud_network_subnet" "internal-subnet" {
-  type = "cloud"
-  network_id = hcloud_network.internal.id
-  network_zone = "eu-central"
-  ip_range = "10.0.1.0/24"
+    type = "cloud"
+    network_id = hcloud_network.internal.id
+    network_zone = "eu-central"
+    ip_range = "10.0.1.0/24"
 }
 
 resource "hcloud_server" "saltmaster" {
