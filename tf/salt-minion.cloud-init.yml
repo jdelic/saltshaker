@@ -27,9 +27,7 @@ runcmd:
     - sh -c 'echo ${saltmaster_ip} saltmaster.maurusnet.internal saltmaster >> /etc/hosts'
     - apt update
     - mkdir -p /etc/salt/roles.d
-
-    - touch /etc/salt/roles.d/master
-    - touch /etc/salt/roles.d/consulserver
+    ${indent(4, yamlencode([for r in roles: "touch /etc/salt/roles.d/${r}"])}
     - mkdir /run/salt-bootstrap
     - wget -O /run/salt-bootstrap/bootstrap-salt.sh https://raw.githubusercontent.com/saltstack/salt-bootstrap/stable/bootstrap-salt.sh
     - chown -R salt:salt /etc/salt
