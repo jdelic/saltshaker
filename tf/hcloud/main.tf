@@ -15,18 +15,6 @@ provider "hcloud" {
     token = var.hcloud_token
 }
 
-data "template_file" "saltmaster-config" {
-    template = file("${path.module}/../../etc/salt-master/master.d/saltshaker.conf")
-}
-
-data "template_file" "saltmaster-init" {
-    template = file("${path.module}/../salt-master.cloud-init.yml")
-    vars = {
-        saltmaster_config = data.template_file.saltmaster-config.rendered
-        hostname = "symbiont.maurus.net"
-    }
-}
-
 locals {
     server_config = {
         "db.maurusnet.internal" = {
@@ -121,7 +109,10 @@ resource "hcloud_server" "saltmaster" {
         ipv6_enabled = true
     }
 
-    user_data = data.template_file.saltmaster-init.rendered
+    user_data = templatefile("${path.module}/../salt-master.cloud-init.yml", {
+        saltmaster_config = file("${path.module}/../../etc/salt-master/master.d/saltshaker.conf")
+        hostname = "symbiont.maurus.net"
+    })
 
     backups = true
 }
