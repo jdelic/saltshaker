@@ -85,7 +85,7 @@ docker-overlaynet-udp-in4789-recv:
         - proto: udp
         - save: True
         - require:
-            - sls: iptables
+            - sls: basics.iptables
 
 
 docker-overlaynet-udp-in4789-send:
@@ -98,7 +98,7 @@ docker-overlaynet-udp-in4789-send:
         - proto: udp
         - save: True
         - require:
-            - sls: iptables
+            - sls: basics.iptables
 
 
 docker-tcp-in7946-recv:
@@ -113,7 +113,7 @@ docker-tcp-in7946-recv:
         - proto: tcp
         - save: True
         - require:
-            - sls: iptables
+            - sls: basics.iptables
 
 
 docker-tcp-out7946-send:
@@ -128,7 +128,7 @@ docker-tcp-out7946-send:
         - proto: tcp
         - save: True
         - require:
-            - sls: iptables
+            - sls: basics.iptables
 
 
 docker-tcp-in2377-recv:
@@ -143,7 +143,7 @@ docker-tcp-in2377-recv:
         - proto: tcp
         - save: True
         - require:
-            - sls: iptables
+            - sls: basics.iptables
 
 
 docker-tcp-out2377-send:
@@ -158,4 +158,4 @@ docker-tcp-out2377-send:
         - proto: tcp
         - save: True
         - require:
-            - sls: iptables
+            - sls: basics.iptables

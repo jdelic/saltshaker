@@ -10,14 +10,14 @@
 # order 1, 2 and 3 for the netfilter baseline setup so we can make sure that rules are added in a certain order.
 
 include:
-    - vim
-    - etc_mods
-    - salt-minion
-    - python
-    - python.apt
-    - iptables  # forces "order: 1"
-    - crypto
-    - rsyslog
+    - .vim
+    - .etc_mods
+    - .salt-minion
+    - .python
+    - .python.apt
+    - .iptables  # forces "order: 1"
+    - .crypto
+    - .rsyslog
     - .nounup
 
 
@@ -122,7 +122,7 @@ backports-org-bookworm:
         - order: 1  # execute this state early!
     file.managed:
         - name: /etc/apt/preferences.d/bookworm-backports
-        - source: salt://etc_mods/bookworm-backports
+        - source: salt://basics/etc_mods/bookworm-backports
 
 
 saltstack-repo:
@@ -197,7 +197,7 @@ openssh-in22-recv:
         - connstate: NEW
         - save: True
         - require:
-            - sls: iptables
+            - sls: basics.iptables
         - order: 4
 
 
@@ -266,7 +266,7 @@ basics-internal-network-tcp:
         - save: True
         - order: 4
         - require:
-            - sls: iptables
+            - sls: basics.iptables
 
 
 basics-internal-network-udp:
@@ -279,7 +279,7 @@ basics-internal-network-udp:
         - save: True
         - order: 4
         - require:
-            - sls: iptables
+            - sls: basics.iptables
 
 
 # vim: syntax=yaml

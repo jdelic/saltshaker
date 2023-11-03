@@ -146,7 +146,7 @@ base:
         # put vagrant user config on .test machines
         - mn.users.vagrant
         # enable the NAT networking device for all network traffic
-        - iptables.vagrant
+        - basics.iptables.vagrant
 
     # put my personal user on every other machine
     '(?!saltmaster).*?net(|.internal)$':

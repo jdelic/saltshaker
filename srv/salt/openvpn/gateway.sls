@@ -186,7 +186,7 @@ openvpn-tcp-in1194-recv:
         - connstate: NEW
         - save: True
         - require:
-            - sls: iptables
+            - sls: basics.iptables
 
 
 openvpn-udp-in1194-recv:
@@ -204,7 +204,7 @@ openvpn-udp-in1194-recv:
         - proto: udp
         - save: True
         - require:
-            - sls: iptables
+            - sls: basics.iptables
 
 
 openvpn-udp-in1194-send:
@@ -222,7 +222,7 @@ openvpn-udp-in1194-send:
         - proto: udp
         - save: True
         - require:
-            - sls: iptables
+            - sls: basics.iptables
 
 
 {% for net in ['10.0.253.0', '10.0.254.0'] %}
@@ -235,7 +235,7 @@ openvpn-clients-nat-{{loop.index}}:
         - destination: '! {{net}}/24'
         - save: True
         - require:
-            - sls: iptables
+            - sls: basics.iptables
 
 
 openvpn-clients-forward-{{loop.index}}:
@@ -247,7 +247,7 @@ openvpn-clients-forward-{{loop.index}}:
         - destination: 0/0
         - save: True
         - require:
-            - sls: iptables
+            - sls: basics.iptables
 
 
 openvpn-clients-dns-udp-access-{{loop.index}}:
@@ -261,7 +261,7 @@ openvpn-clients-dns-udp-access-{{loop.index}}:
         - proto: udp
         - save: True
         - require:
-            - sls: iptables
+            - sls: basics.iptables
 
 
 openvpn-clients-dns-udp-replies-{{loop.index}}:
@@ -275,7 +275,7 @@ openvpn-clients-dns-udp-replies-{{loop.index}}:
         - proto: udp
         - save: True
         - require:
-            - sls: iptables
+            - sls: basics.iptables
 
 
 openvpn-clients-dns-tcp-access-{{loop.index}}:
@@ -289,7 +289,7 @@ openvpn-clients-dns-tcp-access-{{loop.index}}:
         - proto: tcp
         - save: True
         - require:
-            - sls: iptables
+            - sls: basics.iptables
 
 
 openvpn-pdns-recursor-ip-{{loop.index}}:
