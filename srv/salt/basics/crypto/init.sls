@@ -4,9 +4,9 @@
 #
 
 include:
-    - crypto.ssl
-    - crypto.gpg
-    - crypto.ssh
+    - .ssl
+    - .gpg
+    - .ssh
 
 
 # vim: syntax=yaml

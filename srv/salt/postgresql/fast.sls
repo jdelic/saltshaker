@@ -248,7 +248,7 @@ postgresql-in{{port}}-recv:
         - connstate: NEW
         - save: True
         - require:
-            - sls: iptables
+            - sls: basics.iptables
 
 
 {% if pillar.get('duplicity-backup', {}).get('enabled', False) %}

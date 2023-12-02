@@ -189,7 +189,7 @@ consul-all-in-recv:
         - destination: 169.254.1.1
         - save: True
         - require:
-            - sls: iptables
+            - sls: basics.iptables
             - cmd: consul-network-interface
         - require_in:
             - cmd: consul-sync-network
@@ -210,7 +210,7 @@ consul-tcp-in{{port}}-recv:
         - connstate: NEW
         - save: True
         - require:
-            - sls: iptables
+            - sls: basics.iptables
         - require_in:
             - cmd: consul-sync-network
 {% endfor %}
@@ -228,7 +228,7 @@ consul-udp-in{{port}}-recv:
         - proto: udp
         - save: True
         - require:
-            - sls: iptables
+            - sls: basics.iptables
         - require_in:
             - cmd: consul-sync-network
 {% endfor %}

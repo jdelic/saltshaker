@@ -34,7 +34,7 @@ openssh-config-folder:
 openssh-config:
     file.managed:
         - name: /etc/ssh/sshd_config.d/00-sshd_config
-        - source: salt://crypto/sshd_config.jinja
+        - source: salt://basics/crypto/sshd_config.jinja
         - template: jinja
         - require:
             - file: openssh-config-folder
@@ -45,7 +45,7 @@ openssh-config:
 openssh-config-builder:
     file.managed:
         - name: /etc/ssh/assemble-ssh-config.sh
-        - source: salt://crypto/assemble-sshd-config.sh
+        - source: salt://basics/crypto/assemble-sshd-config.sh
         - user: root
         - group: root
         - mode: '0750'

@@ -6,7 +6,7 @@
 inputrc:
     file.managed:
         - name: /etc/inputrc
-        - source: salt://etc_mods/inputrc
+        - source: salt://basics/etc_mods/inputrc
 
 
 # Add hostnames for services proxied through the local smartstack-internal HAProxy.
@@ -57,7 +57,7 @@ sudoers-config:
         - name: sudo
     file.managed:
         - name: /etc/sudoers.d/salt-sudoers
-        - source: salt://etc_mods/salt-sudoers.jinja
+        - source: salt://basics/etc_mods/salt-sudoers.jinja
         - template: jinja
         - context:
             sudoers_allow_nopasswd: {{pillar['sudoers_allow_nopasswd']}}

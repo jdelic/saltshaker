@@ -13,7 +13,7 @@
 # After that all other iptables states should establish order by requiring this sls, i.e.:
 # ...
 #    - require:
-#        - sls: iptables
+#        - sls: basics.iptables
 #
 
 iptables:

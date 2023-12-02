@@ -366,7 +366,7 @@ opensmtpd-{{svc}}-tcp-in25-recv:
         - proto: tcp
         - save: True
         - require:
-            - sls: iptables
+            - sls: basics.iptables
 {% endfor %}
 
 
@@ -383,7 +383,7 @@ opensmtpd-relay-tcp-in465-recv:
         - proto: tcp
         - save: True
         - require:
-            - sls: iptables
+            - sls: basics.iptables
 
 
 opensmtpd-receiver-tcp-in465-recv:
@@ -399,7 +399,7 @@ opensmtpd-receiver-tcp-in465-recv:
         - proto: tcp
         - save: True
         - require:
-            - sls: iptables
+            - sls: basics.iptables
 
 
 opensmtpd-relay-out25-send:
@@ -415,7 +415,7 @@ opensmtpd-relay-out25-send:
         - proto: tcp
         - save: True
         - require:
-            - sls: iptables
+            - sls: basics.iptables
 
 
 opensmtpd-relay-out465-send:
@@ -431,4 +431,4 @@ opensmtpd-relay-out465-send:
         - proto: tcp
         - save: True
         - require:
-            - sls: iptables
+            - sls: basics.iptables

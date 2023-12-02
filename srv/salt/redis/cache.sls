@@ -43,7 +43,7 @@ redis-in{{pillar.get('redis-server', {}).get('bind-port', 6379)}}-recv:
         - connstate: NEW
         - save: True
         - require:
-            - sls: iptables
+            - sls: basics.iptables
 
 
 redis-servicedef:

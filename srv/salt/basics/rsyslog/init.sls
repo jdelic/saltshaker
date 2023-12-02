@@ -18,7 +18,7 @@ rsyslog:
 
 /etc/rsyslog.d/10-main.conf:
     file.managed:
-        - source: salt://rsyslog/10-main.conf
+        - source: salt://basics/rsyslog/10-main.conf
         - user: root
         - group: root
         - mode: '0640'
@@ -28,7 +28,7 @@ rsyslog:
 
 /etc/rsyslog.conf:
     file.managed:
-        - source: salt://rsyslog/rsyslog.conf
+        - source: salt://basics/rsyslog/rsyslog.conf
         - user: root
         - group: root
         - mode: '0644'
@@ -51,7 +51,7 @@ rsyslog:
 #salt-master-logging:
 #    file.managed:
 #        - name: /etc/rsyslog.d/40-salt-master.conf
-#        - source: salt://rsyslog/40-salt.rsyslog.jinja.conf
+#        - source: salt://basics/rsyslog/40-salt.rsyslog.jinja.conf
 #        - template: jinja
 #        - context:
 #            source: master
@@ -62,7 +62,7 @@ rsyslog:
 #salt-minion-logging:
 #    file.managed:
 #        - name: /etc/rsyslog.d/40-salt-minion.conf
-#        - source: salt://rsyslog/40-salt.rsyslog.jinja.conf
+#        - source: salt://basics/rsyslog/40-salt.rsyslog.jinja.conf
 #        - template: jinja
 #        - context:
 #            source: minion

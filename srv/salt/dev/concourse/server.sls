@@ -347,7 +347,7 @@ concourse-tcp-in{{pillar.get('concourse-server', {}).get('tsa-port', 2222)}}-rec
         - proto: tcp
         - save: True
         - require:
-            - sls: iptables
+            - sls: basics.iptables
 
 
 concourse-tcp-in{{pillar.get('concourse-server', {}).get('atc-port', 8080)}}-recv:
@@ -365,7 +365,7 @@ concourse-tcp-in{{pillar.get('concourse-server', {}).get('atc-port', 8080)}}-rec
         - proto: tcp
         - save: True
         - require:
-            - sls: iptables
+            - sls: basics.iptables
 
 
 # allow us to talk to others
@@ -384,7 +384,7 @@ concourse-tcp-out{{pillar.get('concourse-server', {}).get('atc-port', 8080)}}-se
         - proto: tcp
         - save: True
         - require:
-            - sls: iptables
+            - sls: basics.iptables
 
 
 # vim: syntax=yaml

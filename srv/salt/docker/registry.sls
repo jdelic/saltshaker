@@ -86,7 +86,7 @@ docker-registry-tcp-in{{pillar.get('docker', {}).get('registry', {}).get('bind-p
         - proto: tcp
         - save: True
         - require:
-            - sls: iptables
+            - sls: basics.iptables
 
 
 # vim: syntax=yaml
