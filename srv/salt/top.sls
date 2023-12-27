@@ -58,7 +58,7 @@ base:
 #        - dev.pypi
 #        - sentry
         - compilers
-        - python.dev
+        - basics.python.dev
         - docker.install
 
     'roles:buildserver':
