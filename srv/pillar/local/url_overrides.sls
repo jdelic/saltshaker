@@ -16,7 +16,7 @@ repos:
     maurusnet-opensmtpd: deb http://fileserver.maurusnet.test/mn-opensmtpd/ mn-opensmtpd main
     maurusnet-radicale: deb http://fileserver.maurusnet.test/mn-radicale/ mn-radicale main
     postgresql: deb http://fileserver.maurusnet.test/postgresql/ bookworm-pgdg
-    saltstack: deb http://fileserver.maurusnet.test/apt/debian/11/amd64/latest bookworm main
+    saltstack: deb http://fileserver.maurusnet.test/salt/py3/debian/12/amd64/latest bookworm main
 
     pgpkey: salt://mn/fileserver_ACADBD6B.pgp.key
 
