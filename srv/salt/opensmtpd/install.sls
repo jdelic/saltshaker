@@ -8,10 +8,10 @@ opensmtpd:
         - pkgs:
             - opensmtpd
             - opensmtpd-extras
-        #- fromrepo: bookworm-backports
+        - fromrepo: bookworm-backports
         - install_recommends: False
         - require:
-              - pkg: no-exim
+            - pkg: no-exim
 
 
 opensmtpd-filters:
