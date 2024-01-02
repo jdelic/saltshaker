@@ -27,12 +27,16 @@ smartstack-hostnames:
 
 # If we're in a development environment, install a list of local well-known hosts in /etc/hosts
 # so we don't need a local DNS server.
-{% if pillar.get('wellknown_hosts', None) %}
+{% if pillar.get('install_wellknown_hosts', False) %}
+    {% set ipprefix = salt['network.interface_ip'](pillar['ifassign']['external']).split(".")[0:3]|join(".") %}
+# You shouldn't use this outside of a LOCAL VAGRANT NETWORK. This configuration
+# saves you from setting up a DNS server by replicating it in all nodes' /etc/hosts files.
 wellknown-etc-hosts:
     file.append:
         - name: /etc/hosts
         - text: |
-            {{pillar['wellknown_hosts']|indent(12)}}
+            {{ipprefix}}.163   auth.{{pillar["tld"]}} mail.{{pillar["tld"]}} calendar.{{pillar["tld"]}} ci.{{pillar["tld"]}}
+            {{ipprefix}}.164   smtp.{{pillar["tld"]}}
         - order: 2
 {% endif %}
 
