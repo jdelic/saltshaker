@@ -21,6 +21,11 @@ include:
     - .nounup
 
 
+check-our-assumptions:
+    sanitycheck.check:
+        - order: 1
+
+
 # enforce that Debian packages can't launch daemons while salt runs
 # see http://people.debian.org/~hmh/invokerc.d-policyrc.d-specification.txt
 policy-deny:
