@@ -4,7 +4,7 @@
 #    nftables.append:
 #        - table: filter
 #        - chain: INPUT
-#        - jump: LOG
+#        - jump: log
 #        - log-prefix: "netfilter INPUT dropped: "
 #        - order: last
 #        - require:
@@ -15,7 +15,7 @@
 #    nftables.append:
 #        - table: filter
 #        - chain: OUTPUT
-#        - jump: LOG
+#        - jump: log
 #        - log-prefix: "netfilter OUTPUT dropped: "
 #        - order: last
 #        - require:
@@ -26,7 +26,7 @@
 #    nftables.append:
 #        - table: filter
 #        - chain: FORWARD
-#        - jump: LOG
+#        - jump: log
 #        - log-prefix: "netfilter FORWARD dropped: "
 #        - order: last
 #        - require:

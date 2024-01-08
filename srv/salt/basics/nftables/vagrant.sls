@@ -11,11 +11,11 @@
 {% if pillar["ifassign"].get("nat", False) %}
 vagrant-eth0-recv:
     nftables.insert:
-        - position: 2
+        - position: 1
         - table: filter
         - family: inet
         - chain: INPUT
-        - jump: ACCEPT
+        - jump: accept
         - in-interface: {{pillar["ifassign"]["nat"]}}
         - order: 3
         - save: True
@@ -24,12 +24,12 @@ vagrant-eth0-recv:
 
 
 vagrant-eth0-send:
-    nftables.append:
+    nftables.insert:
         - position: 1
         - table: filter
         - family: inet
         - chain: OUTPUT
-        - jump: ACCEPT
+        - jump: accept
         - out-interface: {{pillar["ifassign"]["nat"]}}
         - order: 3
         - save: True
