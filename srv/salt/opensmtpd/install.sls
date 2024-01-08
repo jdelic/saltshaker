@@ -193,21 +193,46 @@ opensmtpd-internal-relay-sslkey:
 
 
 {% set opensmtpd_ips = {
-    "relay": pillar.get('smtp-outgoing', {}).get(
-                 'bind-ip', grains['ip_interfaces'][pillar['ifassign']['external-alt']][pillar['ifassign'].get(
-                     'external-alt-ip-index', 0
-                 )|int()]
-             ),
-    "receiver": pillar.get('smtp-incoming', {}).get(
-                    'bind-ip', grains['ip_interfaces'][pillar['ifassign']['external']][pillar['ifassign'].get(
-                        'external-ip-index', 0
-                    )|int()]
-                ),
-    "internal_relay": pillar.get('smtp-local-relay', {}).get(
-                          'bind-ip', grains['ip_interfaces'][pillar['ifassign']['internal']][pillar['ifassign'].get(
-                              'internal-ip-index', 0
-                          )|int()]
-                      ),
+    "ipv4": {
+        relay":
+            pillar.get('smtp-outgoing', {}).get(
+                    'bind-ip', grains[ 'ip4_interfaces' ][ pillar[ 'ifassign' ][ 'external-alt' ] ][ pillar[ 'ifassign' ].get(
+                    'external-alt-ip-index', 0
+                )|int() ]
+            ),
+        "receiver":
+            pillar.get('smtp-incoming', {}).get(
+                    'bind-ip', grains[ 'ip4_interfaces' ][ pillar[ 'ifassign' ][ 'external' ] ][ pillar[ 'ifassign' ].get(
+                    'external-ip-index', 0
+                )|int() ]
+            ),
+        "internal_relay":
+            pillar.get('smtp-local-relay', {}).get(
+                    'bind-ip', grains[ 'ip4_interfaces' ][ pillar[ 'ifassign' ][ 'internal' ] ][ pillar[ 'ifassign' ].get(
+                    'internal-ip-index', 0
+                )|int() ]
+            ),
+    },
+    "ipv6": {
+        relay":
+            pillar.get('smtp-outgoing', {}).get(
+                    'bind-ip', grains[ 'ip6_interfaces' ][ pillar[ 'ifassign' ][ 'external-alt' ] ][ pillar[ 'ifassign' ].get(
+                    'external-alt-ip-index', 0
+                )|int() ]
+            ),
+        "receiver":
+            pillar.get('smtp-incoming', {}).get(
+                    'bind-ip', grains[ 'ip6_interfaces' ][ pillar[ 'ifassign' ][ 'external' ] ][ pillar[ 'ifassign' ].get(
+                    'external-ip-index', 0
+                )|int() ]
+            ),
+        "internal_relay":
+            pillar.get('smtp-local-relay', {}).get(
+                    'bind-ip', grains[ 'ip6_interfaces' ][ pillar[ 'ifassign' ][ 'internal' ] ][ pillar[ 'ifassign' ].get(
+                    'internal-ip-index', 0
+                )|int() ]
+            ),
+    }
 } %}
 opensmtpd-config:
     file.managed:
@@ -353,8 +378,8 @@ opensmtpd-servicedef-internal:
 
 
 {% for svc in ['receiver', 'relay', 'internal_relay'] %}
-opensmtpd-{{svc}}-tcp-in25-recv:
-    iptables.append:
+opensmtpd-{{svc}}-tcp-in25-recv-ip4:
+    nftables.append:
         - table: filter
         - chain: INPUT
         - jump: ACCEPT
@@ -366,7 +391,7 @@ opensmtpd-{{svc}}-tcp-in25-recv:
         - proto: tcp
         - save: True
         - require:
-            - sls: basics.iptables
+            - sls: basics.nftables
 {% endfor %}
 
 
@@ -383,7 +408,7 @@ opensmtpd-relay-tcp-in465-recv:
         - proto: tcp
         - save: True
         - require:
-            - sls: basics.iptables
+            - sls: basics.nftables
 
 
 opensmtpd-receiver-tcp-in465-recv:
@@ -399,7 +424,7 @@ opensmtpd-receiver-tcp-in465-recv:
         - proto: tcp
         - save: True
         - require:
-            - sls: basics.iptables
+            - sls: basics.nftables
 
 
 opensmtpd-relay-out25-send:
@@ -415,7 +440,7 @@ opensmtpd-relay-out25-send:
         - proto: tcp
         - save: True
         - require:
-            - sls: basics.iptables
+            - sls: basics.nftables
 
 
 opensmtpd-relay-out465-send:
@@ -431,4 +456,4 @@ opensmtpd-relay-out465-send:
         - proto: tcp
         - save: True
         - require:
-            - sls: basics.iptables
+            - sls: basics.nftables

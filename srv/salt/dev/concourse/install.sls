@@ -124,7 +124,7 @@ concourse-tcp-out{{pillar.get('concourse-server', {}).get('tsa-port', 2222)}}-se
         - proto: tcp
         - save: True
         - require:
-            - sls: basics.iptables
+            - sls: basics.nftables
 
 
 # vim: syntax=yaml

@@ -1,62 +1,65 @@
 #
-# BASICS: iptables is included by basics (which are installed as a baseline everywhere)
+# BASICS: nftables is included by basics (which are installed as a baseline everywhere)
 # Usually, you won't need to assign this state manually. Assign "basics" instead.
 #
 
 # WHY ORDER?
-# This establishes static ordering here so that other states can insert their iptables rules using "order: 2 (or 3)"
-# before iptables.init sets the default policies to DROP. Otherwise the salt-minion will fail its first connection
+# This establishes static ordering here so that other states can insert their nftables rules using "order: 2 (or 3)"
+# before nftables.init sets the default policies to DROP. Otherwise, the salt-minion will fail its first connection
 # attempt to salt-master and wait for a full connection interval (usually 30 minutes) before trying again. So when
 # bootstrapping a new installation this prevents a race condition. It also makes sure that certain netfilter rules
-# which should to to the top of the list, actually go to the top of the list.
+# which should go to the top of the list, actually go to the top of the list.
 #
-# After that all other iptables states should establish order by requiring this sls, i.e.:
+# After that all other nftables states should establish order by requiring this sls, i.e.:
 # ...
 #    - require:
-#        - sls: basics.iptables
+#        - sls: basics.nftables
 #
 
-iptables:
+nftables:
     pkg.installed:
         - order: 2
 
 
-iptables-persistent:
+netfilter-persistent:
     pkg.installed:
         - order: 2
 
 
 # always allow local connections
 localhost-recv:
-    iptables.insert:
+    nftables.insert:
         - position: 1
         - table: filter
+        - family: inet
         - chain: INPUT
         - jump: ACCEPT
         - in-interface: lo
         - order: 3
         - save: True
         - require:
-            - pkg: iptables
+            - pkg: nftables
 
 
 localhost-send:
-    iptables.append:
+    nftables.append:
         - position: 1
         - table: filter
+        - family: inet
         - chain: OUTPUT
         - jump: ACCEPT
         - out-interface: lo
         - order: 3
         - save: True
         - require:
-            - pkg: iptables
+            - pkg: nftables
 
 
 # always allow ICMP pings
 icmp-recv:
-    iptables.append:
+    nftables.append:
         - table: filter
+        - family: inet
         - chain: INPUT
         - jump: ACCEPT
         - proto: icmp
@@ -65,12 +68,13 @@ icmp-recv:
         - order: 4
         - save: True
         - require:
-            - pkg: iptables
+            - pkg: nftables
 
 
 icmp-send:
-    iptables.append:
+    nftables.append:
         - table: filter
+        - family: inet
         - chain: OUTPUT
         - jump: ACCEPT
         - proto: icmp
@@ -79,12 +83,13 @@ icmp-send:
         - order: 4
         - save: True
         - require:
-            - pkg: iptables
+            - pkg: nftables
 
 
 icmp-forward:
-    iptables.append:
+    nftables.append:
         - table: filter
+        - family: inet
         - chain: FORWARD
         - jump: ACCEPT
         - proto: icmp
@@ -94,14 +99,15 @@ icmp-forward:
         - order: 4
         - save: True
         - require:
-            - pkg: iptables
+            - pkg: nftables
 
 
 # prevent tcp packets without a connection
 drop-confused-tcp-packets:
-    iptables.insert:
+    nftables.insert:
         - position: 3
         - table: filter
+        - family: inet
         - chain: INPUT
         - jump: DROP
         - proto: tcp
@@ -111,13 +117,14 @@ drop-confused-tcp-packets:
         - order: 5
         - save: True
         - require:
-            - pkg: iptables
+            - pkg: nftables
 
 
 iptables-default-allow-related-established-input:
-    iptables.insert:
+    nftables.insert:
         - position: 2
         - table: filter
+        - family: inet
         - chain: INPUT
         - jump: ACCEPT
         - match: state
@@ -125,13 +132,14 @@ iptables-default-allow-related-established-input:
         - order: 4  # this is order "2" so it executes together with basics.sls
         - save: True
         - require:
-            - pkg: iptables
+            - pkg: nftables
 
 
 iptables-default-allow-related-established-output:
-    iptables.insert:
+    nftables.insert:
         - position: 2
         - table: filter
+        - family: inet
         - chain: OUTPUT
         - jump: ACCEPT
         - match: state
@@ -139,14 +147,15 @@ iptables-default-allow-related-established-output:
         - order: 4  # this is order "2" so it executes together with basics.sls
         - save: True
         - require:
-            - pkg: iptables
+            - pkg: nftables
 
 
 iptables-default-allow-related-established-forward:
-    iptables.insert:
+    nftables.insert:
         # insert this right at the top, since we don't have preceding appends on the forward chain
         - position: 1
         - table: filter
+        - family: inet
         - chain: FORWARD
         - jump: ACCEPT
         - match: state
@@ -154,41 +163,79 @@ iptables-default-allow-related-established-forward:
         - order: 4  # this is order "2" so it executes together with basics.sls
         - save: True
         - require:
-            - pkg: iptables
+            - pkg: nftables
 
 
-
-iptables-default-input-drop:
+nftables-default-input-drop-ipv4:
     iptables.set_policy:
         - policy: DROP
         - table: filter
+        - family: ip4
         - chain: INPUT
         - order: 5
         - save: True
         - require:
-            - pkg: iptables
+            - pkg: nftables
 
 
-iptables-default-output-drop:
+nftables-default-input-drop-ipv6:
     iptables.set_policy:
         - policy: DROP
         - table: filter
+        - family: ip6
+        - chain: INPUT
+        - order: 5
+        - save: True
+        - require:
+            - pkg: nftables
+
+
+nftables-default-output-drop-ipv4:
+    iptables.set_policy:
+        - policy: DROP
+        - table: filter
+        - family: ip4
         - chain: OUTPUT
         - order: 5
         - save: True
         - require:
-            - pkg: iptables
+            - pkg: nftables
 
 
-iptables-default-forward-drop:
+nftables-default-output-drop-ipv6:
     iptables.set_policy:
         - policy: DROP
         - table: filter
+        - family: ip6
+        - chain: OUTPUT
+        - order: 5
+        - save: True
+        - require:
+            - pkg: nftables
+
+
+nftables-default-forward-drop-ipv4:
+    iptables.set_policy:
+        - policy: DROP
+        - table: filter
+        - family: ip4
         - chain: FORWARD
         - order: 5
         - save: True
         - require:
-            - pkg: iptables
+            - pkg: nftables
+
+
+nftables-default-forward-drop-ipv6:
+    iptables.set_policy:
+        - policy: DROP
+        - table: filter
+        - family: ip6
+        - chain: FORWARD
+        - order: 5
+        - save: True
+        - require:
+            - pkg: nftables
 
 
 enable-ipv4-forwarding:
@@ -200,6 +247,12 @@ enable-ipv4-forwarding:
 enable-ipv4-nonlocalbind:
     sysctl.present:
         - name: net.ipv4.ip_nonlocal_bind
+        - value: 1
+
+
+enable-ipv6-nonlocalbind:
+    sysctl.present:
+        - name: net.ipv6.ip_nonlocal_bind
         - value: 1
 
 

@@ -10,27 +10,29 @@
 
 {% if pillar["ifassign"].get("nat", False) %}
 vagrant-eth0-recv:
-    iptables.insert:
+    nftables.insert:
         - position: 2
         - table: filter
+        - family: inet
         - chain: INPUT
         - jump: ACCEPT
         - in-interface: {{pillar["ifassign"]["nat"]}}
         - order: 3
         - save: True
         - require:
-            - pkg: iptables
+            - pkg: nftables
 
 
 vagrant-eth0-send:
-    iptables.append:
+    nftables.append:
         - position: 1
         - table: filter
+        - family: inet
         - chain: OUTPUT
         - jump: ACCEPT
         - out-interface: {{pillar["ifassign"]["nat"]}}
         - order: 3
         - save: True
         - require:
-            - pkg: iptables
+            - pkg: nftables
 {% endif %}

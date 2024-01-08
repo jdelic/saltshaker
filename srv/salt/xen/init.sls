@@ -100,7 +100,7 @@ xen-forward-domUs:
         - destination: 0/0
         - save: True
         - require:
-            - sls: basics.iptables
+            - sls: basics.nftables
 
 
 xen-nat-domUs:
@@ -112,7 +112,7 @@ xen-nat-domUs:
         - destination: '! 10.0.1.0/24'
         - save: True
         - require:
-            - sls: basics.iptables
+            - sls: basics.nftables
 
 
 # vim: syntax=yaml

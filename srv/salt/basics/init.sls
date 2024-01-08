@@ -6,8 +6,8 @@
 
 
 # Some of the states in this file enforce special ordering to make sure that the firewall is configured to allow
-# access to the saltmaster before other states are executed that require such access. Notably iptables.init reserves
-# order 1, 2 and 3 for the netfilter baseline setup so we can make sure that rules are added in a certain order.
+# access to the saltmaster before other states are executed that require such access. Notably basics.nfiptables.init
+# reserves order 1 to 4 for the netfilter baseline setup so we can make sure that rules are added in a certain order.
 
 include:
     - .vim
@@ -15,7 +15,7 @@ include:
     - .salt-minion
     - .python
     - .python.apt
-    - .iptables  # forces "order: 1"
+    - .nftables  # forces "order: 1"
     - .crypto
     - .rsyslog
     - .nounup
@@ -202,7 +202,7 @@ openssh-in22-recv:
         - connstate: NEW
         - save: True
         - require:
-            - sls: basics.iptables
+            - sls: basics.nftables
         - order: 4
 
 
@@ -271,7 +271,7 @@ basics-internal-network-tcp:
         - save: True
         - order: 4
         - require:
-            - sls: basics.iptables
+            - sls: basics.nftables
 
 
 basics-internal-network-udp:
@@ -284,7 +284,7 @@ basics-internal-network-udp:
         - save: True
         - order: 4
         - require:
-            - sls: basics.iptables
+            - sls: basics.nftables
 
 
 # vim: syntax=yaml

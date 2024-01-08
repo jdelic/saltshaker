@@ -56,15 +56,15 @@ smartstack-external:
             - cmd: smartstack-external-sync
 
 
-# This is probably overkill, since consul-template already runs the smartstack script with --open-iptables=conntrack
-#smartstack-ensure-iptables-rules:
+# This is probably overkill, since consul-template already runs the smartstack script with --open-nftables=conntrack
+#smartstack-ensure-nftables-rules:
 #    cmd.run:
 #        - name: >
 #            /etc/consul/renders/smartstack-external.py
 #            --include tags=smartstack:external
-#            --open-iptables=conntrack
+#            --open-nftables=conntrack
 #            --smartstack-localip {{pillar.get('loadbalancer', {}).get('external-ip', grains['ip_interfaces'][pillar['ifassign']['external']][pillar['ifassign'].get('external-ip-index', 0)|int()])}}
-#            --only-iptables
+#            --only-nftables
 #        - require:
 #            - file: smartstack-external
 

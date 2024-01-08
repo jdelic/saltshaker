@@ -15,7 +15,7 @@
 
 include:
     - consul.sync
-    - basics.iptables  # this is a necessary dependency, absolving us from passing dependencies in targeted state.sls runs
+    - basics.nftables  # this is a necessary dependency, absolving us from passing dependencies in targeted state.sls runs
 {% if pillar['dynamicsecrets'].get('consul-acl-master-token', False) %}
     {# I didn't come up with a better idea to detect whether this runs on a consul.server or agent #}
     - consul.server

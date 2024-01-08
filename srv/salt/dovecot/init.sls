@@ -135,7 +135,7 @@ dovecot-in{{port}}-recv:
         - proto: tcp
         - save: True
         - require:
-            - sls: basics.iptables
+            - sls: basics.nftables
 {% endfor %}
 
 

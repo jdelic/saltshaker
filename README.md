@@ -460,12 +460,13 @@ individual machine managed through this saltshaker, only the connection
 creation needs to be managed in the machine's states.
 
 The naming standard for states that enable ports that get contacted is:
-`(servicename)-tcp-in(port)-recv`. For example:
+`(servicename)-tcp-in(port)-recv-{family}`. For example:
 
 ```yaml
-openssh-in22-recv:
+openssh-in22-recv-ipv6:
     iptables.append:
         - table: filter
+        - family: ip6
         - chain: INPUT
         - jump: ACCEPT
         - source: '0/0'
@@ -475,16 +476,17 @@ openssh-in22-recv:
         - connstate: NEW
         - save: True
         - require:
-            - sls: iptables
+            - sls: basics.nftables
 ```
 
 The naming standard for states that enable ports that initiate connections is:
-`(servicename)-tcp-out(port)-send`. For example:
+`(servicename)-tcp-out(port)-send-{family}`. For example:
 
 ```yaml
-dns-tcp-out53-send:
+dns-tcp-out53-send-ipv4:
       iptables.append:
           - table: filter
+          - family: ip4
           - chain: OUTPUT
           - jump: ACCEPT
           - destination: '0/0'

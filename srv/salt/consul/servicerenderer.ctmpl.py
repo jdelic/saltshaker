@@ -35,7 +35,7 @@
 # {% endfor %}
 # */}}
 #
-# If run as root, it can also call /sbin/iptables and create all necessary
+# If run as root, it can also call /sbin/nftables and create all necessary
 # INPUT and OUTPUT rules for incoming connections based of the
 # smartstack:protocol and smartstack:extport tags.
 #
@@ -395,7 +395,7 @@ def _setup_iptables(services, ip, mode, debug=False, verbose=False):
 
         if not _extports:
             print("no external port (smartstack:extport:) for service %s, or no well-known protocol in "
-                  "'smartstack:protocol:' so not creating iptables rule" % svc.name,
+                  "'smartstack:protocol:' so not creating nftables rule" % svc.name,
                   file=sys.stderr)
             continue
 
@@ -415,29 +415,29 @@ def _setup_iptables(services, ip, mode, debug=False, verbose=False):
 
             if input_rule:
                 if debug:
-                    print("%s: %s" % (svc.name, " ".join(["/sbin/iptables", "-A"] + input_rule)))
+                    print("%s: %s" % (svc.name, " ".join(["/sbin/nftables", "-A"] + input_rule)))
                 else:
                     try:
-                        # check if the rule exists first... iptables wille exit with 0 if it does
-                        # also, suppress output (if the rule doesn't exist iptables will print "bad rule", which is
+                        # check if the rule exists first... nftables wille exit with 0 if it does
+                        # also, suppress output (if the rule doesn't exist nftables will print "bad rule", which is
                         # pretty confusing
                         with open(os.devnull, "w") as devnull:
-                            subprocess.check_call(["/sbin/iptables", "-C"] + input_rule, stdout=devnull, stderr=devnull)
+                            subprocess.check_call(["/sbin/nftables", "-C"] + input_rule, stdout=devnull, stderr=devnull)
                     except subprocess.CalledProcessError as e:
                         if e.returncode == 1:
-                            subprocess.call(["/sbin/iptables", "-A"] + input_rule)
+                            subprocess.call(["/sbin/nftables", "-A"] + input_rule)
                     else:
                         if verbose:
                             print("%s: INPUT rule exists" % svc.name, file=sys.stderr)
             if output_rule:
                 if debug:
-                    print("%s: %s" % (svc.name, " ".join(["/sbin/iptables", "-A"] + output_rule)))
+                    print("%s: %s" % (svc.name, " ".join(["/sbin/nftables", "-A"] + output_rule)))
                 else:
                     try:
-                        subprocess.check_call(["/sbin/iptables", "-C"] + output_rule)
+                        subprocess.check_call(["/sbin/nftables", "-C"] + output_rule)
                     except subprocess.CalledProcessError as e:
                         if e.returncode == 1:
-                            subprocess.call(["/sbin/iptables", "-A"] + output_rule)
+                            subprocess.call(["/sbin/nftables", "-A"] + output_rule)
                     else:
                         if verbose:
                             print("%s: OUTPUT rule exists" % svc.name, file=sys.stderr)
@@ -446,9 +446,9 @@ def _setup_iptables(services, ip, mode, debug=False, verbose=False):
 def main():
     global _args
     preparser = argparse.ArgumentParser(add_help=False)
-    preparser.add_argument("--only-iptables", dest="only_iptables", default=False, action="store_true",
+    preparser.add_argument("--only-nftables", dest="only_iptables", default=False, action="store_true",
                            help=argparse.SUPPRESS)
-    preparser.add_argument("--debug-iptables", dest="debug_iptables", default=False, action="store_true",
+    preparser.add_argument("--debug-nftables", dest="debug_iptables", default=False, action="store_true",
                            help=argparse.SUPPRESS)
     args, _ = preparser.parse_known_args()
 
@@ -487,18 +487,18 @@ def main():
     parser.add_argument("--smartstack-localip", dest="localip", default="127.0.0.1",
                         help="Sets the local ip address all smartstack services should bind to. This is passed to the"
                              "template as the 'localip' variable. (Default: 127.0.0.1)")
-    parser.add_argument("--open-iptables", dest="open_iptables", default=None, choices=["conntrack", "plain"],
-                        help="When this is set, this program will append iptables rules to the INPUT and OUTPUT chains "
+    parser.add_argument("--open-nftables", dest="open_iptables", default=None, choices=["conntrack", "plain"],
+                        help="When this is set, this program will append nftables rules to the INPUT and OUTPUT chains "
                              "for all services it renders on the IP provided by --smartstack-localip. 'plain' will set "
                              "up plain INPUT and OUTPUT rules from anywhere to everywhere and vice versa. 'conntrack' "
-                             "will only set up rules for NEW incoming connections, assuming that your default iptables "
-                             "ruleset allows RELATED incoming and outgoing traffic. The iptables rules will be set up "
+                             "will only set up rules for NEW incoming connections, assuming that your default nftables "
+                             "ruleset allows RELATED incoming and outgoing traffic. The nftables rules will be set up "
                              "before [command] is executed.")
-    parser.add_argument("--only-iptables", dest="only_iptables", default=False, action="store_true",
-                        help="Use this parameter to only set up iptables rules, and not do anything else. No templates "
+    parser.add_argument("--only-nftables", dest="only_iptables", default=False, action="store_true",
+                        help="Use this parameter to only set up nftables rules, and not do anything else. No templates "
                              "will be rendered and no commands executed.")
-    parser.add_argument("--debug-iptables", dest="debug_iptables", default=None, choices=["conntrack", "plain"],
-                        help="Like --only-iptables, but output the rules to stdout instead of executing them.")
+    parser.add_argument("--debug-nftables", dest="debug_iptables", default=None, choices=["conntrack", "plain"],
+                        help="Like --only-nftables, but output the rules to stdout instead of executing them.")
     parser.add_argument("-D", "--define", dest="defines", action="append", default=[],
                         help="Define a template variable for the rendering in the form 'varname=value'. 'varname' will "
                              "be added directly to the Jinja rendering context. Setting 'varname' multiple times will "
@@ -510,7 +510,7 @@ def main():
 
     if _args.open_iptables:
         if os.getuid() != 0:
-            print("Must run as root if --open-iptables is used")
+            print("Must run as root if --open-nftables is used")
             sys.exit(1)
 
     add_params = {}
