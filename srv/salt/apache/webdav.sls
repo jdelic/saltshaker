@@ -157,10 +157,11 @@ apache2-webdav-add-port-{{port}}:
             - file: apache2-ports-config
 
 
-apache2-webdav-tcp-in{{port}}-recv:
-    iptables.append:
+apache2-webdav-tcp-in{{port}}-recv-ipv4:
+    nftables.append:
         - table: filter
         - chain: INPUT
+        - family: ip4
         - jump: ACCEPT
         - source: '0/0'
         - destination: {{ip}}/32

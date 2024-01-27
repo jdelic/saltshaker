@@ -58,27 +58,30 @@ docker-pdns-recursor-cidr:
 
 # enable encryption for overlay nets
 docker-overlaynet-enable-protocol50-in:
-    iptables.append:
+    nftables.append:
         - table: filter
         - chain: INPUT
+        - family: inet
         - jump: ACCEPT
         - in-interface: {{pillar['ifassign']['internal']}}
         - proto: 50
 
 
 docker-overlaynet-enable-protocol50-out:
-    iptables.append:
+    nftables.append:
         - table: filter
         - chain: OUTPUT
+        - family: inet
         - jump: ACCEPT
         - out-interface: {{pillar['ifassign']['internal']}}
         - proto: 50
 
 
 docker-overlaynet-udp-in4789-recv:
-    iptables.append:
+    nftables.append:
         - table: filter
         - chain: INPUT
+        - family: inet
         - jump: ACCEPT
         - in-interface: {{pillar['ifassign']['internal']}}
         - dport: 4789
@@ -89,9 +92,10 @@ docker-overlaynet-udp-in4789-recv:
 
 
 docker-overlaynet-udp-in4789-send:
-    iptables.append:
+    nftables.append:
         - table: filter
         - chain: OUTPUT
+        - family: inet
         - jump: ACCEPT
         - out-interface: {{pillar['ifassign']['internal']}}
         - sport: 4789
@@ -102,9 +106,10 @@ docker-overlaynet-udp-in4789-send:
 
 
 docker-tcp-in7946-recv:
-    iptables.append:
+    nftables.append:
         - table: filter
         - chain: INPUT
+        - family: inet
         - jump: ACCEPT
         - in-interface: {{pillar['ifassign']['internal']}}
         - dport: 7946
@@ -117,9 +122,10 @@ docker-tcp-in7946-recv:
 
 
 docker-tcp-out7946-send:
-    iptables.append:
+    nftables.append:
         - table: filter
         - chain: OUTPUT
+        - family: inet
         - jump: ACCEPT
         - out-interface: {{pillar['ifassign']['internal']}}
         - dport: 7946
@@ -132,9 +138,10 @@ docker-tcp-out7946-send:
 
 
 docker-tcp-in2377-recv:
-    iptables.append:
+    nftables.append:
         - table: filter
         - chain: INPUT
+        - family: inet
         - jump: ACCEPT
         - in-interface: {{pillar['ifassign']['internal']}}
         - dport: 2377
@@ -147,9 +154,10 @@ docker-tcp-in2377-recv:
 
 
 docker-tcp-out2377-send:
-    iptables.append:
+    nftables.append:
         - table: filter
         - chain: OUTPUT
+        - family: inet
         - jump: ACCEPT
         - out-interface: {{pillar['ifassign']['internal']}}
         - dport: 2377

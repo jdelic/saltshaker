@@ -332,10 +332,11 @@ fly-link-teams:
             - file: fly-install
 
 
-concourse-tcp-in{{pillar.get('concourse-server', {}).get('tsa-port', 2222)}}-recv:
-    iptables.append:
+concourse-tcp-in{{pillar.get('concourse-server', {}).get('tsa-port', 2222)}}-recv-ipv4:
+    nftables.append:
         - table: filter
         - chain: INPUT
+        - family: ip4
         - jump: ACCEPT
         - source: '0/0'
         - destination: {{pillar.get('concourse-server', {}).get('tsa-internal-ip',
@@ -350,10 +351,11 @@ concourse-tcp-in{{pillar.get('concourse-server', {}).get('tsa-port', 2222)}}-rec
             - sls: basics.nftables
 
 
-concourse-tcp-in{{pillar.get('concourse-server', {}).get('atc-port', 8080)}}-recv:
+concourse-tcp-in{{pillar.get('concourse-server', {}).get('atc-port', 8080)}}-recv-ipv4:
     iptables.append:
         - table: filter
         - chain: INPUT
+        - family: ip4
         - jump: ACCEPT
         - source: '0/0'
         - destination: {{pillar.get('concourse-server', {}).get('atc-ip',
@@ -369,10 +371,11 @@ concourse-tcp-in{{pillar.get('concourse-server', {}).get('atc-port', 8080)}}-rec
 
 
 # allow us to talk to others
-concourse-tcp-out{{pillar.get('concourse-server', {}).get('atc-port', 8080)}}-send:
+concourse-tcp-out{{pillar.get('concourse-server', {}).get('atc-port', 8080)}}-send-ipv4:
     iptables.append:
         - table: filter
         - chain: OUTPUT
+        - family: ip4
         - jump: ACCEPT
         - source: {{pillar.get('concourse-server', {}).get('atc-ip',
                       grains['ip_interfaces'][pillar['ifassign']['internal']][pillar['ifassign'].get(
