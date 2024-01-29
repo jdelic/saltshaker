@@ -25,9 +25,9 @@ repos:
 
 urls:
     acme: https://github.com/acmesh-official/acme.sh/archive/refs/tags/3.0.4.zip
-    concourse: https://github.com/concourse/concourse/releases/download/v7.11.0/concourse-7.11.0-linux-amd64.tgz
-    concourse-fly: https://github.com/concourse/concourse/releases/download/v7.11.0/fly-7.11.0-linux-amd64.tgz
-    consul: https://releases.hashicorp.com/consul/1.17.1/consul_1.17.1_linux_amd64.zip
+    concourse: https://github.com/concourse/concourse/releases/download/v7.11.1/concourse-7.11.1-linux-amd64.tgz
+    concourse-fly: https://github.com/concourse/concourse/releases/download/v7.11.1/fly-7.11.1-linux-amd64.tgz
+    consul: https://releases.hashicorp.com/consul/1.17.2/consul_1.17.2_linux_amd64.zip
     consul-esm: https://releases.hashicorp.com/consul-esm/0.7.1/consul-esm_0.7.1_linux_amd64.zip
     consul-replicate: https://releases.hashicorp.com/consul-replicate/0.4.0/consul-replicate_0.4.0_linux_amd64.zip
     consul-template: https://releases.hashicorp.com/consul-template/0.35.0/consul-template_0.35.0_linux_amd64.zip
@@ -43,9 +43,9 @@ urls:
 
 hashes:
     acme: sha256=8f02886f809df01ef79ef3314f09876b04cc144a9460d4e5755a32bcb2dc1c84
-    concourse: sha256=ef75c157c15b4672e432ab6eea8cbc0d6db600747a0f0ec0f3c6536c9ff8eb25
-    concourse-fly: sha256=c49a654eadbdf190799393fa03fe264ccb41302153e3b6208f32de5092334f57
-    consul: sha256=388889321d6aaf389ee87acc247ea9885e684a1581c8ebfbeab7348abd7c0214
+    concourse: sha256=fa48ad44c6973e6537e54f9e586f1d9ccb14526b216c3788eaee3290b07df0be
+    concourse-fly: sha256=7ac3fda96ae193bee95f92fdbc9decfc563cd14393882e47520ab67fa1a075f5
+    consul: sha256=e16489849b3b203251d93fef94d60600b59cb776c11b66959786e3484d336381
     consul-esm: sha256=bc1d8c351d277bb1e93d3d2a209b9282ee5d84e3a82ce3c38281f40318b5268f
     consul-replicate: sha256=96c6651291c2f8e75d98d04b9b4653d8a02324edaa25783744d9ea1d8d411c61
     consul-template: sha256=1b1c9127e8da25b2d7322e6f2aa8e6d946336083999e0fdb321f96ffd447eebd
