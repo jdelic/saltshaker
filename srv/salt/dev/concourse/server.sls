@@ -352,7 +352,7 @@ concourse-tcp-in{{pillar.get('concourse-server', {}).get('tsa-port', 2222)}}-rec
 
 
 concourse-tcp-in{{pillar.get('concourse-server', {}).get('atc-port', 8080)}}-recv-ipv4:
-    iptables.append:
+    nftables.append:
         - table: filter
         - chain: INPUT
         - family: ip4
@@ -372,7 +372,7 @@ concourse-tcp-in{{pillar.get('concourse-server', {}).get('atc-port', 8080)}}-rec
 
 # allow us to talk to others
 concourse-tcp-out{{pillar.get('concourse-server', {}).get('atc-port', 8080)}}-send-ipv4:
-    iptables.append:
+    nftables.append:
         - table: filter
         - chain: OUTPUT
         - family: ip4

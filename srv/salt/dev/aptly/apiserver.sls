@@ -92,9 +92,10 @@ aptly-servicedef:
 
 
 aptly-tcp-in{{port}}-recv:
-    iptables.append:
+    nftables.append:
         - table: filter
         - chain: INPUT
+        - family: ip4
         - jump: ACCEPT
         - source: '0/0'
         - destination: {{ip}}

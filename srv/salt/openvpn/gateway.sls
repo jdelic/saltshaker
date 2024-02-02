@@ -62,20 +62,19 @@ openvpn-udp-gateway-conf:
             - file: {{pillar['ssl']['service-rootca-cert']}}
 
 
+{% set bind_ip = pillar.get('openvpn', {}).get('bind-ip',
+                    grains['ip_interfaces'][pillar['ifassign']['external']][pillar['ifassign'].get(
+                        'external-ip-index', 0)|int()])}}
+
 openvpn-tcp-gateway-conf:
     file.managed:
         - name: /etc/openvpn/server/gateway-tcp.conf
         - source: salt://openvpn/gateway.jinja.conf
         - template: jinja
         - context:
-            server_ip: >
-                {{pillar.get('openvpn', {}).get('bind-ip',
-                    grains['ip_interfaces'][pillar['ifassign']['external']][pillar['ifassign'].get(
-                        'external-ip-index', 0
-                    )|int()]
-                )}}
+            server_ip: {{bind_ip}}
             server_port: 1194
-            proto: tcp
+            proto: {{ "tcp6" if (bind_ip | is_ipv6) else "tcp" }}
             basenet: 10.0.253.0
             dns: 10.0.253.1
             capath: {{pillar['ssl']['service-rootca-cert']}}

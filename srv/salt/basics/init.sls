@@ -190,10 +190,11 @@ trigger-minion-sync:
 
 
 # always allow ssh in
-openssh-in22-recv:
-    iptables.append:
+openssh-in22-recv-ipv4:
+    nftables.append:
         - table: filter
         - chain: INPUT
+        - family: ip4
         - jump: ACCEPT
         - source: '0/0'
         - proto: tcp
@@ -217,10 +218,26 @@ openssh-in22-recv:
 
 {% for port in tcp %}
 # allow us to contact others on ports
-basics-tcp-out{{port}}-send:
-    iptables.append:
+basics-tcp-out{{port}}-send-ipv4:
+    nftables.append:
         - table: filter
         - chain: OUTPUT
+        - family: ip4
+        - jump: ACCEPT
+        - destination: '0/0'
+        - dport: {{port}}
+        - match: state
+        - connstate: NEW
+        - proto: tcp
+        - save: True
+        - order: 4
+
+
+basics-tcp-out{{port}}-send-ipv6:
+    nftables.append:
+        - table: filter
+        - chain: OUTPUT
+        - family: ip6
         - jump: ACCEPT
         - destination: '0/0'
         - dport: {{port}}
@@ -235,9 +252,10 @@ basics-tcp-out{{port}}-send:
 {% for port in udp %}
 # allow others to answer. For UDP we make this stateless here to guarantee it works.
 basics-udp-out{{port}}-recv:
-    iptables.append:
+    nftables.append:
         - table: filter
         - chain: INPUT
+        - family: inet
         - jump: ACCEPT
         - proto: udp
         - sport: {{port}}
@@ -247,9 +265,10 @@ basics-udp-out{{port}}-recv:
 
 # allow us to talk to others. For UDP we make this stateless here to guarantee it works.
 basics-udp-out{{port}}-send:
-    iptables.append:
+    nftables.append:
         - table: filter
         - chain: OUTPUT
+        - family: inet
         - jump: ACCEPT
         - proto: udp
         - dport: {{port}}
@@ -259,10 +278,11 @@ basics-udp-out{{port}}-send:
 
 
 # OPEN THE INTERNAL NETWORK FOR OUTGOING CONNECTIONS =========================
-basics-internal-network-tcp:
-    iptables.append:
+basics-internal-network-tcp-ipv4:
+    nftables.append:
         - table: filter
         - chain: OUTPUT
+        - family: ip4
         - jump: ACCEPT
         - out-interface: {{pillar['ifassign']['internal']}}
         - match: state
@@ -274,10 +294,11 @@ basics-internal-network-tcp:
             - sls: basics.nftables
 
 
-basics-internal-network-udp:
-    iptables.append:
+basics-internal-network-udp-ipv4:
+    nftables.append:
         - table: filter
         - chain: OUTPUT
+        - family: ip4
         - jump: ACCEPT
         - out-interface: {{pillar['ifassign']['internal']}}
         - proto: udp

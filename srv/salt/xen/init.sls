@@ -92,9 +92,10 @@ xen-bridge-interfaces:
 
 
 xen-forward-domUs:
-    iptables.append:
+    nftables.append:
         - table: filter
         - chain: FORWARD
+        - family: inet
         - jump: ACCEPT
         - source: 10.0.1.0/24
         - destination: 0/0
@@ -103,16 +104,36 @@ xen-forward-domUs:
             - sls: basics.nftables
 
 
+xen-nat-table:
+    nftables.table_present:
+        - table: nat
+        - family: ip4
+
+
+xen-nat-postrouting-chain:
+    nftables.chain_present:
+        - name: POSTROUTING
+        - table: nat
+        - table_type: nat
+        - family: ip4
+        - hook: postrouting
+        - priority: 100
+        - require:
+            - nftables: xen-nat-table
+
+
 xen-nat-domUs:
-    iptables.append:
+    nftables.append:
         - table: nat
         - chain: POSTROUTING
+        - family: ip4
         - jump: MASQUERADE
         - source: 10.0.1.0/24
         - destination: '! 10.0.1.0/24'
         - save: True
         - require:
             - sls: basics.nftables
+            - nftables: xen-nat-postrouting-chain
 
 
 # vim: syntax=yaml

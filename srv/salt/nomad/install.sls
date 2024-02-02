@@ -98,10 +98,11 @@ nomad-service:
 # open nomad ports TCP https://www.nomadproject.io/docs/cluster/requirements.html
 {% for port in ['4646', '4647', '4648'] %}
 # allow others to talk to us
-nomad-tcp-in{{port}}-recv:
-    iptables.append:
+nomad-tcp-in{{port}}-recv-ipv4:
+    nftables.append:
         - table: filter
         - chain: INPUT
+        - family: ip4
         - jump: ACCEPT
         - in-interface: {{pillar['ifassign']['internal']}}
         - dport: {{port}}
@@ -114,10 +115,11 @@ nomad-tcp-in{{port}}-recv:
 
 
 # allow us to talk to others
-nomad-tcp-out{{port}}-send:
-    iptables.append:
+nomad-tcp-out{{port}}-send-ipv4:
+    nftables.append:
         - table: filter
         - chain: OUTPUT
+        - family: ip4
         - jump: ACCEPT
         - out-interface: {{pillar['ifassign']['internal']}}
         - dport: {{port}}
@@ -130,10 +132,11 @@ nomad-tcp-out{{port}}-send:
 {% endfor %}
 
 
-nomad-udp-in4648-recv:
-    iptables.append:
+nomad-udp-in4648-recv-ipv4:
+    nftables.append:
         - table: filter
         - chain: INPUT
+        - family: ip4
         - jump: ACCEPT
         - in-interface: {{pillar['ifassign']['internal']}}
         - dport: 4648
@@ -143,10 +146,11 @@ nomad-udp-in4648-recv:
             - sls: basics.nftables
 
 
-nomad-udp-in4648-send:
-    iptables.append:
+nomad-udp-in4648-send-ipv4:
+    nftables.append:
         - table: filter
         - chain: OUTPUT
+        - family: ip4
         - jump: ACCEPT
         - out-interface: {{pillar['ifassign']['internal']}}
         - sport: 4648

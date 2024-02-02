@@ -20,10 +20,11 @@ saltmaster-backup-symlink:
 
 {% for port in ['4505', '4506'] %}
 # allow the internal network to talk to us
-saltmaster-tcp-in{{port}}-recv:
-    iptables.append:
+saltmaster-tcp-in{{port}}-recv-ipv4:
+    nftables.append:
         - table: filter
         - chain: INPUT
+        - family: ip4
         - jump: ACCEPT
         - in-interface: {{pillar['ifassign']['internal']}}
         - dport: {{port}}
