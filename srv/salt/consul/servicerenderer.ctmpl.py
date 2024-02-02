@@ -473,7 +473,12 @@ def _check_nftables_rule(table: str, chain: str, rule: List[str | Tuple[str, ...
     components = [f"{' '.join(part)}" for part in rule if isinstance(part, tuple)]
     nft_output_lines = nft_output.split("\n")
     for line in nft_output_lines:
-        if all(component in line for component in components):
+        match = True
+        for component in components:
+            if component not in line:
+                match = False
+                break
+        if match:
             return True
     return False
 
