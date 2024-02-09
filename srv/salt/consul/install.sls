@@ -180,11 +180,12 @@ consul-rsyslog:
 
 
 # open consul interface
-consul-all-in-recv:
-    iptables.insert:
+consul-all-in-recv-ipv4:
+    nftables.insert:
         - position: 2
         - table: filter
         - chain: INPUT
+        - family: ip4
         - jump: ACCEPT
         - destination: 169.254.1.1
         - save: True
@@ -198,11 +199,12 @@ consul-all-in-recv:
 # open consul ports TCP
 {% for port in ['8300', '8301', '8302', '8400', '8500', '8600'] %}
 # allow others to talk to us
-consul-tcp-in{{port}}-recv:
-    iptables.append:
+consul-tcp-in{{port}}-recv-ipv4:
+    nftables.append:
         - table: filter
         - chain: INPUT
         - jump: ACCEPT
+        - family: ip4
         - in-interface: {{pillar['ifassign']['internal']}}
         - dport: {{port}}
         - proto: tcp
@@ -219,9 +221,10 @@ consul-tcp-in{{port}}-recv:
 # open consul ports UDP
 {% for port in ['8301', '8302', '8600'] %}
 consul-udp-in{{port}}-recv:
-    iptables.append:
+    nftables.append:
         - table: filter
         - chain: INPUT
+        - family: ip4
         - jump: ACCEPT
         - in-interface: {{pillar['ifassign']['internal']}}
         - dport: {{port}}
