@@ -377,7 +377,7 @@ opensmtpd-servicedef-internal:
             - file: consul-service-dir
 
 
-{% for svc in ['receiver', 'relay', 'internal_relay'] %}
+{% for svc in ['receiver', 'internal_relay'] %}
     {% if opensmtpd_ips['ipv4'][svc] %}
 opensmtpd-{{svc}}-tcp-in25-recv-ipv4:
     nftables.append:
@@ -415,15 +415,16 @@ opensmtpd-{{svc}}-tcp-in25-recv-ipv6:
 {% endfor %}
 
 
-{% if opensmtpd_ips['ipv4']['relay'] %}
-opensmtpd-relay-tcp-in465-recv-ipv4:
+{% for svc in ['relay', 'receiver'] %}
+    {% if opensmtpd_ips['ipv4'][svc] %}
+opensmtpd-{{svc}}-tcp-in465-recv-ipv4:
     nftables.append:
         - table: filter
         - chain: INPUT
         - family: ip4
         - jump: ACCEPT
         - source: '0/0'
-        - destination: {{opensmtpd_ips['ipv4']['relay']}}/32
+        - destination: {{opensmtpd_ips['ipv4'][svc]}}/32
         - dport: 465
         - match: state
         - connstate: NEW
@@ -431,16 +432,16 @@ opensmtpd-relay-tcp-in465-recv-ipv4:
         - save: True
         - require:
             - sls: basics.nftables
-{% endif %}
-{% if opensmtpd_ips['ipv6']['relay'] %}
-opensmtpd-relay-tcp-in465-recv-ipv6:
+    {% endif %}
+    {% if opensmtpd_ips['ipv6'][svc] %}
+opensmtpd-{{svc}}-tcp-in465-recv-ipv6:
     nftables.append:
         - table: filter
         - chain: INPUT
         - family: ip6
         - jump: ACCEPT
         - source: '0/0'
-        - destination: {{opensmtpd_ips['ipv6']['relay']}}/128
+        - destination: {{opensmtpd_ips['ipv6'][svc]}}/128
         - dport: 465
         - match: state
         - connstate: NEW
@@ -448,42 +449,9 @@ opensmtpd-relay-tcp-in465-recv-ipv6:
         - save: True
         - require:
             - sls: basics.nftables
-{% endif %}
+    {% endif %}
+{% endfor %}
 
-{% if opensmtpd_ips['ipv4']['receiver'] %}
-opensmtpd-receiver-tcp-in465-recv-ipv4:
-    nftables.append:
-        - table: filter
-        - chain: INPUT
-        - family: ip4
-        - jump: ACCEPT
-        - source: '0/0'
-        - destination: {{opensmtpd_ips['ipv4']['receiver']}}/32
-        - dport: 465
-        - match: state
-        - connstate: NEW
-        - proto: tcp
-        - save: True
-        - require:
-            - sls: basics.nftables
-{% endif %}
-{% if opensmtpd_ips['ipv6']['receiver'] %}
-opensmtpd-receiver-tcp-in465-recv-ipv4:
-    nftables.append:
-        - table: filter
-        - chain: INPUT
-        - family: ip6
-        - jump: ACCEPT
-        - source: '0/0'
-        - destination: {{opensmtpd_ips['ipv6']['receiver']}}/128
-        - dport: 465
-        - match: state
-        - connstate: NEW
-        - proto: tcp
-        - save: True
-        - require:
-            - sls: basics.nftables
-{% endif %}
 
 {% if pillar["smtp-outgoing"].get("bind-ipv4", True) %}
 opensmtpd-relay-out25-send-ipv4:
