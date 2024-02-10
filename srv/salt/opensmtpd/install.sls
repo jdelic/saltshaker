@@ -243,9 +243,9 @@ opensmtpd-config:
             receiver_hostname: {{pillar['smtp-incoming']['hostname']}}
             relay_hostname: {{pillar['smtp-outgoing']['hostname']}}
             internal_relay_hostname: {{pillar['smtp']['smartstack-hostname']}}
-            receiver_ips: [{{opensmtpd_ips['receiver']['ipv4']}}, {{opensmtpd_ips['receiver']['ipv6']}}]
-            relay_ips: [{{opensmtpd_ips['relay']['ipv4']}}, {{opensmtpd_ips['relay']['ipv6']}}]
-            internal_relay_ips: [{{opensmtpd_ips['internal_relay']['ipv4']}}, {{opensmtpd_ips['internal_relay']['ipv6']}}]
+            receiver_ips: ["{{opensmtpd_ips['receiver']['ipv4']}}", "{{opensmtpd_ips['receiver']['ipv6']}}"]
+            relay_ips: ["{{opensmtpd_ips['relay']['ipv4']}}", "{{opensmtpd_ips['relay']['ipv6']}}"]
+            internal_relay_ips: ["{{opensmtpd_ips['internal_relay']['ipv4']}}", "{{opensmtpd_ips['internal_relay']['ipv6']}}"]
             receiver_certfile: >
                 {% if pillar['smtp']['receiver']['sslcert'] == 'default' -%}
                     {{pillar['ssl']['filenames']['default-cert-combined']}}
