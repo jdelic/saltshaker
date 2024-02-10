@@ -539,7 +539,7 @@ opensmtpd-relay-out25-send-ipv6:
 
 
 opensmtpd-relay-out465-send-ipv6:
-    iptables.append:
+    nftables.append:
         - table: filter
         - chain: OUTPUT
         - family: ip6
