@@ -49,6 +49,13 @@ def ip(d)
     end
 end
 
+def ip6(d)
+    if OS.windows?
+        "fd00:56::" + d
+    else
+        "fd00:123::" + d
+    end
+end
 
 # When I'm on a train or plane I like to use a local Debian mirror that I run off a Micro SD Card.
 # The shell script below sets a Debian VM to load everything from there when you set $local_provision
