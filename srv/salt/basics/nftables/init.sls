@@ -332,7 +332,7 @@ drop-confused-tcp-packets-ipv6:
             - pkg: nftables
 
 
-iptables-default-allow-related-established-input-ipv4:
+nftables-default-allow-related-established-input-ipv4:
     nftables.insert:
         - position: 2
         - table: filter
@@ -346,7 +346,7 @@ iptables-default-allow-related-established-input-ipv4:
         - require:
             - pkg: nftables
 
-iptables-default-allow-related-established-input-ipv6:
+nftables-default-allow-related-established-input-ipv6:
     nftables.insert:
         - position: 2
         - table: filter
@@ -361,7 +361,7 @@ iptables-default-allow-related-established-input-ipv6:
             - pkg: nftables
 
 
-iptables-default-allow-related-established-output-ipv4:
+nftables-default-allow-related-established-output-ipv4:
     nftables.insert:
         - position: 2
         - table: filter
@@ -375,7 +375,7 @@ iptables-default-allow-related-established-output-ipv4:
         - require:
             - pkg: nftables
 
-iptables-default-allow-related-established-output-ipv6:
+nftables-default-allow-related-established-output-ipv6:
     nftables.insert:
         - position: 2
         - table: filter
@@ -390,7 +390,7 @@ iptables-default-allow-related-established-output-ipv6:
             - pkg: nftables
 
 
-iptables-default-allow-related-established-forward-ipv4:
+nftables-default-allow-related-established-forward-ipv4:
     nftables.insert:
         # insert this right at the top, since we don't have preceding appends on the forward chain
         - position: 1
@@ -405,7 +405,7 @@ iptables-default-allow-related-established-forward-ipv4:
         - require:
             - pkg: nftables
 
-iptables-default-allow-related-established-forward-ipv6:
+nftables-default-allow-related-established-forward-ipv6:
     nftables.insert:
         # insert this right at the top, since we don't have preceding appends on the forward chain
         - position: 1
@@ -422,7 +422,7 @@ iptables-default-allow-related-established-forward-ipv6:
 
 
 nftables-default-input-drop-ipv4:
-    iptables.set_policy:
+    nftables.set_policy:
         - policy: drop
         - table: filter
         - family: ip4
@@ -434,7 +434,7 @@ nftables-default-input-drop-ipv4:
 
 
 nftables-default-input-drop-ipv6:
-    iptables.set_policy:
+    nftables.set_policy:
         - policy: drop
         - table: filter
         - family: ip6
@@ -446,7 +446,7 @@ nftables-default-input-drop-ipv6:
 
 
 nftables-default-output-drop-ipv4:
-    iptables.set_policy:
+    nftables.set_policy:
         - policy: drop
         - table: filter
         - family: ip4
@@ -458,7 +458,7 @@ nftables-default-output-drop-ipv4:
 
 
 nftables-default-output-drop-ipv6:
-    iptables.set_policy:
+    nftables.set_policy:
         - policy: drop
         - table: filter
         - family: ip6
@@ -470,7 +470,7 @@ nftables-default-output-drop-ipv6:
 
 
 nftables-default-forward-drop-ipv4:
-    iptables.set_policy:
+    nftables.set_policy:
         - policy: drop
         - table: filter
         - family: ip4
@@ -482,7 +482,7 @@ nftables-default-forward-drop-ipv4:
 
 
 nftables-default-forward-drop-ipv6:
-    iptables.set_policy:
+    nftables.set_policy:
         - policy: drop
         - table: filter
         - family: ip6
