@@ -337,14 +337,14 @@ concourse-tcp-in{{pillar.get('concourse-server', {}).get('tsa-port', 2222)}}-rec
         - table: filter
         - chain: INPUT
         - family: ip4
-        - jump: ACCEPT
+        - jump: accept
         - source: '0/0'
         - destination: {{pillar.get('concourse-server', {}).get('tsa-internal-ip',
                            grains['ip_interfaces'][pillar['ifassign']['internal']][pillar['ifassign'].get(
                                'internal-ip-index', 0)|int()])}}
         - dport: {{pillar.get('concourse-server', {}).get('tsa-port', 2222)}}
         - match: state
-        - connstate: NEW
+        - connstate: new
         - proto: tcp
         - save: True
         - require:
@@ -356,14 +356,14 @@ concourse-tcp-in{{pillar.get('concourse-server', {}).get('atc-port', 8080)}}-rec
         - table: filter
         - chain: INPUT
         - family: ip4
-        - jump: ACCEPT
+        - jump: accept
         - source: '0/0'
         - destination: {{pillar.get('concourse-server', {}).get('atc-ip',
                            grains['ip_interfaces'][pillar['ifassign']['internal']][pillar['ifassign'].get(
                                'internal-ip-index', 0)|int()])}}
         - dport: {{pillar.get('concourse-server', {}).get('atc-port', 8080)}}
         - match: state
-        - connstate: NEW
+        - connstate: new
         - proto: tcp
         - save: True
         - require:
@@ -376,14 +376,14 @@ concourse-tcp-out{{pillar.get('concourse-server', {}).get('atc-port', 8080)}}-se
         - table: filter
         - chain: OUTPUT
         - family: ip4
-        - jump: ACCEPT
+        - jump: accept
         - source: {{pillar.get('concourse-server', {}).get('atc-ip',
                       grains['ip_interfaces'][pillar['ifassign']['internal']][pillar['ifassign'].get(
                           'internal-ip-index', 0)|int()])}}
         - sport: {{pillar.get('concourse-server', {}).get('atc-port', 8080)}}
         - destination: '0/0'
         - match: state
-        - connstate: NEW
+        - connstate: new
         - proto: tcp
         - save: True
         - require:

@@ -565,11 +565,11 @@ vault-tcp8200-recv-ipv4:
         - table: filter
         - chain: INPUT
         - family: ip4
-        - jump: ACCEPT
+        - jump: accept
         - in-interface: {{pillar['ifassign']['internal']}}
         - dport: 8200
         - match: state
-        - connstate: NEW
+        - connstate: new
         - proto: tcp
         - save: True
         - require:

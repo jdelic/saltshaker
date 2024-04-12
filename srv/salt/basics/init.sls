@@ -195,12 +195,12 @@ openssh-in22-recv-ipv4:
         - table: filter
         - chain: INPUT
         - family: ip4
-        - jump: ACCEPT
+        - jump: accept
         - source: '0/0'
         - proto: tcp
         - dport: 22
         - match: state
-        - connstate: NEW
+        - connstate: new
         - save: True
         - require:
             - sls: basics.nftables
@@ -223,11 +223,11 @@ basics-tcp-out{{port}}-send-ipv4:
         - table: filter
         - chain: OUTPUT
         - family: ip4
-        - jump: ACCEPT
+        - jump: accept
         - destination: '0/0'
         - dport: {{port}}
         - match: state
-        - connstate: NEW
+        - connstate: new
         - proto: tcp
         - save: True
         - order: 4
@@ -238,11 +238,11 @@ basics-tcp-out{{port}}-send-ipv6:
         - table: filter
         - chain: OUTPUT
         - family: ip6
-        - jump: ACCEPT
+        - jump: accept
         - destination: '0/0'
         - dport: {{port}}
         - match: state
-        - connstate: NEW
+        - connstate: new
         - proto: tcp
         - save: True
         - order: 4
@@ -256,7 +256,7 @@ basics-udp-out{{port}}-recv:
         - table: filter
         - chain: INPUT
         - family: inet
-        - jump: ACCEPT
+        - jump: acceot
         - proto: udp
         - sport: {{port}}
         - save: True
@@ -269,7 +269,7 @@ basics-udp-out{{port}}-send:
         - table: filter
         - chain: OUTPUT
         - family: inet
-        - jump: ACCEPT
+        - jump: accept
         - proto: udp
         - dport: {{port}}
         - save: True
@@ -283,10 +283,10 @@ basics-internal-network-tcp-ipv4:
         - table: filter
         - chain: OUTPUT
         - family: ip4
-        - jump: ACCEPT
+        - jump: accept
         - out-interface: {{pillar['ifassign']['internal']}}
         - match: state
-        - connstate: NEW
+        - connstate: new
         - proto: tcp
         - save: True
         - order: 4
@@ -299,7 +299,7 @@ basics-internal-network-udp-ipv4:
         - table: filter
         - chain: OUTPUT
         - family: ip4
-        - jump: ACCEPT
+        - jump: accept
         - out-interface: {{pillar['ifassign']['internal']}}
         - proto: udp
         - save: True

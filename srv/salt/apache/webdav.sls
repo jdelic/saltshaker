@@ -162,12 +162,12 @@ apache2-webdav-tcp-in{{port}}-recv-ipv4:
         - table: filter
         - chain: INPUT
         - family: ip4
-        - jump: ACCEPT
+        - jump: accept
         - source: '0/0'
         - destination: {{ip}}/32
         - dport: {{port}}
         - match: state
-        - connstate: NEW
+        - connstate: new
         - proto: tcp
         - save: True
         - require:

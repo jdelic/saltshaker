@@ -96,12 +96,12 @@ aptly-tcp-in{{port}}-recv:
         - table: filter
         - chain: INPUT
         - family: ip4
-        - jump: ACCEPT
+        - jump: accept
         - source: '0/0'
         - destination: {{ip}}
         - dport: {{port}}
         - match: state
-        - connstate: NEW
+        - connstate: new
         - proto: tcp
         - save: True
         - require:

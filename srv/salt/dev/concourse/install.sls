@@ -117,11 +117,11 @@ concourse-tcp-out{{pillar.get('concourse-server', {}).get('tsa-port', 2222)}}-se
         - table: filter
         - chain: OUTPUT
         - family: ip4
-        - jump: ACCEPT
+        - jump: accept
         - out-interface: {{pillar['ifassign']['internal']}}
         - dport: {{pillar.get('concourse-server', {}).get('tsa-port', 2222)}}
         - match: state
-        - connstate: NEW
+        - connstate: new
         - proto: tcp
         - save: True
         - require:

@@ -112,12 +112,12 @@ concourse-worker-tcp-out{{port}}-forward-ipv4:
         - table: filter
         - chain: FORWARD
         - family: ip4
-        - jump: ACCEPT
+        - jump: accept
         - source: {{pillar.get('ci', {}).get('backend-network-pool', '10.254.0.0/22')}}
         - destination: 0/0
         - dport: {{port}}
         - match: state
-        - connstate: NEW
+        - connstate: new
         - proto: tcp
         - save: True
         - require:
@@ -133,11 +133,11 @@ concourse-worker-tcp-in{{port}}-recv-ipv4:
         - table: filter
         - chain: INPUT
         - family: ip4
-        - jump: ACCEPT
+        - jump: accept
         - in-interface: {{pillar['ifassign']['internal']}}
         - dport: {{port}}
         - match: state
-        - connstate: NEW
+        - connstate: new
         - proto: tcp
         - save: True
         - require:
@@ -150,12 +150,12 @@ concourse-worker-udp-out53-forward-ipv4:
         - table: filter
         - chain: FORWARD
         - family: ip4
-        - jump: ACCEPT
+        - jump: accept
         - source: {{pillar.get('ci', {}).get('backend-network-pool', '10.254.0.0/22')}}
         - destination: 0/0
         - dport: 53
         - match: state
-        - connstate: NEW
+        - connstate: new
         - proto: udp
         - save: True
         - require:
@@ -167,7 +167,7 @@ concourse-allow-inter-container-traffic-recv-ipv4:
         - table: filter
         - chain: INPUT
         - family: ip4
-        - jump: ACCEPT
+        - jump: accept
         - source: {{pillar.get('ci', {}).get('backend-network-pool', '10.254.0.0/22')}}
         - destination: {{pillar.get('ci', {}).get('backend-network-pool', '10.254.0.0/22')}}
         - save: True
@@ -180,7 +180,7 @@ concourse-allow-inter-container-traffic-send-ipv4:
         - table: filter
         - chain: OUTPUT
         - family: ip4
-        - jump: ACCEPT
+        - jump: accept
         - source: {{pillar.get('ci', {}).get('backend-network-pool', '10.254.0.0/22')}}
         - destination: {{pillar.get('ci', {}).get('backend-network-pool', '10.254.0.0/22')}}
         - save: True

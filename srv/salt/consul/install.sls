@@ -186,7 +186,7 @@ consul-all-in-recv-ipv4:
         - table: filter
         - chain: INPUT
         - family: ip4
-        - jump: ACCEPT
+        - jump: accept
         - destination: 169.254.1.1
         - save: True
         - require:
@@ -203,13 +203,13 @@ consul-tcp-in{{port}}-recv-ipv4:
     nftables.append:
         - table: filter
         - chain: INPUT
-        - jump: ACCEPT
+        - jump: accept
         - family: ip4
         - in-interface: {{pillar['ifassign']['internal']}}
         - dport: {{port}}
         - proto: tcp
         - match: state
-        - connstate: NEW
+        - connstate: new
         - save: True
         - require:
             - sls: basics.nftables
@@ -225,7 +225,7 @@ consul-udp-in{{port}}-recv:
         - table: filter
         - chain: INPUT
         - family: ip4
-        - jump: ACCEPT
+        - jump: accept
         - in-interface: {{pillar['ifassign']['internal']}}
         - dport: {{port}}
         - proto: udp

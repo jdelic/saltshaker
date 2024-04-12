@@ -308,7 +308,7 @@ drop-confused-tcp-packets-ipv4:
         - jump: drop
         - proto: tcp
         - match: state
-        - connstate: NEW
+        - connstate: new
         - tcp-flags: '! FIN,SYN,RST,ACK SYN'
         - order: 5
         - save: True
@@ -324,7 +324,7 @@ drop-confused-tcp-packets-ipv6:
         - jump: drop
         - proto: tcp
         - match: state
-        - connstate: NEW
+        - connstate: new
         - tcp-flags: '! FIN,SYN,RST,ACK SYN'
         - order: 5
         - save: True
@@ -340,7 +340,7 @@ iptables-default-allow-related-established-input-ipv4:
         - chain: INPUT
         - jump: accept
         - match: state
-        - connstate: ESTABLISHED,RELATED
+        - connstate: established,related
         - order: 4
         - save: True
         - require:
@@ -354,7 +354,7 @@ iptables-default-allow-related-established-input-ipv6:
         - chain: INPUT
         - jump: accept
         - match: state
-        - connstate: ESTABLISHED,RELATED
+        - connstate: established,related
         - order: 4
         - save: True
         - require:
@@ -369,7 +369,7 @@ iptables-default-allow-related-established-output-ipv4:
         - chain: OUTPUT
         - jump: accept
         - match: state
-        - connstate: ESTABLISHED,RELATED
+        - connstate: established,related
         - order: 4
         - save: True
         - require:
@@ -383,7 +383,7 @@ iptables-default-allow-related-established-output-ipv6:
         - chain: OUTPUT
         - jump: accept
         - match: state
-        - connstate: ESTABLISHED,RELATED
+        - connstate: established,related
         - order: 4
         - save: True
         - require:
@@ -399,7 +399,7 @@ iptables-default-allow-related-established-forward-ipv4:
         - chain: FORWARD
         - jump: accept
         - match: state
-        - connstate: ESTABLISHED,RELATED
+        - connstate: established,related
         - order: 4
         - save: True
         - require:
@@ -414,7 +414,7 @@ iptables-default-allow-related-established-forward-ipv6:
         - chain: FORWARD
         - jump: accept
         - match: state
-        - connstate: ESTABLISHED,RELATED
+        - connstate: established,related
         - order: 4
         - save: True
         - require:

@@ -384,12 +384,12 @@ opensmtpd-{{svc}}-tcp-in25-recv-ipv4:
         - table: filter
         - chain: INPUT
         - family: ip4
-        - jump: ACCEPT
+        - jump: accept
         - source: '0/0'
         - destination: {{opensmtpd_ips['ipv4'][svc]}}/32
         - dport: 25
         - match: state
-        - connstate: NEW
+        - connstate: new
         - proto: tcp
         - save: True
         - require:
@@ -401,12 +401,12 @@ opensmtpd-{{svc}}-tcp-in25-recv-ipv6:
         - table: filter
         - chain: INPUT
         - family: ip6
-        - jump: ACCEPT
+        - jump: accept
         - source: '0/0'
         - destination: {{opensmtpd_ips['ipv6'][svc]}}/128
         - dport: 25
         - match: state
-        - connstate: NEW
+        - connstate: new
         - proto: tcp
         - save: True
         - require:
@@ -422,12 +422,12 @@ opensmtpd-{{svc}}-tcp-in465-recv-ipv4:
         - table: filter
         - chain: INPUT
         - family: ip4
-        - jump: ACCEPT
+        - jump: accept
         - source: '0/0'
         - destination: {{opensmtpd_ips['ipv4'][svc]}}/32
         - dport: 465
         - match: state
-        - connstate: NEW
+        - connstate: new
         - proto: tcp
         - save: True
         - require:
@@ -439,12 +439,12 @@ opensmtpd-{{svc}}-tcp-in465-recv-ipv6:
         - table: filter
         - chain: INPUT
         - family: ip6
-        - jump: ACCEPT
+        - jump: accept
         - source: '0/0'
         - destination: {{opensmtpd_ips['ipv6'][svc]}}/128
         - dport: 465
         - match: state
-        - connstate: NEW
+        - connstate: new
         - proto: tcp
         - save: True
         - require:
@@ -459,12 +459,12 @@ opensmtpd-relay-out25-send-ipv4:
         - table: filter
         - chain: OUTPUT
         - family: ip4
-        - jump: ACCEPT
+        - jump: accept
         - source: {{salt['network.interface_ip'](salt['network.default_route']('inet')[0]['interface'])}}/32
         - destination: 0/0
         - dport: 25
         - match: state
-        - connstate: NEW
+        - connstate: new
         - proto: tcp
         - save: True
         - require:
@@ -476,12 +476,12 @@ opensmtpd-relay-out465-send-ipv4:
         - table: filter
         - chain: OUTPUT
         - family: ip4
-        - jump: ACCEPT
+        - jump: accept
         - source: {{salt['network.interface_ip'](salt['network.default_route']('inet')[0]['interface'])}}/32
         - destination: 0/0
         - dport: 465
         - match: state
-        - connstate: NEW
+        - connstate: new
         - proto: tcp
         - save: True
         - require:
@@ -494,12 +494,12 @@ opensmtpd-relay-out25-send-ipv6:
         - table: filter
         - chain: OUTPUT
         - family: ip6
-        - jump: ACCEPT
+        - jump: accept
         - source: {{salt['network.interface_ip'](salt['network.default_route']('inet6')[0]['interface'])}}/128
         - destination: 0/0
         - dport: 25
         - match: state
-        - connstate: NEW
+        - connstate: new
         - proto: tcp
         - save: True
         - require:
@@ -511,12 +511,12 @@ opensmtpd-relay-out465-send-ipv6:
         - table: filter
         - chain: OUTPUT
         - family: ip6
-        - jump: ACCEPT
+        - jump: accept
         - source: {{salt['network.interface_ip'](salt['network.default_route']('inet6')[0]['interface'])}}/128
         - destination: 0/0
         - dport: 465
         - match: state
-        - connstate: NEW
+        - connstate: new
         - proto: tcp
         - save: True
         - require:

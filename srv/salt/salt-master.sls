@@ -25,12 +25,12 @@ saltmaster-tcp-in{{port}}-recv-ipv4:
         - table: filter
         - chain: INPUT
         - family: ip4
-        - jump: ACCEPT
+        - jump: accept
         - in-interface: {{pillar['ifassign']['internal']}}
         - dport: {{port}}
         - proto: tcp
         - match: state
-        - connstate: NEW
+        - connstate: new
         # it's super important these go first so the local minion works
         - order: 2
         - save: True

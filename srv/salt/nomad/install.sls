@@ -103,11 +103,11 @@ nomad-tcp-in{{port}}-recv-ipv4:
         - table: filter
         - chain: INPUT
         - family: ip4
-        - jump: ACCEPT
+        - jump: accept
         - in-interface: {{pillar['ifassign']['internal']}}
         - dport: {{port}}
         - match: state
-        - connstate: NEW
+        - connstate: new
         - proto: tcp
         - save: True
         - require:
@@ -120,11 +120,11 @@ nomad-tcp-out{{port}}-send-ipv4:
         - table: filter
         - chain: OUTPUT
         - family: ip4
-        - jump: ACCEPT
+        - jump: accept
         - out-interface: {{pillar['ifassign']['internal']}}
         - dport: {{port}}
         - match: state
-        - connstate: NEW
+        - connstate: new
         - proto: tcp
         - save: True
         - require:
@@ -137,7 +137,7 @@ nomad-udp-in4648-recv-ipv4:
         - table: filter
         - chain: INPUT
         - family: ip4
-        - jump: ACCEPT
+        - jump: accept
         - in-interface: {{pillar['ifassign']['internal']}}
         - dport: 4648
         - proto: udp
@@ -151,7 +151,7 @@ nomad-udp-in4648-send-ipv4:
         - table: filter
         - chain: OUTPUT
         - family: ip4
-        - jump: ACCEPT
+        - jump: accept
         - out-interface: {{pillar['ifassign']['internal']}}
         - sport: 4648
         - proto: udp

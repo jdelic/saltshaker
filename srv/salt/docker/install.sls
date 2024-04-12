@@ -62,7 +62,7 @@ docker-overlaynet-enable-protocol50-in:
         - table: filter
         - chain: INPUT
         - family: inet
-        - jump: ACCEPT
+        - jump: accept
         - in-interface: {{pillar['ifassign']['internal']}}
         - proto: 50
 
@@ -72,7 +72,7 @@ docker-overlaynet-enable-protocol50-out:
         - table: filter
         - chain: OUTPUT
         - family: inet
-        - jump: ACCEPT
+        - jump: accept
         - out-interface: {{pillar['ifassign']['internal']}}
         - proto: 50
 
@@ -82,7 +82,7 @@ docker-overlaynet-udp-in4789-recv:
         - table: filter
         - chain: INPUT
         - family: inet
-        - jump: ACCEPT
+        - jump: accept
         - in-interface: {{pillar['ifassign']['internal']}}
         - dport: 4789
         - proto: udp
@@ -96,7 +96,7 @@ docker-overlaynet-udp-in4789-send:
         - table: filter
         - chain: OUTPUT
         - family: inet
-        - jump: ACCEPT
+        - jump: accept
         - out-interface: {{pillar['ifassign']['internal']}}
         - sport: 4789
         - proto: udp
@@ -110,11 +110,11 @@ docker-tcp-in7946-recv:
         - table: filter
         - chain: INPUT
         - family: inet
-        - jump: ACCEPT
+        - jump: accept
         - in-interface: {{pillar['ifassign']['internal']}}
         - dport: 7946
         - match: state
-        - connstate: NEW
+        - connstate: new
         - proto: tcp
         - save: True
         - require:
@@ -126,11 +126,11 @@ docker-tcp-out7946-send:
         - table: filter
         - chain: OUTPUT
         - family: inet
-        - jump: ACCEPT
+        - jump: accept
         - out-interface: {{pillar['ifassign']['internal']}}
         - dport: 7946
         - match: state
-        - connstate: NEW
+        - connstate: new
         - proto: tcp
         - save: True
         - require:
@@ -142,11 +142,11 @@ docker-tcp-in2377-recv:
         - table: filter
         - chain: INPUT
         - family: inet
-        - jump: ACCEPT
+        - jump: accept
         - in-interface: {{pillar['ifassign']['internal']}}
         - dport: 2377
         - match: state
-        - connstate: NEW
+        - connstate: new
         - proto: tcp
         - save: True
         - require:
@@ -158,11 +158,11 @@ docker-tcp-out2377-send:
         - table: filter
         - chain: OUTPUT
         - family: inet
-        - jump: ACCEPT
+        - jump: accept
         - out-interface: {{pillar['ifassign']['internal']}}
         - dport: 2377
         - match: state
-        - connstate: NEW
+        - connstate: new
         - proto: tcp
         - save: True
         - require:

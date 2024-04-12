@@ -78,12 +78,12 @@ docker-registry-tcp-in{{pillar.get('docker', {}).get('registry', {}).get('bind-p
         - table: filter
         - chain: INPUT
         - family: ip4
-        - jump: ACCEPT
+        - jump: accept
         - source: '0/0'
         - destination: {{registry_ip}}
         - dport: {{registry_port}}
         - match: state
-        - connstate: NEW
+        - connstate: new
         - proto: tcp
         - save: True
         - require:

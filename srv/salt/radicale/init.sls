@@ -105,7 +105,7 @@ radicale-tcp-in{{pillar.get('radicale', {}).get('bind-port', 8990)}}-recv-ipv4:
         - table: filter
         - chain: INPUT
         - family: ip4
-        - jump: ACCEPT
+        - jump: accept
         - source: '0/0'
         - destination: {{pillar.get('calendar', {}).get(
               'bind-ip', grains['ip_interfaces'][pillar['ifassign']['internal']][pillar['ifassign'].get(
@@ -114,7 +114,7 @@ radicale-tcp-in{{pillar.get('radicale', {}).get('bind-port', 8990)}}-recv-ipv4:
           )}}
         - dport: {{pillar.get('calendar', {}).get('bind-port', 8990)}}
         - match: state
-        - connstate: NEW
+        - connstate: new
         - proto: tcp
         - save: True
         - require:

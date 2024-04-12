@@ -122,7 +122,7 @@ dovecot-in{{port}}-recv:
     iptables.append:
         - table: filter
         - chain: INPUT
-        - jump: ACCEPT
+        - jump: accept
         - source: '0/0'
         - destination: {{pillar['imap'].get(
             'bind-ip', grains['ip_interfaces'][pillar['ifassign']['external']][pillar['ifassign'].get(
@@ -131,7 +131,7 @@ dovecot-in{{port}}-recv:
         )}}
         - dport: {{port}}
         - match: state
-        - connstate: NEW
+        - connstate: new
         - proto: tcp
         - save: True
         - require:

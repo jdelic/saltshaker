@@ -238,7 +238,7 @@ postgresql-in{{port}}-recv-ip4:
     iptables.append:
         - table: filter
         - chain: INPUT
-        - jump: ACCEPT
+        - jump: accept
         - family: ip4
         - proto: tcp
         - source: '0/0'
@@ -246,7 +246,7 @@ postgresql-in{{port}}-recv-ip4:
         - destination: {{ip}}
         - dport: {{port}}
         - match: state
-        - connstate: NEW
+        - connstate: new
         - save: True
         - require:
             - sls: basics.nftables
