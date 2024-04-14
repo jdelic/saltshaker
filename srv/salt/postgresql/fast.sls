@@ -235,7 +235,7 @@ postgresql-servicedef:
 
 
 postgresql-in{{port}}-recv-ip4:
-    iptables.append:
+    nftables.append:
         - table: filter
         - chain: INPUT
         - jump: accept
