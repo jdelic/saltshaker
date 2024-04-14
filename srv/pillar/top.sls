@@ -31,6 +31,10 @@ base:
         - shared.buildserver
         - shared.secrets.gpg-package-signing
 
+    'roles:loadbalancer':
+        - match: grain
+        - shared.loadbalancer
+
     # spaces ' ' are important after parentheses for the matcher to work (see
     # https://docs.saltstack.com/en/latest/topics/targeting/compound.html)
     'not *.test and ( G@roles:apps or G@roles:loadbalancer or G@roles:mail )':
