@@ -704,7 +704,7 @@ def main() -> None:
 
     context = {
         "services": SmartstackServiceContainer(all_services=parsed),
-        "localips": _args.localip,
+        "localips": _args.localips,
     }
 
     context.update(add_params)
