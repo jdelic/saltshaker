@@ -194,7 +194,7 @@ opensmtpd-internal-relay-sslkey:
 
 {% set opensmtpd_ips = {
     "ipv4": {
-        relay":
+        "relay":
             pillar.get('smtp-outgoing', {}).get(
                 'override-ipv4', grains['ip4_interfaces'].get(pillar['ifassign']['external-alt'], {}).get(
                         pillar['ifassign'].get('external-alt-ip-index', 0)|int(), None
@@ -214,7 +214,7 @@ opensmtpd-internal-relay-sslkey:
             ) if pillar.get('smtp-local-relay', {}).get('bind-ipv4', True) else None,
     },
     "ipv6": {
-        relay":
+        "relay":
             pillar.get('smtp-outgoing', {}).get(
                 'override-ipv6', grains['ip6_interfaces'].get(pillar['ifassign']['external-alt'], {}).get(
                     pillar[ 'ifassign' ].get('external-alt-ipv6-index', 0)|int(), None
