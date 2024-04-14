@@ -192,9 +192,10 @@ authserver-servicedef-internal:
 
 
 authserver-tcp-in{{pillar.get('authserver', {}).get('bind-port', 8999)}}-recv:
-    iptables.append:
+    nftables.append:
         - table: filter
         - chain: INPUT
+        - family: ip4
         - jump: accept
         - source: '0/0'
         - destination: {{config['BINDIP']}}/32
