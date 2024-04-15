@@ -156,7 +156,7 @@ dovecot-consul-servicedef:
 dovecot-in{{port}}-recv-ipv4:
     nftables.append:
         - table: filter
-        - chain: INPUT
+        - chain: input
         - family: ip4
         - jump: accept
         - source: '0/0'
@@ -173,7 +173,7 @@ dovecot-in{{port}}-recv-ipv4:
 dovecot-in{{port}}-recv-ipv6:
     nftables.append:
         - table: filter
-        - chain: INPUT
+        - chain: input
         - family: ip6
         - jump: accept
         - source: '0/0'

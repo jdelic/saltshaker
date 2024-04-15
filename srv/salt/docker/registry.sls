@@ -76,7 +76,7 @@ docker-registry-servicedef:
 docker-registry-tcp-in{{pillar.get('docker', {}).get('registry', {}).get('bind-port', 5000)}}-recv-ipv4:
     nftables.append:
         - table: filter
-        - chain: INPUT
+        - chain: input
         - family: ip4
         - jump: accept
         - source: '0/0'

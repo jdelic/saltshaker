@@ -29,7 +29,7 @@ redis-cache:
 redis-in{{pillar.get('redis-server', {}).get('bind-port', 6379)}}-recv:
     nftables.append:
         - table: filter
-        - chain: INPUT
+        - chain: input
         - family: ip4
         - jump: accept
         - proto: tcp

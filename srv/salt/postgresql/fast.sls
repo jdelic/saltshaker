@@ -237,7 +237,7 @@ postgresql-servicedef:
 postgresql-in{{port}}-recv-ip4:
     nftables.append:
         - table: filter
-        - chain: INPUT
+        - chain: input
         - jump: accept
         - family: ip4
         - proto: tcp

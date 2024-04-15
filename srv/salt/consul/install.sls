@@ -184,7 +184,7 @@ consul-all-in-recv-ipv4:
     nftables.insert:
         - position: 2
         - table: filter
-        - chain: INPUT
+        - chain: input
         - family: ip4
         - jump: accept
         - destination: 169.254.1.1
@@ -202,7 +202,7 @@ consul-all-in-recv-ipv4:
 consul-tcp-in{{port}}-recv-ipv4:
     nftables.append:
         - table: filter
-        - chain: INPUT
+        - chain: input
         - jump: accept
         - family: ip4
         - in-interface: {{pillar['ifassign']['internal']}}
@@ -223,7 +223,7 @@ consul-tcp-in{{port}}-recv-ipv4:
 consul-udp-in{{port}}-recv:
     nftables.append:
         - table: filter
-        - chain: INPUT
+        - chain: input
         - family: ip4
         - jump: accept
         - in-interface: {{pillar['ifassign']['internal']}}

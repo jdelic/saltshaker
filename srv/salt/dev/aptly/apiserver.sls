@@ -94,7 +94,7 @@ aptly-servicedef:
 aptly-tcp-in{{port}}-recv:
     nftables.append:
         - table: filter
-        - chain: INPUT
+        - chain: input
         - family: ip4
         - jump: accept
         - source: '0/0'

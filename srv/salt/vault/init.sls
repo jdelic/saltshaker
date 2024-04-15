@@ -563,7 +563,7 @@ vault-ssl-key:
 vault-tcp8200-recv-ipv4:
     nftables.append:
         - table: filter
-        - chain: INPUT
+        - chain: input
         - family: ip4
         - jump: accept
         - in-interface: {{pillar['ifassign']['internal']}}

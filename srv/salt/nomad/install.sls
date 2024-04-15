@@ -101,7 +101,7 @@ nomad-service:
 nomad-tcp-in{{port}}-recv-ipv4:
     nftables.append:
         - table: filter
-        - chain: INPUT
+        - chain: input
         - family: ip4
         - jump: accept
         - in-interface: {{pillar['ifassign']['internal']}}
@@ -118,7 +118,7 @@ nomad-tcp-in{{port}}-recv-ipv4:
 nomad-tcp-out{{port}}-send-ipv4:
     nftables.append:
         - table: filter
-        - chain: OUTPUT
+        - chain: output
         - family: ip4
         - jump: accept
         - out-interface: {{pillar['ifassign']['internal']}}
@@ -135,7 +135,7 @@ nomad-tcp-out{{port}}-send-ipv4:
 nomad-udp-in4648-recv-ipv4:
     nftables.append:
         - table: filter
-        - chain: INPUT
+        - chain: input
         - family: ip4
         - jump: accept
         - in-interface: {{pillar['ifassign']['internal']}}
@@ -149,7 +149,7 @@ nomad-udp-in4648-recv-ipv4:
 nomad-udp-in4648-send-ipv4:
     nftables.append:
         - table: filter
-        - chain: OUTPUT
+        - chain: output
         - family: ip4
         - jump: accept
         - out-interface: {{pillar['ifassign']['internal']}}

@@ -193,7 +193,7 @@ trigger-minion-sync:
 openssh-in22-recv-ipv4:
     nftables.append:
         - table: filter
-        - chain: INPUT
+        - chain: input
         - family: ip4
         - jump: accept
         - source: '0/0'
@@ -221,7 +221,7 @@ openssh-in22-recv-ipv4:
 basics-tcp-out{{port}}-send-ipv4:
     nftables.append:
         - table: filter
-        - chain: OUTPUT
+        - chain: output
         - family: ip4
         - jump: accept
         - destination: '0/0'
@@ -236,7 +236,7 @@ basics-tcp-out{{port}}-send-ipv4:
 basics-tcp-out{{port}}-send-ipv6:
     nftables.append:
         - table: filter
-        - chain: OUTPUT
+        - chain: output
         - family: ip6
         - jump: accept
         - destination: '0/0'
@@ -254,7 +254,7 @@ basics-tcp-out{{port}}-send-ipv6:
 basics-udp-out{{port}}-recv:
     nftables.append:
         - table: filter
-        - chain: INPUT
+        - chain: input
         - family: inet
         - jump: acceot
         - proto: udp
@@ -267,7 +267,7 @@ basics-udp-out{{port}}-recv:
 basics-udp-out{{port}}-send:
     nftables.append:
         - table: filter
-        - chain: OUTPUT
+        - chain: output
         - family: inet
         - jump: accept
         - proto: udp
@@ -281,7 +281,7 @@ basics-udp-out{{port}}-send:
 basics-internal-network-tcp-ipv4:
     nftables.append:
         - table: filter
-        - chain: OUTPUT
+        - chain: output
         - family: ip4
         - jump: accept
         - out-interface: {{pillar['ifassign']['internal']}}
@@ -297,7 +297,7 @@ basics-internal-network-tcp-ipv4:
 basics-internal-network-udp-ipv4:
     nftables.append:
         - table: filter
-        - chain: OUTPUT
+        - chain: output
         - family: ip4
         - jump: accept
         - out-interface: {{pillar['ifassign']['internal']}}

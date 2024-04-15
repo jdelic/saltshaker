@@ -382,7 +382,7 @@ opensmtpd-servicedef-internal:
 opensmtpd-{{svc}}-tcp-in25-recv-ipv4:
     nftables.append:
         - table: filter
-        - chain: INPUT
+        - chain: input
         - family: ip4
         - jump: accept
         - source: '0/0'
@@ -399,7 +399,7 @@ opensmtpd-{{svc}}-tcp-in25-recv-ipv4:
 opensmtpd-{{svc}}-tcp-in25-recv-ipv6:
     nftables.append:
         - table: filter
-        - chain: INPUT
+        - chain: input
         - family: ip6
         - jump: accept
         - source: '0/0'
@@ -420,7 +420,7 @@ opensmtpd-{{svc}}-tcp-in25-recv-ipv6:
 opensmtpd-{{svc}}-tcp-in465-recv-ipv4:
     nftables.append:
         - table: filter
-        - chain: INPUT
+        - chain: input
         - family: ip4
         - jump: accept
         - source: '0/0'
@@ -437,7 +437,7 @@ opensmtpd-{{svc}}-tcp-in465-recv-ipv4:
 opensmtpd-{{svc}}-tcp-in465-recv-ipv6:
     nftables.append:
         - table: filter
-        - chain: INPUT
+        - chain: input
         - family: ip6
         - jump: accept
         - source: '0/0'
@@ -457,7 +457,7 @@ opensmtpd-{{svc}}-tcp-in465-recv-ipv6:
 opensmtpd-relay-out25-send-ipv4:
     nftables.append:
         - table: filter
-        - chain: OUTPUT
+        - chain: output
         - family: ip4
         - jump: accept
         - source: {{salt['network.interface_ip'](salt['network.default_route']('inet')[0]['interface'])}}/32
@@ -474,7 +474,7 @@ opensmtpd-relay-out25-send-ipv4:
 opensmtpd-relay-out465-send-ipv4:
     nftables.append:
         - table: filter
-        - chain: OUTPUT
+        - chain: output
         - family: ip4
         - jump: accept
         - source: {{salt['network.interface_ip'](salt['network.default_route']('inet')[0]['interface'])}}/32
@@ -492,7 +492,7 @@ opensmtpd-relay-out465-send-ipv4:
 opensmtpd-relay-out25-send-ipv6:
     nftables.append:
         - table: filter
-        - chain: OUTPUT
+        - chain: output
         - family: ip6
         - jump: accept
         - source: {{salt['network.interface_ip'](salt['network.default_route']('inet6')[0]['interface'])}}/128
@@ -509,7 +509,7 @@ opensmtpd-relay-out25-send-ipv6:
 opensmtpd-relay-out465-send-ipv6:
     nftables.append:
         - table: filter
-        - chain: OUTPUT
+        - chain: output
         - family: ip6
         - jump: accept
         - source: {{salt['network.interface_ip'](salt['network.default_route']('inet6')[0]['interface'])}}/128

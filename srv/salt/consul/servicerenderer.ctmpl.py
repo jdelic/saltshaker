@@ -35,8 +35,8 @@
 # {% endfor %}
 # */}}
 #
-# If run as root, it can also call /sbin/iptables and create all necessary
-# INPUT and OUTPUT rules for incoming connections based of the
+# If run as root, it can also call /sbin/iptables or /sbin/nftables and create
+# all necessary INPUT and OUTPUT rules for incoming connections based of the
 # smartstack:protocol and smartstack:extport tags.
 #
 import ipaddress
@@ -638,7 +638,7 @@ def main() -> None:
                              "before [command] is executed.")
     parser.add_argument("--nftables-input-chain", dest="nftables_input_chain", default="input",
                         help="The name of the input filter chain to use for nftables.")
-    parser.add_argument("--nftables-output-chain", dest="nftables_output_chain", default="input",
+    parser.add_argument("--nftables-output-chain", dest="nftables_output_chain", default="output",
                         help="The name of the output filter chain to use for nftables.")
     parser.add_argument("--only-nftables", dest="only_nftables", default=False, action="store_true",
                         help="Use this parameter to only set up iptables rules, and not do anything else. No templates "

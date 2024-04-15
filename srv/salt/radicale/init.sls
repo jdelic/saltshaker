@@ -103,7 +103,7 @@ radicale-servicedef-external:
 radicale-tcp-in{{pillar.get('radicale', {}).get('bind-port', 8990)}}-recv-ipv4:
     nftables.append:
         - table: filter
-        - chain: INPUT
+        - chain: input
         - family: ip4
         - jump: accept
         - source: '0/0'

@@ -49,7 +49,7 @@ nftables-baseconfig-table-ipv6-filter:
 
 nftables-baseconfig-chain-inet-input:
     nftables.chain_present:
-        - name: INPUT
+        - name: input
         - table: filter
         - table_type: filter
         - family: inet
@@ -62,7 +62,7 @@ nftables-baseconfig-chain-inet-input:
 
 nftables-baseconfig-chain-ipv4-input:
     nftables.chain_present:
-        - name: INPUT
+        - name: input
         - table: filter
         - table_type: filter
         - family: ip4
@@ -75,7 +75,7 @@ nftables-baseconfig-chain-ipv4-input:
 
 nftables-baseconfig-chain-ipv6-input:
     nftables.chain_present:
-        - name: INPUT
+        - name: input
         - table: filter
         - table_type: filter
         - family: ip6
@@ -88,7 +88,7 @@ nftables-baseconfig-chain-ipv6-input:
 
 nftables-baseconfig-chain-inet-output:
     nftables.chain_present:
-        - name: OUTPUT
+        - name: output
         - table: filter
         - table_type: filter
         - family: inet
@@ -101,7 +101,7 @@ nftables-baseconfig-chain-inet-output:
 
 nftables-baseconfig-chain-ipv4-output:
     nftables.chain_present:
-        - name: OUTPUT
+        - name: output
         - table: filter
         - table_type: filter
         - family: ip4
@@ -114,7 +114,7 @@ nftables-baseconfig-chain-ipv4-output:
 
 nftables-baseconfig-chain-ipv6-output:
     nftables.chain_present:
-        - name: OUTPUT
+        - name: output
         - table: filter
         - table_type: filter
         - family: ip6
@@ -127,7 +127,7 @@ nftables-baseconfig-chain-ipv6-output:
 
 nftables-baseconfig-chain-ipv4-forward:
     nftables.chain_present:
-        - name: FORWARD
+        - name: forward
         - table: filter
         - table_type: filter
         - family: ip4
@@ -140,7 +140,7 @@ nftables-baseconfig-chain-ipv4-forward:
 
 nftables-baseconfig-chain-ipv6-forward:
     nftables.chain_present:
-        - name: FORWARD
+        - name: forward
         - table: filter
         - table_type: filter
         - family: ip6
@@ -157,7 +157,7 @@ localhost-recv-ipv4:
         - position: 1
         - table: filter
         - family: ip4
-        - chain: INPUT
+        - chain: input
         - jump: accept
         - in-interface: lo
         - order: 3
@@ -171,7 +171,7 @@ localhost-recv-ipv6:
         - position: 1
         - table: filter
         - family: ip6
-        - chain: INPUT
+        - chain: input
         - jump: accept
         - in-interface: lo
         - order: 3
@@ -185,7 +185,7 @@ localhost-send-ipv4:
         - position: 1
         - table: filter
         - family: ip4
-        - chain: OUTPUT
+        - chain: output
         - jump: accept
         - out-interface: lo
         - order: 3
@@ -199,7 +199,7 @@ localhost-send-ipv6:
         - position: 1
         - table: filter
         - family: ip6
-        - chain: OUTPUT
+        - chain: output
         - jump: accept
         - out-interface: lo
         - order: 3
@@ -213,7 +213,7 @@ icmp-recv-ipv4:
     nftables.append:
         - table: filter
         - family: ip4
-        - chain: INPUT
+        - chain: input
         - jump: accept
         - proto: icmp
         - icmp-type: any
@@ -227,7 +227,7 @@ icmp-recv-ipv6:
     nftables.append:
         - table: filter
         - family: ip6
-        - chain: INPUT
+        - chain: input
         - jump: accept
         - proto: icmp
         - icmp-type: any
@@ -242,7 +242,7 @@ icmp-send-ipv4:
     nftables.append:
         - table: filter
         - family: ip4
-        - chain: OUTPUT
+        - chain: output
         - jump: accept
         - proto: icmp
         - icmp-type: any
@@ -256,7 +256,7 @@ icmp-send-ipv6:
     nftables.append:
         - table: filter
         - family: ip6
-        - chain: OUTPUT
+        - chain: output
         - jump: accept
         - proto: icmp
         - icmp-type: any
@@ -271,7 +271,7 @@ icmp-forward-ipv4:
     nftables.append:
         - table: filter
         - family: ip4
-        - chain: FORWARD
+        - chain: forward
         - jump: accept
         - proto: icmp
         - icmp-type: any
@@ -286,7 +286,7 @@ icmp-forward-ipv6:
     nftables.append:
         - table: filter
         - family: ip6
-        - chain: FORWARD
+        - chain: forward
         - jump: accept
         - proto: icmp
         - icmp-type: any
@@ -304,7 +304,7 @@ drop-confused-tcp-packets-ipv4:
         - position: 3
         - table: filter
         - family: ip4
-        - chain: INPUT
+        - chain: input
         - jump: drop
         - proto: tcp
         - match: state
@@ -320,7 +320,7 @@ drop-confused-tcp-packets-ipv6:
         - position: 3
         - table: filter
         - family: ip6
-        - chain: INPUT
+        - chain: input
         - jump: drop
         - proto: tcp
         - match: state
@@ -337,7 +337,7 @@ nftables-default-allow-related-established-input-ipv4:
         - position: 2
         - table: filter
         - family: ip4
-        - chain: INPUT
+        - chain: input
         - jump: accept
         - match: state
         - connstate: established,related
@@ -351,7 +351,7 @@ nftables-default-allow-related-established-input-ipv6:
         - position: 2
         - table: filter
         - family: ip6
-        - chain: INPUT
+        - chain: input
         - jump: accept
         - match: state
         - connstate: established,related
@@ -366,7 +366,7 @@ nftables-default-allow-related-established-output-ipv4:
         - position: 2
         - table: filter
         - family: ip4
-        - chain: OUTPUT
+        - chain: output
         - jump: accept
         - match: state
         - connstate: established,related
@@ -380,7 +380,7 @@ nftables-default-allow-related-established-output-ipv6:
         - position: 2
         - table: filter
         - family: ip6
-        - chain: OUTPUT
+        - chain: output
         - jump: accept
         - match: state
         - connstate: established,related
@@ -396,7 +396,7 @@ nftables-default-allow-related-established-forward-ipv4:
         - position: 1
         - table: filter
         - family: ip4
-        - chain: FORWARD
+        - chain: forward
         - jump: accept
         - match: state
         - connstate: established,related
@@ -411,7 +411,7 @@ nftables-default-allow-related-established-forward-ipv6:
         - position: 1
         - table: filter
         - family: ip6
-        - chain: FORWARD
+        - chain: forward
         - jump: accept
         - match: state
         - connstate: established,related
@@ -426,7 +426,7 @@ nftables-default-input-drop-ipv4:
         - policy: drop
         - table: filter
         - family: ip4
-        - chain: INPUT
+        - chain: input
         - order: 5
         - save: True
         - require:
@@ -438,7 +438,7 @@ nftables-default-input-drop-ipv6:
         - policy: drop
         - table: filter
         - family: ip6
-        - chain: INPUT
+        - chain: input
         - order: 5
         - save: True
         - require:
@@ -450,7 +450,7 @@ nftables-default-output-drop-ipv4:
         - policy: drop
         - table: filter
         - family: ip4
-        - chain: OUTPUT
+        - chain: output
         - order: 5
         - save: True
         - require:
@@ -462,7 +462,7 @@ nftables-default-output-drop-ipv6:
         - policy: drop
         - table: filter
         - family: ip6
-        - chain: OUTPUT
+        - chain: output
         - order: 5
         - save: True
         - require:
@@ -474,7 +474,7 @@ nftables-default-forward-drop-ipv4:
         - policy: drop
         - table: filter
         - family: ip4
-        - chain: FORWARD
+        - chain: forward
         - order: 5
         - save: True
         - require:
@@ -486,7 +486,7 @@ nftables-default-forward-drop-ipv6:
         - policy: drop
         - table: filter
         - family: ip6
-        - chain: FORWARD
+        - chain: forward
         - order: 5
         - save: True
         - require:

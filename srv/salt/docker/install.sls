@@ -60,7 +60,7 @@ docker-pdns-recursor-cidr:
 docker-overlaynet-enable-protocol50-in:
     nftables.append:
         - table: filter
-        - chain: INPUT
+        - chain: input
         - family: inet
         - jump: accept
         - in-interface: {{pillar['ifassign']['internal']}}
@@ -70,7 +70,7 @@ docker-overlaynet-enable-protocol50-in:
 docker-overlaynet-enable-protocol50-out:
     nftables.append:
         - table: filter
-        - chain: OUTPUT
+        - chain: output
         - family: inet
         - jump: accept
         - out-interface: {{pillar['ifassign']['internal']}}
@@ -80,7 +80,7 @@ docker-overlaynet-enable-protocol50-out:
 docker-overlaynet-udp-in4789-recv:
     nftables.append:
         - table: filter
-        - chain: INPUT
+        - chain: input
         - family: inet
         - jump: accept
         - in-interface: {{pillar['ifassign']['internal']}}
@@ -94,7 +94,7 @@ docker-overlaynet-udp-in4789-recv:
 docker-overlaynet-udp-in4789-send:
     nftables.append:
         - table: filter
-        - chain: OUTPUT
+        - chain: output
         - family: inet
         - jump: accept
         - out-interface: {{pillar['ifassign']['internal']}}
@@ -108,7 +108,7 @@ docker-overlaynet-udp-in4789-send:
 docker-tcp-in7946-recv:
     nftables.append:
         - table: filter
-        - chain: INPUT
+        - chain: input
         - family: inet
         - jump: accept
         - in-interface: {{pillar['ifassign']['internal']}}
@@ -124,7 +124,7 @@ docker-tcp-in7946-recv:
 docker-tcp-out7946-send:
     nftables.append:
         - table: filter
-        - chain: OUTPUT
+        - chain: output
         - family: inet
         - jump: accept
         - out-interface: {{pillar['ifassign']['internal']}}
@@ -140,7 +140,7 @@ docker-tcp-out7946-send:
 docker-tcp-in2377-recv:
     nftables.append:
         - table: filter
-        - chain: INPUT
+        - chain: input
         - family: inet
         - jump: accept
         - in-interface: {{pillar['ifassign']['internal']}}
@@ -156,7 +156,7 @@ docker-tcp-in2377-recv:
 docker-tcp-out2377-send:
     nftables.append:
         - table: filter
-        - chain: OUTPUT
+        - chain: output
         - family: inet
         - jump: accept
         - out-interface: {{pillar['ifassign']['internal']}}

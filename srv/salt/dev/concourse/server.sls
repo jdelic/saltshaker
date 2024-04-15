@@ -335,7 +335,7 @@ fly-link-teams:
 concourse-tcp-in{{pillar.get('concourse-server', {}).get('tsa-port', 2222)}}-recv-ipv4:
     nftables.append:
         - table: filter
-        - chain: INPUT
+        - chain: input
         - family: ip4
         - jump: accept
         - source: '0/0'
@@ -354,7 +354,7 @@ concourse-tcp-in{{pillar.get('concourse-server', {}).get('tsa-port', 2222)}}-rec
 concourse-tcp-in{{pillar.get('concourse-server', {}).get('atc-port', 8080)}}-recv-ipv4:
     nftables.append:
         - table: filter
-        - chain: INPUT
+        - chain: input
         - family: ip4
         - jump: accept
         - source: '0/0'
@@ -374,7 +374,7 @@ concourse-tcp-in{{pillar.get('concourse-server', {}).get('atc-port', 8080)}}-rec
 concourse-tcp-out{{pillar.get('concourse-server', {}).get('atc-port', 8080)}}-send-ipv4:
     nftables.append:
         - table: filter
-        - chain: OUTPUT
+        - chain: output
         - family: ip4
         - jump: accept
         - source: {{pillar.get('concourse-server', {}).get('atc-ip',

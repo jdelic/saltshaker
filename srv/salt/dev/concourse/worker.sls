@@ -110,7 +110,7 @@ concourse-worker:
 concourse-worker-tcp-out{{port}}-forward-ipv4:
     nftables.append:
         - table: filter
-        - chain: FORWARD
+        - chain: forward
         - family: ip4
         - jump: accept
         - source: {{pillar.get('ci', {}).get('backend-network-pool', '10.254.0.0/22')}}
@@ -131,7 +131,7 @@ concourse-worker-tcp-out{{port}}-forward-ipv4:
 concourse-worker-tcp-in{{port}}-recv-ipv4:
     nftables.append:
         - table: filter
-        - chain: INPUT
+        - chain: input
         - family: ip4
         - jump: accept
         - in-interface: {{pillar['ifassign']['internal']}}
@@ -148,7 +148,7 @@ concourse-worker-tcp-in{{port}}-recv-ipv4:
 concourse-worker-udp-out53-forward-ipv4:
     nftables.append:
         - table: filter
-        - chain: FORWARD
+        - chain: forward
         - family: ip4
         - jump: accept
         - source: {{pillar.get('ci', {}).get('backend-network-pool', '10.254.0.0/22')}}
@@ -165,7 +165,7 @@ concourse-worker-udp-out53-forward-ipv4:
 concourse-allow-inter-container-traffic-recv-ipv4:
     nftables.append:
         - table: filter
-        - chain: INPUT
+        - chain: input
         - family: ip4
         - jump: accept
         - source: {{pillar.get('ci', {}).get('backend-network-pool', '10.254.0.0/22')}}
@@ -178,7 +178,7 @@ concourse-allow-inter-container-traffic-recv-ipv4:
 concourse-allow-inter-container-traffic-send-ipv4:
     nftables.append:
         - table: filter
-        - chain: OUTPUT
+        - chain: output
         - family: ip4
         - jump: accept
         - source: {{pillar.get('ci', {}).get('backend-network-pool', '10.254.0.0/22')}}

@@ -115,7 +115,7 @@ concourse-rsyslog:
 concourse-tcp-out{{pillar.get('concourse-server', {}).get('tsa-port', 2222)}}-send:
     nftables.append:
         - table: filter
-        - chain: OUTPUT
+        - chain: output
         - family: ip4
         - jump: accept
         - out-interface: {{pillar['ifassign']['internal']}}

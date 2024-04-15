@@ -160,7 +160,7 @@ apache2-webdav-add-port-{{port}}:
 apache2-webdav-tcp-in{{port}}-recv-ipv4:
     nftables.append:
         - table: filter
-        - chain: INPUT
+        - chain: input
         - family: ip4
         - jump: accept
         - source: '0/0'

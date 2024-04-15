@@ -14,7 +14,7 @@ vagrant-eth0-recv:
         - position: 1
         - table: filter
         - family: inet
-        - chain: INPUT
+        - chain: input
         - jump: accept
         - in-interface: {{pillar["ifassign"]["nat"]}}
         - order: 3
@@ -28,7 +28,7 @@ vagrant-eth0-send:
         - position: 1
         - table: filter
         - family: inet
-        - chain: OUTPUT
+        - chain: output
         - jump: accept
         - out-interface: {{pillar["ifassign"]["nat"]}}
         - order: 3
