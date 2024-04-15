@@ -251,11 +251,23 @@ basics-tcp-out{{port}}-send-ipv6:
 
 {% for port in udp %}
 # allow others to answer. For UDP we make this stateless here to guarantee it works.
-basics-udp-out{{port}}-recv:
+basics-udp-out{{port}}-recv-ipv4:
     nftables.append:
         - table: filter
         - chain: input
-        - family: inet
+        - family: ip4
+        - jump: acceot
+        - proto: udp
+        - sport: {{port}}
+        - save: True
+        - order: 4
+
+
+basics-udp-out{{port}}-recv-ipv6:
+    nftables.append:
+        - table: filter
+        - chain: input
+        - family: ip6
         - jump: acceot
         - proto: udp
         - sport: {{port}}
@@ -264,11 +276,23 @@ basics-udp-out{{port}}-recv:
 
 
 # allow us to talk to others. For UDP we make this stateless here to guarantee it works.
-basics-udp-out{{port}}-send:
+basics-udp-out{{port}}-send-ipv4:
     nftables.append:
         - table: filter
         - chain: output
-        - family: inet
+        - family: ip4
+        - jump: accept
+        - proto: udp
+        - dport: {{port}}
+        - save: True
+        - order: 4
+
+
+basics-udp-out{{port}}-send-ipv6:
+    nftables.append:
+        - table: filter
+        - chain: output
+        - family: ip6
         - jump: accept
         - proto: udp
         - dport: {{port}}
