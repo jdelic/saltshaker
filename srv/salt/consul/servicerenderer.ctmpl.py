@@ -530,16 +530,19 @@ def _setup_nftables(services: List[SmartstackService], ips: List[str], mode: str
                 if mode == "plain":
                     # Tuples in these arrays will be used to check for the rule in nft output, but only tuples
                     input_rule = ["rule", "ip6" if isinstance(ipaddr, ipaddress.IPv6Address) else "ip",
-                                  "filter", input_chainname, ("saddr", "0/0"),
+                                  "filter", input_chainname,
+                                  ("saddr", "::/0" if isinstance(ipaddr, ipaddress.IPv6Address) else "0/0"),
                                   ("daddr", f"{ip}/128" if isinstance(ipaddr, ipaddress.IPv6Address) else f"{ip}/32"),
                                   (prot, "dport", str(ruleport)), ("accept",)]
                     output_rule = ["rule", "ip6" if isinstance(ipaddr, ipaddress.IPv6Address) else "ip",
                                    "filter", output_chainname,
                                    ("saddr", f"{ip}/128" if isinstance(ipaddr, ipaddress.IPv6Address) else f"{ip}/32"),
-                                   ("daddr", "0/0"), (prot, "sport", str(ruleport)), ("accept",)]
+                                   ("daddr", "::/0" if isinstance(ipaddr, ipaddress.IPv6Address) else "0/0"),
+                                   (prot, "sport", str(ruleport)), ("accept",)]
                 elif mode == "conntrack":
                     input_rule = ["rule", "ip6" if isinstance(ipaddr, ipaddress.IPv6Address) else "ip",
-                                  "filter", input_chainname, ("saddr", "0/0"),
+                                  "filter", input_chainname,
+                                  ("saddr", "::/0" if isinstance(ipaddr, ipaddress.IPv6Address) else "0/0"),
                                   ("daddr", f"{ip}/128" if isinstance(ipaddr, ipaddress.IPv6Address) else f"{ip}/32"),
                                   (prot, "dport", str(ruleport)), ("ct", "state", "new"), ("accept",)]
                     output_rule = None

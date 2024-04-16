@@ -40,6 +40,13 @@ nftables-baseconfig-table-ipv6-filter:
         - order: 2
 
 
+nftables-baseconfig-table-inet-filter:
+    nftables.table_present:
+        - name: filter
+        - family: inet
+        - order: 2
+
+
 nftables-baseconfig-chain-ipv4-input:
     nftables.chain_present:
         - name: input
@@ -118,15 +125,53 @@ nftables-baseconfig-chain-ipv6-forward:
             - nftables: nftables-baseconfig-table-ipv6-filter
 
 
+nftables-baseconfig-chain-inet-input:
+    nftables.chain_present:
+        - name: input
+        - table: filter
+        - table_type: filter
+        - family: inet
+        - hook: input
+        - priority: 0
+        - order: 2
+        - require:
+            - nftables: nftables-baseconfig-table-inet-filter
+
+
+nftables-baseconfig-chain-inet-output:
+    nftables.chain_present:
+        - name: output
+        - table: filter
+        - table_type: filter
+        - family: inet
+        - hook: output
+        - priority: 0
+        - order: 2
+        - require:
+            - nftables: nftables-baseconfig-table-inet-filter
+
+
+nftables-baseconfig-chain-inet-forward:
+    nftables.chain_present:
+        - name: forward
+        - table: filter
+        - table_type: filter
+        - family: inet
+        - hook: forward
+        - priority: 0
+        - order: 2
+        - require:
+            - nftables: nftables-baseconfig-table-inet-filter
+
+
 # always allow local connections
 localhost-recv-ipv4:
-    nftables.insert:
-        - position: 1
+    nftables.append:
         - table: filter
         - family: ip4
         - chain: input
         - jump: accept
-        - in-interface: lo
+        - if: lo
         - order: 3
         - save: True
         - require:
@@ -134,13 +179,12 @@ localhost-recv-ipv4:
 
 
 localhost-recv-ipv6:
-    nftables.insert:
-        - position: 1
+    nftables.append:
         - table: filter
         - family: ip6
         - chain: input
         - jump: accept
-        - in-interface: lo
+        - if: lo
         - order: 3
         - save: True
         - require:
@@ -149,12 +193,11 @@ localhost-recv-ipv6:
 
 localhost-send-ipv4:
     nftables.append:
-        - position: 1
         - table: filter
         - family: ip4
         - chain: output
         - jump: accept
-        - out-interface: lo
+        - of: lo
         - order: 3
         - save: True
         - require:
@@ -163,102 +206,55 @@ localhost-send-ipv4:
 
 localhost-send-ipv6:
     nftables.append:
-        - position: 1
         - table: filter
         - family: ip6
         - chain: output
         - jump: accept
-        - out-interface: lo
+        - of: lo
         - order: 3
         - save: True
         - require:
             - pkg: nftables
 
 
-# always allow ICMP pings
-icmp-recv-ipv4:
+# always allow ICMP pings. Saltstack nftables does not support icmpv6 right now, so that
+# must be solved differently.
+icmp-recv:
     nftables.append:
         - table: filter
-        - family: ip4
+        - family: inet
         - chain: input
         - jump: accept
         - proto: icmp
-        - icmp-type: any
-        - source: 0/0
-        - order: 4
-        - save: True
-        - require:
-            - pkg: nftables
-
-icmp-recv-ipv6:
-    nftables.append:
-        - table: filter
-        - family: ip6
-        - chain: input
-        - jump: accept
-        - proto: icmp
-        - icmp-type: any
-        - source: 0/0
+        - icmp-type: echo-reply,destination-unreachable,source-quench,redirect,echo-request,time-exceeded,parameter-problem,timestamp-request,timestamp-reply,info-request,info-reply,address-mask-request,address-mask-reply,router-advertisement,router-solicitation
         - order: 4
         - save: True
         - require:
             - pkg: nftables
 
 
-icmp-send-ipv4:
+icmp-send:
     nftables.append:
         - table: filter
-        - family: ip4
+        - family: inet
         - chain: output
         - jump: accept
         - proto: icmp
-        - icmp-type: any
-        - destination: 0/0
-        - order: 4
-        - save: True
-        - require:
-            - pkg: nftables
-
-icmp-send-ipv6:
-    nftables.append:
-        - table: filter
-        - family: ip6
-        - chain: output
-        - jump: accept
-        - proto: icmp
-        - icmp-type: any
-        - destination: 0/0
+        - icmp-type: echo-reply,destination-unreachable,source-quench,redirect,echo-request,time-exceeded,parameter-problem,timestamp-request,timestamp-reply,info-request,info-reply,address-mask-request,address-mask-reply,router-advertisement,router-solicitation
         - order: 4
         - save: True
         - require:
             - pkg: nftables
 
 
-icmp-forward-ipv4:
+icmp-forward:
     nftables.append:
         - table: filter
-        - family: ip4
+        - family: inet
         - chain: forward
         - jump: accept
         - proto: icmp
-        - icmp-type: any
-        - source: 0/0
-        - destination: 0/0
-        - order: 4
-        - save: True
-        - require:
-            - pkg: nftables
-
-icmp-forward-ipv6:
-    nftables.append:
-        - table: filter
-        - family: ip6
-        - chain: forward
-        - jump: accept
-        - proto: icmp
-        - icmp-type: any
-        - source: 0/0
-        - destination: 0/0
+        - icmp-type: echo-reply,destination-unreachable,source-quench,redirect,echo-request,time-exceeded,parameter-problem,timestamp-request,timestamp-reply,info-request,info-reply,address-mask-request,address-mask-reply,router-advertisement,router-solicitation
         - order: 4
         - save: True
         - require:
@@ -267,32 +263,29 @@ icmp-forward-ipv6:
 
 # prevent tcp packets without a connection
 drop-confused-tcp-packets-ipv4:
-    nftables.insert:
-        - position: 3
+    nftables.append:
         - table: filter
         - family: ip4
         - chain: input
         - jump: drop
         - proto: tcp
         - match: state
-        - connstate: new
-        - tcp-flags: '! FIN,SYN,RST,ACK SYN'
+        - connstate: invalid
         - order: 5
         - save: True
         - require:
             - pkg: nftables
 
+
 drop-confused-tcp-packets-ipv6:
-    nftables.insert:
-        - position: 3
+    nftables.append:
         - table: filter
         - family: ip6
         - chain: input
         - jump: drop
         - proto: tcp
         - match: state
-        - connstate: new
-        - tcp-flags: '! FIN,SYN,RST,ACK SYN'
+        - connstate: invalid
         - order: 5
         - save: True
         - require:
@@ -300,8 +293,7 @@ drop-confused-tcp-packets-ipv6:
 
 
 nftables-default-allow-related-established-input-ipv4:
-    nftables.insert:
-        - position: 2
+    nftables.append:
         - table: filter
         - family: ip4
         - chain: input
@@ -313,9 +305,9 @@ nftables-default-allow-related-established-input-ipv4:
         - require:
             - pkg: nftables
 
+
 nftables-default-allow-related-established-input-ipv6:
-    nftables.insert:
-        - position: 2
+    nftables.append:
         - table: filter
         - family: ip6
         - chain: input
@@ -329,8 +321,7 @@ nftables-default-allow-related-established-input-ipv6:
 
 
 nftables-default-allow-related-established-output-ipv4:
-    nftables.insert:
-        - position: 2
+    nftables.append:
         - table: filter
         - family: ip4
         - chain: output
@@ -342,9 +333,9 @@ nftables-default-allow-related-established-output-ipv4:
         - require:
             - pkg: nftables
 
+
 nftables-default-allow-related-established-output-ipv6:
-    nftables.insert:
-        - position: 2
+    nftables.append:
         - table: filter
         - family: ip6
         - chain: output
@@ -358,9 +349,8 @@ nftables-default-allow-related-established-output-ipv6:
 
 
 nftables-default-allow-related-established-forward-ipv4:
-    nftables.insert:
+    nftables.append:
         # insert this right at the top, since we don't have preceding appends on the forward chain
-        - position: 1
         - table: filter
         - family: ip4
         - chain: forward
@@ -372,10 +362,10 @@ nftables-default-allow-related-established-forward-ipv4:
         - require:
             - pkg: nftables
 
+
 nftables-default-allow-related-established-forward-ipv6:
-    nftables.insert:
+    nftables.append:
         # insert this right at the top, since we don't have preceding appends on the forward chain
-        - position: 1
         - table: filter
         - family: ip6
         - chain: forward

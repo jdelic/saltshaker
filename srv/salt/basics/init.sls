@@ -239,7 +239,7 @@ basics-tcp-out{{port}}-send-ipv6:
         - chain: output
         - family: ip6
         - jump: accept
-        - destination: '0/0'
+        - destination: '::/0'
         - dport: {{port}}
         - match: state
         - connstate: new

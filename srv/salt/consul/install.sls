@@ -181,8 +181,7 @@ consul-rsyslog:
 
 # open consul interface
 consul-all-in-recv-ipv4:
-    nftables.insert:
-        - position: 2
+    nftables.append:
         - table: filter
         - chain: input
         - family: ip4

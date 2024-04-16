@@ -10,8 +10,7 @@
 
 {% if pillar["ifassign"].get("nat", False) %}
 vagrant-eth0-recv-ipv4:
-    nftables.insert:
-        - position: 1
+    nftables.append:
         - table: filter
         - family: ip4
         - chain: input
@@ -24,8 +23,7 @@ vagrant-eth0-recv-ipv4:
 
 
 vagrant-eth0-recv-ipv6:
-    nftables.insert:
-        - position: 1
+    nftables.append:
         - table: filter
         - family: ip6
         - chain: input
@@ -38,8 +36,7 @@ vagrant-eth0-recv-ipv6:
 
 
 vagrant-eth0-send-ipv4:
-    nftables.insert:
-        - position: 1
+    nftables.append:
         - table: filter
         - family: ip4
         - chain: output
@@ -52,8 +49,7 @@ vagrant-eth0-send-ipv4:
 
 
 vagrant-eth0-send-ipv6:
-    nftables.insert:
-        - position: 1
+    nftables.append:
         - table: filter
         - family: ip6
         - chain: output

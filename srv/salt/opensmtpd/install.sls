@@ -402,7 +402,7 @@ opensmtpd-{{svc}}-tcp-in25-recv-ipv6:
         - chain: input
         - family: ip6
         - jump: accept
-        - source: '0/0'
+        - source: '::/0'
         - destination: {{opensmtpd_ips['ipv6'][svc]}}/128
         - dport: 25
         - match: state
@@ -440,7 +440,7 @@ opensmtpd-{{svc}}-tcp-in465-recv-ipv6:
         - chain: input
         - family: ip6
         - jump: accept
-        - source: '0/0'
+        - source: '::/0'
         - destination: {{opensmtpd_ips['ipv6'][svc]}}/128
         - dport: 465
         - match: state
@@ -496,7 +496,7 @@ opensmtpd-relay-out25-send-ipv6:
         - family: ip6
         - jump: accept
         - source: {{salt['network.interface_ip'](salt['network.default_route']('inet6')[0]['interface'])}}/128
-        - destination: 0/0
+        - destination: ::/0
         - dport: 25
         - match: state
         - connstate: new
@@ -513,7 +513,7 @@ opensmtpd-relay-out465-send-ipv6:
         - family: ip6
         - jump: accept
         - source: {{salt['network.interface_ip'](salt['network.default_route']('inet6')[0]['interface'])}}/128
-        - destination: 0/0
+        - destination: ::/0
         - dport: 465
         - match: state
         - connstate: new
