@@ -256,7 +256,7 @@ basics-udp-out{{port}}-recv-ipv4:
         - table: filter
         - chain: input
         - family: ip4
-        - jump: acceot
+        - jump: accept
         - proto: udp
         - sport: {{port}}
         - save: True
@@ -268,7 +268,7 @@ basics-udp-out{{port}}-recv-ipv6:
         - table: filter
         - chain: input
         - family: ip6
-        - jump: acceot
+        - jump: accept
         - proto: udp
         - sport: {{port}}
         - save: True
