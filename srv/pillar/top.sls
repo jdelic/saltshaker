@@ -35,6 +35,10 @@ base:
         - match: grain
         - shared.loadbalancer
 
+    'roles:6to4gateway':
+        - match: grain
+        - shared.6to4
+
     # spaces ' ' are important after parentheses for the matcher to work (see
     # https://docs.saltstack.com/en/latest/topics/targeting/compound.html)
     'not *.test and ( G@roles:apps or G@roles:loadbalancer or G@roles:mail )':
