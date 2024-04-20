@@ -23,7 +23,7 @@
 #======================================================================================================================
 set -o nounset                              # Treat unset variables as an error
 
-__ScriptVersion="2023.08.03"
+__ScriptVersion="2024.04.03"
 __ScriptName="bootstrap-salt.sh"
 
 __ScriptFullName="$0"
@@ -596,7 +596,6 @@ fi
 echoinfo "Running version: ${__ScriptVersion}"
 echoinfo "Executed by: ${CALLER}"
 echoinfo "Command line: '${__ScriptFullName} ${__ScriptArgs}'"
-echowarn "Running the unstable version of ${__ScriptName}"
 
 # Define installation type
 if [ "$#" -gt 0 ];then
@@ -1522,9 +1521,9 @@ __check_dpkg_architecture() {
             if [ "$_CUSTOM_REPO_URL" != "null" ]; then
                 warn_msg="Support for arm64 is experimental, make sure the custom repository used has the expected structure and contents."
             else
-                # Saltstack official repository has arm64 metadata beginning with Debian 11,
+                # Saltstack official repository has arm64 metadata beginning with Debian 10,
                 # use amd64 repositories on arm64 for anything older, since all pkgs are arch-independent
-                if [ "$DISTRO_NAME_L" = "debian" ] || [ "$DISTRO_MAJOR_VERSION" -lt 11 ]; then
+                if [ "$DISTRO_NAME_L" = "debian" ] && [ "$DISTRO_MAJOR_VERSION" -lt 10 ]; then
                   __REPO_ARCH="amd64"
                 else
                   __REPO_ARCH="arm64"
@@ -1709,6 +1708,14 @@ __debian_codename_translation() {
             ;;
         "11")
             DISTRO_CODENAME="bullseye"
+            ;;
+        "12")
+            DISTRO_CODENAME="bookworm"
+            # FIXME - TEMPORARY
+            # use bullseye packages until bookworm packages are available
+            DISTRO_CODENAME="bullseye"
+            DISTRO_MAJOR_VERSION=11
+            rv=11
             ;;
         *)
             DISTRO_CODENAME="stretch"
@@ -3652,10 +3659,10 @@ __install_saltstack_debian_repository() {
     __apt_get_install_noinput ${__PACKAGES} || return 1
 
     # amd64 is just a part of repository URI, 32-bit pkgs are hosted under the same location
-    SALTSTACK_DEBIAN_URL="${HTTP_VAL}://${_REPO_URL}/${__PY_VERSION_REPO}/debian/${DEBIAN_RELEASE}/${__REPO_ARCH}/${STABLE_REV}"
+    SALTSTACK_DEBIAN_URL="${HTTP_VAL}://${_REPO_URL}/${__PY_VERSION_REPO}/debian/${DEBIAN_RELEASE}/${__REPO_ARCH}"
     echo "$__REPO_ARCH_DEB $SALTSTACK_DEBIAN_URL $DEBIAN_CODENAME main" > "/etc/apt/sources.list.d/salt.list"
 
-    __apt_key_fetch "$SALTSTACK_DEBIAN_URL/salt-archive-keyring.gpg" || return 1
+    __apt_key_fetch "$SALTSTACK_DEBIAN_URL/SALT-PROJECT-GPG-PUBKEY-2023.gpg" || return 1
 
     __wait_for_apt apt-get update || return 1
 }
