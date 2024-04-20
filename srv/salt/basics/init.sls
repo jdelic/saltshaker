@@ -6,8 +6,8 @@
 
 
 # Some of the states in this file enforce special ordering to make sure that the firewall is configured to allow
-# access to the saltmaster before other states are executed that require such access. Notably iptables.init reserves
-# order 1, 2 and 3 for the netfilter baseline setup so we can make sure that rules are added in a certain order.
+# access to the saltmaster before other states are executed that require such access. Notably basics.nfiptables.init
+# reserves order 1 to 4 for the netfilter baseline setup so we can make sure that rules are added in a certain order.
 
 include:
     - .vim
@@ -15,10 +15,15 @@ include:
     - .salt-minion
     - .python
     - .python.apt
-    - .iptables  # forces "order: 1"
+    - .nftables  # forces "order: 1"
     - .crypto
     - .rsyslog
     - .nounup
+
+
+check-our-assumptions:
+    sanitycheck.check:
+        - order: 1
 
 
 # enforce that Debian packages can't launch daemons while salt runs
@@ -185,19 +190,20 @@ trigger-minion-sync:
 
 
 # always allow ssh in
-openssh-in22-recv:
-    iptables.append:
+openssh-in22-recv-ipv4:
+    nftables.append:
         - table: filter
-        - chain: INPUT
-        - jump: ACCEPT
+        - chain: input
+        - family: ip4
+        - jump: accept
         - source: '0/0'
         - proto: tcp
         - dport: 22
         - match: state
-        - connstate: NEW
+        - connstate: new
         - save: True
         - require:
-            - sls: basics.iptables
+            - sls: basics.nftables
         - order: 4
 
 
@@ -212,15 +218,31 @@ openssh-in22-recv:
 
 {% for port in tcp %}
 # allow us to contact others on ports
-basics-tcp-out{{port}}-send:
-    iptables.append:
+basics-tcp-out{{port}}-send-ipv4:
+    nftables.append:
         - table: filter
-        - chain: OUTPUT
-        - jump: ACCEPT
+        - chain: output
+        - family: ip4
+        - jump: accept
         - destination: '0/0'
         - dport: {{port}}
         - match: state
-        - connstate: NEW
+        - connstate: new
+        - proto: tcp
+        - save: True
+        - order: 4
+
+
+basics-tcp-out{{port}}-send-ipv6:
+    nftables.append:
+        - table: filter
+        - chain: output
+        - family: ip6
+        - jump: accept
+        - destination: '::/0'
+        - dport: {{port}}
+        - match: state
+        - connstate: new
         - proto: tcp
         - save: True
         - order: 4
@@ -229,11 +251,24 @@ basics-tcp-out{{port}}-send:
 
 {% for port in udp %}
 # allow others to answer. For UDP we make this stateless here to guarantee it works.
-basics-udp-out{{port}}-recv:
-    iptables.append:
+basics-udp-out{{port}}-recv-ipv4:
+    nftables.append:
         - table: filter
-        - chain: INPUT
-        - jump: ACCEPT
+        - chain: input
+        - family: ip4
+        - jump: accept
+        - proto: udp
+        - sport: {{port}}
+        - save: True
+        - order: 4
+
+
+basics-udp-out{{port}}-recv-ipv6:
+    nftables.append:
+        - table: filter
+        - chain: input
+        - family: ip6
+        - jump: accept
         - proto: udp
         - sport: {{port}}
         - save: True
@@ -241,11 +276,24 @@ basics-udp-out{{port}}-recv:
 
 
 # allow us to talk to others. For UDP we make this stateless here to guarantee it works.
-basics-udp-out{{port}}-send:
-    iptables.append:
+basics-udp-out{{port}}-send-ipv4:
+    nftables.append:
         - table: filter
-        - chain: OUTPUT
-        - jump: ACCEPT
+        - chain: output
+        - family: ip4
+        - jump: accept
+        - proto: udp
+        - dport: {{port}}
+        - save: True
+        - order: 4
+
+
+basics-udp-out{{port}}-send-ipv6:
+    nftables.append:
+        - table: filter
+        - chain: output
+        - family: ip6
+        - jump: accept
         - proto: udp
         - dport: {{port}}
         - save: True
@@ -254,32 +302,34 @@ basics-udp-out{{port}}-send:
 
 
 # OPEN THE INTERNAL NETWORK FOR OUTGOING CONNECTIONS =========================
-basics-internal-network-tcp:
-    iptables.append:
+basics-internal-network-tcp-ipv4:
+    nftables.append:
         - table: filter
-        - chain: OUTPUT
-        - jump: ACCEPT
+        - chain: output
+        - family: ip4
+        - jump: accept
         - out-interface: {{pillar['ifassign']['internal']}}
         - match: state
-        - connstate: NEW
+        - connstate: new
         - proto: tcp
         - save: True
         - order: 4
         - require:
-            - sls: basics.iptables
+            - sls: basics.nftables
 
 
-basics-internal-network-udp:
-    iptables.append:
+basics-internal-network-udp-ipv4:
+    nftables.append:
         - table: filter
-        - chain: OUTPUT
-        - jump: ACCEPT
+        - chain: output
+        - family: ip4
+        - jump: accept
         - out-interface: {{pillar['ifassign']['internal']}}
         - proto: udp
         - save: True
         - order: 4
         - require:
-            - sls: basics.iptables
+            - sls: basics.nftables
 
 
 # vim: syntax=yaml

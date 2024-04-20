@@ -16,24 +16,24 @@ repos:
     maurusnet-opensmtpd: deb http://fileserver.maurusnet.test/mn-opensmtpd/ mn-opensmtpd main
     maurusnet-radicale: deb http://fileserver.maurusnet.test/mn-radicale/ mn-radicale main
     postgresql: deb http://fileserver.maurusnet.test/postgresql/ bookworm-pgdg
-    saltstack: deb http://fileserver.maurusnet.test/apt/debian/11/amd64/latest bookworm main
+    saltstack: deb http://fileserver.maurusnet.test/salt/py3/debian/12/amd64/latest bookworm main
 
     pgpkey: salt://mn/fileserver_ACADBD6B.pgp.key
 
 
 urls:
     acme: http://fileserver.maurusnet.test/downloads/acmesh/3.0.4.zip
-    concourse: http://fileserver.maurusnet.test/downloads/concourse/concourse-7.11.0-linux-amd64.tgz
-    concourse-fly: http://fileserver.maurusnet.test/downloads/concourse/fly-7.11.0-linux-amd64.tgz
-    consul: http://fileserver.maurusnet.test/downloads/consul/consul_1.17.0_linux_amd64.zip
+    concourse: http://fileserver.maurusnet.test/downloads/concourse/concourse-7.11.1-linux-amd64.tgz
+    concourse-fly: http://fileserver.maurusnet.test/downloads/concourse/fly-7.11.1-linux-amd64.tgz
+    consul: http://fileserver.maurusnet.test/downloads/consul/consul_1.18.1_linux_amd64.zip
     consul-esm: http://fileserver.maurusnet.test/downloads/consul-esm/consul-esm_0.7.1_linux_amd64.zip
     consul-replicate: http://fileserver.maurusnet.test/downloads/consul-replicate/consul-replicate_0.4.0_linux_amd64.zip
-    consul-template: http://fileserver.maurusnet.test/downloads/consul-template/consul-template_0.35.0_linux_amd64.zip
-    nomad: http://fileserver.maurusnet.test/downloads/nomad/nomad_1.6.3_linux_amd64.zip
-    nomad-autoscaler: http://fileserver.maurusnet.test/downloads/nomad-autoscaler/nomad-autoscaler_0.3.7_linux_amd64.zip
-    nomad-pack: http://fileserver.maurusnet.test/downloads/nomad-pack/nomad-pack_0.0.1-techpreview.3_linux_amd64.zip
-    terraform: http://fileserver.maurusnet.test/downloads/terraform/terraform_1.6.3_linux_amd64.zip
-    vault: http://fileserver.maurusnet.test/downloads/vault/vault_1.15.2_linux_amd64.zip
+    consul-template: http://fileserver.maurusnet.test/downloads/consul-template/consul-template_0.37.4_linux_amd64.zip
+    nomad: http://fileserver.maurusnet.test/downloads/nomad/nomad_1.7.6_linux_amd64.zip
+    nomad-autoscaler: http://fileserver.maurusnet.test/downloads/nomad-autoscaler/nomad-autoscaler_0.4.3_linux_amd64.zip
+    nomad-pack: http://fileserver.maurusnet.test/downloads/nomad-pack/nomad-pack_0.1.0_linux_amd64.zip
+    terraform: http://fileserver.maurusnet.test/downloads/terraform/terraform_1.8.0_linux_amd64.zip
+    vault: http://fileserver.maurusnet.test/downloads/vault/vault_1.16.1_linux_amd64.zip
     vault-auditor: http://fileserver.maurusnet.test/downloads/vault-auditor/vault-auditor_1.0.3_linux_amd64.zip
     vault-gpg-plugin: http://fileserver.maurusnet.test/downloads/vault-gpg-plugin/linux_amd64.zip
     vault-ssh-helper: http://fileserver.maurusnet.test/downloads/vault/vault-ssh-helper_0.2.1_linux_amd64.zip
@@ -42,17 +42,17 @@ urls:
 
 hashes:
     acme: sha256=8f02886f809df01ef79ef3314f09876b04cc144a9460d4e5755a32bcb2dc1c84
-    concourse: sha256=ef75c157c15b4672e432ab6eea8cbc0d6db600747a0f0ec0f3c6536c9ff8eb25
-    concourse-fly: sha256=c49a654eadbdf190799393fa03fe264ccb41302153e3b6208f32de5092334f57
-    consul: sha256=4fbb6c3a05ddfc72d314149fe9765a1be89c33857b003a1d861469f2fe97e23e
+    concourse: sha256=fa48ad44c6973e6537e54f9e586f1d9ccb14526b216c3788eaee3290b07df0be
+    concourse-fly: sha256=7ac3fda96ae193bee95f92fdbc9decfc563cd14393882e47520ab67fa1a075f5
+    consul: sha256=5faa9cc3f2832e3ae454a3ec2dbc6799179d14e1e09463f220bb906c590f4b05
     consul-esm: sha256=bc1d8c351d277bb1e93d3d2a209b9282ee5d84e3a82ce3c38281f40318b5268f
     consul-replicate: sha256=96c6651291c2f8e75d98d04b9b4653d8a02324edaa25783744d9ea1d8d411c61
-    consul-template: sha256=1b1c9127e8da25b2d7322e6f2aa8e6d946336083999e0fdb321f96ffd447eebd
-    nomad: sha256=1771f83030d9c0e25b4b97b73e824f4b566721e3b9898ae9940eceb95bb7f4d0
-    nomad-autoscaler: sha256=11d3c8a5d16020514a55775f5b83fc8f1a08e2a2274f97b06700a5d9877346b4
-    nomad-pack: sha256=825cbe6f6053ad4eab4bc298a901cb957b6331fdb3db4b6a896e620a2b96f3c3
-    terraform: sha256=caa432f110db519bf9b7c84df23ead398e59b6cc3da2938f010200f1ee8f2ae4
-    vault: sha256=5a0820943bc212713ba57a5136b5ec96dd1a6fc5a1c61666407d996027b2e694
+    consul-template: sha256=f43567923e57f1e8ad30b07a3bc0a303b7213d13a5ad5c1ed7b3a9ea09be8275
+    nomad: sha256=82a438a144066a8f42ceea8548da754c0bd96b5b528cd337a5dc09017afddb56
+    nomad-autoscaler: sha256=c66e352accca50413202f88144e5aa2211c185f6a58a1061df38c42753f0f0a0
+    nomad-pack: sha256=20604ae26caffc506a5f6ad993bc8925f6022d1875c678e91a0897e1a2411288
+    terraform: sha256=858e2ca2d38ce3644607af68eb5184a91493feecf82346deb386fd6cfbfad785
+    vault: sha256=315a1964d7003ef6de94c407a88972d45eb9b378946a53a1bbff34de1ae2d1e0
     vault-auditor: sha256=14aebc65351e52ff705fd9a4f3fb89655bf3a87a6c67a86ff8aa67ef5ff4837f
     vault-gpg-plugin: sha256=943c17330e9933863be7de8a6fc69e00bd871aef4d62a36404b384278d87cfc5
     vault-ssh-helper: sha256=fe26f62e5822bdf66ea4bf874d1a535ffca19af07a27ff3bcd7e344bc1af39fe

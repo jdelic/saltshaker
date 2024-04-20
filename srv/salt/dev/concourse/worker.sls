@@ -107,79 +107,84 @@ concourse-worker:
 
 # allow forwarding of outgoing dns/http/https traffic to the internet from concourse.ci/garden containers
 {% for port in ['53', '80', '443', '8100'] %}
-concourse-worker-tcp-out{{port}}-forward:
-    iptables.append:
+concourse-worker-tcp-out{{port}}-forward-ipv4:
+    nftables.append:
         - table: filter
-        - chain: FORWARD
-        - jump: ACCEPT
+        - chain: forward
+        - family: ip4
+        - jump: accept
         - source: {{pillar.get('ci', {}).get('backend-network-pool', '10.254.0.0/22')}}
         - destination: 0/0
         - dport: {{port}}
         - match: state
-        - connstate: NEW
+        - connstate: new
         - proto: tcp
         - save: True
         - require:
-            - sls: basics.iptables
+            - sls: basics.nftables
 {% endfor %}
 
 
 # allow incoming connections from concourse TSA. Outgoing connections for the web/server node are
 # covered by basics.sls for the internal network
 {% for port in ['7777', '7788', '7799'] %}
-concourse-worker-tcp-in{{port}}-recv:
-    iptables.append:
+concourse-worker-tcp-in{{port}}-recv-ipv4:
+    nftables.append:
         - table: filter
-        - chain: INPUT
-        - jump: ACCEPT
+        - chain: input
+        - family: ip4
+        - jump: accept
         - in-interface: {{pillar['ifassign']['internal']}}
         - dport: {{port}}
         - match: state
-        - connstate: NEW
+        - connstate: new
         - proto: tcp
         - save: True
         - require:
-            - sls: basics.iptables
+            - sls: basics.nftables
 {% endfor %}
 
 
-concourse-worker-udp-out53-forward:
-    iptables.append:
+concourse-worker-udp-out53-forward-ipv4:
+    nftables.append:
         - table: filter
-        - chain: FORWARD
-        - jump: ACCEPT
+        - chain: forward
+        - family: ip4
+        - jump: accept
         - source: {{pillar.get('ci', {}).get('backend-network-pool', '10.254.0.0/22')}}
         - destination: 0/0
         - dport: 53
         - match: state
-        - connstate: NEW
+        - connstate: new
         - proto: udp
         - save: True
         - require:
-            - sls: basics.iptables
+            - sls: basics.nftables
 
 
-concourse-allow-inter-container-traffic-recv:
-    iptables.append:
+concourse-allow-inter-container-traffic-recv-ipv4:
+    nftables.append:
         - table: filter
-        - chain: INPUT
-        - jump: ACCEPT
+        - chain: input
+        - family: ip4
+        - jump: accept
         - source: {{pillar.get('ci', {}).get('backend-network-pool', '10.254.0.0/22')}}
         - destination: {{pillar.get('ci', {}).get('backend-network-pool', '10.254.0.0/22')}}
         - save: True
         - require:
-            - sls: basics.iptables
+            - sls: basics.nftables
 
 
-concourse-allow-inter-container-traffic-send:
-    iptables.append:
+concourse-allow-inter-container-traffic-send-ipv4:
+    nftables.append:
         - table: filter
-        - chain: OUTPUT
-        - jump: ACCEPT
+        - chain: output
+        - family: ip4
+        - jump: accept
         - source: {{pillar.get('ci', {}).get('backend-network-pool', '10.254.0.0/22')}}
         - destination: {{pillar.get('ci', {}).get('backend-network-pool', '10.254.0.0/22')}}
         - save: True
         - require:
-            - sls: basics.iptables
+            - sls: basics.nftables
 
 # vim: syntax=yaml

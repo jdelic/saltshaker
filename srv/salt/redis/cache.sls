@@ -27,10 +27,11 @@ redis-cache:
 
 # allow locals to contact us on port 6379
 redis-in{{pillar.get('redis-server', {}).get('bind-port', 6379)}}-recv:
-    iptables.append:
+    nftables.append:
         - table: filter
-        - chain: INPUT
-        - jump: ACCEPT
+        - chain: input
+        - family: ip4
+        - jump: accept
         - proto: tcp
         - source: '0/0'
         - in-interface: {{pillar['ifassign']['internal']}}
@@ -40,10 +41,10 @@ redis-in{{pillar.get('redis-server', {}).get('bind-port', 6379)}}-recv:
                        )}}
         - dport: {{pillar.get('redis-server', {}).get('bind-port', 6379)}}
         - match: state
-        - connstate: NEW
+        - connstate: new
         - save: True
         - require:
-            - sls: basics.iptables
+            - sls: basics.nftables
 
 
 redis-servicedef:

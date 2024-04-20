@@ -27,6 +27,7 @@ pdns-recursor-config:
                 - {{pillar.get('ci', {}).get('garden-network-pool',
                       '10.254.0.0/22')}}
             {% endif %}
+            provide_dns64: {{pillar.get('powerdns', {}).get('provide_dns64', False)}}
 
 
 pdns-recursor-lua-config:
