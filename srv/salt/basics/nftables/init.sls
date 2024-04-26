@@ -60,6 +60,16 @@ nftables-baseconfig-chain-ipv4-input:
             - nftables: nftables-baseconfig-table-ipv4-filter
 
 
+nftables-baseconfig-chain-ipv4-input-flush:
+    nftables.flush:
+        - table: filter
+        - chain: input
+        - family: ip4
+        - order: 2
+        - require:
+            - nftables: nftables-baseconfig-chain-ipv4-input
+
+
 nftables-baseconfig-chain-ipv6-input:
     nftables.chain_present:
         - name: input
@@ -71,6 +81,16 @@ nftables-baseconfig-chain-ipv6-input:
         - order: 2
         - require:
             - nftables: nftables-baseconfig-table-ipv6-filter
+
+
+nftables-baseconfig-chain-ipv6-input-flush:
+    nftables.flush:
+        - table: filter
+        - chain: input
+        - family: ip6
+        - order: 2
+        - require:
+            - nftables: nftables-baseconfig-chain-ipv6-input
 
 
 nftables-baseconfig-chain-ipv4-output:
@@ -86,6 +106,16 @@ nftables-baseconfig-chain-ipv4-output:
             - nftables: nftables-baseconfig-table-ipv4-filter
 
 
+nftables-baseconfig-chain-ipv4-output-flush:
+    nftables.flush:
+        - table: filter
+        - chain: output
+        - family: ip4
+        - order: 2
+        - require:
+            - nftables: nftables-baseconfig-chain-ipv4-output
+
+
 nftables-baseconfig-chain-ipv6-output:
     nftables.chain_present:
         - name: output
@@ -97,6 +127,16 @@ nftables-baseconfig-chain-ipv6-output:
         - order: 2
         - require:
             - nftables: nftables-baseconfig-table-ipv6-filter
+
+
+nftables-baseconfig-chain-ipv6-output-flush:
+    nftables.flush:
+        - table: filter
+        - chain: output
+        - family: ip6
+        - order: 2
+        - require:
+            - nftables: nftables-baseconfig-chain-ipv6-output
 
 
 nftables-baseconfig-chain-ipv4-forward:
@@ -112,6 +152,16 @@ nftables-baseconfig-chain-ipv4-forward:
             - nftables: nftables-baseconfig-table-ipv4-filter
 
 
+nftables-baseconfig-chain-ipv4-forward-flush:
+    nftables.flush:
+        - table: filter
+        - chain: forward
+        - family: ip4
+        - order: 2
+        - require:
+            - nftables: nftables-baseconfig-chain-ipv4-forward
+
+
 nftables-baseconfig-chain-ipv6-forward:
     nftables.chain_present:
         - name: forward
@@ -123,6 +173,16 @@ nftables-baseconfig-chain-ipv6-forward:
         - order: 2
         - require:
             - nftables: nftables-baseconfig-table-ipv6-filter
+
+
+nftables-baseconfig-chain-ipv6-forward-flush:
+    nftables.flush:
+        - table: filter
+        - chain: forward
+        - family: ip6
+        - order: 2
+        - require:
+            - nftables: nftables-baseconfig-chain-ipv6-forward
 
 
 nftables-baseconfig-chain-inet-input:
@@ -138,6 +198,16 @@ nftables-baseconfig-chain-inet-input:
             - nftables: nftables-baseconfig-table-inet-filter
 
 
+nftables-baseconfig-chain-inet-input-flush:
+    nftables.flush:
+        - table: filter
+        - chain: input
+        - family: inet
+        - order: 2
+        - require:
+            - nftables: nftables-baseconfig-chain-inet-input
+
+
 nftables-baseconfig-chain-inet-output:
     nftables.chain_present:
         - name: output
@@ -151,6 +221,16 @@ nftables-baseconfig-chain-inet-output:
             - nftables: nftables-baseconfig-table-inet-filter
 
 
+nftables-baseconfig-chain-inet-output-flush:
+    nftables.flush:
+        - table: filter
+        - chain: output
+        - family: inet
+        - order: 2
+        - require:
+            - nftables: nftables-baseconfig-chain-inet-output
+
+
 nftables-baseconfig-chain-inet-forward:
     nftables.chain_present:
         - name: forward
@@ -162,6 +242,16 @@ nftables-baseconfig-chain-inet-forward:
         - order: 2
         - require:
             - nftables: nftables-baseconfig-table-inet-filter
+
+
+nftables-baseconfig-chain-inet-forward-flush:
+    nftables.flush:
+        - table: filter
+        - chain: forward
+        - family: inet
+        - order: 2
+        - require:
+            - nftables: nftables-baseconfig-chain-inet-forward
 
 
 # always allow local connections
