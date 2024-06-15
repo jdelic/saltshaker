@@ -448,12 +448,12 @@ SysCTL is set up to accept
    even if those don't exist yet. This reduces usage of the `0.0.0.0` wildcard
    allowing to write more secure configurations.
  * `net.ipv4.conf.all.route_localnet` allows packets to and from `localhost` to
-   pass through iptables, making it possible to route them. This is required so
+   pass through nftables, making it possible to route them. This is required so
    we can make consul services available on `localhost` even though consul runs 
    on its own `consul0` dummy interface.
 
-## iptables states
-iptables is configured by the `basics` and `iptables` states to use the
+## nftables states
+nftables is configured by the `basics` and `basics.nftables` states to use the
 `connstate`/`conntrack` module to allow incoming and outgoing packets in the
 `RELATED` state. So to enable new TCP services in the firewall on each
 individual machine managed through this saltshaker, only the connection
@@ -464,16 +464,16 @@ The naming standard for states that enable ports that get contacted is:
 
 ```yaml
 openssh-in22-recv-ipv6:
-    iptables.append:
+    nftables.append:
         - table: filter
         - family: ip6
-        - chain: INPUT
-        - jump: ACCEPT
+        - chain: input
+        - jump: accept
         - source: '0/0'
         - proto: tcp
         - dport: 22
         - match: state
-        - connstate: NEW
+        - connstate: new
         - save: True
         - require:
             - sls: basics.nftables
@@ -484,15 +484,15 @@ The naming standard for states that enable ports that initiate connections is:
 
 ```yaml
 dns-tcp-out53-send-ipv4:
-      iptables.append:
+      nftables.append:
           - table: filter
           - family: ip4
-          - chain: OUTPUT
-          - jump: ACCEPT
+          - chain: output
+          - jump: accept
           - destination: '0/0'
           - dport: 53
           - match: state
-          - connstate: NEW
+          - connstate: new
           - proto: tcp
           - save: True
 ```

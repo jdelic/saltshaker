@@ -6,7 +6,7 @@
 
 
 # Some of the states in this file enforce special ordering to make sure that the firewall is configured to allow
-# access to the saltmaster before other states are executed that require such access. Notably basics.nfiptables.init
+# access to the saltmaster before other states are executed that require such access. Notably basics.nftables.init
 # reserves order 1 to 4 for the netfilter baseline setup so we can make sure that rules are added in a certain order.
 
 include:
