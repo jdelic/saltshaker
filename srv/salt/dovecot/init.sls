@@ -69,15 +69,15 @@ sa-learn-pipe-script:
 {% set dovecot_ips = {
     "ipv4":
         pillar.get('imap-incoming', {}).get(
-                'override-ipv4', grains['ip4_interfaces'].get(pillar['ifassign']['external'], {}).get( 
-                    pillar['ifassign'].get('external-ip-index', 0)|int(), None
-                )
+                'override-ipv4', grains['ip4_interfaces'].get(pillar['ifassign']['external'])[
+                    pillar['ifassign'].get('external-ip-index', 0)|int()
+                ]
             ) if pillar.get('imap-incoming', {}).get('bind-ipv4', True) else None,
     "ipv6":
         pillar.get('imap-incoming', {}).get(
-                'override-ipv6', grains['ip6_interfaces'].get(pillar['ifassign']['external'], {}).get(
-                    pillar['ifassign'].get('external-ip-index', 0)|int(), None
-                )
+                'override-ipv6', grains['ip6_interfaces'].get(pillar['ifassign']['external'])[
+                    pillar['ifassign'].get('external-ip-index', 0)|int()
+                ]
             ) if pillar.get('imap-incoming', {}).get('bind-ipv6', True) else None
 } %}
 
