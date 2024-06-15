@@ -15,13 +15,8 @@ base:
         - vault.install
         - mn.cas.client
 
-    'roles:xenserver':
-        - match: grain
-        - xen
-        - consul.server
-
     # everything that is not a consul server has a consul agent
-    'not G@roles:consulserver and not G@roles:xenserver':
+    'not G@roles:consulserver':
         - match: compound
         - consul.agent
 
@@ -130,14 +125,6 @@ base:
         - match: grain
         - haproxy.external
 
-    'roles:vpngateway':
-        - match: grain
-        - openvpn.gateway
-
-    'not G@roles:vpngateway':
-        - match: compound
-        - openvpn.gateway_accessible
-
     'roles:webdav':
         - match: grain
         - apache.webdav
@@ -146,7 +133,7 @@ base:
         # put vagrant user config on .test machines
         - mn.users.vagrant
         # enable the NAT networking device for all network traffic
-        - basics.iptables.vagrant
+        - basics.nftables.vagrant
 
     # put my personal user on every other machine
     '(?!saltmaster).*?net(|.internal)$':

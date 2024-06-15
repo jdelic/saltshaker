@@ -1,4 +1,4 @@
-#!/usr/bin/env python3
+#!/usr/bin/env python
 
 # This script template takes a list of dicts describing services in Consul,
 # rendered directly into this script by consul-template and then
@@ -35,26 +35,27 @@
 # {% endfor %}
 # */}}
 #
-# If run as root, it can also call /sbin/iptables and create all necessary
-# INPUT and OUTPUT rules for incoming connections based of the
+# If run as root, it can also call /sbin/iptables or /sbin/nftables and create
+# all necessary INPUT and OUTPUT rules for incoming connections based of the
 # smartstack:protocol and smartstack:extport tags.
 #
-from __future__ import print_function
-
+import ipaddress
 import os
 import re
 import sys
+from typing import Dict, Union, List, Optional, Set, Self, Iterator, Tuple, TextIO, Iterable
+
 import jinja2
 import argparse
 import subprocess
 import contextlib
 
-from collections.abc import Iterable
 
+t_servicedict = Dict[str, Union[str, int, List[str]]]
 
 # The Go template is in the comments (yes, this works and therefor keeps
 # IntelliJ's Python plugin from freaking out)
-_services = [
+_services: List[t_servicedict] = [
     # {{ range services }}
     #    {{ range service .Name }}
     {
@@ -73,42 +74,42 @@ _services = [
 _args = None
 
 
-class SmartstackService(object):
-    def __init__(self, servicedict, port=None, mode=None):
+class SmartstackService:
+    def __init__(self, servicedict: t_servicedict, port: Optional[int] = None, mode: Optional[str] = None) -> None:
         self._port = port
         self.mode = mode
         self.svc = servicedict
 
     @property
-    def port(self):
+    def port(self) -> int:
         if self._port:
             return self._port
         else:
             return self.svc["port"]
 
     @port.setter
-    def port(self, value):
+    def port(self, value) -> None:
         self._port = value
 
     @property
-    def name(self):
+    def name(self) -> str:
         return self.svc["name"]
 
     @property
-    def ip(self):
+    def ip(self) -> str:
         return self.svc["ip"]
 
     @property
-    def tags(self):
+    def tags(self) -> List[str]:
         return self.svc["tags"]
 
-    def tagvalue(self, tagpart):
+    def tagvalue(self, tagpart: str) -> Union[str, None]:
         for tag in self.svc["tags"]:
             if tag.startswith(tagpart):
                 return tag[len(tagpart):]
         return None
 
-    def tagvalue_set(self, tagpart):
+    def tagvalue_set(self, tagpart: str) -> Set[str]:
         res = set()
         for tag in self.svc["tags"]:
             if tag.startswith(tagpart):
@@ -116,23 +117,25 @@ class SmartstackService(object):
         return res
 
 
-class SmartstackServiceContainer(object):
-    def __init__(self, services=None, all_services=None, grouped_by=None, group_by_type=None,
-                 filtered_to=None):
+class SmartstackServiceContainer:
+    def __init__(self, services: Optional[Union[Dict[str, Self], List[SmartstackService]]] = None,
+                 all_services: Optional[List[SmartstackService]] = None, grouped_by: Optional[List[str]] = None,
+                 group_by_type: Optional[List[str]] = None,
+                 filtered_to: Optional[List[str]] = None):
         self.services = services if services is not None else all_services or []
         self.all_services = all_services
         self.grouped_by = grouped_by or []
         self.group_by_type = group_by_type or []
         self.filtered_to = filtered_to or []
 
-    def add(self, service):
+    def add(self, service: SmartstackService) -> None:
         if isinstance(self.services, list):
             self.services.append(service)
         else:
             raise ValueError(".add() can't be called on SmartstackServiceContainers that contain a grouping dict (%s)" %
                              repr(self))
 
-    def iter_services(self, all=False):
+    def iter_services(self, all: bool = False):
         if all:
             for ss in self.all_services:
                 yield ss
@@ -146,34 +149,34 @@ class SmartstackServiceContainer(object):
             for ss in self.services:
                 yield ss
 
-    def ungroup(self):
+    def ungroup(self) -> Self:
         return SmartstackServiceContainer(all_services=self.all_services)
 
-    def __iter__(self):
+    def __iter__(self) -> Iterator[SmartstackService]:
         return self.iter_services()
 
-    def __getitem__(self, item):
+    def __getitem__(self, item: str) -> Union[List[SmartstackService], SmartstackService]:
         if isinstance(self.services, dict):
             if item not in self.services:
                 raise KeyError("%s not in %s (%s)" % (item, type(self.services), repr(self)))
         return self.services[item]
 
-    def __getattr__(self, item):
+    def __getattr__(self, item: str) -> Union[List[SmartstackService], SmartstackService]:
         if item not in self.services:
             raise KeyError("%s not in %s (%s)" % (item, type(self.services), repr(self)))
         return self.services[item]
 
-    def __contains__(self, item):
+    def __contains__(self, item: str) -> bool:
         return item in self.services
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return "SmartstackServiceContainer<%s services of %s known services, grouped: %s, group_by_type: %s, " \
                "filtered_to: %s>" % (len(list(self.iter_services())), len(self.all_services),
                                      ".".join(self.grouped_by) if self.grouped_by is not None else "None",
                                      ".".join(self.group_by_type) if self.group_by_type is not None else "None",
                                      ".".join(self.filtered_to if self.filtered_to is not None else "None"))
 
-    def __add__(self, other):
+    def __add__(self, other: Self) -> Self:
         if isinstance(other.services, dict) and isinstance(self.services, dict):
             combined = dict(self.services)
             combined.update(other.services)
@@ -185,22 +188,24 @@ class SmartstackServiceContainer(object):
         else:
             raise ValueError("Trying to combine list of services with dict of services")
 
-    def keys(self):
-        res = self.services.keys()
+    def keys(self) -> List[str]:
+        res = list(self.services.keys())
         if "__untagged" in res:
-            del res["__untagged"]
+            res.remove("__untagged")
         return res
 
-    def items(self):
+    def items(self) -> Iterable[Union[Tuple[int, SmartstackService],
+                                      Tuple[str, SmartstackService],
+                                      Tuple[str, Self]]]:
         return self.services.items()
 
-    def count(self):
+    def count(self) -> int:
         if isinstance(self.services, dict):
             return len(self.keys())
         elif isinstance(self.services, list):
             return len(self.services)
 
-    def group_by(self, field):
+    def group_by(self, field: str) -> Self:
         grouped = {}
 
         for ss in self.iter_services():
@@ -218,7 +223,7 @@ class SmartstackServiceContainer(object):
                                           grouped_by=self.grouped_by + [field],
                                           group_by_type=self.group_by_type + ["field"])
 
-    def group_by_tagvalue(self, tagpart):
+    def group_by_tagvalue(self, tagpart: str) -> Self:
         grouped = {}
 
         for ss in self.iter_services():
@@ -237,14 +242,14 @@ class SmartstackServiceContainer(object):
                                           grouped_by=self.grouped_by + [tagpart],
                                           group_by_type=self.group_by_type + ["tag"])
 
-    def value_set(self, field):
+    def value_set(self, field: str) -> Set[Union[str, int, List[str]]]:
         res = set()
         for ss in self.iter_services():
             if field in ss.svc:
                 res.add(ss.svc[field])
         return res
 
-    def tagvalue_set(self, tagpart):
+    def tagvalue_set(self, tagpart: str) -> Set[str]:
         res = set()
         for ss in self.iter_services():
             for tag in ss.svc["tags"]:
@@ -257,7 +262,7 @@ class SmartstackServiceContainer(object):
 
 
 @contextlib.contextmanager
-def file_or_stdout(filename=None):
+def file_or_stdout(filename: str = None) -> TextIO:
     if filename and filename != "-":
         fh = open(filename, "w")
     else:
@@ -270,7 +275,7 @@ def file_or_stdout(filename=None):
             fh.close()
 
 
-def parse_queries(queries):
+def parse_queries(queries: List[str]) -> List[List[Dict[str, str]]]:
     result = []
     for query in queries:
         parsed_query = []
@@ -293,7 +298,7 @@ def parse_queries(queries):
     return result
 
 
-def query_match(haystack, needle):
+def query_match(haystack, needle) -> bool:
     if hasattr(needle, "match"):
         if isinstance(haystack, Iterable):
             for h in haystack:
@@ -304,7 +309,7 @@ def query_match(haystack, needle):
         return needle in haystack
 
 
-def filter_services(svcs):
+def filter_services(svcs: List[t_servicedict]) -> List[t_servicedict]:
     if _args.add_all:
         filtered = list(_services)
     else:
@@ -351,7 +356,7 @@ def filter_services(svcs):
     return filtered
 
 
-def parse_smartstack_tags(service):
+def parse_smartstack_tags(service: t_servicedict) -> SmartstackService:
     sv = SmartstackService(service)
     for tag in service["tags"]:
         if re.match("^smartstack:port:([0-9]+)$", tag):
@@ -363,9 +368,21 @@ def parse_smartstack_tags(service):
     return sv
 
 
-def _setup_iptables(services, ip, mode, debug=False, verbose=False):
+def _setup_iptables(services: List[SmartstackService], ips: List[str], mode: str, debug: bool = False,
+                    verbose: bool = False) -> None:
     if debug:
         print("========= IPTABLES RULES DEBUG =========")
+
+    for ip in ips:
+        if isinstance(ipaddress.ip_address(ip), ipaddress.IPv6Address):
+            print("ERROR: iptables setup does not support ipv6.")
+            sys.exit(1)
+
+    if len(ips) > 1:
+        print("ERROR: iptables supports only one IP. Use nftables to support more than one IP and IPv6.")
+        sys.exit(1)
+
+    ip = ips[0]
 
     for svc in services:
         _extports = set()
@@ -415,40 +432,156 @@ def _setup_iptables(services, ip, mode, debug=False, verbose=False):
 
             if input_rule:
                 if debug:
-                    print("%s: %s" % (svc.name, " ".join(["/sbin/iptables", "-A"] + input_rule)))
+                    print("%s: %s" % (svc.name, " ".join(["/usr/sbin/iptables", "-A"] + input_rule)))
                 else:
                     try:
                         # check if the rule exists first... iptables wille exit with 0 if it does
                         # also, suppress output (if the rule doesn't exist iptables will print "bad rule", which is
                         # pretty confusing
                         with open(os.devnull, "w") as devnull:
-                            subprocess.check_call(["/sbin/iptables", "-C"] + input_rule, stdout=devnull, stderr=devnull)
+                            subprocess.check_call(["/usr/sbin/iptables", "-C"] + input_rule, stdout=devnull, stderr=devnull)
                     except subprocess.CalledProcessError as e:
                         if e.returncode == 1:
-                            subprocess.call(["/sbin/iptables", "-A"] + input_rule)
+                            subprocess.call(["/usr/sbin/iptables", "-A"] + input_rule)
                     else:
                         if verbose:
                             print("%s: INPUT rule exists" % svc.name, file=sys.stderr)
             if output_rule:
                 if debug:
-                    print("%s: %s" % (svc.name, " ".join(["/sbin/iptables", "-A"] + output_rule)))
+                    print("%s: %s" % (svc.name, " ".join(["/usr/sbin/iptables", "-A"] + output_rule)))
                 else:
                     try:
-                        subprocess.check_call(["/sbin/iptables", "-C"] + output_rule)
+                        subprocess.check_call(["/usr/sbin/iptables", "-C"] + output_rule)
                     except subprocess.CalledProcessError as e:
                         if e.returncode == 1:
-                            subprocess.call(["/sbin/iptables", "-A"] + output_rule)
+                            subprocess.call(["/usr/sbin/iptables", "-A"] + output_rule)
                     else:
                         if verbose:
                             print("%s: OUTPUT rule exists" % svc.name, file=sys.stderr)
 
 
-def main():
+def _check_nftables_rule(table: str, chain: str, rule: List[str | Tuple[str, ...]]) -> bool:
+    try:
+        nft_output = subprocess.check_output(
+            ["nft", "list", "chain", table, chain], stderr=subprocess.STDOUT,
+            text=True
+        )
+    except subprocess.CalledProcessError as exc:
+        print(f"Error running nft command: {exc.output}")
+        return False
+
+    components = [f"{' '.join(part)}" for part in rule if isinstance(part, tuple)]
+    nft_output_lines = nft_output.split("\n")
+    for line in nft_output_lines:
+        match = True
+        for component in components:
+            if component not in line:
+                match = False
+                break
+        if match:
+            return True
+    return False
+
+
+def _setup_nftables(services: List[SmartstackService], ips: List[str], mode: str, input_chainname: str,
+                    output_chainname: str, debug: bool = False, verbose: bool = False) -> None:
+    if debug:
+        print("========= NFTABLES RULES DEBUG =========")
+
+    for svc in services:
+        _extports = set()
+        for port in svc.tagvalue_set("smartstack:extport:"):
+            try:
+                _extports.add(int(port))
+            except ValueError:
+                print("Port number for 'smartstack:extport:' must be an integer not %s" %
+                      svc.tagvalue("smartstack:extport:"), file=sys.stderr)
+                continue
+
+        _protocol = svc.tagvalue("smartstack:protocol:")
+        if _protocol == "udp":
+            prot = "udp"
+            mode = "plain"  # udp can't be used with -m state
+        elif _protocol == "http":
+            prot = "tcp"
+            _extports.add(80)
+        elif _protocol == "https":
+            prot = "tcp"
+            _extports.add(443)
+        else:
+            prot = "tcp"
+
+        if "https-redirect" in svc.tagvalue_set("smartstack:"):
+            _extports.add(80)
+
+        if not _extports:
+            print("no external port (smartstack:extport:) for service %s, or no well-known protocol in "
+                  "'smartstack:protocol:' so not creating iptables rule" % svc.name,
+                  file=sys.stderr)
+            continue
+
+        for ip in ips:
+            ipaddr = ipaddress.ip_address(ip)
+
+            for ruleport in _extports:
+                input_rule = None
+                output_rule = None
+
+                if mode == "plain":
+                    # Tuples in these arrays will be used to check for the rule in nft output, but only tuples
+                    input_rule = ["rule", "ip6" if isinstance(ipaddr, ipaddress.IPv6Address) else "ip",
+                                  "filter", input_chainname,
+                                  ("saddr", "::/0" if isinstance(ipaddr, ipaddress.IPv6Address) else "0/0"),
+                                  ("daddr", f"{ip}/128" if isinstance(ipaddr, ipaddress.IPv6Address) else f"{ip}/32"),
+                                  (prot, "dport", str(ruleport)), ("accept",)]
+                    output_rule = ["rule", "ip6" if isinstance(ipaddr, ipaddress.IPv6Address) else "ip",
+                                   "filter", output_chainname,
+                                   ("saddr", f"{ip}/128" if isinstance(ipaddr, ipaddress.IPv6Address) else f"{ip}/32"),
+                                   ("daddr", "::/0" if isinstance(ipaddr, ipaddress.IPv6Address) else "0/0"),
+                                   (prot, "sport", str(ruleport)), ("accept",)]
+                elif mode == "conntrack":
+                    input_rule = ["rule", "ip6" if isinstance(ipaddr, ipaddress.IPv6Address) else "ip",
+                                  "filter", input_chainname,
+                                  ("saddr", "::/0" if isinstance(ipaddr, ipaddress.IPv6Address) else "0/0"),
+                                  ("daddr", f"{ip}/128" if isinstance(ipaddr, ipaddress.IPv6Address) else f"{ip}/32"),
+                                  (prot, "dport", str(ruleport)), ("ct", "state", "new"), ("accept",)]
+                    output_rule = None
+
+                if input_rule:
+                    input_cmd = [f"{' '.join(part)}" if isinstance(part, tuple) else part for part in input_rule]
+                    if debug:
+                        print("%s: %s" % (svc.name, " ".join(["/usr/sbin/nft", "add", "filter", input_chainname] +
+                                                             input_cmd)))
+                    else:
+                        # check if the rule exists first...
+                        if _check_nftables_rule("filter", input_chainname, input_rule):
+                            subprocess.call(["/usr/sbin/nft", "add", "filter", input_chainname] + input_cmd)
+                        else:
+                            if verbose:
+                                print("%s: INPUT rule already exists" % svc.name, file=sys.stderr)
+                if output_rule:
+                    output_cmd = [f"{' '.join(part)}" if isinstance(part, tuple) else part for part in output_rule]
+                    if debug:
+                        print("%s: %s" % (svc.name, " ".join(["/usr/sbin/nft", "add", "filter", output_chainname] +
+                                                             output_cmd)))
+                    else:
+                        if _check_nftables_rule("filter", output_chainname, output_rule):
+                            subprocess.call(["/usr/sbin/nft", "add", "filter", output_chainname] + output_cmd)
+                        else:
+                            if verbose:
+                                print("%s: OUTPUT rule already exists" % svc.name, file=sys.stderr)
+
+
+def main() -> None:
     global _args
     preparser = argparse.ArgumentParser(add_help=False)
     preparser.add_argument("--only-iptables", dest="only_iptables", default=False, action="store_true",
                            help=argparse.SUPPRESS)
     preparser.add_argument("--debug-iptables", dest="debug_iptables", default=False, action="store_true",
+                           help=argparse.SUPPRESS)
+    preparser.add_argument("--only-nftables", dest="only_nftables", default=False, action="store_true",
+                           help=argparse.SUPPRESS)
+    preparser.add_argument("--debug-nftables", dest="debug_nftables", default=False, action="store_true",
                            help=argparse.SUPPRESS)
     args, _ = preparser.parse_known_args()
 
@@ -463,7 +596,7 @@ def main():
         description=description
     )
 
-    if not args.only_iptables and not args.debug_iptables:
+    if not (args.only_iptables or args.only_nftables) and not (args.debug_iptables or args.debug_nftables):
         # only add required arguments if we actually need them
         parser.add_argument("template",
                             help="The Jinja2 template to render. This template is passed a set of services selected "
@@ -484,9 +617,9 @@ def main():
                              "boolean OR semantics.")
     parser.add_argument("--exclude", dest="exclude_queries", action="append", default=[],
                         help="The opposite of --include-query.")
-    parser.add_argument("--smartstack-localip", dest="localip", default="127.0.0.1",
+    parser.add_argument("--smartstack-localip", dest="localips", default=[], action="append",
                         help="Sets the local ip address all smartstack services should bind to. This is passed to the"
-                             "template as the 'localip' variable. (Default: 127.0.0.1)")
+                             "template as the 'localip' variable. Can be specified multiple times (Default: 127.0.0.1)")
     parser.add_argument("--open-iptables", dest="open_iptables", default=None, choices=["conntrack", "plain"],
                         help="When this is set, this program will append iptables rules to the INPUT and OUTPUT chains "
                              "for all services it renders on the IP provided by --smartstack-localip. 'plain' will set "
@@ -497,7 +630,23 @@ def main():
     parser.add_argument("--only-iptables", dest="only_iptables", default=False, action="store_true",
                         help="Use this parameter to only set up iptables rules, and not do anything else. No templates "
                              "will be rendered and no commands executed.")
-    parser.add_argument("--debug-iptables", dest="debug_iptables", default=None, choices=["conntrack", "plain"],
+    parser.add_argument("--debug-iptables", dest="debug_iptables", default=False, action="store_true",
+                        help="Like --only-iptables, but output the rules to stdout instead of executing them.")
+    parser.add_argument("--open-nftables", dest="open_nftables", default=None, choices=["conntrack", "plain"],
+                        help="When this is set, this program will append nftables rules to the INPUT and OUTPUT chains "
+                             "for all services it renders on the IP provided by --smartstack-localip. 'plain' will set "
+                             "up plain INPUT and OUTPUT rules from anywhere to everywhere and vice versa. 'conntrack' "
+                             "will only set up rules for NEW incoming connections, assuming that your default iptables "
+                             "ruleset allows RELATED incoming and outgoing traffic. The nftables rules will be set up "
+                             "before [command] is executed.")
+    parser.add_argument("--nftables-input-chain", dest="nftables_input_chain", default="input",
+                        help="The name of the input filter chain to use for nftables.")
+    parser.add_argument("--nftables-output-chain", dest="nftables_output_chain", default="output",
+                        help="The name of the output filter chain to use for nftables.")
+    parser.add_argument("--only-nftables", dest="only_nftables", default=False, action="store_true",
+                        help="Use this parameter to only set up iptables rules, and not do anything else. No templates "
+                             "will be rendered and no commands executed.")
+    parser.add_argument("--debug-nftables", dest="debug_nftables", default=False, action="store_true",
                         help="Like --only-iptables, but output the rules to stdout instead of executing them.")
     parser.add_argument("-D", "--define", dest="defines", action="append", default=[],
                         help="Define a template variable for the rendering in the form 'varname=value'. 'varname' will "
@@ -512,6 +661,27 @@ def main():
         if os.getuid() != 0:
             print("Must run as root if --open-iptables is used")
             sys.exit(1)
+
+    if _args.open_nftables:
+        if os.getuid() != 0:
+            print("Must run as root if --open-nftables is used")
+            sys.exit(1)
+
+    if _args.open_iptables and _args.open_nftables:
+        print("ERROR: setting up iptables and nftables at the same time makes no sense. Choose one.")
+        sys.exit(1)
+
+    for ip in _args.localips:
+        try:
+            ipaddress.ip_address(ip)
+        except ValueError:
+            print("ERROR: %s is not a valid ip address" % str(ip))
+            sys.exit(1)
+
+    if len(_args.localips) == 0:
+        if _args.verbose:
+            print("No local ip addres supplied. Using ipv4 localhost (127.0.0.1).")
+        _args.localips.append("127.0.0.1")
 
     add_params = {}
     # convert defines from varname=value to a dict
@@ -537,7 +707,7 @@ def main():
 
     context = {
         "services": SmartstackServiceContainer(all_services=parsed),
-        "localip": _args.localip,
+        "localips": _args.localips,
     }
 
     context.update(add_params)
@@ -548,7 +718,12 @@ def main():
             print("    %s = %s" % (key, value))
 
     if (_args.open_iptables and _args.only_iptables) or _args.debug_iptables:
-        _setup_iptables(context["services"], context["localip"], _args.open_iptables, debug=_args.debug_iptables,
+        _setup_iptables(context["services"], context["localips"], _args.open_iptables, debug=_args.debug_iptables,
+                        verbose=_args.verbose)
+        sys.exit(0)
+
+    if (_args.open_nftables and _args.only_nftables) or _args.debug_nftables:
+        _setup_nftables(context["services"], context["localips"], _args.open_nftables, debug=_args.debug_nftables,
                         verbose=_args.verbose)
         sys.exit(0)
 
@@ -560,7 +735,10 @@ def main():
         outf.write(tpl.render(context))
 
     if _args.open_iptables:
-        _setup_iptables(context["services"], context["localip"], _args.open_iptables, debug=_args.debug_iptables,
+        _setup_iptables(context["services"], context["localips"], _args.open_iptables, debug=_args.debug_iptables,
+                        verbose=_args.verbose)
+    if _args.open_nftables:
+        _setup_nftables(context["services"], context["localips"], _args.open_nftables, debug=_args.debug_nftables,
                         verbose=_args.verbose)
     if _args.command:
         if _args.verbose:

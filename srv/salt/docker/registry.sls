@@ -73,20 +73,21 @@ docker-registry-servicedef:
             - file: consul-service-dir
 
 
-docker-registry-tcp-in{{pillar.get('docker', {}).get('registry', {}).get('bind-port', 5000)}}-recv:
-    iptables.append:
+docker-registry-tcp-in{{pillar.get('docker', {}).get('registry', {}).get('bind-port', 5000)}}-recv-ipv4:
+    nftables.append:
         - table: filter
-        - chain: INPUT
-        - jump: ACCEPT
+        - chain: input
+        - family: ip4
+        - jump: accept
         - source: '0/0'
         - destination: {{registry_ip}}
         - dport: {{registry_port}}
         - match: state
-        - connstate: NEW
+        - connstate: new
         - proto: tcp
         - save: True
         - require:
-            - sls: basics.iptables
+            - sls: basics.nftables
 
 
 # vim: syntax=yaml
