@@ -393,7 +393,7 @@ opensmtpd-{{svc}}-tcp-in25-recv-ipv4:
         - proto: tcp
         - save: True
         - require:
-            - sls: basics.nftables
+            - sls: basics.nftables.setup
     {% endif %}
     {% if opensmtpd_ips['ipv6'][svc] %}
 opensmtpd-{{svc}}-tcp-in25-recv-ipv6:
@@ -410,7 +410,7 @@ opensmtpd-{{svc}}-tcp-in25-recv-ipv6:
         - proto: tcp
         - save: True
         - require:
-            - sls: basics.nftables
+            - sls: basics.nftables.setup
     {% endif %}
 {% endfor %}
 
@@ -431,7 +431,7 @@ opensmtpd-{{svc}}-tcp-in465-recv-ipv4:
         - proto: tcp
         - save: True
         - require:
-            - sls: basics.nftables
+            - sls: basics.nftables.setup
     {% endif %}
     {% if opensmtpd_ips['ipv6'][svc] %}
 opensmtpd-{{svc}}-tcp-in465-recv-ipv6:
@@ -448,7 +448,7 @@ opensmtpd-{{svc}}-tcp-in465-recv-ipv6:
         - proto: tcp
         - save: True
         - require:
-            - sls: basics.nftables
+            - sls: basics.nftables.setup
     {% endif %}
 {% endfor %}
 
@@ -468,7 +468,7 @@ opensmtpd-relay-out25-send-ipv4:
         - proto: tcp
         - save: True
         - require:
-            - sls: basics.nftables
+            - sls: basics.nftables.setup
 
 
 opensmtpd-relay-out465-send-ipv4:
@@ -485,7 +485,7 @@ opensmtpd-relay-out465-send-ipv4:
         - proto: tcp
         - save: True
         - require:
-            - sls: basics.nftables
+            - sls: basics.nftables.setup
 {% endif %}
 
 {% if pillar["smtp-outgoing"].get("bind-ipv6", False) %}
@@ -503,7 +503,7 @@ opensmtpd-relay-out25-send-ipv6:
         - proto: tcp
         - save: True
         - require:
-            - sls: basics.nftables
+            - sls: basics.nftables.setup
 
 
 opensmtpd-relay-out465-send-ipv6:
@@ -520,5 +520,5 @@ opensmtpd-relay-out465-send-ipv6:
         - proto: tcp
         - save: True
         - require:
-            - sls: basics.nftables
+            - sls: basics.nftables.setup
 {% endif %}

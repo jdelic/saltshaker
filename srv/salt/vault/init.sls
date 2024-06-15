@@ -573,4 +573,4 @@ vault-tcp8200-recv-ipv4:
         - proto: tcp
         - save: True
         - require:
-            - sls: basics.nftables
+            - sls: basics.nftables.setup

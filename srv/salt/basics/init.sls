@@ -203,7 +203,7 @@ openssh-in22-recv-ipv4:
         - connstate: new
         - save: True
         - require:
-            - sls: basics.nftables
+            - sls: basics.nftables.setup
         - order: 4
 
 
@@ -315,7 +315,7 @@ basics-internal-network-tcp-ipv4:
         - save: True
         - order: 4
         - require:
-            - sls: basics.nftables
+            - sls: basics.nftables.setup
 
 
 basics-internal-network-udp-ipv4:
@@ -329,7 +329,7 @@ basics-internal-network-udp-ipv4:
         - save: True
         - order: 4
         - require:
-            - sls: basics.nftables
+            - sls: basics.nftables.setup
 
 
 # vim: syntax=yaml

@@ -13,8 +13,11 @@
 # After that all other nftables states should establish order by requiring this sls, i.e.:
 # ...
 #    - require:
-#        - sls: basics.nftables
+#        - sls: basics.nftables.setup
 #
+
+include:
+    - basics.nftables.setup
 
 nftables:
     pkg.installed:
@@ -24,40 +27,6 @@ nftables:
 netfilter-persistent:
     pkg.installed:
         - order: 2
-
-
-nftables-baseconfig-table-ipv4-filter:
-    nftables.table_present:
-        - name: filter
-        - family: ip4
-        - order: 2
-
-
-nftables-baseconfig-table-ipv6-filter:
-    nftables.table_present:
-        - name: filter
-        - family: ip6
-        - order: 2
-
-
-nftables-baseconfig-table-inet-filter:
-    nftables.table_present:
-        - name: filter
-        - family: inet
-        - order: 2
-
-
-nftables-baseconfig-chain-ipv4-input:
-    nftables.chain_present:
-        - name: input
-        - table: filter
-        - table_type: filter
-        - family: ip4
-        - hook: input
-        - priority: 0
-        - order: 2
-        - require:
-            - nftables: nftables-baseconfig-table-ipv4-filter
 
 
 nftables-baseconfig-chain-ipv4-input-flush:
@@ -70,19 +39,6 @@ nftables-baseconfig-chain-ipv4-input-flush:
             - nftables: nftables-baseconfig-chain-ipv4-input
 
 
-nftables-baseconfig-chain-ipv6-input:
-    nftables.chain_present:
-        - name: input
-        - table: filter
-        - table_type: filter
-        - family: ip6
-        - hook: input
-        - priority: 0
-        - order: 2
-        - require:
-            - nftables: nftables-baseconfig-table-ipv6-filter
-
-
 nftables-baseconfig-chain-ipv6-input-flush:
     nftables.flush:
         - table: filter
@@ -91,19 +47,6 @@ nftables-baseconfig-chain-ipv6-input-flush:
         - order: 2
         - require:
             - nftables: nftables-baseconfig-chain-ipv6-input
-
-
-nftables-baseconfig-chain-ipv4-output:
-    nftables.chain_present:
-        - name: output
-        - table: filter
-        - table_type: filter
-        - family: ip4
-        - hook: output
-        - priority: 0
-        - order: 2
-        - require:
-            - nftables: nftables-baseconfig-table-ipv4-filter
 
 
 nftables-baseconfig-chain-ipv4-output-flush:
@@ -116,19 +59,6 @@ nftables-baseconfig-chain-ipv4-output-flush:
             - nftables: nftables-baseconfig-chain-ipv4-output
 
 
-nftables-baseconfig-chain-ipv6-output:
-    nftables.chain_present:
-        - name: output
-        - table: filter
-        - table_type: filter
-        - family: ip6
-        - hook: output
-        - priority: 0
-        - order: 2
-        - require:
-            - nftables: nftables-baseconfig-table-ipv6-filter
-
-
 nftables-baseconfig-chain-ipv6-output-flush:
     nftables.flush:
         - table: filter
@@ -137,19 +67,6 @@ nftables-baseconfig-chain-ipv6-output-flush:
         - order: 2
         - require:
             - nftables: nftables-baseconfig-chain-ipv6-output
-
-
-nftables-baseconfig-chain-ipv4-forward:
-    nftables.chain_present:
-        - name: forward
-        - table: filter
-        - table_type: filter
-        - family: ip4
-        - hook: forward
-        - priority: 0
-        - order: 2
-        - require:
-            - nftables: nftables-baseconfig-table-ipv4-filter
 
 
 nftables-baseconfig-chain-ipv4-forward-flush:
@@ -162,19 +79,6 @@ nftables-baseconfig-chain-ipv4-forward-flush:
             - nftables: nftables-baseconfig-chain-ipv4-forward
 
 
-nftables-baseconfig-chain-ipv6-forward:
-    nftables.chain_present:
-        - name: forward
-        - table: filter
-        - table_type: filter
-        - family: ip6
-        - hook: forward
-        - priority: 0
-        - order: 2
-        - require:
-            - nftables: nftables-baseconfig-table-ipv6-filter
-
-
 nftables-baseconfig-chain-ipv6-forward-flush:
     nftables.flush:
         - table: filter
@@ -183,19 +87,6 @@ nftables-baseconfig-chain-ipv6-forward-flush:
         - order: 2
         - require:
             - nftables: nftables-baseconfig-chain-ipv6-forward
-
-
-nftables-baseconfig-chain-inet-input:
-    nftables.chain_present:
-        - name: input
-        - table: filter
-        - table_type: filter
-        - family: inet
-        - hook: input
-        - priority: 0
-        - order: 2
-        - require:
-            - nftables: nftables-baseconfig-table-inet-filter
 
 
 nftables-baseconfig-chain-inet-input-flush:
@@ -208,19 +99,6 @@ nftables-baseconfig-chain-inet-input-flush:
             - nftables: nftables-baseconfig-chain-inet-input
 
 
-nftables-baseconfig-chain-inet-output:
-    nftables.chain_present:
-        - name: output
-        - table: filter
-        - table_type: filter
-        - family: inet
-        - hook: output
-        - priority: 0
-        - order: 2
-        - require:
-            - nftables: nftables-baseconfig-table-inet-filter
-
-
 nftables-baseconfig-chain-inet-output-flush:
     nftables.flush:
         - table: filter
@@ -229,19 +107,6 @@ nftables-baseconfig-chain-inet-output-flush:
         - order: 2
         - require:
             - nftables: nftables-baseconfig-chain-inet-output
-
-
-nftables-baseconfig-chain-inet-forward:
-    nftables.chain_present:
-        - name: forward
-        - table: filter
-        - table_type: filter
-        - family: inet
-        - hook: forward
-        - priority: 0
-        - order: 2
-        - require:
-            - nftables: nftables-baseconfig-table-inet-filter
 
 
 nftables-baseconfig-chain-inet-forward-flush:

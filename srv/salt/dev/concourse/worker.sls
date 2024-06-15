@@ -121,7 +121,7 @@ concourse-worker-tcp-out{{port}}-forward-ipv4:
         - proto: tcp
         - save: True
         - require:
-            - sls: basics.nftables
+            - sls: basics.nftables.setup
 {% endfor %}
 
 
@@ -141,7 +141,7 @@ concourse-worker-tcp-in{{port}}-recv-ipv4:
         - proto: tcp
         - save: True
         - require:
-            - sls: basics.nftables
+            - sls: basics.nftables.setup
 {% endfor %}
 
 
@@ -159,7 +159,7 @@ concourse-worker-udp-out53-forward-ipv4:
         - proto: udp
         - save: True
         - require:
-            - sls: basics.nftables
+            - sls: basics.nftables.setup
 
 
 concourse-allow-inter-container-traffic-recv-ipv4:
@@ -172,7 +172,7 @@ concourse-allow-inter-container-traffic-recv-ipv4:
         - destination: {{pillar.get('ci', {}).get('backend-network-pool', '10.254.0.0/22')}}
         - save: True
         - require:
-            - sls: basics.nftables
+            - sls: basics.nftables.setup
 
 
 concourse-allow-inter-container-traffic-send-ipv4:
@@ -185,6 +185,6 @@ concourse-allow-inter-container-traffic-send-ipv4:
         - destination: {{pillar.get('ci', {}).get('backend-network-pool', '10.254.0.0/22')}}
         - save: True
         - require:
-            - sls: basics.nftables
+            - sls: basics.nftables.setup
 
 # vim: syntax=yaml

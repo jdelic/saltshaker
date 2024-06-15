@@ -8,7 +8,7 @@
 #        - log-prefix: "netfilter INPUT dropped: "
 #        - order: last
 #        - require:
-#            - sls: basics.nftables
+#            - sls: basics.nftables.setup
 
 
 #log-output-drops:
@@ -19,7 +19,7 @@
 #        - log-prefix: "netfilter OUTPUT dropped: "
 #        - order: last
 #        - require:
-#            - sls: basics.nftables
+#            - sls: basics.nftables.setup
 
 
 #log-forward-drops:
@@ -30,5 +30,5 @@
 #        - log-prefix: "netfilter FORWARD dropped: "
 #        - order: last
 #        - require:
-#            - sls: basics.nftables
+#            - sls: basics.nftables.setup
 

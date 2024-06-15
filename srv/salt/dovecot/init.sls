@@ -167,7 +167,7 @@ dovecot-in{{port}}-recv-ipv4:
         - proto: tcp
         - save: True
         - require:
-            - sls: basics.nftables
+            - sls: basics.nftables.setup
     {% endif %}
     {% if pillar['imap-incoming'].get('bind-ipv6', True) %}
 dovecot-in{{port}}-recv-ipv6:
@@ -184,7 +184,7 @@ dovecot-in{{port}}-recv-ipv6:
         - proto: tcp
         - save: True
         - require:
-            - sls: basics.nftables
+            - sls: basics.nftables.setup
     {% endif %}
 {% endfor %}
 

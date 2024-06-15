@@ -118,4 +118,4 @@ radicale-tcp-in{{pillar.get('radicale', {}).get('bind-port', 8990)}}-recv-ipv4:
         - proto: tcp
         - save: True
         - require:
-            - sls: basics.nftables
+            - sls: basics.nftables.setup

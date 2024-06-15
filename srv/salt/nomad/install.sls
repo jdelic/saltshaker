@@ -111,7 +111,7 @@ nomad-tcp-in{{port}}-recv-ipv4:
         - proto: tcp
         - save: True
         - require:
-            - sls: basics.nftables
+            - sls: basics.nftables.setup
 
 
 # allow us to talk to others
@@ -128,7 +128,7 @@ nomad-tcp-out{{port}}-send-ipv4:
         - proto: tcp
         - save: True
         - require:
-            - sls: basics.nftables
+            - sls: basics.nftables.setup
 {% endfor %}
 
 
@@ -143,7 +143,7 @@ nomad-udp-in4648-recv-ipv4:
         - proto: udp
         - save: True
         - require:
-            - sls: basics.nftables
+            - sls: basics.nftables.setup
 
 
 nomad-udp-in4648-send-ipv4:
@@ -157,7 +157,7 @@ nomad-udp-in4648-send-ipv4:
         - proto: udp
         - save: True
         - require:
-            - sls: basics.nftables
+            - sls: basics.nftables.setup
 
 
 nomad-envvar-config:

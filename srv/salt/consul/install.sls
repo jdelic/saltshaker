@@ -189,7 +189,7 @@ consul-all-in-recv-ipv4:
         - destination: 169.254.1.1
         - save: True
         - require:
-            - sls: basics.nftables
+            - sls: basics.nftables.setup
             - cmd: consul-network-interface
         - require_in:
             - cmd: consul-sync-network
@@ -211,7 +211,7 @@ consul-tcp-in{{port}}-recv-ipv4:
         - connstate: new
         - save: True
         - require:
-            - sls: basics.nftables
+            - sls: basics.nftables.setup
         - require_in:
             - cmd: consul-sync-network
 {% endfor %}
@@ -230,7 +230,7 @@ consul-udp-in{{port}}-recv:
         - proto: udp
         - save: True
         - require:
-            - sls: basics.nftables
+            - sls: basics.nftables.setup
         - require_in:
             - cmd: consul-sync-network
 {% endfor %}

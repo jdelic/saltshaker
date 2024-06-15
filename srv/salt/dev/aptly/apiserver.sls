@@ -105,4 +105,4 @@ aptly-tcp-in{{port}}-recv:
         - proto: tcp
         - save: True
         - require:
-            - sls: basics.nftables
+            - sls: basics.nftables.setup
