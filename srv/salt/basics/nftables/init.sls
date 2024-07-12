@@ -409,18 +409,21 @@ enable-ipv4-forwarding:
     sysctl.present:
         - name: net.ipv4.ip_forward
         - value: 1
+        - order: 4
 
 
 enable-ipv4-nonlocalbind:
     sysctl.present:
         - name: net.ipv4.ip_nonlocal_bind
         - value: 1
+        - order: 4
 
 
 enable-ipv6-nonlocalbind:
     sysctl.present:
         - name: net.ipv6.ip_nonlocal_bind
         - value: 1
+        - order: 4
 
 
 # vim: syntax=yaml
