@@ -23,15 +23,6 @@ locals {
     })
 
     server_config = {
-        saltmaster = {
-            server_type = "cx11"
-            backup = 0
-            additional_ipv4 = 0
-            ipv6_only = 0
-            internal_only = 0
-            ptr = "saltmaster.maurus.net"
-            user_data = local.saltmaster_init
-        }
         db = {
             server_type = "cx21"
             backup = 1
@@ -45,6 +36,7 @@ locals {
                 roles = ["database"],
                 hostname = "db.maurusnet.internal"
             })
+            depends_on = ["saltmaster"]
         }
         /*
         dev = {
@@ -110,6 +102,27 @@ resource "hcloud_network_subnet" "internal-subnet" {
     ip_range = "10.0.1.0/24"
 }
 
+resource "hcloud_server" "saltmaster" {
+    name = "saltmaster"
+    server_type = "cx11"
+    image = "debian-12"
+    location = "hel1"
+    ssh_keys = ["symbiont laptop key", "jonas@hades"]
+    network {
+      network_id = hcloud_network.internal.id
+    }
+
+    public_net {
+        ipv4_enabled = true
+        ipv6_enabled = true
+    }
+
+    user_data = local.saltmaster_init
+    backups = false
+    # important as per hcloud docs as there's a race condition otherwise
+    depends_on = [hcloud_network_subnet.internal-subnet]
+}
+
 resource "hcloud_server" "servers" {
     for_each = local.server_config
 
@@ -117,7 +130,7 @@ resource "hcloud_server" "servers" {
     server_type = each.value.server_type
     image = "debian-12"
     location = "hel1"
-    ssh_keys = ["symbiont laptop key"]
+    ssh_keys = ["symbiont laptop key", "jonas@hades"]
 
     network {
         network_id = hcloud_network.internal.id
@@ -133,7 +146,7 @@ resource "hcloud_server" "servers" {
     backups = each.value.backup == 1 ? true : false
 
     # important as per hcloud docs as there's a race condition otherwise
-    depends_on = [hcloud_network_subnet.internal-subnet]
+    depends_on = [hcloud_network_subnet.internal-subnet, hcloud_server.saltmaster]
 }
 
 resource "hcloud_floating_ip" "additional_ipv4" {
@@ -157,11 +170,9 @@ resource "hcloud_load_balancer_target" "app_targets" {
 
 output "ip_addresses" {
     value = {
-        for s in hcloud_server.servers : s.name => concat(
-            [
-                s.ipv4_address != "" ? s.ipv4_address : null,
-                s.ipv6_address
-            ],
+        for s in merge({ saltmaster = hcloud_server.saltmaster }, hcloud_server.servers) : s.name => concat(
+            s.ipv4_address != "" ? [s.ipv4_address] : [],
+            s.ipv6_address != "" ? [s.ipv6_address] : [],
             flatten(s.network.*.ip),
             [for ip in hcloud_floating_ip.additional_ipv4 : ip.ip_address if ip.server_id == s.id]
         )
