@@ -75,5 +75,5 @@ sudoers-config:
 ensure-interfaces.d-works:
     file.append:
         - name: /etc/network/interfaces
-        - text: source /etc/network/interfaces.d/*
+        - text: source-directory /etc/network/interfaces.d
         - order: 2
