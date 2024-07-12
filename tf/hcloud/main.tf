@@ -32,14 +32,21 @@ locals {
             ptr = "saltmaster.maurus.net"
             user_data = local.saltmaster_init
         }
-/*        db = {
+        db = {
             server_type = "cx21"
             backup = 1
             additional_ipv4 = 0
             ipv6_only = 1
             internal_only = 1
             ptr = null
+            user_data = templatefile("${path.module}/../salt-minion.cloud-init.yml", {
+                saltmaster_ip = "10.0.1.1",
+                ipv6_only = true,
+                roles = ["database"],
+                hostname = "db.maurusnet.internal"
+            })
         }
+        /*
         dev = {
             server_type = "cx31"
             backup = 0

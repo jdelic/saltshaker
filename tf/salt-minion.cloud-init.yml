@@ -13,7 +13,7 @@ users:
 write_files:
     - path: /etc/salt/minion.d/saltshaker.conf
       content: |
-          master: ${hcloud_servers.servers['saltmaster'].ipv4_address}
+          master: ${saltmaster_ip}
           hash_type: sha256
           log_level: debug
           #log_file: /dev/log
@@ -24,7 +24,7 @@ write_files:
 runcmd:
 %{ if ipv6_only ~}
     - ip route del default
-    - ip route default via ${hcloud_servers.servers['saltmaster'].ipv4_address}
+    - ip route default via ${saltmaster_ip}
 %{ endif ~}
     - mkdir -p /etc/apt/keyrings
     - wget -O /etc/apt/keyrings/salt-archive-keyring-2023.gpg https://repo.saltproject.io/salt/py3/debian/12/amd64/SALT-PROJECT-GPG-PUBKEY-2023.gpg
