@@ -125,6 +125,10 @@ base:
         - match: grain
         - haproxy.external
 
+    'roles:natgateway':
+        - match: grain
+        - basics.nftables.nat
+
     'roles:webdav':
         - match: grain
         - apache.webdav

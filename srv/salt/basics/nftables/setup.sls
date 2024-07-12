@@ -143,3 +143,34 @@ nftables-baseconfig-chain-inet-forward:
               - nftables: nftables-baseconfig-table-inet-filter
 
 
+nftables-baseconfig-table-nat:
+    nftables.table_present:
+        - name: nat
+        - family: ip4
+        - order: 2
+
+
+nftables-baseconfig-chain-ipv4-postrouting:
+    nftables.chain_present:
+        - name: postrouting
+        - table: nat
+        - table_type: nat
+        - family: ip4
+        - hook: postrouting
+        - priority: 100
+        - order: 2
+        - require:
+            - nftables: nftables-baseconfig-table-nat
+
+
+nftables-baseconfig-chain-ipv4-prerouting:
+    nftables.chain_present:
+        - name: prerouting
+        - table: nat
+        - table_type: nat
+        - family: ip4
+        - hook: prerouting
+        - priority: -150
+        - order: 2
+        - require:
+            - nftables: nftables-baseconfig-table-nat
