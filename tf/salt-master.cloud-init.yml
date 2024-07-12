@@ -32,6 +32,7 @@ runcmd:
     - mkdir -p /etc/salt/roles.d
     - touch /etc/salt/roles.d/master
     - touch /etc/salt/roles.d/consulserver
+    - touch /etc/salt/roles.d/natgateway
     - mkdir /run/salt-bootstrap
     - wget -O /run/salt-bootstrap/bootstrap-salt.sh https://raw.githubusercontent.com/saltstack/salt-bootstrap/stable/bootstrap-salt.sh
     - chown -R salt:salt /etc/salt
