@@ -27,12 +27,11 @@ locals {
             internal_only = 1
             ptr = null
             user_data = templatefile("${path.module}/../salt-minion.cloud-init.yml", {
-                    saltmaster_ip = flatten(hcloud_server.saltmaster.network.*.ip)[0],
-                    roles = ["database", "vault", "authserver"],
-                    hostname = "db.maurusnet.internal",
-                    ipv6_only = true,
-                },
-            )
+                saltmaster_ip = flatten(hcloud_server.saltmaster.network.*.ip)[0]
+                roles = ["database", "vault", "authserver"]
+                ipv6_only = true,
+                hostname = "db.maurusnet.internal"
+            })
         }
 /*      dev = {
             server_type = "cx31"

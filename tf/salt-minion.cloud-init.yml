@@ -27,7 +27,7 @@ runcmd:
     - apt update
     - mkdir -p /etc/salt/roles.d
     - mkdir -p /etc/salt/env.d
-    ${indent(4, yamlencode([for r in roles: "touch /etc/salt/roles.d/${r}"])}
+    ${indent(4, yamlencode([for r in roles: "touch /etc/salt/roles.d/${r}"]))}
 %{ if ipv6_only ~}
     - echo true > /etc/salt/env.d/ipv6_only
 %{ endif ~}
