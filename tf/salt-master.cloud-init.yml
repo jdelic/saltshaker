@@ -54,4 +54,6 @@ final_message: |
         - ln -sv /etc/saltshaker/srv/reactor /srv/reactor
         - cd saltshaker
         - git submodule init; git submodule update
+        - chown -R salt:salt /etc/salt
+        - systemctl restart salt-master
         - salt-call state.highstate
