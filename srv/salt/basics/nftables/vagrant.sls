@@ -15,7 +15,7 @@ vagrant-eth0-recv-ipv4:
         - family: ip4
         - chain: input
         - jump: accept
-        - in-interface: {{pillar["ifassign"]["nat"]}}
+        - if: {{pillar["ifassign"]["nat"]}}
         - order: 3
         - save: True
         - require:
@@ -28,7 +28,7 @@ vagrant-eth0-recv-ipv6:
         - family: ip6
         - chain: input
         - jump: accept
-        - in-interface: {{pillar["ifassign"]["nat"]}}
+        - if: {{pillar["ifassign"]["nat"]}}
         - order: 3
         - save: True
         - require:
@@ -41,7 +41,7 @@ vagrant-eth0-send-ipv4:
         - family: ip4
         - chain: output
         - jump: accept
-        - out-interface: {{pillar["ifassign"]["nat"]}}
+        - of: {{pillar["ifassign"]["nat"]}}
         - order: 3
         - save: True
         - require:
@@ -54,7 +54,7 @@ vagrant-eth0-send-ipv6:
         - family: ip6
         - chain: output
         - jump: accept
-        - out-interface: {{pillar["ifassign"]["nat"]}}
+        - of: {{pillar["ifassign"]["nat"]}}
         - order: 3
         - save: True
         - require:

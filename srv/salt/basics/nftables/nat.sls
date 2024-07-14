@@ -3,8 +3,8 @@ enable-ipv4-nat:
         - table: nat
         - chain: postrouting
         - family: ip4
-        - in-interface: {{pillar["ifassign"]["internal"]}}
-        - out-interface: {{pillar["ifassign"]["external"]}}
+        - if: {{pillar["ifassign"]["internal"]}}
+        - of: {{pillar["ifassign"]["external"]}}
         - jump: masquerade
         - order: 4
         - save: True
@@ -17,7 +17,7 @@ enable-internal-forward:
         - table: filter
         - chain: forward
         - family: ip4
-        - in-interface: {{pillar["ifassign"]["internal"]}}
+        - if: {{pillar["ifassign"]["internal"]}}
         - jump: accept
         - order: 4
         - save: True

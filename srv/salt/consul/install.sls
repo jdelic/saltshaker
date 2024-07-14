@@ -204,7 +204,7 @@ consul-tcp-in{{port}}-recv-ipv4:
         - chain: input
         - jump: accept
         - family: ip4
-        - in-interface: {{pillar['ifassign']['internal']}}
+        - if: {{pillar['ifassign']['internal']}}
         - dport: {{port}}
         - proto: tcp
         - match: state
@@ -225,7 +225,7 @@ consul-udp-in{{port}}-recv:
         - chain: input
         - family: ip4
         - jump: accept
-        - in-interface: {{pillar['ifassign']['internal']}}
+        - if: {{pillar['ifassign']['internal']}}
         - dport: {{port}}
         - proto: udp
         - save: True

@@ -26,7 +26,7 @@ saltmaster-tcp-in{{port}}-recv-ipv4:
         - chain: input
         - family: ip4
         - jump: accept
-        - in-interface: {{pillar['ifassign']['internal']}}
+        - if: {{pillar['ifassign']['internal']}}
         - dport: {{port}}
         - proto: tcp
         - match: state
