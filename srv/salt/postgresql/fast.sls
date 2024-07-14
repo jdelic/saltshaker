@@ -242,7 +242,7 @@ postgresql-in{{port}}-recv-ip4:
         - family: ip4
         - proto: tcp
         - source: '0/0'
-        - in-interface: {{pillar['ifassign']['internal']}}
+        - if: {{pillar['ifassign']['internal']}}
         - destination: {{ip}}
         - dport: {{port}}
         - match: state

@@ -308,7 +308,7 @@ basics-internal-network-tcp-ipv4:
         - chain: output
         - family: ip4
         - jump: accept
-        - out-interface: {{pillar['ifassign']['internal']}}
+        - of: {{pillar['ifassign']['internal']}}
         - match: state
         - connstate: new
         - proto: tcp
@@ -324,7 +324,7 @@ basics-internal-network-udp-ipv4:
         - chain: output
         - family: ip4
         - jump: accept
-        - out-interface: {{pillar['ifassign']['internal']}}
+        - of: {{pillar['ifassign']['internal']}}
         - proto: udp
         - save: True
         - order: 4

@@ -134,7 +134,7 @@ concourse-worker-tcp-in{{port}}-recv-ipv4:
         - chain: input
         - family: ip4
         - jump: accept
-        - in-interface: {{pillar['ifassign']['internal']}}
+        - if: {{pillar['ifassign']['internal']}}
         - dport: {{port}}
         - match: state
         - connstate: new
