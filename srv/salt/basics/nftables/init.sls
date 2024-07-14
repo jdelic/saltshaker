@@ -119,6 +119,26 @@ nftables-baseconfig-chain-inet-forward-flush:
             - nftables: nftables-baseconfig-chain-inet-forward
 
 
+nftables-baseconfig-chain-ipv4-prerouting-flush:
+    nftables.flush:
+        - table: nat
+        - chain: prerouting
+        - family: ip4
+        - order: 2
+        - require:
+            - nftables: nftables-baseconfig-chain-ipv4-prerouting
+
+
+nftables-baseconfig-chain-ipv4-postrouting-flush:
+    nftables.flush:
+        - table: nat
+        - chain: postrouting
+        - family: ip4
+        - order: 2
+        - require:
+            - nftables: nftables-baseconfig-chain-ipv4-postrouting
+
+
 # always allow local connections
 localhost-recv-ipv4:
     nftables.append:
