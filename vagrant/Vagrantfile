@@ -49,6 +49,13 @@ def ip(d)
     end
 end
 
+def ip6(d)
+    if OS.windows?
+        "fd00:56::" + d
+    else
+        "fd00:123::" + d
+    end
+end
 
 # When I'm on a train or plane I like to use a local Debian mirror that I run off a Micro SD Card.
 # The shell script below sets a Debian VM to load everything from there when you set $local_provision
@@ -56,8 +63,8 @@ end
 $local_provision = false
 $remote_provision_script = <<SCRIPT
         mkdir -p /etc/apt/keyrings
-        wget -O /etc/apt/keyrings/salt-archive-keyring-2023.gpg https://repo.saltproject.io/salt/py3/debian/11/amd64/SALT-PROJECT-GPG-PUBKEY-2023.gpg
-        sh -c 'echo deb [signed-by=/etc/apt/keyrings/salt-archive-keyring-2023.gpg arch=amd64] https://repo.saltproject.io/salt/py3/debian/11/amd64/latest bullseye main > /etc/apt/sources.list.d/salt.list'
+        wget -O /etc/apt/keyrings/salt-archive-keyring-2023.gpg https://repo.saltproject.io/salt/py3/debian/12/amd64/SALT-PROJECT-GPG-PUBKEY-2023.gpg
+        sh -c 'echo deb [signed-by=/etc/apt/keyrings/salt-archive-keyring-2023.gpg arch=amd64] https://repo.saltproject.io/salt/py3/debian/12/amd64/latest bookworm main > /etc/apt/sources.list.d/salt.list'
         apt update
         groupadd -g 110 salt
         useradd -g salt -M -d /opt/saltstack/salt -s /usr/sbin/nologin salt

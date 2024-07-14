@@ -448,49 +448,51 @@ SysCTL is set up to accept
    even if those don't exist yet. This reduces usage of the `0.0.0.0` wildcard
    allowing to write more secure configurations.
  * `net.ipv4.conf.all.route_localnet` allows packets to and from `localhost` to
-   pass through iptables, making it possible to route them. This is required so
+   pass through nftables, making it possible to route them. This is required so
    we can make consul services available on `localhost` even though consul runs 
    on its own `consul0` dummy interface.
 
-## iptables states
-iptables is configured by the `basics` and `iptables` states to use the
+## nftables states
+nftables is configured by the `basics` and `basics.nftables` states to use the
 `connstate`/`conntrack` module to allow incoming and outgoing packets in the
 `RELATED` state. So to enable new TCP services in the firewall on each
 individual machine managed through this saltshaker, only the connection
 creation needs to be managed in the machine's states.
 
 The naming standard for states that enable ports that get contacted is:
-`(servicename)-tcp-in(port)-recv`. For example:
+`(servicename)-tcp-in(port)-recv-{family}`. For example:
 
 ```yaml
-openssh-in22-recv:
-    iptables.append:
+openssh-in22-recv-ipv6:
+    nftables.append:
         - table: filter
-        - chain: INPUT
-        - jump: ACCEPT
+        - family: ip6
+        - chain: input
+        - jump: accept
         - source: '0/0'
         - proto: tcp
         - dport: 22
         - match: state
-        - connstate: NEW
+        - connstate: new
         - save: True
         - require:
-            - sls: iptables
+            - sls: basics.nftables
 ```
 
 The naming standard for states that enable ports that initiate connections is:
-`(servicename)-tcp-out(port)-send`. For example:
+`(servicename)-tcp-out(port)-send-{family}`. For example:
 
 ```yaml
-dns-tcp-out53-send:
-      iptables.append:
+dns-tcp-out53-send-ipv4:
+      nftables.append:
           - table: filter
-          - chain: OUTPUT
-          - jump: ACCEPT
+          - family: ip4
+          - chain: output
+          - jump: accept
           - destination: '0/0'
           - dport: 53
           - match: state
-          - connstate: NEW
+          - connstate: new
           - proto: tcp
           - save: True
 ```

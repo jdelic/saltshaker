@@ -113,18 +113,19 @@ concourse-rsyslog:
 
 # allow workers to talk to the server on port 2222 on the internal network
 concourse-tcp-out{{pillar.get('concourse-server', {}).get('tsa-port', 2222)}}-send:
-    iptables.append:
+    nftables.append:
         - table: filter
-        - chain: OUTPUT
-        - jump: ACCEPT
+        - chain: output
+        - family: ip4
+        - jump: accept
         - out-interface: {{pillar['ifassign']['internal']}}
         - dport: {{pillar.get('concourse-server', {}).get('tsa-port', 2222)}}
         - match: state
-        - connstate: NEW
+        - connstate: new
         - proto: tcp
         - save: True
         - require:
-            - sls: basics.iptables
+            - sls: basics.nftables.setup
 
 
 # vim: syntax=yaml

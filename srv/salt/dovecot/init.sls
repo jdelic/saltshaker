@@ -16,10 +16,6 @@ dovecot:
         - running
         - enable: True
         - watch:
-{% if pillar['imap']['sslcert'] != 'default' %}
-            - file: dovecot-ssl-cert
-            - file: dovecot-ssl-key
-{% endif %}
 {% if pillar['imap']['sslcert'] == 'default' %}
             - file: ssl-maincert-combined-certificate
             - file: ssl-maincert-key
@@ -39,6 +35,8 @@ dovecot-ssl-cert:
         - group: root
         - require:
             - file: ssl-cert-location
+        - require_in:
+            - service: dovecot
 
 
 dovecot-ssl-key:
@@ -50,6 +48,8 @@ dovecot-ssl-key:
         - group: root
         - require:
             - file: ssl-key-location
+        - require_in:
+            - service: dovecot
 {% endif %}
 
 
@@ -65,6 +65,21 @@ sa-learn-pipe-script:
             - pkg: dovecot
             - file: email-storage
 
+
+{% set dovecot_ips = {
+    "ipv4":
+        pillar.get('imap-incoming', {}).get(
+                'override-ipv4', grains['ip4_interfaces'].get(pillar['ifassign']['external'])[
+                    pillar['ifassign'].get('external-ip-index', 0)|int()
+                ]
+            ) if pillar.get('imap-incoming', {}).get('bind-ipv4', True) else "",
+    "ipv6":
+        pillar.get('imap-incoming', {}).get(
+                'override-ipv6', grains['ip6_interfaces'].get(pillar['ifassign']['external'])[
+                    pillar['ifassign'].get('external-ip-index', 0)|int()
+                ]
+            ) if pillar.get('imap-incoming', {}).get('bind-ipv6', True) else ""
+} %}
 
 {% for file in conffiles %}
 dovecot-config-{{file}}:
@@ -86,11 +101,7 @@ dovecot-config-{{file}}:
                 {%- else %}
                     {{pillar['imap']['sslkey']}}
                 {%- endif %}
-            bindip: {{pillar['imap'].get(
-                    'bind-ip', grains['ip_interfaces'][pillar['ifassign']['external']][pillar['ifassign'].get(
-                        'external-ip-index', 0
-                    )|int()]
-                )}}
+            bindips: ["{{dovecot_ips['ipv4']}}", "{{dovecot_ips['ipv6']}}"]
             bindport: 143
             ssl_bindport: 993
         - watch_in:
@@ -116,29 +127,6 @@ dovecot-sql-config:
             - file: {{pillar['ssl']['service-rootca-cert']}}
 
 
-# allow others to contact us on ports (imap, imaps, managesieve)
-{% for port in ['143', '993', '4190'] %}
-dovecot-in{{port}}-recv:
-    iptables.append:
-        - table: filter
-        - chain: INPUT
-        - jump: ACCEPT
-        - source: '0/0'
-        - destination: {{pillar['imap'].get(
-            'bind-ip', grains['ip_interfaces'][pillar['ifassign']['external']][pillar['ifassign'].get(
-                'external-ip-index', 0
-            )|int()]
-        )}}
-        - dport: {{port}}
-        - match: state
-        - connstate: NEW
-        - proto: tcp
-        - save: True
-        - require:
-            - sls: basics.iptables
-{% endfor %}
-
-
 dovecot-consul-servicedef:
     file.managed:
         - name: /etc/consul/services.d/imap.json
@@ -160,5 +148,44 @@ dovecot-consul-servicedef:
             sslport: 993
         - require:
             - file: consul-service-dir
+
+
+# allow others to contact us on ports (imap, imaps, managesieve)
+{% for port in ['143', '993', '4190'] %}
+    {% if pillar['imap-incoming'].get('bind-ipv4', True) %}
+dovecot-in{{port}}-recv-ipv4:
+    nftables.append:
+        - table: filter
+        - chain: input
+        - family: ip4
+        - jump: accept
+        - source: '0/0'
+        - destination: {{dovecot_ips['ipv4']}}
+        - dport: {{port}}
+        - match: state
+        - connstate: new
+        - proto: tcp
+        - save: True
+        - require:
+            - sls: basics.nftables.setup
+    {% endif %}
+    {% if pillar['imap-incoming'].get('bind-ipv6', True) %}
+dovecot-in{{port}}-recv-ipv6:
+    nftables.append:
+        - table: filter
+        - chain: input
+        - family: ip6
+        - jump: accept
+        - source: '::/0'
+        - destination: {{dovecot_ips['ipv6']}}
+        - dport: {{port}}
+        - match: state
+        - connstate: new
+        - proto: tcp
+        - save: True
+        - require:
+            - sls: basics.nftables.setup
+    {% endif %}
+{% endfor %}
 
 # vim: syntax=yaml

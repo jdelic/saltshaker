@@ -4,7 +4,7 @@
 include:
     - postgresql.sync
 
-{% set postgres_version = pillar.get('postgresql', {}).get('version', '12') %}
+{% set postgres_version = pillar.get('postgresql', {}).get('version', '16') %}
 {% set port = pillar.get('postgresql', {}).get('bind-port', '5432') %}
 {% set ip = pillar.get('postgresql', {}).get(
               'bind-ip', grains['ip_interfaces'][pillar['ifassign']['internal']][pillar['ifassign'].get(
@@ -234,21 +234,22 @@ postgresql-servicedef:
 {% endif %}
 
 
-postgresql-in{{port}}-recv:
-    iptables.append:
+postgresql-in{{port}}-recv-ip4:
+    nftables.append:
         - table: filter
-        - chain: INPUT
-        - jump: ACCEPT
+        - chain: input
+        - jump: accept
+        - family: ip4
         - proto: tcp
         - source: '0/0'
         - in-interface: {{pillar['ifassign']['internal']}}
         - destination: {{ip}}
         - dport: {{port}}
         - match: state
-        - connstate: NEW
+        - connstate: new
         - save: True
         - require:
-            - sls: basics.iptables
+            - sls: basics.nftables.setup
 
 
 {% if pillar.get('duplicity-backup', {}).get('enabled', False) %}

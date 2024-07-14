@@ -8,7 +8,7 @@ terraform {
 }
 
 variable "hcloud_token" {
-    sensitive = true # Requires terraform >= 0.14
+    sensitive = true
 }
 
 provider "hcloud" {
@@ -16,6 +16,8 @@ provider "hcloud" {
 }
 
 locals {
+    saltmaster_config = templatefile("${path.module}/../../etc/salt-master/master.d/saltshaker.conf", {})
+
     server_config = {
         "db.maurusnet.internal" = {
             server_type = "cx21"
@@ -26,11 +28,13 @@ locals {
             ptr = null
             user_data = templatefile("${path.module}/../salt-minion.cloud-init.yml", {
                     saltmaster_ip = flatten(hcloud_server.saltmaster.network.*.ip)[0],
-                    roles = ["database", "vault", "authserver"]
+                    roles = ["database", "vault", "authserver"],
+                    hostname = "db.maurusnet.internal",
+                    ipv6_only = true,
                 },
             )
         }
-/*        "dev.maurusnet.internal" = {
+/*      dev = {
             server_type = "cx31"
             backup = 0
             additional_ipv4 = 0
@@ -98,7 +102,7 @@ resource "hcloud_server" "saltmaster" {
     server_type = "cx11"
     image = "debian-12"
     location = "hel1"
-    ssh_keys = ["symbiont laptop key"]
+    ssh_keys = ["symbiont laptop key", "jonas@hades"]
 
     network {
         network_id = hcloud_network.internal.id
@@ -115,6 +119,8 @@ resource "hcloud_server" "saltmaster" {
     })
 
     backups = true
+    # important as per hcloud docs as there's a race condition otherwise
+    depends_on = [hcloud_network_subnet.internal-subnet]
 }
 
 resource "hcloud_server" "servers" {
@@ -124,7 +130,7 @@ resource "hcloud_server" "servers" {
     server_type = each.value.server_type
     image = "debian-12"
     location = "hel1"
-    ssh_keys = ["symbiont laptop key"]
+    ssh_keys = ["symbiont laptop key", "jonas@hades"]
 
     network {
         network_id = hcloud_network.internal.id
@@ -165,10 +171,8 @@ resource "hcloud_load_balancer_target" "app_targets" {
 output "ip_addresses" {
     value = {
         for s in merge({"symbiont.maurus.net" = hcloud_server.saltmaster}, hcloud_server.servers) : s.name => concat(
-            [
-                s.ipv4_address != "" ? s.ipv4_address : null,
-                s.ipv6_address
-            ],
+            s.ipv4_address != "" ? [s.ipv4_address] : [],
+            s.ipv6_address != "" ? [s.ipv6_address] : [],
             flatten(s.network.*.ip),
             [for ip in hcloud_floating_ip.additional_ipv4 : ip.ip_address if ip.server_id == s.id]
         )

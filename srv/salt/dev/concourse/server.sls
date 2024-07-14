@@ -332,59 +332,62 @@ fly-link-teams:
             - file: fly-install
 
 
-concourse-tcp-in{{pillar.get('concourse-server', {}).get('tsa-port', 2222)}}-recv:
-    iptables.append:
+concourse-tcp-in{{pillar.get('concourse-server', {}).get('tsa-port', 2222)}}-recv-ipv4:
+    nftables.append:
         - table: filter
-        - chain: INPUT
-        - jump: ACCEPT
+        - chain: input
+        - family: ip4
+        - jump: accept
         - source: '0/0'
         - destination: {{pillar.get('concourse-server', {}).get('tsa-internal-ip',
                            grains['ip_interfaces'][pillar['ifassign']['internal']][pillar['ifassign'].get(
                                'internal-ip-index', 0)|int()])}}
         - dport: {{pillar.get('concourse-server', {}).get('tsa-port', 2222)}}
         - match: state
-        - connstate: NEW
+        - connstate: new
         - proto: tcp
         - save: True
         - require:
-            - sls: basics.iptables
+            - sls: basics.nftables.setup
 
 
-concourse-tcp-in{{pillar.get('concourse-server', {}).get('atc-port', 8080)}}-recv:
-    iptables.append:
+concourse-tcp-in{{pillar.get('concourse-server', {}).get('atc-port', 8080)}}-recv-ipv4:
+    nftables.append:
         - table: filter
-        - chain: INPUT
-        - jump: ACCEPT
+        - chain: input
+        - family: ip4
+        - jump: accept
         - source: '0/0'
         - destination: {{pillar.get('concourse-server', {}).get('atc-ip',
                            grains['ip_interfaces'][pillar['ifassign']['internal']][pillar['ifassign'].get(
                                'internal-ip-index', 0)|int()])}}
         - dport: {{pillar.get('concourse-server', {}).get('atc-port', 8080)}}
         - match: state
-        - connstate: NEW
+        - connstate: new
         - proto: tcp
         - save: True
         - require:
-            - sls: basics.iptables
+            - sls: basics.nftables.setup
 
 
 # allow us to talk to others
-concourse-tcp-out{{pillar.get('concourse-server', {}).get('atc-port', 8080)}}-send:
-    iptables.append:
+concourse-tcp-out{{pillar.get('concourse-server', {}).get('atc-port', 8080)}}-send-ipv4:
+    nftables.append:
         - table: filter
-        - chain: OUTPUT
-        - jump: ACCEPT
+        - chain: output
+        - family: ip4
+        - jump: accept
         - source: {{pillar.get('concourse-server', {}).get('atc-ip',
                       grains['ip_interfaces'][pillar['ifassign']['internal']][pillar['ifassign'].get(
                           'internal-ip-index', 0)|int()])}}
         - sport: {{pillar.get('concourse-server', {}).get('atc-port', 8080)}}
         - destination: '0/0'
         - match: state
-        - connstate: NEW
+        - connstate: new
         - proto: tcp
         - save: True
         - require:
-            - sls: basics.iptables
+            - sls: basics.nftables.setup
 
 
 # vim: syntax=yaml

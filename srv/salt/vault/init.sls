@@ -560,16 +560,17 @@ vault-ssl-key:
 
 
 # This is for contacting Vault. Outgoing connections to port 8200 are covered by basics.sls
-vault-tcp8200-recv:
-    iptables.append:
+vault-tcp8200-recv-ipv4:
+    nftables.append:
         - table: filter
-        - chain: INPUT
-        - jump: ACCEPT
+        - chain: input
+        - family: ip4
+        - jump: accept
         - in-interface: {{pillar['ifassign']['internal']}}
         - dport: 8200
         - match: state
-        - connstate: NEW
+        - connstate: new
         - proto: tcp
         - save: True
         - require:
-            - sls: basics.iptables
+            - sls: basics.nftables.setup

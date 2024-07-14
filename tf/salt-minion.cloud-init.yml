@@ -14,23 +14,30 @@ write_files:
     - path: /etc/salt/minion.d/saltshaker.conf
       content: |
           master: saltmaster.maurusnet.internal
-          hash_type: sha256
-          log_level: debug
-          #log_file: /dev/log
-          state_verbose: false
-          mine_interval: 5
-          
+
 runcmd:
+%{ if ipv6_only ~}
+    - ip route del default
+    - ip route default via ${saltmaster_ip}
+%{ endif ~}
     - mkdir -p /etc/apt/keyrings
-    - wget -O /etc/apt/keyrings/salt-archive-keyring-2023.gpg https://repo.saltproject.io/salt/py3/debian/11/amd64/SALT-PROJECT-GPG-PUBKEY-2023.gpg
-    - sh -c 'echo deb [signed-by=/etc/apt/keyrings/salt-archive-keyring-2023.gpg arch=amd64] https://repo.saltproject.io/salt/py3/debian/11/amd64/latest bullseye main > /etc/apt/sources.list.d/salt.list'
+    - wget -O /etc/apt/keyrings/salt-archive-keyring-2023.gpg https://repo.saltproject.io/salt/py3/debian/12/amd64/SALT-PROJECT-GPG-PUBKEY-2023.gpg
+    - sh -c 'echo deb [signed-by=/etc/apt/keyrings/salt-archive-keyring-2023.gpg arch=amd64] https://repo.saltproject.io/salt/py3/debian/12/amd64/latest bookworm main > /etc/apt/sources.list.d/salt.list'
     - sh -c 'echo ${saltmaster_ip} saltmaster.maurusnet.internal saltmaster >> /etc/hosts'
     - apt update
     - mkdir -p /etc/salt/roles.d
+    - mkdir -p /etc/salt/env.d
     ${indent(4, yamlencode([for r in roles: "touch /etc/salt/roles.d/${r}"])}
-    - mkdir /run/salt-bootstrap
-    - wget -O /run/salt-bootstrap/bootstrap-salt.sh https://raw.githubusercontent.com/saltstack/salt-bootstrap/stable/bootstrap-salt.sh
+%{ if ipv6_only ~}
+    - echo true > /etc/salt/env.d/ipv6_only
+%{ endif ~}
+    - apt install -y --no-install-recommends git salt-minion
     - chown -R salt:salt /etc/salt
-    - chmod 700 /run/salt-bootstrap/bootstrap-salt.sh
-    - apt -y install --no-install-recommends git
-    - /usr/bin/bash /run/salt-bootstrap/bootstrap-salt.sh -r -x python3
+    - systemctl restart salt-minion
+
+
+final_message: |
+    Next steps:
+        Add the minion key on saltmaster. Execute highstate:
+            salt-key -y -a ${hostname}
+            salt '${hostname}' state.highstate

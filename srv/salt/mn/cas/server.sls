@@ -192,18 +192,19 @@ authserver-servicedef-internal:
 
 
 authserver-tcp-in{{pillar.get('authserver', {}).get('bind-port', 8999)}}-recv:
-    iptables.append:
+    nftables.append:
         - table: filter
-        - chain: INPUT
-        - jump: ACCEPT
+        - chain: input
+        - family: ip4
+        - jump: accept
         - source: '0/0'
         - destination: {{config['BINDIP']}}/32
         - dport: {{config['BINDPORT']}}
         - match: state
-        - connstate: NEW
+        - connstate: new
         - proto: tcp
         - save: True
         - require:
-            - sls: basics.iptables
+            - sls: basics.nftables.setup
 
 # vim: syntax=yaml
