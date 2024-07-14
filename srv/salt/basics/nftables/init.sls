@@ -194,10 +194,10 @@ localhost-send-ipv6:
 
 # always allow ICMP pings. Saltstack nftables does not support icmpv6 right now, so that
 # must be solved differently.
-icmp-recv:
+icmp-recv-ipv4:
     nftables.append:
         - table: filter
-        - family: inet
+        - family: ip4
         - chain: input
         - jump: accept
         - proto: icmp
@@ -208,10 +208,10 @@ icmp-recv:
             - pkg: nftables
 
 
-icmp-send:
+icmp-send-ipv4:
     nftables.append:
         - table: filter
-        - family: inet
+        - family: ip4
         - chain: output
         - jump: accept
         - proto: icmp
@@ -222,10 +222,10 @@ icmp-send:
             - pkg: nftables
 
 
-icmp-forward:
+icmp-forward-ipv4:
     nftables.append:
         - table: filter
-        - family: inet
+        - family: ip4
         - chain: forward
         - jump: accept
         - proto: icmp
@@ -234,6 +234,48 @@ icmp-forward:
         - save: True
         - require:
             - pkg: nftables
+
+
+icmp-recv-ipv6:
+    nftables.append:
+        - table: filter
+        - family: ip6
+        - chain: input
+        - jump: accept
+        - proto: icmp
+        - icmp-type: echo-reply,destination-unreachable,source-quench,redirect,echo-request,time-exceeded,parameter-problem,timestamp-request,timestamp-reply,info-request,info-reply,address-mask-request,address-mask-reply,router-advertisement,router-solicitation
+        - order: 4
+        - save: True
+        - require:
+              - pkg: nftables
+
+
+icmp-send-ipv6:
+    nftables.append:
+        - table: filter
+        - family: ip6
+        - chain: output
+        - jump: accept
+        - proto: icmp
+        - icmp-type: echo-reply,destination-unreachable,source-quench,redirect,echo-request,time-exceeded,parameter-problem,timestamp-request,timestamp-reply,info-request,info-reply,address-mask-request,address-mask-reply,router-advertisement,router-solicitation
+        - order: 4
+        - save: True
+        - require:
+              - pkg: nftables
+
+
+icmp-forward-ipv6:
+    nftables.append:
+        - table: filter
+        - family: ip6
+        - chain: forward
+        - jump: accept
+        - proto: icmp
+        - icmp-type: echo-reply,destination-unreachable,source-quench,redirect,echo-request,time-exceeded,parameter-problem,timestamp-request,timestamp-reply,info-request,info-reply,address-mask-request,address-mask-reply,router-advertisement,router-solicitation
+        - order: 4
+        - save: True
+        - require:
+              - pkg: nftables
 
 
 # prevent tcp packets without a connection
