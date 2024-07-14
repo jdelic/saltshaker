@@ -20,7 +20,7 @@ locals {
 
     server_config = {
         "db.maurusnet.internal" = {
-            server_type = "cx21"
+            server_type = "cx22"
             backup = 1
             additional_ipv4 = 0
             ipv6_only = 1
@@ -34,7 +34,7 @@ locals {
             })
         }
 /*      dev = {
-            server_type = "cx31"
+            server_type = "cx32"
             backup = 0
             additional_ipv4 = 0
             ipv6_only = 1
@@ -50,7 +50,7 @@ locals {
             ptr = "mail.maurus.net"
         }
         "apps1.maurusnet.internal" = {
-            server_type = "cx21"
+            server_type = "cx22"
             backup = 0
             additional_ipv4 = 0
             ipv6_only = 1
@@ -58,7 +58,7 @@ locals {
             ptr = null
         }
         "apps2.maurusnet.internal" = {
-            server_type = "cx21"
+            server_type = "cx22"
             backup = 0
             additional_ipv4 = 0
             ipv6_only = 1
@@ -66,7 +66,7 @@ locals {
             ptr = null
         }
         "apps3.maurusnet.internal" = {
-            server_type = "cx21"
+            server_type = "cx22"
             backup = 0
             additional_ipv4 = 0
             ipv6_only = 1
@@ -84,6 +84,25 @@ locals {
     }
 }
 
+/*
+ NETWORK CONFIGURATION
+ The following stanzas create first:
+   - a network 10.0.0.0/20, which comes with a gateway at 10.0.0.1 where
+     ALL traffic must be routed from each node. Routing will then be applied
+     on that gateway.
+   - a subnet 10.0.1.0/24 in the network, which is the subnet where all
+     servers will be placed.
+   - a route on the network to route all traffic for the internet (0.0.0.0)
+     to the designated NAT gateway for the 10.0.1.0/24 subnet.
+   - the designated NAT gateway is the saltmaster at 10.0.1.1. It has the
+     natgateway Salt role which configures its network and nftables
+     accordingly.
+   - Servers without a public IP will be able to reach the internet through
+     the NAT gateway. For that they need to send their traffic to the
+     network gateway which will route it to saltmaster.
+
+         ip route add default via 10.0.0.1 dev ens10
+*/
 resource "hcloud_network" "internal" {
     name = "private-network"
     ip_range = "10.0.0.0/20"
@@ -105,7 +124,7 @@ resource "hcloud_network_route" "nat-route" {
 
 resource "hcloud_server" "saltmaster" {
     name = "symbiont.maurus.net"
-    server_type = "cx11"
+    server_type = "cx22"
     image = "debian-12"
     location = "hel1"
     ssh_keys = ["symbiont laptop key", "jonas@hades"]
