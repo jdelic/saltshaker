@@ -96,6 +96,13 @@ resource "hcloud_network_subnet" "internal-subnet" {
     ip_range = "10.0.1.0/24"
 }
 
+resource "hcloud_network_route" "nat-route" {
+    network_id = hcloud_network.internal.id
+    destination = "0.0.0.0/0"
+    gateway = flatten(hcloud_server.saltmaster.network.*.ip)[0]
+    depends_on = [hcloud_server.saltmaster]
+}
+
 resource "hcloud_server" "saltmaster" {
     name = "symbiont.maurus.net"
     server_type = "cx11"
