@@ -31,6 +31,7 @@ runcmd:
 %{ if ipv6_only ~}
     - echo true > /etc/salt/env.d/ipv6_only
 %{ endif ~}
+    - echo ${server_type} > /etc/salt/env.d/server_type
     - apt install -y --no-install-recommends git salt-minion
     - chown -R salt:salt /etc/salt
     - systemctl restart salt-minion

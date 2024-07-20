@@ -26,12 +26,7 @@ locals {
             ipv6_only = 1
             internal_only = 1
             ptr = null
-            user_data = templatefile("${path.module}/../salt-minion.cloud-init.yml", {
-                saltmaster_ip = flatten(hcloud_server.saltmaster.network.*.ip)[0]
-                roles = ["database", "vault", "authserver"]
-                ipv6_only = true,
-                hostname = "db.maurusnet.internal"
-            })
+            roles = ["database", "vault", "authserver"]
         }
 /*      dev = {
             server_type = "cx32"
@@ -140,7 +135,8 @@ resource "hcloud_server" "saltmaster" {
 
     user_data = templatefile("${path.module}/../salt-master.cloud-init.yml", {
         saltmaster_config = file("${path.module}/../../etc/salt-master/master.d/saltshaker.conf")
-        hostname = "symbiont.maurus.net"
+        hostname = "symbiont.maurus.net",
+        server_type = "cx22",
     })
 
     backups = true
@@ -166,7 +162,13 @@ resource "hcloud_server" "servers" {
         ipv6_enabled = each.value.internal_only == 1 ? false : true
     }
 
-    user_data = lookup(each.value, "user_data", null)
+    user_data = templatefile("${path.module}/../salt-minion.cloud-init.yml", {
+                    saltmaster_ip = flatten(hcloud_server.saltmaster.network.*.ip)[0]
+                    roles = lookup(each.value, "roles", [])
+                    ipv6_only = each.value.ipv6_only,
+                    hostname = each.key,
+                    server_type = each.value.server_type,
+                })
 
     backups = each.value.backup == 1 ? true : false
 
