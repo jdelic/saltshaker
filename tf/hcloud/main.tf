@@ -127,7 +127,7 @@ resource "hcloud_server" "saltmaster" {
     server_type = "cx22"
     image = "debian-12"
     location = "hel1"
-    ssh_keys = ["symbiont laptop key", "jonas@hades"]
+    ssh_keys = ["jonas@parasite", "jonas@hades"]
 
     network {
         network_id = hcloud_network.internal.id
