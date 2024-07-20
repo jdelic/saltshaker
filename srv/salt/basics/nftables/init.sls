@@ -13,8 +13,11 @@
 # After that all other nftables states should establish order by requiring this sls, i.e.:
 # ...
 #    - require:
-#        - sls: basics.nftables
+#        - sls: basics.nftables.setup
 #
+
+include:
+    - basics.nftables.setup
 
 nftables:
     pkg.installed:
@@ -26,142 +29,114 @@ netfilter-persistent:
         - order: 2
 
 
-nftables-baseconfig-table-ipv4-filter:
-    nftables.table_present:
-        - name: filter
+nftables-baseconfig-chain-ipv4-input-flush:
+    nftables.flush:
+        - table: filter
+        - chain: input
         - family: ip4
         - order: 2
+        - require:
+            - nftables: nftables-baseconfig-chain-ipv4-input
 
 
-nftables-baseconfig-table-ipv6-filter:
-    nftables.table_present:
-        - name: filter
+nftables-baseconfig-chain-ipv6-input-flush:
+    nftables.flush:
+        - table: filter
+        - chain: input
         - family: ip6
         - order: 2
+        - require:
+            - nftables: nftables-baseconfig-chain-ipv6-input
 
 
-nftables-baseconfig-table-inet-filter:
-    nftables.table_present:
-        - name: filter
-        - family: inet
-        - order: 2
-
-
-nftables-baseconfig-chain-ipv4-input:
-    nftables.chain_present:
-        - name: input
+nftables-baseconfig-chain-ipv4-output-flush:
+    nftables.flush:
         - table: filter
-        - table_type: filter
+        - chain: output
         - family: ip4
-        - hook: input
-        - priority: 0
         - order: 2
         - require:
-            - nftables: nftables-baseconfig-table-ipv4-filter
+            - nftables: nftables-baseconfig-chain-ipv4-output
 
 
-nftables-baseconfig-chain-ipv6-input:
-    nftables.chain_present:
-        - name: input
+nftables-baseconfig-chain-ipv6-output-flush:
+    nftables.flush:
         - table: filter
-        - table_type: filter
+        - chain: output
         - family: ip6
-        - hook: input
-        - priority: 0
         - order: 2
         - require:
-            - nftables: nftables-baseconfig-table-ipv6-filter
+            - nftables: nftables-baseconfig-chain-ipv6-output
 
 
-nftables-baseconfig-chain-ipv4-output:
-    nftables.chain_present:
-        - name: output
+nftables-baseconfig-chain-ipv4-forward-flush:
+    nftables.flush:
         - table: filter
-        - table_type: filter
+        - chain: forward
         - family: ip4
-        - hook: output
-        - priority: 0
         - order: 2
         - require:
-            - nftables: nftables-baseconfig-table-ipv4-filter
+            - nftables: nftables-baseconfig-chain-ipv4-forward
 
 
-nftables-baseconfig-chain-ipv6-output:
-    nftables.chain_present:
-        - name: output
+nftables-baseconfig-chain-ipv6-forward-flush:
+    nftables.flush:
         - table: filter
-        - table_type: filter
+        - chain: forward
         - family: ip6
-        - hook: output
-        - priority: 0
         - order: 2
         - require:
-            - nftables: nftables-baseconfig-table-ipv6-filter
+            - nftables: nftables-baseconfig-chain-ipv6-forward
 
 
-nftables-baseconfig-chain-ipv4-forward:
-    nftables.chain_present:
-        - name: forward
+nftables-baseconfig-chain-inet-input-flush:
+    nftables.flush:
         - table: filter
-        - table_type: filter
+        - chain: input
+        - family: inet
+        - order: 2
+        - require:
+            - nftables: nftables-baseconfig-chain-inet-input
+
+
+nftables-baseconfig-chain-inet-output-flush:
+    nftables.flush:
+        - table: filter
+        - chain: output
+        - family: inet
+        - order: 2
+        - require:
+            - nftables: nftables-baseconfig-chain-inet-output
+
+
+nftables-baseconfig-chain-inet-forward-flush:
+    nftables.flush:
+        - table: filter
+        - chain: forward
+        - family: inet
+        - order: 2
+        - require:
+            - nftables: nftables-baseconfig-chain-inet-forward
+
+
+nftables-baseconfig-chain-ipv4-prerouting-flush:
+    nftables.flush:
+        - table: nat
+        - chain: prerouting
         - family: ip4
-        - hook: forward
-        - priority: 0
         - order: 2
         - require:
-            - nftables: nftables-baseconfig-table-ipv4-filter
+            - nftables: nftables-baseconfig-chain-ipv4-prerouting
 
 
-nftables-baseconfig-chain-ipv6-forward:
-    nftables.chain_present:
-        - name: forward
-        - table: filter
-        - table_type: filter
-        - family: ip6
-        - hook: forward
-        - priority: 0
+nftables-baseconfig-chain-ipv4-postrouting-flush:
+    nftables.flush:
+        - table: nat
+        - chain: postrouting
+        - family: ip4
         - order: 2
         - require:
-            - nftables: nftables-baseconfig-table-ipv6-filter
-
-
-nftables-baseconfig-chain-inet-input:
-    nftables.chain_present:
-        - name: input
-        - table: filter
-        - table_type: filter
-        - family: inet
-        - hook: input
-        - priority: 0
-        - order: 2
-        - require:
-            - nftables: nftables-baseconfig-table-inet-filter
-
-
-nftables-baseconfig-chain-inet-output:
-    nftables.chain_present:
-        - name: output
-        - table: filter
-        - table_type: filter
-        - family: inet
-        - hook: output
-        - priority: 0
-        - order: 2
-        - require:
-            - nftables: nftables-baseconfig-table-inet-filter
-
-
-nftables-baseconfig-chain-inet-forward:
-    nftables.chain_present:
-        - name: forward
-        - table: filter
-        - table_type: filter
-        - family: inet
-        - hook: forward
-        - priority: 0
-        - order: 2
-        - require:
-            - nftables: nftables-baseconfig-table-inet-filter
+            - nftables: nftables-baseconfig-chain-ipv4-postrouting
 
 
 # always allow local connections
@@ -219,10 +194,10 @@ localhost-send-ipv6:
 
 # always allow ICMP pings. Saltstack nftables does not support icmpv6 right now, so that
 # must be solved differently.
-icmp-recv:
+icmp-recv-ipv4:
     nftables.append:
         - table: filter
-        - family: inet
+        - family: ip4
         - chain: input
         - jump: accept
         - proto: icmp
@@ -233,10 +208,10 @@ icmp-recv:
             - pkg: nftables
 
 
-icmp-send:
+icmp-send-ipv4:
     nftables.append:
         - table: filter
-        - family: inet
+        - family: ip4
         - chain: output
         - jump: accept
         - proto: icmp
@@ -247,10 +222,10 @@ icmp-send:
             - pkg: nftables
 
 
-icmp-forward:
+icmp-forward-ipv4:
     nftables.append:
         - table: filter
-        - family: inet
+        - family: ip4
         - chain: forward
         - jump: accept
         - proto: icmp
@@ -259,6 +234,48 @@ icmp-forward:
         - save: True
         - require:
             - pkg: nftables
+
+
+icmp-recv-ipv6:
+    nftables.append:
+        - table: filter
+        - family: ip6
+        - chain: input
+        - jump: accept
+        - proto: icmp
+        - icmp-type: echo-reply,destination-unreachable,source-quench,redirect,echo-request,time-exceeded,parameter-problem,timestamp-request,timestamp-reply,info-request,info-reply,address-mask-request,address-mask-reply,router-advertisement,router-solicitation
+        - order: 4
+        - save: True
+        - require:
+              - pkg: nftables
+
+
+icmp-send-ipv6:
+    nftables.append:
+        - table: filter
+        - family: ip6
+        - chain: output
+        - jump: accept
+        - proto: icmp
+        - icmp-type: echo-reply,destination-unreachable,source-quench,redirect,echo-request,time-exceeded,parameter-problem,timestamp-request,timestamp-reply,info-request,info-reply,address-mask-request,address-mask-reply,router-advertisement,router-solicitation
+        - order: 4
+        - save: True
+        - require:
+              - pkg: nftables
+
+
+icmp-forward-ipv6:
+    nftables.append:
+        - table: filter
+        - family: ip6
+        - chain: forward
+        - jump: accept
+        - proto: icmp
+        - icmp-type: echo-reply,destination-unreachable,source-quench,redirect,echo-request,time-exceeded,parameter-problem,timestamp-request,timestamp-reply,info-request,info-reply,address-mask-request,address-mask-reply,router-advertisement,router-solicitation
+        - order: 4
+        - save: True
+        - require:
+              - pkg: nftables
 
 
 # prevent tcp packets without a connection
@@ -454,18 +471,21 @@ enable-ipv4-forwarding:
     sysctl.present:
         - name: net.ipv4.ip_forward
         - value: 1
+        - order: 4
 
 
 enable-ipv4-nonlocalbind:
     sysctl.present:
         - name: net.ipv4.ip_nonlocal_bind
         - value: 1
+        - order: 4
 
 
 enable-ipv6-nonlocalbind:
     sysctl.present:
         - name: net.ipv6.ip_nonlocal_bind
         - value: 1
+        - order: 4
 
 
 # vim: syntax=yaml

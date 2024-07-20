@@ -566,11 +566,11 @@ vault-tcp8200-recv-ipv4:
         - chain: input
         - family: ip4
         - jump: accept
-        - in-interface: {{pillar['ifassign']['internal']}}
+        - if: {{pillar['ifassign']['internal']}}
         - dport: 8200
         - match: state
         - connstate: new
         - proto: tcp
         - save: True
         - require:
-            - sls: basics.nftables
+            - sls: basics.nftables.setup

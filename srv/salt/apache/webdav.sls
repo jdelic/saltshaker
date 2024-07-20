@@ -171,4 +171,4 @@ apache2-webdav-tcp-in{{port}}-recv-ipv4:
         - proto: tcp
         - save: True
         - require:
-            - sls: basics.nftables
+            - sls: basics.nftables.setup

@@ -205,6 +205,6 @@ authserver-tcp-in{{pillar.get('authserver', {}).get('bind-port', 8999)}}-recv:
         - proto: tcp
         - save: True
         - require:
-            - sls: basics.nftables
+            - sls: basics.nftables.setup
 
 # vim: syntax=yaml

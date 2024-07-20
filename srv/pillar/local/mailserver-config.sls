@@ -27,7 +27,7 @@ smtp-local-relay: # {}
 imap-incoming:
     hostname: mail.{{external_tld}}
     bind-ipv4: True
-    bind-ipv6: True
+    bind-ipv6: False
     # override-ipv4: 123.123.123.123   # override interface bindings to bind to a specific IP
     # override-ipv6: 1234:1234::0
 

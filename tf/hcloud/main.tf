@@ -8,7 +8,7 @@ terraform {
 }
 
 variable "hcloud_token" {
-    sensitive = true # Requires terraform >= 0.14
+    sensitive = true
 }
 
 provider "hcloud" {
@@ -16,22 +16,25 @@ provider "hcloud" {
 }
 
 locals {
+    saltmaster_config = templatefile("${path.module}/../../etc/salt-master/master.d/saltshaker.conf", {})
+
     server_config = {
         "db.maurusnet.internal" = {
-            server_type = "cx21"
+            server_type = "cx22"
             backup = 1
             additional_ipv4 = 0
             ipv6_only = 1
             internal_only = 1
             ptr = null
             user_data = templatefile("${path.module}/../salt-minion.cloud-init.yml", {
-                    saltmaster_ip = flatten(hcloud_server.saltmaster.network.*.ip)[0],
-                    roles = ["database", "vault", "authserver"]
-                },
-            )
+                saltmaster_ip = flatten(hcloud_server.saltmaster.network.*.ip)[0]
+                roles = ["database", "vault", "authserver"]
+                ipv6_only = true,
+                hostname = "db.maurusnet.internal"
+            })
         }
-/*        "dev.maurusnet.internal" = {
-            server_type = "cx31"
+/*      dev = {
+            server_type = "cx32"
             backup = 0
             additional_ipv4 = 0
             ipv6_only = 1
@@ -47,7 +50,7 @@ locals {
             ptr = "mail.maurus.net"
         }
         "apps1.maurusnet.internal" = {
-            server_type = "cx21"
+            server_type = "cx22"
             backup = 0
             additional_ipv4 = 0
             ipv6_only = 1
@@ -55,7 +58,7 @@ locals {
             ptr = null
         }
         "apps2.maurusnet.internal" = {
-            server_type = "cx21"
+            server_type = "cx22"
             backup = 0
             additional_ipv4 = 0
             ipv6_only = 1
@@ -63,7 +66,7 @@ locals {
             ptr = null
         }
         "apps3.maurusnet.internal" = {
-            server_type = "cx21"
+            server_type = "cx22"
             backup = 0
             additional_ipv4 = 0
             ipv6_only = 1
@@ -81,6 +84,25 @@ locals {
     }
 }
 
+/*
+ NETWORK CONFIGURATION
+ The following stanzas create first:
+   - a network 10.0.0.0/20, which comes with a gateway at 10.0.0.1 where
+     ALL traffic must be routed from each node. Routing will then be applied
+     on that gateway.
+   - a subnet 10.0.1.0/24 in the network, which is the subnet where all
+     servers will be placed.
+   - a route on the network to route all traffic for the internet (0.0.0.0)
+     to the designated NAT gateway for the 10.0.1.0/24 subnet.
+   - the designated NAT gateway is the saltmaster at 10.0.1.1. It has the
+     natgateway Salt role which configures its network and nftables
+     accordingly.
+   - Servers without a public IP will be able to reach the internet through
+     the NAT gateway. For that they need to send their traffic to the
+     network gateway which will route it to saltmaster.
+
+         ip route add default via 10.0.0.1 dev ens10
+*/
 resource "hcloud_network" "internal" {
     name = "private-network"
     ip_range = "10.0.0.0/20"
@@ -93,12 +115,19 @@ resource "hcloud_network_subnet" "internal-subnet" {
     ip_range = "10.0.1.0/24"
 }
 
+resource "hcloud_network_route" "nat-route" {
+    network_id = hcloud_network.internal.id
+    destination = "0.0.0.0/0"
+    gateway = flatten(hcloud_server.saltmaster.network.*.ip)[0]
+    depends_on = [hcloud_server.saltmaster]
+}
+
 resource "hcloud_server" "saltmaster" {
     name = "symbiont.maurus.net"
-    server_type = "cx11"
+    server_type = "cx22"
     image = "debian-12"
     location = "hel1"
-    ssh_keys = ["symbiont laptop key"]
+    ssh_keys = ["symbiont laptop key", "jonas@hades"]
 
     network {
         network_id = hcloud_network.internal.id
@@ -115,6 +144,8 @@ resource "hcloud_server" "saltmaster" {
     })
 
     backups = true
+    # important as per hcloud docs as there's a race condition otherwise
+    depends_on = [hcloud_network_subnet.internal-subnet]
 }
 
 resource "hcloud_server" "servers" {
@@ -124,7 +155,7 @@ resource "hcloud_server" "servers" {
     server_type = each.value.server_type
     image = "debian-12"
     location = "hel1"
-    ssh_keys = ["symbiont laptop key"]
+    ssh_keys = ["symbiont laptop key", "jonas@hades"]
 
     network {
         network_id = hcloud_network.internal.id
@@ -165,10 +196,8 @@ resource "hcloud_load_balancer_target" "app_targets" {
 output "ip_addresses" {
     value = {
         for s in merge({"symbiont.maurus.net" = hcloud_server.saltmaster}, hcloud_server.servers) : s.name => concat(
-            [
-                s.ipv4_address != "" ? s.ipv4_address : null,
-                s.ipv6_address
-            ],
+            s.ipv4_address != "" ? [s.ipv4_address] : [],
+            s.ipv6_address != "" ? [s.ipv6_address] : [],
             flatten(s.network.*.ip),
             [for ip in hcloud_floating_ip.additional_ipv4 : ip.ip_address if ip.server_id == s.id]
         )

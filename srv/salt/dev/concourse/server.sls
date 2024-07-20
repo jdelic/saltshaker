@@ -348,7 +348,7 @@ concourse-tcp-in{{pillar.get('concourse-server', {}).get('tsa-port', 2222)}}-rec
         - proto: tcp
         - save: True
         - require:
-            - sls: basics.nftables
+            - sls: basics.nftables.setup
 
 
 concourse-tcp-in{{pillar.get('concourse-server', {}).get('atc-port', 8080)}}-recv-ipv4:
@@ -367,7 +367,7 @@ concourse-tcp-in{{pillar.get('concourse-server', {}).get('atc-port', 8080)}}-rec
         - proto: tcp
         - save: True
         - require:
-            - sls: basics.nftables
+            - sls: basics.nftables.setup
 
 
 # allow us to talk to others
@@ -387,7 +387,7 @@ concourse-tcp-out{{pillar.get('concourse-server', {}).get('atc-port', 8080)}}-se
         - proto: tcp
         - save: True
         - require:
-            - sls: basics.nftables
+            - sls: basics.nftables.setup
 
 
 # vim: syntax=yaml

@@ -196,42 +196,42 @@ opensmtpd-internal-relay-sslkey:
     "ipv4": {
         "relay":
             pillar.get('smtp-outgoing', {}).get(
-                'override-ipv4', grains['ip4_interfaces'].get(pillar['ifassign']['external-alt'], {}).get(
-                        pillar['ifassign'].get('external-alt-ip-index', 0)|int(), None
-                )
-            ) if pillar.get('smtp-outgoing', {}).get('bind-ipv4', True) else None,
+                'override-ipv4', grains['ip4_interfaces'].get(pillar['ifassign']['external-alt'])[
+                        pillar['ifassign'].get('external-alt-ip-index', 0)|int()
+                ]
+            ) if pillar.get('smtp-outgoing', {}).get('bind-ipv4', True) else "",
         "receiver":
             pillar.get('smtp-incoming', {}).get(
-                'override-ipv4', grains['ip4_interfaces'].get(pillar['ifassign']['external'], {}).get( 
-                    pillar['ifassign'].get('external-ip-index', 0)|int(), None
-                )
-            ) if pillar.get('smtp-incoming', {}).get('bind-ipv4', True) else None,
+                'override-ipv4', grains['ip4_interfaces'].get(pillar['ifassign']['external'])[
+                    pillar['ifassign'].get('external-ip-index', 0)|int()
+                ]
+            ) if pillar.get('smtp-incoming', {}).get('bind-ipv4', True) else "",
         "internal_relay":
             pillar.get('smtp-local-relay', {}).get(
-                'override-ipv4', grains['ip4_interfaces'].get(pillar['ifassign']['internal'], {}).get(
-                    pillar['ifassign'].get('internal-ip-index', 0)|int(), None
-                )
-            ) if pillar.get('smtp-local-relay', {}).get('bind-ipv4', True) else None,
+                'override-ipv4', grains['ip4_interfaces'].get(pillar['ifassign']['internal'])[
+                    pillar['ifassign'].get('internal-ip-index', 0)|int()
+                ]
+            ) if pillar.get('smtp-local-relay', {}).get('bind-ipv4', True) else "",
     },
     "ipv6": {
         "relay":
             pillar.get('smtp-outgoing', {}).get(
-                'override-ipv6', grains['ip6_interfaces'].get(pillar['ifassign']['external-alt'], {}).get(
-                    pillar['ifassign'].get('external-alt-ipv6-index', 0)|int(), None
-                )
-            ) if pillar.get('smtp-outgoing', {}).get('bind-ipv6', False) else None,
+                'override-ipv6', grains['ip6_interfaces'].get(pillar['ifassign']['external-alt'])[
+                    pillar['ifassign'].get('external-alt-ipv6-index', 0)|int()
+                ]
+            ) if pillar.get('smtp-outgoing', {}).get('bind-ipv6', False) else "",
         "receiver":
             pillar.get('smtp-incoming', {}).get(
-                'override-ipv6', grains['ip6_interfaces'].et(pillar['ifassign']['external'], {}).get(
-                    pillar['ifassign'].get('external-ipv6-index', 0)|int(), None
-                )
-            ) if pillar.get('smtp-incoming', {}).get('bind-ipv6', False) else None,
+                'override-ipv6', grains['ip6_interfaces'].get(pillar['ifassign']['external'])[
+                    pillar['ifassign'].get('external-ipv6-index', 0)|int()
+                ]
+            ) if pillar.get('smtp-incoming', {}).get('bind-ipv6', False) else "",
         "internal_relay":
             pillar.get('smtp-local-relay', {}).get(
-                'override-ipv6', grains['ip6_interfaces'].get(pillar['ifassign']['internal'], {}).get(
-                    pillar['ifassign'].get('internal-ipv6-index', 0)|int(), None
-                )
-            ) if pillar.get('smtp-local-relay', {}).get('bind-ipv6', False) else None,
+                'override-ipv6', grains['ip6_interfaces'].get(pillar['ifassign']['internal'])[
+                    pillar['ifassign'].get('internal-ipv6-index', 0)|int()
+                ]
+            ) if pillar.get('smtp-local-relay', {}).get('bind-ipv6', False) else "",
     }
 } %}
 opensmtpd-config:
@@ -243,9 +243,9 @@ opensmtpd-config:
             receiver_hostname: {{pillar['smtp-incoming']['hostname']}}
             relay_hostname: {{pillar['smtp-outgoing']['hostname']}}
             internal_relay_hostname: {{pillar['smtp']['smartstack-hostname']}}
-            receiver_ips: ["{{opensmtpd_ips['receiver']['ipv4']}}", "{{opensmtpd_ips['receiver']['ipv6']}}"]
-            relay_ips: ["{{opensmtpd_ips['relay']['ipv4']}}", "{{opensmtpd_ips['relay']['ipv6']}}"]
-            internal_relay_ips: ["{{opensmtpd_ips['internal_relay']['ipv4']}}", "{{opensmtpd_ips['internal_relay']['ipv6']}}"]
+            receiver_ips: ["{{opensmtpd_ips['ipv4']['receiver']}}", "{{opensmtpd_ips['ipv6']['receiver']}}"]
+            relay_ips: ["{{opensmtpd_ips['ipv4']['relay']}}", "{{opensmtpd_ips['ipv6']['relay']}}"]
+            internal_relay_ips: ["{{opensmtpd_ips['ipv4']['internal_relay']}}", "{{opensmtpd_ips['ipv6']['internal_relay']}}"]
             receiver_certfile: >
                 {% if pillar['smtp']['receiver']['sslcert'] == 'default' -%}
                     {{pillar['ssl']['filenames']['default-cert-combined']}}
@@ -371,7 +371,7 @@ opensmtpd-servicedef-internal:
         - mode: '0644'
         - template: jinja
         - context:
-            relayip: {{opensmtpd_ips['internal_relay']}}
+            relayip: {{opensmtpd_ips['ipv4']['internal_relay']}}
             relayport: 25
         - require:
             - file: consul-service-dir
@@ -393,7 +393,7 @@ opensmtpd-{{svc}}-tcp-in25-recv-ipv4:
         - proto: tcp
         - save: True
         - require:
-            - sls: basics.nftables
+            - sls: basics.nftables.setup
     {% endif %}
     {% if opensmtpd_ips['ipv6'][svc] %}
 opensmtpd-{{svc}}-tcp-in25-recv-ipv6:
@@ -410,7 +410,7 @@ opensmtpd-{{svc}}-tcp-in25-recv-ipv6:
         - proto: tcp
         - save: True
         - require:
-            - sls: basics.nftables
+            - sls: basics.nftables.setup
     {% endif %}
 {% endfor %}
 
@@ -431,7 +431,7 @@ opensmtpd-{{svc}}-tcp-in465-recv-ipv4:
         - proto: tcp
         - save: True
         - require:
-            - sls: basics.nftables
+            - sls: basics.nftables.setup
     {% endif %}
     {% if opensmtpd_ips['ipv6'][svc] %}
 opensmtpd-{{svc}}-tcp-in465-recv-ipv6:
@@ -448,7 +448,7 @@ opensmtpd-{{svc}}-tcp-in465-recv-ipv6:
         - proto: tcp
         - save: True
         - require:
-            - sls: basics.nftables
+            - sls: basics.nftables.setup
     {% endif %}
 {% endfor %}
 
@@ -468,7 +468,7 @@ opensmtpd-relay-out25-send-ipv4:
         - proto: tcp
         - save: True
         - require:
-            - sls: basics.nftables
+            - sls: basics.nftables.setup
 
 
 opensmtpd-relay-out465-send-ipv4:
@@ -485,7 +485,7 @@ opensmtpd-relay-out465-send-ipv4:
         - proto: tcp
         - save: True
         - require:
-            - sls: basics.nftables
+            - sls: basics.nftables.setup
 {% endif %}
 
 {% if pillar["smtp-outgoing"].get("bind-ipv6", False) %}
@@ -495,7 +495,7 @@ opensmtpd-relay-out25-send-ipv6:
         - chain: output
         - family: ip6
         - jump: accept
-        - source: {{salt['network.interface_ip'](salt['network.default_route']('inet6')[0]['interface'])}}/128
+        - source: {{salt['network.ip_addrs6'](salt['network.default_route']('inet6')[0]['interface'], True)[0]}}/128
         - destination: ::/0
         - dport: 25
         - match: state
@@ -503,7 +503,7 @@ opensmtpd-relay-out25-send-ipv6:
         - proto: tcp
         - save: True
         - require:
-            - sls: basics.nftables
+            - sls: basics.nftables.setup
 
 
 opensmtpd-relay-out465-send-ipv6:
@@ -512,7 +512,7 @@ opensmtpd-relay-out465-send-ipv6:
         - chain: output
         - family: ip6
         - jump: accept
-        - source: {{salt['network.interface_ip'](salt['network.default_route']('inet6')[0]['interface'])}}/128
+        - source: {{salt['network.ip_addrs6'](salt['network.default_route']('inet6')[0]['interface'], True)[0]}}/128
         - destination: ::/0
         - dport: 465
         - match: state
@@ -520,5 +520,5 @@ opensmtpd-relay-out465-send-ipv6:
         - proto: tcp
         - save: True
         - require:
-            - sls: basics.nftables
+            - sls: basics.nftables.setup
 {% endif %}

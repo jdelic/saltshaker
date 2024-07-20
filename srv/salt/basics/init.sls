@@ -6,7 +6,7 @@
 
 
 # Some of the states in this file enforce special ordering to make sure that the firewall is configured to allow
-# access to the saltmaster before other states are executed that require such access. Notably basics.nfiptables.init
+# access to the saltmaster before other states are executed that require such access. Notably basics.nftables.init
 # reserves order 1 to 4 for the netfilter baseline setup so we can make sure that rules are added in a certain order.
 
 include:
@@ -203,7 +203,7 @@ openssh-in22-recv-ipv4:
         - connstate: new
         - save: True
         - require:
-            - sls: basics.nftables
+            - sls: basics.nftables.setup
         - order: 4
 
 
@@ -308,14 +308,14 @@ basics-internal-network-tcp-ipv4:
         - chain: output
         - family: ip4
         - jump: accept
-        - out-interface: {{pillar['ifassign']['internal']}}
+        - of: {{pillar['ifassign']['internal']}}
         - match: state
         - connstate: new
         - proto: tcp
         - save: True
         - order: 4
         - require:
-            - sls: basics.nftables
+            - sls: basics.nftables.setup
 
 
 basics-internal-network-udp-ipv4:
@@ -324,12 +324,12 @@ basics-internal-network-udp-ipv4:
         - chain: output
         - family: ip4
         - jump: accept
-        - out-interface: {{pillar['ifassign']['internal']}}
+        - of: {{pillar['ifassign']['internal']}}
         - proto: udp
         - save: True
         - order: 4
         - require:
-            - sls: basics.nftables
+            - sls: basics.nftables.setup
 
 
 # vim: syntax=yaml

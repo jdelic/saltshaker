@@ -69,16 +69,16 @@ sa-learn-pipe-script:
 {% set dovecot_ips = {
     "ipv4":
         pillar.get('imap-incoming', {}).get(
-                'override-ipv4', grains['ip4_interfaces'].get(pillar['ifassign']['external'], {}).get( 
-                    pillar['ifassign'].get('external-ip-index', 0)|int(), None
-                )
-            ) if pillar.get('imap-incoming', {}).get('bind-ipv4', True) else None,
+                'override-ipv4', grains['ip4_interfaces'].get(pillar['ifassign']['external'])[
+                    pillar['ifassign'].get('external-ip-index', 0)|int()
+                ]
+            ) if pillar.get('imap-incoming', {}).get('bind-ipv4', True) else "",
     "ipv6":
         pillar.get('imap-incoming', {}).get(
-                'override-ipv6', grains['ip6_interfaces'].get(pillar['ifassign']['external'], {}).get(
-                    pillar['ifassign'].get('external-ip-index', 0)|int(), None
-                )
-            ) if pillar.get('imap-incoming', {}).get('bind-ipv6', True) else None
+                'override-ipv6', grains['ip6_interfaces'].get(pillar['ifassign']['external'])[
+                    pillar['ifassign'].get('external-ip-index', 0)|int()
+                ]
+            ) if pillar.get('imap-incoming', {}).get('bind-ipv6', True) else ""
 } %}
 
 {% for file in conffiles %}
@@ -152,7 +152,7 @@ dovecot-consul-servicedef:
 
 # allow others to contact us on ports (imap, imaps, managesieve)
 {% for port in ['143', '993', '4190'] %}
-    {% if pillar['imap'].get('bind-ipv4', True) %}
+    {% if pillar['imap-incoming'].get('bind-ipv4', True) %}
 dovecot-in{{port}}-recv-ipv4:
     nftables.append:
         - table: filter
@@ -167,9 +167,9 @@ dovecot-in{{port}}-recv-ipv4:
         - proto: tcp
         - save: True
         - require:
-            - sls: basics.nftables
+            - sls: basics.nftables.setup
     {% endif %}
-    {% if pillar['imap'].get('bind-ipv6', True) %}
+    {% if pillar['imap-incoming'].get('bind-ipv6', True) %}
 dovecot-in{{port}}-recv-ipv6:
     nftables.append:
         - table: filter
@@ -184,7 +184,7 @@ dovecot-in{{port}}-recv-ipv6:
         - proto: tcp
         - save: True
         - require:
-            - sls: basics.nftables
+            - sls: basics.nftables.setup
     {% endif %}
 {% endfor %}
 

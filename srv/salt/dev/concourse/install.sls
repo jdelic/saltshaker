@@ -118,14 +118,14 @@ concourse-tcp-out{{pillar.get('concourse-server', {}).get('tsa-port', 2222)}}-se
         - chain: output
         - family: ip4
         - jump: accept
-        - out-interface: {{pillar['ifassign']['internal']}}
+        - of: {{pillar['ifassign']['internal']}}
         - dport: {{pillar.get('concourse-server', {}).get('tsa-port', 2222)}}
         - match: state
         - connstate: new
         - proto: tcp
         - save: True
         - require:
-            - sls: basics.nftables
+            - sls: basics.nftables.setup
 
 
 # vim: syntax=yaml

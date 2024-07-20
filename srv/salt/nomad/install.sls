@@ -104,14 +104,14 @@ nomad-tcp-in{{port}}-recv-ipv4:
         - chain: input
         - family: ip4
         - jump: accept
-        - in-interface: {{pillar['ifassign']['internal']}}
+        - if: {{pillar['ifassign']['internal']}}
         - dport: {{port}}
         - match: state
         - connstate: new
         - proto: tcp
         - save: True
         - require:
-            - sls: basics.nftables
+            - sls: basics.nftables.setup
 
 
 # allow us to talk to others
@@ -121,14 +121,14 @@ nomad-tcp-out{{port}}-send-ipv4:
         - chain: output
         - family: ip4
         - jump: accept
-        - out-interface: {{pillar['ifassign']['internal']}}
+        - of: {{pillar['ifassign']['internal']}}
         - dport: {{port}}
         - match: state
         - connstate: new
         - proto: tcp
         - save: True
         - require:
-            - sls: basics.nftables
+            - sls: basics.nftables.setup
 {% endfor %}
 
 
@@ -138,12 +138,12 @@ nomad-udp-in4648-recv-ipv4:
         - chain: input
         - family: ip4
         - jump: accept
-        - in-interface: {{pillar['ifassign']['internal']}}
+        - if: {{pillar['ifassign']['internal']}}
         - dport: 4648
         - proto: udp
         - save: True
         - require:
-            - sls: basics.nftables
+            - sls: basics.nftables.setup
 
 
 nomad-udp-in4648-send-ipv4:
@@ -152,12 +152,12 @@ nomad-udp-in4648-send-ipv4:
         - chain: output
         - family: ip4
         - jump: accept
-        - out-interface: {{pillar['ifassign']['internal']}}
+        - of: {{pillar['ifassign']['internal']}}
         - sport: 4648
         - proto: udp
         - save: True
         - require:
-            - sls: basics.nftables
+            - sls: basics.nftables.setup
 
 
 nomad-envvar-config:
