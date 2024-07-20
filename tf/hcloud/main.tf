@@ -151,7 +151,7 @@ resource "hcloud_server" "servers" {
     server_type = each.value.server_type
     image = "debian-12"
     location = "hel1"
-    ssh_keys = ["symbiont laptop key", "jonas@hades"]
+    ssh_keys = ["jonas@parasite", "jonas@hades"]
 
     network {
         network_id = hcloud_network.internal.id
@@ -165,7 +165,7 @@ resource "hcloud_server" "servers" {
     user_data = templatefile("${path.module}/../salt-minion.cloud-init.yml", {
                     saltmaster_ip = flatten(hcloud_server.saltmaster.network.*.ip)[0]
                     roles = lookup(each.value, "roles", [])
-                    ipv6_only = each.value.ipv6_only,
+                    ipv6_only = each.value.ipv6_only == 1,
                     hostname = each.key,
                     server_type = each.value.server_type,
                 })
