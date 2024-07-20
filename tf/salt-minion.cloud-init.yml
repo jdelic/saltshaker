@@ -19,9 +19,11 @@ write_files:
 %{ if ipv6_only ~}
 network:
     version: 2
-    routes:
-        - to: 0.0.0.0/0
-          via: 10.0.0.1
+    ethernets:
+        %{ if endswith(server_type, '2') }enp7s0:%{ else ~}ens10:%{ endif ~}
+            routes:
+                - to: 0.0.0.0/0
+                  via: 10.0.0.1
 %{ endif ~}
 
 
