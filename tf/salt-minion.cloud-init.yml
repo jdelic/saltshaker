@@ -20,7 +20,7 @@ write_files:
 network:
     version: 2
     ethernets:
-        %{ if endswith(server_type, '2') }enp7s0:%{ else ~}ens10:%{ endif ~}
+        %{ if endswith(server_type, "2") }enp7s0:%{ else ~}ens10:%{ endif ~}
             routes:
                 - to: 0.0.0.0/0
                   via: 10.0.0.1
