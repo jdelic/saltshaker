@@ -20,8 +20,8 @@ deploying them. Personally, I'm deploying this configuration on my laptop
 using Vagrant, on Digital Ocean and my own server on Hetzner which I configure
 with a XEN Hypervisor running VMs for all my development needs.
 
-Everything in here is based around **Debian 9.0 Stretch** (i.e. requires
-systemd and uses Debian package naming).
+Everything in here is based around **Debian 12.0 Bookworm** (i.e. requires
+systemd, nftables, and uses Debian package naming).
 
 Using these salt formulae you can bring up:
 
