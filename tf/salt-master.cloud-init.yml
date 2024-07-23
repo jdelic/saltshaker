@@ -41,7 +41,7 @@ runcmd:
     - chmod 700 /run/salt-bootstrap/bootstrap-salt.sh
     - apt -y install --no-install-recommends git
     - /usr/bin/bash /run/salt-bootstrap/bootstrap-salt.sh -r -x python3 -M
-    - /usr/bin/bash -c 'until [ "/opt/saltstack/salt/salt-key --list=un | grep -q saltmaster" ]; do sleep 1; done;'
+    - /usr/bin/bash -c 'until [ "/opt/saltstack/salt/salt-key --list=un | grep -q ${hostname}" ]; do sleep 1; echo "."; done;'
     - /opt/saltstack/salt/salt-key --list=un
     - /opt/saltstack/salt/salt-key -y -a ${hostname}
 
