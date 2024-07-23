@@ -21,12 +21,13 @@ runcmd:
     - ip route del default || /usr/bin/true
     - ip route add default via 10.0.0.1
     - echo "nameserver 8.8.8.8" >> /etc/resolv.conf
-    - /usr/bin/bash -c 'until [ "dig debian.org > /dev/null" ]; do sleep 1; echo "."; done;'
+    - echo "Waiting for NAT to come up..."
+    - /usr/bin/bash -c 'until [ ! "dig debian.org > /dev/null" ]; do sleep 1; echo -n "."; done; echo "";'
 %{ endif ~}
     - mkdir -p /etc/apt/keyrings
-    - wget -O /etc/apt/keyrings/salt-archive-keyring-2023.gpg https://repo.saltproject.io/salt/py3/debian/12/amd64/SALT-PROJECT-GPG-PUBKEY-2023.gpg
-    - sh -c 'echo deb [signed-by=/etc/apt/keyrings/salt-archive-keyring-2023.gpg arch=amd64] https://repo.saltproject.io/salt/py3/debian/12/amd64/latest bookworm main > /etc/apt/sources.list.d/salt.list'
-    - sh -c 'echo ${saltmaster_ip} saltmaster.maurusnet.internal saltmaster >> /etc/hosts'
+    - /usr/bin/wget -O /etc/apt/keyrings/salt-archive-keyring-2023.gpg https://repo.saltproject.io/salt/py3/debian/12/amd64/SALT-PROJECT-GPG-PUBKEY-2023.gpg
+    - /usr/bin/bash -c 'echo deb [signed-by=/etc/apt/keyrings/salt-archive-keyring-2023.gpg arch=amd64] https://repo.saltproject.io/salt/py3/debian/12/amd64/latest bookworm main > /etc/apt/sources.list.d/salt.list'
+    - /usr/bin/bash -c 'echo ${saltmaster_ip} saltmaster.maurusnet.internal saltmaster >> /etc/hosts'
     - apt update
     - mkdir -p /etc/salt/roles.d
     - mkdir -p /etc/salt/env.d
