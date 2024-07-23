@@ -26,7 +26,7 @@ locals {
             ipv6_only = 1
             internal_only = 1
             ptr = null
-            roles = ["database", "vault", "authserver"]
+            roles = ["database", "vault", "authserver", "consulserver"]
         }
 /*      dev = {
             server_type = "cx32"
@@ -173,7 +173,7 @@ resource "hcloud_server" "servers" {
     backups = each.value.backup == 1 ? true : false
 
     # important as per hcloud docs as there's a race condition otherwise
-    depends_on = [hcloud_network_subnet.internal-subnet, hcloud_server.saltmaster]
+    depends_on = [hcloud_server.saltmaster]
 }
 
 resource "hcloud_floating_ip" "additional_ipv4" {
