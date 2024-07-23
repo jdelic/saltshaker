@@ -22,7 +22,7 @@ runcmd:
     - ip route add default via 10.0.0.1
     - echo "nameserver 8.8.8.8" >> /etc/resolv.conf
     - echo "Waiting for NAT to come up..."
-    - /usr/bin/bash -c 'until [ ! "dig debian.org > /dev/null" ]; do sleep 1; echo -n "."; done; echo "";'
+    - /usr/bin/bash -c 'until [ "dig debian.org > /dev/null" ]; do sleep 1; echo -n "."; done; echo "";'
 %{ endif ~}
     - mkdir -p /etc/apt/keyrings
     - /usr/bin/wget -O /etc/apt/keyrings/salt-archive-keyring-2023.gpg https://repo.saltproject.io/salt/py3/debian/12/amd64/SALT-PROJECT-GPG-PUBKEY-2023.gpg
