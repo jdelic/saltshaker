@@ -33,6 +33,7 @@ runcmd:
     - mkdir -p /etc/salt/env.d
     - touch /etc/salt/roles.d/master
     - touch /etc/salt/roles.d/consulserver
+    - touch /etc/salt/roles.d/consulbootstrapprimary
     - touch /etc/salt/roles.d/natgateway
     - echo ${server_type} > /etc/salt/env.d/server_type
     - mkdir /run/salt-bootstrap
