@@ -564,6 +564,43 @@ Those are:
 
 # Configuration
 
+## Consul bootstrap
+
+Bootstrapping a production Consul cluster is automated within this Salt config.
+It uses Consul's manual bootstrap mode. This allows the first server to start
+(which must be assigned the `consulbootstrapprimary` role) to immediately act
+as cluster leader. This allows other servers to come up in parallel.
+
+Only one node is allowed to have the `consulbootstrapprimary` role. This node
+will have `-bootstrap` set on its consul server instance. It will also get a
+systemd timer that will check every 30 seconds whether 
+`{{pillar['consul']['number-of-servers']}}` servers are up and running. When
+that condition is met, the timer will stop the consul service and remove the
+`-bootstrap` flag from the consul server systemd unit, then remove the
+`consulbootstrapprimary` role from the node and resync the Salt grains.
+
+### Consul ACL bootstrap
+
+The Consul cluster is orchestrated such that it will automatically create ACLs
+for for each node when the node starts. Dynamicsecrets has support for creating
+ACL tokens on consul through the secret type `consul-acl-token`. So what
+happens is that on the first Consul server the ACL system is bootstrapped with
+the dynamic secret `consul-acl-master-token` which is of type `uuid` by
+creating a ACL policy called `tempacl-policy-[nodeid]`. This policy is used
+by Salt on the Salt master node to create ACL tokens, i.e. dynamic secrets of
+type `consul-acl-token`.
+
+However, these tokens are created without any policies attached to them. For
+ACLs to be meaningful, the policies must be specific to the node. Therefor
+this is a two step process. Dynamicsecrets creates the ACL token without
+policies and the Salt minion sends a beacon event to the Salt master. The
+master then creates a policy for the node and attaches it to the token. This
+happens through the reactor system (`srv/reactor/consul-acl.sls`) and the
+`srv/salt/orchestrate/consul-node-setup.sls` state. The node's
+`consul.acl_install` state is set up to send the beacon event and then block
+and wait until the master has created the ACL policy and attached it to the
+token.
+
 ## PostgreSQL
 
 ### Accumulators
