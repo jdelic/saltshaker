@@ -83,7 +83,7 @@ consul-service:
         - context:
             user: {{consul_user}}
             group: {{consul_group}}
-            extra_parameters: -server -bootstrap -ui
+            extra_parameters: -server -ui {% if grains['roles'].get('consulbootstrapprimary', False) %}-bootstrap{% endif %}
             single_node_cluster: {% if single_node_cluster %}True{% else %}False{% endif %}
             node_name: {{grains['id']}}
 {% if single_node_cluster %}
@@ -299,5 +299,23 @@ consul-agent-absent:
         - sig: consul
         - enable: False
 
+
+{% if grains['roles'].get('consulbootstrapprimary', False) %}
+consul-cluster-check-timer:
+    file.managed:
+        - name: /etc/systemd/system/consul-cluster-check.timer
+        - source: salt://consul/consul-cluster-check.timer
+
+consul-cluster-check-service:
+    systemdunit.managed:
+        - name: /etc/systemd/system/consul-cluster-check.service
+        - source: salt://consul/consul-cluster-check.service
+    service.running:
+        - name: consul-cluster-check.timer
+        - require:
+            - file: consul-cluster-check-timer
+            - systemdunit: consul-cluster-check-service
+            - service: consul-service
+{% endif %}
 
 # vim: syntax=yaml
