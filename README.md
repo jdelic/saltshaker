@@ -569,7 +569,7 @@ Those are:
 Bootstrapping a production Consul cluster is automated within this Salt config.
 It uses Consul's manual bootstrap mode. This allows the first server to start
 (which must be assigned the `consulbootstrapprimary` role) to immediately act
-as cluster leader. This allows other servers to come up in parallel.
+as cluster leader. Other servers can then come up in parallel.
 
 Only one node is allowed to have the `consulbootstrapprimary` role. This node
 will have `-bootstrap` set on its consul server instance. It will also get a
@@ -577,7 +577,8 @@ systemd timer that will check every 30 seconds whether
 `{{pillar['consul']['number-of-servers']}}` servers are up and running. When
 that condition is met, the timer will stop the consul service and remove the
 `-bootstrap` flag from the consul server systemd unit, then remove the
-`consulbootstrapprimary` role from the node and resync the Salt grains.
+`consulbootstrapprimary` role from the node, resync the Salt grains and restart
+the consul server.
 
 ### Consul ACL bootstrap
 
