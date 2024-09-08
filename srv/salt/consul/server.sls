@@ -83,7 +83,7 @@ consul-service:
         - context:
             user: {{consul_user}}
             group: {{consul_group}}
-            extra_parameters: -server -ui {% if grains['roles'].get('consulbootstrapprimary', False) %}-bootstrap{% endif %}
+            extra_parameters: -server -ui {% if 'consulbootstrapprimary' in grains['roles'] %}-bootstrap{% endif %}
             single_node_cluster: {% if single_node_cluster %}True{% else %}False{% endif %}
             node_name: {{grains['id']}}
     {% if single_node_cluster %}
@@ -300,7 +300,7 @@ consul-agent-absent:
         - enable: False
 
 
-{% if grains['roles'].get('consulbootstrapprimary', False) and not single_node_cluster %}
+{% if 'consulbootstrapprimary' in grains['roles'] and not single_node_cluster %}
 consul-cluster-check-helper:
     file.managed:
         - name: /etc/consul/consul-cluster-bootstrap-helper.sh
