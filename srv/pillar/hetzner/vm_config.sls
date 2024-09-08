@@ -1,8 +1,17 @@
 # importable variables for reuse
-{% if grains["envdir"].get("server_type", "cx22").endswith("2") %}
-    {% set iface_internal = "enp7s0" %}
+{% if grains.get("envdir", False) %}
+    {% if grains["envdir"].get("server_type", "cx22").endswith("2") %}
+        {% set iface_internal = "enp7s0" %}
+    {% else %}
+        {% set iface_internal = 'ens10' %}
+    {% endif %}
 {% else %}
-    {% set iface_internal = 'ens10' %}
+    # sometimes grains are apparently not available, e.g. during a Reactor run. Then we do our best to guess.
+    {% if network.interfaces.get('enp7s0', False) %}
+        {% set iface_internal = 'enp7s0' %}
+    {% else %}
+        {% set iface_internal = 'ens10' %}
+    {% endif %}
 {% endif %}
 {% set iface_external = 'eth0' %}
 {% set iface_external2 = 'eth1' %}
