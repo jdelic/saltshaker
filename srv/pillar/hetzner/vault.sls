@@ -9,7 +9,7 @@
 # look at local.vault for a full-fledged example config pillar!
 
 vault:
-    backend: s3
+    backend: postgresql
     verify-backend-ssl: verify-full
 
     kvpath: 'vault/'  # see https://vaultproject.io/docs/config/index.html
@@ -17,10 +17,9 @@ vault:
     sslcert: {{salt['file.join'](certificate_location, 'vault.crt')}}
     sslkey: {{salt['file.join'](secret_key_location, 'vault.key')}}
 
-    s3:
-        bucket: maurusnet-dev-vault
-        aws-region: eu-central-1
-        # S3 secrets config moved to saltshaker-secrets
+    postgres:
+        dbname: vault  # only needed for postgres backend
+        dbuser: vault  # the password is created via the dynamicsecrets ext_pillar
 
     enable-telemetry: False
     hostname: vault.{{external_tld}}
