@@ -2,6 +2,7 @@ gpg:
     keys:
         jonas-maurus-key: |
             -----BEGIN PGP PUBLIC KEY BLOCK-----
+
             mQINBFfR3eABEADIaUq/zWSgUeRPow7amLYPiWDIoT6T5zSDRTruGznDZDdJdJ/u
             841B6WXDncXwOjfRr/izjQKhp3xcwBXBpT4WvRz/wscbNqQKgNRe3etTy3HpGKYo
             cfFsqKOH/ZAek8isPODcumO022q6DeYCi9AfgDp6keug2FNdqVqIaZe5Zr0m31eV

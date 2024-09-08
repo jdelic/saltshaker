@@ -2,7 +2,8 @@
 Description=Check Consul cluster for enough servers and modify consul-server service if necessary
 Wants=network-online.target
 After=network-online.target
+ConditionFileIsExecutable=/etc/consul/consul-cluster-bootstrap-helper.sh
 
 [Service]
 Type=simple
-ExecStart=/usr/local/bin/check_consul.sh
+ExecStart=/etc/consul/consul-cluster-bootstrap-helper.sh
