@@ -1,0 +1,10 @@
+[Unit]
+Description=Timer to check if Consul cluster has 3 servers and remove -bootstrap
+
+[Timer]
+OnBootSec=30sec
+OnUnitActiveSec=30sec
+AccuracySec=1sec
+
+[Install]
+WantedBy=timers.target

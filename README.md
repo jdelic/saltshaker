@@ -364,12 +364,12 @@ whatever... how do I plug this into this smartstack implementation?**
 
 **Answer:** You create a Salt state that registers these services as
 `smartstack:internal` services, assign them a port in your [port map](PORTS.md)
-and make sure haproxy instances can route to it.This will cause
+and make sure haproxy instances can route to it. This will cause
 `consul-template` instances on your machines to pick them up and make them
 available on `localhost:[port]`. The ideal machines to assign these states to
 in my opinion are all machines that have the `consulserver` role. Registering
 services with consul that way can either be done by dropping service
-definitions into `/etc/consul/services.d` or perhaps use
+definitions into `/etc/consul/services.d` or maybe
 [use salt consul states](https://github.com/pravka/salt-consul).
 
 A better idea security-wise is to create an "egress router" role that runs a
@@ -377,7 +377,7 @@ specialized version of haproxy-external that sends traffic from its internal IP
 to your external services. Then announce the internal IP+Port as an internal
 smartstack service. The external services can then still be registered with the
 local Consul cluster, but you also have a defined exit point for traffic to
-the external network.
+the external network (... or use NAT gateways).
 
 
 # Vault
@@ -583,7 +583,7 @@ the consul server.
 ### Consul ACL bootstrap
 
 The Consul cluster is orchestrated such that it will automatically create ACLs
-for for each node when the node starts. Dynamicsecrets has support for creating
+for each node when the node starts. Dynamicsecrets has support for creating
 ACL tokens on consul through the secret type `consul-acl-token`. So what
 happens is that on the first Consul server the ACL system is bootstrapped with
 the dynamic secret `consul-acl-master-token` which is of type `uuid` by
@@ -601,6 +601,15 @@ happens through the reactor system (`srv/reactor/consul-acl.sls`) and the
 `consul.acl_install` state is set up to send the beacon event and then block
 and wait until the master has created the ACL policy and attached it to the
 token.
+
+To sum it all up:
+1. Dynamicsecrets knows a Consul ACL master token
+2. It uses that to create ACL tokens for each node when the pillars for that
+   node are rendered
+3. During the setup of each node the node will send a beacon event to the Salt
+   master which will attach a policy to the ACL token
+
+This allows dynamic initialization of ACLs on the Consul cluster.
 
 ## PostgreSQL
 

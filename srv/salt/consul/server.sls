@@ -300,22 +300,37 @@ consul-agent-absent:
         - enable: False
 
 
-{% if grains['roles'].get('consulbootstrapprimary', False) %}
-consul-cluster-check-timer:
+{% if grains['roles'].get('consulbootstrapprimary', False) and not single_node_cluster %}
+consul-cluster-check-helper:
     file.managed:
-        - name: /etc/systemd/system/consul-cluster-check.timer
-        - source: salt://consul/consul-cluster-check.timer
+        - name: /etc/consul/consul-cluster-bootstrap-helper.sh
+        - source: salt://consul/consul-cluster-bootstrap-helper.jinja.sh
+        - user: root
+        - group: root
+        - mode: '0700'
+        - template: jinja
+        - context:
+            target_number: {{pillar['consul-cluster']['number-of-nodes']}}
+
 
 consul-cluster-check-service:
-    systemdunit.managed:
-        - name: /etc/systemd/system/consul-cluster-check.service
-        - source: salt://consul/consul-cluster-check.service
-    service.running:
-        - name: consul-cluster-check.timer
+    file.managed:
+        - name: /etc/systemd/system/consul-cluster-bootstrap.service
+        - source: salt://consul/consul-cluster-bootstrap.service
         - require:
-            - file: consul-cluster-check-timer
-            - systemdunit: consul-cluster-check-service
             - service: consul-service
+            - file: consul-cluster-check-helper
+
+
+consul-cluster-check-timer:
+    systemdunit.managed:
+        - name: /etc/systemd/system/consul-cluster-bootstrap.timer
+        - source: salt://consul/consul-cluster-bootstrap.timer
+    service.running:
+        - name: consul-cluster-bootstrap.timer
+        - enable: True
+        - require:
+            - file: consul-cluster-check-service
 {% endif %}
 
 # vim: syntax=yaml
