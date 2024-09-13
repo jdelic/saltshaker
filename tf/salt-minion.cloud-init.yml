@@ -14,9 +14,21 @@ write_files:
     - path: /etc/salt/minion.d/saltshaker.conf
       content: |
           master: saltmaster.maurusnet.internal
+%{ if additional_ipv4 != false ~}
+    - path: /etc/network/interfaces.d/60-floating-ip.cfg
+      permissions: '0644'
+      content: |
+          auto eth0:1
+          iface eth0:1 inet static
+              address ${additional_ipv4}
+              netmask 32
+%{ endif ~}
 
 
 runcmd:
+%{ if additional_ipv4 != false ~}
+    - ifup eth0:1
+%{ endif ~}
 %{ if ipv6_only ~}
     - ip route del default || /usr/bin/true
     - ip route add default via 10.0.0.1

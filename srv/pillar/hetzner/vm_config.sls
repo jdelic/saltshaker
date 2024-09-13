@@ -11,7 +11,7 @@
     {% set iface_internal = 'run saltutil.refresh_pillar and mine.update' %}
 {% endif %}
 {% set iface_external = 'eth0' %}
-{% set iface_external2 = 'eth1' %}
+{% set iface_external2 = 'eth0:1' %}
 
 
 ifassign:

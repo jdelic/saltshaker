@@ -171,7 +171,7 @@ resource "hcloud_server" "servers" {
 
     user_data = templatefile("${path.module}/../salt-minion.cloud-init.yml", {
                     saltmaster_ip = flatten(hcloud_server.saltmaster.network.*.ip)[0],
-                    additional_ipv4 = each.value.additional_ipv4 == 1 ? hcloud_floating_ip.additional_ipv4[each.key].ip_address : null,
+                    additional_ipv4 = each.value.additional_ipv4 == 1 ? hcloud_floating_ip.additional_ipv4[each.key].ip_address : false,
                     roles = lookup(each.value, "roles", [])
                     ipv6_only = each.value.ipv6_only == 1,
                     hostname = each.key,
