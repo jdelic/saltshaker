@@ -170,7 +170,8 @@ resource "hcloud_server" "servers" {
     }
 
     user_data = templatefile("${path.module}/../salt-minion.cloud-init.yml", {
-                    saltmaster_ip = flatten(hcloud_server.saltmaster.network.*.ip)[0]
+                    saltmaster_ip = flatten(hcloud_server.saltmaster.network.*.ip)[0],
+                    additional_ipv4 = each.value.additional_ipv4 == 1 ? hcloud_floating_ip.additional_ipv4[each.key].ip_address : null,
                     roles = lookup(each.value, "roles", [])
                     ipv6_only = each.value.ipv6_only == 1,
                     hostname = each.key,
@@ -189,8 +190,14 @@ resource "hcloud_server" "servers" {
 
 resource "hcloud_floating_ip" "additional_ipv4" {
     for_each = { for k, v in local.server_config : k => v if v.additional_ipv4 == 1 }
+    name = each.key
     type = "ipv4"
+}
+
+resource "hcloud_floating_ip_assignment" "additional_ipv4" {
+    for_each  = hcloud_floating_ip.additional_ipv4
     server_id = hcloud_server.servers[each.key].id
+    floating_ip_id = each.value.id
 }
 
 /*resource "hcloud_load_balancer" "app_lb" {
