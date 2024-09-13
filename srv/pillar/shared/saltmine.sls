@@ -7,6 +7,9 @@
 mine_functions:
     network_interfaces:
         - mine_function: network.interfaces
+    envdir:
+        - mine_function: grains.get
+        - envdir
 #    network.ip_addrs: []
 
 # vim: syntax=yaml
