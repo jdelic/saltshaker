@@ -1,13 +1,13 @@
 # importable variables for reuse
-{% if salt["mine.get"](opts.id, 'envdir') %}
-    {% if salt["mine.get"](opts.id, 'envdir').get("server_type", "cx22").endswith("2") %}
+{% if salt.saltutil.runner('mine.get', tgt=opts.id, 'envdir') %}
+    {% if salt.saltutil.runner('mine.get', tgt=opts.id, 'envdir').get("server_type", "cx22").endswith("2") %}
         {% set iface_internal = "enp7s0" %}
     {% else %}
         {% set iface_internal = 'ens10' %}
     {% endif %}
 {% else %}
     # sometimes grains are apparently not available, e.g. during a Reactor run. Then we do our best to fail.
-    {% set iface_internal = 'reactor_run' %}
+    {% set iface_internal = 'unknown' %}
 {% endif %}
 {% set iface_external = 'eth0' %}
 {% set iface_external2 = 'eth1' %}
