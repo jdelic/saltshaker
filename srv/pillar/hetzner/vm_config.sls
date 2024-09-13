@@ -6,8 +6,8 @@
         {% set iface_internal = 'ens10' %}
     {% endif %}
 {% else %}
-    # sometimes grains are apparently not available, e.g. during a Reactor run. Then we do our best to fail.
-    {% set iface_internal = 'unknown' %}
+    # sometimes grains are apparently not available. Then we do our best to fail.
+    {% set iface_internal = 'run saltutil.refresh_pillar and mine.update' %}
 {% endif %}
 {% set iface_external = 'eth0' %}
 {% set iface_external2 = 'eth1' %}
