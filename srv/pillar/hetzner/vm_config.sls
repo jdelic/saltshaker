@@ -1,6 +1,6 @@
 # importable variables for reuse
-{% if grains.get("envdir", False) %}
-    {% if grains["envdir"].get("server_type", "cx22").endswith("2") %}
+{% if salt["mine.get"](opts.id, 'envdir') %}
+    {% if salt["mine.get"](opts.id, 'envdir').get("server_type", "cx22").endswith("2") %}
         {% set iface_internal = "enp7s0" %}
     {% else %}
         {% set iface_internal = 'ens10' %}
