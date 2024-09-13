@@ -192,6 +192,7 @@ resource "hcloud_floating_ip" "additional_ipv4" {
     for_each = { for k, v in local.server_config : k => v if v.additional_ipv4 == 1 }
     name = each.key
     type = "ipv4"
+    home_location = "hel1"
 }
 
 resource "hcloud_floating_ip_assignment" "additional_ipv4" {
