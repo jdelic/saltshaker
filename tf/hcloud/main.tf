@@ -28,21 +28,24 @@ locals {
             ptr = null
             roles = ["database", "vault", "authserver", "consulserver"]
         }
-/*      dev = {
+        "mail.maurus.net" = {
+            server_type = "cx22"
+            backup = 1
+            additional_ipv4 = 1
+            ipv6_only = 0
+            internal_only = 0
+            ptr = "mail.maurus.net"
+            roles = ["mail", "consulserver"]
+        }
+/*
+        dev = {
             server_type = "cx32"
             backup = 0
             additional_ipv4 = 0
             ipv6_only = 1
             internal_only = 1
             ptr = null
-        }
-        "mail.maurus.net" = {
-            server_type = "cpx21"
-            backup = 1
-            additional_ipv4 = 1
-            ipv6_only = 0
-            internal_only = 0
-            ptr = "mail.maurus.net"
+            roles = ["dev", "buildserver", "buildworker", "consulserver"]
         }
         "apps1.maurusnet.internal" = {
             server_type = "cx22"
@@ -126,6 +129,8 @@ resource "hcloud_server" "saltmaster" {
 
     network {
         network_id = hcloud_network.internal.id
+        # work around https://github.com/hetznercloud/terraform-provider-hcloud/issues/650
+        alias_ips = []
     }
 
     public_net {
@@ -155,6 +160,8 @@ resource "hcloud_server" "servers" {
 
     network {
         network_id = hcloud_network.internal.id
+        # work around https://github.com/hetznercloud/terraform-provider-hcloud/issues/650
+        alias_ips = []
     }
 
     public_net {
@@ -169,6 +176,10 @@ resource "hcloud_server" "servers" {
                     hostname = each.key,
                     server_type = each.value.server_type,
                 })
+
+    lifecycle {
+        ignore_changes = [user_data]
+    }
 
     backups = each.value.backup == 1 ? true : false
 
