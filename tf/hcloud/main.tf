@@ -220,7 +220,7 @@ output "ip_addresses" {
             s.ipv4_address != "" ? [s.ipv4_address] : [],
             s.ipv6_address != "" ? [s.ipv6_address] : [],
             flatten(s.network.*.ip),
-            [for ip in hcloud_floating_ip.additional_ipv4 : ip.ip_address if ip.server_id == s.id]
+            [for ip in hcloud_floating_ip.additional_ipv4 : ip.ip_address if ip.name == s.name]
         )
     }
 }
