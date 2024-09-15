@@ -41,7 +41,7 @@ consul-register-acl:
     # the unconfigured token. To do so we need consul to run already.
     http.wait_for_successful_query:
         - name: http://169.254.1.1:8500/v1/acl/token/self
-        - wait_for: 10
+        - wait_for: 30
         - request_interval: 1
         - raise_error: False  # only exists in 'tornado' backend
         - backend: tornado

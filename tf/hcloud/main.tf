@@ -28,21 +28,24 @@ locals {
             ptr = null
             roles = ["database", "vault", "authserver", "consulserver"]
         }
-/*      dev = {
+        "mail.maurus.net" = {
+            server_type = "cx22"
+            backup = 1
+            additional_ipv4 = 1
+            ipv6_only = 0
+            internal_only = 0
+            ptr = "mail.maurus.net"
+            roles = ["mail", "consulserver"]
+        }
+/*
+        dev = {
             server_type = "cx32"
             backup = 0
             additional_ipv4 = 0
             ipv6_only = 1
             internal_only = 1
             ptr = null
-        }
-        "mail.maurus.net" = {
-            server_type = "cpx21"
-            backup = 1
-            additional_ipv4 = 1
-            ipv6_only = 0
-            internal_only = 0
-            ptr = "mail.maurus.net"
+            roles = ["dev", "buildserver", "buildworker", "consulserver"]
         }
         "apps1.maurusnet.internal" = {
             server_type = "cx22"
@@ -126,6 +129,8 @@ resource "hcloud_server" "saltmaster" {
 
     network {
         network_id = hcloud_network.internal.id
+        # work around https://github.com/hetznercloud/terraform-provider-hcloud/issues/650
+        alias_ips = []
     }
 
     public_net {
@@ -155,6 +160,8 @@ resource "hcloud_server" "servers" {
 
     network {
         network_id = hcloud_network.internal.id
+        # work around https://github.com/hetznercloud/terraform-provider-hcloud/issues/650
+        alias_ips = []
     }
 
     public_net {
@@ -163,12 +170,17 @@ resource "hcloud_server" "servers" {
     }
 
     user_data = templatefile("${path.module}/../salt-minion.cloud-init.yml", {
-                    saltmaster_ip = flatten(hcloud_server.saltmaster.network.*.ip)[0]
+                    saltmaster_ip = flatten(hcloud_server.saltmaster.network.*.ip)[0],
+                    additional_ipv4 = each.value.additional_ipv4 == 1 ? hcloud_floating_ip.additional_ipv4[each.key].ip_address : false,
                     roles = lookup(each.value, "roles", [])
                     ipv6_only = each.value.ipv6_only == 1,
                     hostname = each.key,
                     server_type = each.value.server_type,
                 })
+
+    lifecycle {
+        ignore_changes = [user_data]
+    }
 
     backups = each.value.backup == 1 ? true : false
 
@@ -178,8 +190,15 @@ resource "hcloud_server" "servers" {
 
 resource "hcloud_floating_ip" "additional_ipv4" {
     for_each = { for k, v in local.server_config : k => v if v.additional_ipv4 == 1 }
+    name = each.key
     type = "ipv4"
+    home_location = "hel1"
+}
+
+resource "hcloud_floating_ip_assignment" "additional_ipv4" {
+    for_each  = hcloud_floating_ip.additional_ipv4
     server_id = hcloud_server.servers[each.key].id
+    floating_ip_id = each.value.id
 }
 
 /*resource "hcloud_load_balancer" "app_lb" {
@@ -201,7 +220,7 @@ output "ip_addresses" {
             s.ipv4_address != "" ? [s.ipv4_address] : [],
             s.ipv6_address != "" ? [s.ipv6_address] : [],
             flatten(s.network.*.ip),
-            [for ip in hcloud_floating_ip.additional_ipv4 : ip.ip_address if ip.server_id == s.id]
+            [for ip in hcloud_floating_ip.additional_ipv4 : ip.ip_address if ip.name == s.name]
         )
     }
 }

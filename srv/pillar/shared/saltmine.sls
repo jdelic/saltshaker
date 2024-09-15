@@ -4,8 +4,12 @@
 # network saltmine values were moved into network config where they get aliases.
 # Since pillars are combined, you can add additional mine_functions here.
 
-#mine_functions:
-#    network.interfaces: []
+mine_functions:
+    network_interfaces:
+        - mine_function: network.interfaces
+    envdir:
+        - mine_function: grains.get
+        - envdir
 #    network.ip_addrs: []
 
 # vim: syntax=yaml

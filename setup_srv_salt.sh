@@ -25,5 +25,7 @@ if [ ! -e /srv/reactor ]; then
 fi
 chown -R salt:salt /etc/salt
 salt-call saltutil.sync_all
+salt-call saltutil.refresh_pillar
+salt-call mine.update
 systemctl restart salt-master
 popd
