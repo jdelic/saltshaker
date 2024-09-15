@@ -18,12 +18,7 @@ mine_functions:
     internal_ip:
         - mine_function: network.interface_ip
         - {{iface_internal}}
-    external_ip:
-        - mine_function: network.interface_ip
-        - {{iface_external}}
-    external_alt_ip:
-        - mine_function: network.interface_ip
-        - {{iface_external2}}
+
 
 install_wellknown_hosts: true
 # vim: syntax=yaml
