@@ -1,5 +1,6 @@
 
 datacenter = "{{datacenter}}"
+enable_syslog = true
 
 client {
     enabled = true
