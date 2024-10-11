@@ -28,7 +28,7 @@ locals {
             ptr = null
             roles = ["database", "vault", "authserver", "consulserver"]
         }
-        "mail.maurus.net" = {
+/*        "mail.maurus.net" = {
             server_type = "cx22"
             backup = 1
             additional_ipv4 = 1
@@ -46,22 +46,24 @@ locals {
             internal_only = 1
             ptr = null
             roles = ["dev", "buildserver", "buildworker", "consulserver"]
-        }
-        "apps1.maurusnet.internal" = {
+        }*/
+/*        "apps1.maurusnet.internal" = {
             server_type = "cx22"
             backup = 0
             additional_ipv4 = 0
             ipv6_only = 1
             internal_only = 1
             ptr = null
+            roles = ["apps", "loadbalancer", "nomadserver"]
         }
-        "apps2.maurusnet.internal" = {
+/*        "apps2.maurusnet.internal" = {
             server_type = "cx22"
             backup = 0
             additional_ipv4 = 0
             ipv6_only = 1
             internal_only = 1
             ptr = null
+            roles = ["apps", "loadbalancer", "nomadserver"]
         }
         "apps3.maurusnet.internal" = {
             server_type = "cx22"
@@ -70,8 +72,9 @@ locals {
             ipv6_only = 1
             internal_only = 1
             ptr = null
+            roles = ["apps", "loadbalancer", "nomadserver"]
         }
-        backup.maurusnet.internal = {
+/*        backup.maurusnet.internal = {
             server_type = "bx11"
             backup = 0
             additional_ipv4 = 0
