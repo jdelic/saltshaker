@@ -2,7 +2,7 @@
 # This state is run on two occasions. The first is: consul.agent and consul.server both include it
 # during a highstate after the ACL system is initialized on the salt-master (after the "firstrun").
 # The second is: When a minion boots
-#     - it sends a Salt event through the Salt event bus (salt/minion/<mid>/start)
+#     - it sends a Salt event through the Salt event bus (maurusnet/consul/installed)
 #     - which triggers a Salt reactor on the salt-master,
 #     - which runs a salt.orchestrate state which creates new
 #     - ACL tokens on the salt-master's consul server and then in turn
