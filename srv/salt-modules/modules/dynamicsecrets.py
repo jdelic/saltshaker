@@ -142,6 +142,7 @@ class DynamicSecretsPillar(DynamicSecretsStore):
 
     def __init__(self, *args, **kwargs):
         super(DynamicSecretsPillar, self).__init__(*args, **kwargs)
+
     def _alphaencoding(self, rndstring):
         # type: (bytes) -> str
         pwstr = "".join([
