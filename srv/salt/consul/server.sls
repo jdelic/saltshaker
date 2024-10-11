@@ -145,7 +145,7 @@ consul-tempacl-create-policy:
                             policy = \"write\"
                         }
 
-                        node \"\" {
+                        node_prefix \"\" {
                             policy = \"read\"
                         }
 
@@ -198,6 +198,8 @@ consul-tempacl-server-config:
             - cmd: consul-tempacl-create-policy
         - watch_in:
             - service: consul-service-restart
+        - require_in:
+            - cmd: consul-sync-ready
 {% endif %}
 
 
