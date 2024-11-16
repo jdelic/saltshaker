@@ -62,6 +62,8 @@ end
 # to true.
 $local_provision = false
 $remote_provision_script = <<SCRIPT
+        apt update
+        apt install -y --no-install-recommends gnupg
         mkdir -p /etc/apt/keyrings
         wget -O /etc/apt/keyrings/salt-archive-keyring-2023.gpg.tmp https://packages.broadcom.com/artifactory/api/security/keypair/SaltProjectKey/public
         gpg --dearmor -o /etc/apt/keyrings/salt-archive-keyring-2023.gpg /etc/apt/keyrings/salt-archive-keyring-2023.gpg.tmp
