@@ -27,8 +27,8 @@ runcmd:
     - ip route default via ${saltmaster_ip}
 %{ endif ~}
     - mkdir -p /etc/apt/keyrings
-    - wget -O /etc/apt/keyrings/salt-archive-keyring-2023.gpg https://repo.saltproject.io/salt/py3/debian/12/amd64/SALT-PROJECT-GPG-PUBKEY-2023.gpg
-    - sh -c 'echo deb [signed-by=/etc/apt/keyrings/salt-archive-keyring-2023.gpg arch=amd64] https://repo.saltproject.io/salt/py3/debian/12/amd64/latest bookworm main > /etc/apt/sources.list.d/salt.list'
+    - wget -O /etc/apt/keyrings/salt-archive-keyring-2023.gpg https://packages.broadcom.com/artifactory/api/security/keypair/SaltProjectKey/public
+    - sh -c 'echo deb [signed-by=/etc/apt/keyrings/salt-archive-keyring-2023.gpg arch=amd64] https://packages.broadcom.com/artifactory/saltproject-deb/ stable main > /etc/apt/sources.list.d/salt.list'
     - apt update
     - mkdir -p /etc/salt/roles.d
 %{ for role in roles ~}
