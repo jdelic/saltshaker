@@ -83,7 +83,9 @@ consul-service:
         - context:
             user: {{consul_user}}
             group: {{consul_group}}
-            extra_parameters: -server -ui {% if 'consulbootstrapprimary' in grains['roles'] %}-bootstrap{% endif %}
+            extra_parameters: >-
+                -server -ui {% if 'consulbootstrapprimary' in grains['roles'] %}-bootstrap{% endif %}
+                {% if single_node_cluster %}-bootstrap-expect={{pillar['consul-cluster']['number-of-nodes']}}{% endif %}
             single_node_cluster: {% if single_node_cluster %}True{% else %}False{% endif %}
             node_name: {{grains['id']}}
 {% if single_node_cluster %}
