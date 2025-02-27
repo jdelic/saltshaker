@@ -42,7 +42,7 @@ runcmd:
     - wget -O /etc/apt/keyrings/salt-archive-keyring-2023.gpg.tmp https://packages.broadcom.com/artifactory/api/security/keypair/SaltProjectKey/public
     - gpg --dearmor -o /etc/apt/keyrings/salt-archive-keyring-2023.gpg /etc/apt/keyrings/salt-archive-keyring-2023.gpg.tmp
     - rm /etc/apt/keyrings/salt-archive-keyring-2023.gpg.tmp
-    - sh -c 'echo deb [signed-by=/etc/apt/keyrings/salt-archive-keyring-2023.gpg arch=amd64] https://packages.broadcom.com/artifactory/saltproject-deb/ stable main > /etc/apt/sources.list.d/salt.list'
+    - /usr/bin/bash -c 'echo deb [signed-by=/etc/apt/keyrings/salt-archive-keyring-2023.gpg arch=amd64] https://packages.broadcom.com/artifactory/saltproject-deb/ stable main > /etc/apt/sources.list.d/salt.list'
     - apt update
     - mkdir -p /etc/salt/roles.d
     - mkdir -p /etc/salt/env.d
