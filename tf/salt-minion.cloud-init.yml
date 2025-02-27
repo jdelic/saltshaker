@@ -13,7 +13,7 @@ users:
 write_files:
     - path: /etc/salt/minion.d/saltshaker.conf
       content: |
-          master: saltmaster.maurusnet.internal
+          master: ${saltmaster_ip}
 %{ if additional_ipv4 != false ~}
     - path: /etc/network/interfaces.d/60-floating-ip.cfg
       permissions: '0644'
