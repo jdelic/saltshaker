@@ -81,8 +81,8 @@ vault-postgres:
 vault-postgres-ready:
     cmd.run:
         - name: >
-            until host postgresql.service.consul || test ${count} -gt 30; do sleep 1; count=$((count+1)); done &&
-            test ${count} -lt 30
+            until host postgresql.service.consul || test ${count} -gt 60; do sleep 1; count=$((count+1)); done &&
+            test ${count} -lt 60
         - env:
             count: 0
         - require_in:
