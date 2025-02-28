@@ -57,6 +57,18 @@ openssh-config-builder:
             - file: /etc/ssh/sshd_config.d*
 
 
+openssh-client-config:
+    file.managed:
+        - name: /etc/ssh/ssh_config
+        - source: salt://basics/crypto/ssh_config.jinja
+        - template: jinja
+        - user: root
+        - group: root
+        - mode: '0644'
+        - require:
+            - pkg: openssh
+
+
 {% if pillar.get("crypto", {}).get("generate-secure-dhparams", True) %}
 openssh-generate-moduli:
     cmd.run:
