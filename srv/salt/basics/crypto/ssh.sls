@@ -59,7 +59,7 @@ openssh-config-builder:
 
 openssh-client-config:
     file.managed:
-        - name: /etc/ssh/ssh_config
+        - name: /etc/ssh/ssh_config.d/mn_tmux.conf
         - source: salt://basics/crypto/ssh_config.jinja
         - template: jinja
         - user: root
