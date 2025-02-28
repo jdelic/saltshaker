@@ -48,6 +48,15 @@ if [ "x$MN_TMUX" != "x1" ]; then _byobu_sourced=1 . /usr/bin/byobu-launch 2>/dev
 ''',
             unless='grep -q byobu /home/%s/.profile' % username
         )
+                
+        st_byobu_folder = state('byobu-%s-folder' % username).file.directory
+        sbf = st_byobu_folder(
+            '/home/%s/.byobu' % username,
+            user=username,
+            group=username,
+            makedirs=True,
+            mode='755'
+        )
 
         st_byobu_tmux_config = state('byobu-%s-tmux-config' % username).file
         sbcm = st_byobu_tmux_config.managed(
@@ -58,6 +67,7 @@ if [ "x$MN_TMUX" != "x1" ]; then _byobu_sourced=1 . /usr/bin/byobu-launch 2>/dev
             mode='644'
         )
         sbcm.require(file='byobu-%s' % username)
+        sbcm.require(file='byobu-%s-folder' % username)
 
         st_byobu_status_config = state('byobu-%s-status-config' % username).file
         sbsc = st_byobu_status_config.managed(
@@ -68,6 +78,7 @@ if [ "x$MN_TMUX" != "x1" ]; then _byobu_sourced=1 . /usr/bin/byobu-launch 2>/dev
             mode='644'
         )
         sbsc.require(file='byobu-%s' % username)
+        sbsc.require(file='byobu-%s-folder' % username)
 
     if set_bashrc:
         file_bashrc = state('/home/%s/.bashrc' % username).file
