@@ -16,7 +16,7 @@ authserver-postgres:
 {% else %}
         - createroles: False
 {% endif %}
-        - encrypted: True
+        - encrypted: scram-sha-256
         - login: True
         - inherit: True
         - superuser: False
@@ -72,7 +72,7 @@ authserver-postgres:
 {% else %}
         - createroles: False
 {% endif %}
-        - encrypted: True
+        - encrypted: scram-sha-256
         - login: True
         - inherit: True
         - superuser: False

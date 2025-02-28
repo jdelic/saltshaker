@@ -22,7 +22,7 @@ vault-postgres:
         - name: {{pillar['vault']['postgres']['dbuser']}}
         - createdb: False
         - createroles: False
-        - encrypted: True
+        - encrypted: scram-sha-256
         - login: True
         - inherit: False
         - superuser: False
