@@ -324,10 +324,12 @@ fly-link-teams:
             /etc/concourse/flyhelper.sh check developers developers
         - env:
             CONCOURSE_SYSOP_PASSWORD: {{pillar['dynamicsecrets']['concourse-sysop']}}
-            CONCOURSE_URL: {{pillar['ci']['protocol']}}://{{pillar['ci']['hostname']}}
+            CONCOURSE_URL: http://concourse-atc.service.consul:{{pillar.get('concourse-server', {}).get('atc-port', 8080)}}
             HOME: /root/
         - require:
             - cmd: concourse-sync
+            - cmd: consul-sync
+            - file: consul-servicedef-atc
             - file: fly-link-teams
             - file: fly-install
 
