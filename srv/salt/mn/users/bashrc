@@ -132,3 +132,7 @@ if ! shopt -oq posix; then
         . /etc/bash_completion
     fi
 fi
+
+if [ "x$TMUX" != "x" ]; then
+    export MN_TMUX=1
+fi
