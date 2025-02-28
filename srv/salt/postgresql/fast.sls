@@ -250,6 +250,8 @@ postgresql-in{{port}}-recv-ip4:
         - save: True
         - require:
             - sls: basics.nftables.setup
+        - require_in:
+              - cmd: postgresql-sync
 
 
 {% if pillar.get('duplicity-backup', {}).get('enabled', False) %}
