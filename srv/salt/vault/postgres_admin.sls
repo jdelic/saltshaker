@@ -11,7 +11,7 @@ vaultadmin:
         - name: {{pillar['vault']['managed-database-owner']}}
         - createdb: False
         - createroles: True
-        - encrypted: True
+        - encrypted: scram-sha-256
         - login: True
         - inherit: False
         - superuser: False

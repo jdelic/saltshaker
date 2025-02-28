@@ -11,7 +11,7 @@ concourse-db-role:
         - password: {{pillar['dynamicsecrets']['concourse-db']}}
         - createdb: False
         - createroles: False
-        - encrypted: True
+        - encrypted: scram-sha-256
         - login: True
         - inherit: False
         - superuser: False

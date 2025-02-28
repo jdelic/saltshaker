@@ -9,7 +9,7 @@ checkuser-postgres:
         - name: checkuser
         - createdb: False
         - createroles: False
-        - encrypted: True
+        - encrypted: scram-sha-256
         - login: True
         - inherit: True
         - superuser: False
