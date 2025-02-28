@@ -57,7 +57,7 @@ if [ "x$MN_TMUX" != "x1" ]; then _byobu_sourced=1 . /usr/bin/byobu-launch 2>/dev
             group=username,
             mode='644'
         )
-        sbcm.require(cmd='byobu-%s' % username)
+        sbcm.require(file='byobu-%s' % username)
 
         st_byobu_status_config = state('byobu-%s-status-config' % username).file
         sbsc = st_byobu_status_config.managed(
@@ -67,7 +67,7 @@ if [ "x$MN_TMUX" != "x1" ]; then _byobu_sourced=1 . /usr/bin/byobu-launch 2>/dev
             group=username,
             mode='644'
         )
-        sbsc.require(cmd='byobu-%s' % username)
+        sbsc.require(file='byobu-%s' % username)
 
     if set_bashrc:
         file_bashrc = state('/home/%s/.bashrc' % username).file
