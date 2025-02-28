@@ -28,7 +28,7 @@ locals {
             ptr = null
             roles = ["database", "vault", "authserver", "consulserver"]
         }
-/*        "mail.maurus.net" = {
+        "mail.maurus.net" = {
             server_type = "cx22"
             backup = 1
             additional_ipv4 = 1
@@ -37,8 +37,7 @@ locals {
             ptr = "mail.maurus.net"
             roles = ["mail", "consulserver"]
         }
-/*
-        dev = {
+        "dev.maurusnet.internal" = {
             server_type = "cx32"
             backup = 0
             additional_ipv4 = 0
@@ -46,7 +45,7 @@ locals {
             internal_only = 1
             ptr = null
             roles = ["dev", "buildserver", "buildworker", "consulserver"]
-        }*/
+        }
 /*        "apps1.maurusnet.internal" = {
             server_type = "cx22"
             backup = 0
