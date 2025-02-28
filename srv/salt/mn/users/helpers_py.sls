@@ -43,9 +43,6 @@ def create_user(username, groups=None, optional_groups=None, key_pillars=None, p
         st_byobu.require(pkg='byobu')
         st_byobu(
             name='/home/%s/.profile' % username,
-            user=username,
-            group=username,
-            mode='644',
             text='''
 if [ "x$MN_TMUX" != "x1" ]; then _byobu_sourced=1 . /usr/bin/byobu-launch 2>/dev/null || true; export MN_TMUX=1; fi
 ''',
