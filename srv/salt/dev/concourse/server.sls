@@ -329,7 +329,7 @@ fly-link-teams:
         - require:
             - cmd: concourse-sync
             - cmd: consul-sync
-            - file: consul-servicedef-atc
+            - file: concourse-servicedef-atc
             - file: fly-link-teams
             - file: fly-install
 
