@@ -17,11 +17,11 @@ haproxy-config-template-external:
 {% set haproxy_ips = [] %}
 {% set x = haproxy_ips.append(
                pillar.get('haproxy', {}).get('override-ipv4',
-                   grains['ip4_interfaces'].get(pillar['ifassign']['external'], {}).get(pillar['ifassign'].get('external-ip-index', 0)|int()))
+                   grains['ip4_interfaces'].get(pillar['ifassign']['external'], {})[pillar['ifassign'].get('external-ip-index', 0)|int()])
            ) if pillar.get('haproxy', {}).get('bind-ipv4', False) %}
 {% set x = haproxy_ips.append(
                pillar.get('haproxy', {}).get('override-ipv6',
-                   grains['ip6_interfaces'].get(pillar['ifassign']['external'], {}).get(pillar['ifassign'].get('external-ip-index', 0)|int()))
+                   grains['ip6_interfaces'].get(pillar['ifassign']['external'], {})[pillar['ifassign'].get('external-ip-index', 0)|int()])
            ) if pillar.get('haproxy', {}).get('bind-ipv6', False) %}
 smartstack-external:
     file.managed:
