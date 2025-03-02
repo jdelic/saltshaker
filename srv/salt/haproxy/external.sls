@@ -41,9 +41,7 @@ smartstack-external:
             parameters: >
                 --include tags=smartstack:external
                 --open-iptables=conntrack
-                {%- for ip in haproxy_ips -%}
-                --smartstack-localip {{ip}}
-                {%- endfor %} 
+                {%- for ip in haproxy_ips %} --smartstack-localip {{ip}}{%- endfor %}
                 {%- if pillar.get('ssl', {}).get('sources', {}).get('default-cert', None) and
                       salt['pillar.fetch'](pillar['ssl']['sources']['default-cert'], None) -%}
                     {{' '}}-D maincert={{pillar['ssl']['filenames']['default-cert-full']}}
