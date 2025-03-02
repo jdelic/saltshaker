@@ -40,7 +40,7 @@ smartstack-external:
                 systemctl restart haproxy@external
             parameters: >
                 --include tags=smartstack:external
-                --open-iptables=conntrack
+                --open-nftables=conntrack
                 {%- for ip in haproxy_ips %} --smartstack-localip {{ip}}{%- endfor %}
                 {%- if pillar.get('ssl', {}).get('sources', {}).get('default-cert', None) and
                       salt['pillar.fetch'](pillar['ssl']['sources']['default-cert'], None) -%}
