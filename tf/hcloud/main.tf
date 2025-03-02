@@ -46,23 +46,23 @@ locals {
             ptr = null
             roles = ["dev", "buildserver", "buildworker", "consulserver"]
         }
-/*        "apps1.maurusnet.internal" = {
+        "apps1.maurusnet.internal" = {
             server_type = "cx22"
             backup = 0
             additional_ipv4 = 0
             ipv6_only = 1
             internal_only = 1
             ptr = null
-            roles = ["apps", "loadbalancer", "nomadserver"]
+            roles = ["apps", "nomadserver"]
         }
-/*        "apps2.maurusnet.internal" = {
+        "apps2.maurusnet.internal" = {
             server_type = "cx22"
             backup = 0
             additional_ipv4 = 0
             ipv6_only = 1
             internal_only = 1
             ptr = null
-            roles = ["apps", "loadbalancer", "nomadserver"]
+            roles = ["apps", "nomadserver"]
         }
         "apps3.maurusnet.internal" = {
             server_type = "cx22"
@@ -71,7 +71,16 @@ locals {
             ipv6_only = 1
             internal_only = 1
             ptr = null
-            roles = ["apps", "loadbalancer", "nomadserver"]
+            roles = ["apps", "nomadserver"]
+        }
+        "lb1.maurus.net" = {
+            server_type = "cx22"
+            backup = 0
+            additional_ipv4 = 0
+            ipv6_only = 0
+            internal_only = 0
+            ptr = null
+            roles = ["loadbalancer"]
         }
 /*        backup.maurusnet.internal = {
             server_type = "bx11"
@@ -202,19 +211,6 @@ resource "hcloud_floating_ip_assignment" "additional_ipv4" {
     server_id = hcloud_server.servers[each.key].id
     floating_ip_id = each.value.id
 }
-
-/*resource "hcloud_load_balancer" "app_lb" {
-    name = "app-load-balancer"
-    location = "hel1"
-    load_balancer_type = "lb11"
-}
-
-resource "hcloud_load_balancer_target" "app_targets" {
-    for_each = { for k, v in local.server_config : k => v if k == "apps1" || k == "apps2" || k == "apps3" }
-    load_balancer_id = hcloud_load_balancer.app_lb.id
-    type = "server"
-    server_id = hcloud_server.servers[each.key].id
-}*/
 
 output "ip_addresses" {
     value = {
