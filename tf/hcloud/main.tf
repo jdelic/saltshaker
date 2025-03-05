@@ -27,6 +27,7 @@ locals {
             internal_only = 1
             ptr = null
             roles = ["database", "vault", "authserver", "consulserver"]
+            firewall_ids = null
         }
         "mail.maurus.net" = {
             server_type = "cx22"
@@ -36,6 +37,7 @@ locals {
             internal_only = 0
             ptr = "mail.maurus.net"
             roles = ["mail", "consulserver"]
+            firewall_ids = [hcloud_firewall.mail.id]
         }
         "dev.maurusnet.internal" = {
             server_type = "cx32"
@@ -45,6 +47,7 @@ locals {
             internal_only = 1
             ptr = null
             roles = ["dev", "buildserver", "buildworker", "consulserver"]
+            firewall_ids = null
         }
         "apps1.maurusnet.internal" = {
             server_type = "cx22"
@@ -54,6 +57,7 @@ locals {
             internal_only = 1
             ptr = null
             roles = ["apps", "nomadserver"]
+            firewall_ids = null
         }
         "apps2.maurusnet.internal" = {
             server_type = "cx22"
@@ -63,6 +67,7 @@ locals {
             internal_only = 1
             ptr = null
             roles = ["apps", "nomadserver"]
+            firewall_ids = null
         }
         "apps3.maurusnet.internal" = {
             server_type = "cx22"
@@ -72,6 +77,7 @@ locals {
             internal_only = 1
             ptr = null
             roles = ["apps", "nomadserver"]
+            firewall_ids = null
         }
         "lb1.maurus.net" = {
             server_type = "cx22"
@@ -81,6 +87,7 @@ locals {
             internal_only = 0
             ptr = null
             roles = ["loadbalancer"]
+            firewall_ids = [hcloud_firewall.web.id]
         }
 /*        backup.maurusnet.internal = {
             server_type = "bx11"
@@ -156,8 +163,11 @@ resource "hcloud_server" "saltmaster" {
     })
 
     backups = true
+
+    firewall_ids = [hcloud_firewall.ssh.id]
+
     # important as per hcloud docs as there's a race condition otherwise
-    depends_on = [hcloud_network_subnet.internal-subnet]
+    depends_on = [hcloud_network_subnet.internal-subnet, hcloud_firewall.ssh]
 }
 
 resource "hcloud_server" "servers" {
@@ -195,6 +205,8 @@ resource "hcloud_server" "servers" {
 
     backups = each.value.backup == 1 ? true : false
 
+    firewall_ids = each.value.firewall_ids
+
     # important as per hcloud docs as there's a race condition otherwise
     depends_on = [hcloud_network_route.nat-route, hcloud_network_subnet.internal-subnet, hcloud_server.saltmaster]
 }
@@ -210,6 +222,46 @@ resource "hcloud_floating_ip_assignment" "additional_ipv4" {
     for_each  = hcloud_floating_ip.additional_ipv4
     server_id = hcloud_server.servers[each.key].id
     floating_ip_id = each.value.id
+}
+
+resource "hcloud_firewall" "ssh" {
+    name = "ssh"
+
+    rule {
+        direction = "in"
+        protocol  = "tcp"
+        port      = 22
+        source_ips = ["0.0.0.0/0", "::/0"]
+    }
+}
+
+resource "hcloud_firewall" "mail" {
+    name = "mail"
+
+    rule {
+        direction = "in"
+        protocol  = "tcp"
+        port      = 25
+        source_ips = ["0.0.0.0/0", "::/0"]
+    }
+}
+
+resource "hcloud_firewall" "web" {
+    name = "web"
+
+    rule {
+        direction = "in"
+        protocol  = "tcp"
+        port      = 80
+        source_ips = ["0.0.0.0/0", "::/0"]
+    }
+
+    rule {
+        direction = "in"
+        protocol  = "tcp"
+        port      = 443
+        source_ips = ["0.0.0.0/0", "::/0"]
+    }
 }
 
 output "ip_addresses" {
