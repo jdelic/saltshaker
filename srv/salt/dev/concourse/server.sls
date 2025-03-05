@@ -324,7 +324,7 @@ fly-link-teams:
             /etc/concourse/flyhelper.sh check developers developers
         - env:
             CONCOURSE_SYSOP_PASSWORD: {{pillar['dynamicsecrets']['concourse-sysop']}}
-            CONCOURSE_URL: http://concourse-atc.service.consul:{{pillar.get('concourse-server', {}).get('atc-port', 8080)}}
+            CONCOURSE_URL: http://concourse-atc.service.consul:{{pillar.get('concourse-server', {}).get('atc-port', 8080)}}/
             HOME: /root/
         - require:
             - cmd: concourse-sync
