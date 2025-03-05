@@ -460,17 +460,27 @@ def _setup_iptables(services: List[SmartstackService], ips: List[str], mode: str
                             print("%s: OUTPUT rule exists" % svc.name, file=sys.stderr)
 
 
-def _check_nftables_rule(table: str, chain: str, rule: List[str | Tuple[str, ...]]) -> bool:
+def _check_nftables_rule_exists(family: str, table: str, chain: str, rule: List[str | Tuple[str, ...]],
+                                verbose: bool = False) -> bool:
     try:
         nft_output = subprocess.check_output(
-            ["nft", "list", "chain", table, chain], stderr=subprocess.STDOUT,
+            ["nft", "list", "chain", family, table, chain], stderr=subprocess.STDOUT,
             text=True
         )
     except subprocess.CalledProcessError as exc:
         print(f"Error running nft command: {exc.output}")
         return False
 
-    components = [f"{' '.join(part)}" for part in rule if isinstance(part, tuple)]
+    components = []
+    for part in rule:
+        if isinstance(part, tuple):
+            tstr = ""
+            for subpart in part:
+                if subpart not in ["{", "}"]:
+                    tstr = f"{tstr} {subpart}"
+            components.append(tstr)
+        else:
+            components.append(part)
     nft_output_lines = nft_output.split("\n")
     for line in nft_output_lines:
         match = True
@@ -479,6 +489,8 @@ def _check_nftables_rule(table: str, chain: str, rule: List[str | Tuple[str, ...
                 match = False
                 break
         if match:
+            if verbose:
+                print(f"Line: {line} matches rule: {components}")
             return True
     return False
 
@@ -529,47 +541,46 @@ def _setup_nftables(services: List[SmartstackService], ips: List[str], mode: str
 
                 if mode == "plain":
                     # Tuples in these arrays will be used to check for the rule in nft output, but only tuples
-                    input_rule = ["rule", "ip6" if isinstance(ipaddr, ipaddress.IPv6Address) else "ip",
-                                  "filter", input_chainname,
-                                  ("saddr", "::/0" if isinstance(ipaddr, ipaddress.IPv6Address) else "0/0"),
-                                  ("daddr", f"{ip}/128" if isinstance(ipaddr, ipaddress.IPv6Address) else f"{ip}/32"),
+                    input_rule = ["ip6" if isinstance(ipaddr, ipaddress.IPv6Address) else "ip",
+                                  ("saddr", "{", "::/0" if isinstance(ipaddr, ipaddress.IPv6Address) else "0.0.0.0/0", "}"),
+                                  "ip6" if isinstance(ipaddr, ipaddress.IPv6Address) else "ip",
+                                  ("daddr", "{", f"{ip}" if isinstance(ipaddr, ipaddress.IPv6Address) else f"{ip}", "}"),
                                   (prot, "dport", str(ruleport)), ("accept",)]
-                    output_rule = ["rule", "ip6" if isinstance(ipaddr, ipaddress.IPv6Address) else "ip",
-                                   "filter", output_chainname,
-                                   ("saddr", f"{ip}/128" if isinstance(ipaddr, ipaddress.IPv6Address) else f"{ip}/32"),
-                                   ("daddr", "::/0" if isinstance(ipaddr, ipaddress.IPv6Address) else "0/0"),
+                    output_rule = ["ip6" if isinstance(ipaddr, ipaddress.IPv6Address) else "ip",
+                                   ("saddr", "{", f"{ip}" if isinstance(ipaddr, ipaddress.IPv6Address) else f"{ip}", "}"),
+                                   "ip6" if isinstance(ipaddr, ipaddress.IPv6Address) else "ip",
+                                   ("daddr", "{", "::/0" if isinstance(ipaddr, ipaddress.IPv6Address) else "0.0.0.0/0", "}"),
                                    (prot, "sport", str(ruleport)), ("accept",)]
                 elif mode == "conntrack":
-                    input_rule = ["rule", "ip6" if isinstance(ipaddr, ipaddress.IPv6Address) else "ip",
-                                  "filter", input_chainname,
-                                  ("saddr", "::/0" if isinstance(ipaddr, ipaddress.IPv6Address) else "0/0"),
-                                  ("daddr", f"{ip}/128" if isinstance(ipaddr, ipaddress.IPv6Address) else f"{ip}/32"),
+                    input_rule = ["ip6" if isinstance(ipaddr, ipaddress.IPv6Address) else "ip",
+                                  ("saddr", "{", "::/0" if isinstance(ipaddr, ipaddress.IPv6Address) else "0.0.0.0/0", "}"),
+                                  "ip6" if isinstance(ipaddr, ipaddress.IPv6Address) else "ip",
+                                  ("daddr", "{", f"{ip}" if isinstance(ipaddr, ipaddress.IPv6Address) else f"{ip}", "}"),
                                   (prot, "dport", str(ruleport)), ("ct", "state", "new"), ("accept",)]
                     output_rule = None
 
                 if input_rule:
-                    input_cmd = [f"{' '.join(part)}" if isinstance(part, tuple) else part for part in input_rule]
+                    input_cmd = (["rule", "ip6" if isinstance(ipaddr, ipaddress.IPv6Address) else "ip", "filter",
+                                 input_chainname] +
+                                 [f"{' '.join(part)}" if isinstance(part, tuple) else part for part in input_rule])
                     if debug:
-                        print("%s: %s" % (svc.name, " ".join(["/usr/sbin/nft", "add", "filter", input_chainname] +
+                        print("%s: %s" % (svc.name, " ".join(["/usr/sbin/nft", "add"] +
                                                              input_cmd)))
                     else:
                         # check if the rule exists first...
-                        if _check_nftables_rule("filter", input_chainname, input_rule):
-                            subprocess.call(["/usr/sbin/nft", "add", "filter", input_chainname] + input_cmd)
-                        else:
-                            if verbose:
-                                print("%s: INPUT rule already exists" % svc.name, file=sys.stderr)
+                        if not _check_nftables_rule_exists("ip6" if isinstance(ipaddr, ipaddress.IPv6Address) else "ip",
+                                                           "filter", input_chainname, input_rule, verbose):
+                            subprocess.call(["/usr/sbin/nft", "add"] + input_cmd)
                 if output_rule:
-                    output_cmd = [f"{' '.join(part)}" if isinstance(part, tuple) else part for part in output_rule]
+                    output_cmd = (["rule", "ip6" if isinstance(ipaddr, ipaddress.IPv6Address) else "ip", "filter",
+                                  output_chainname] +
+                                  [f"{' '.join(part)}" if isinstance(part, tuple) else part for part in output_rule])
                     if debug:
-                        print("%s: %s" % (svc.name, " ".join(["/usr/sbin/nft", "add", "filter", output_chainname] +
-                                                             output_cmd)))
+                        print("%s: %s" % (svc.name, " ".join(["/usr/sbin/nft", "add"] + output_cmd)))
                     else:
-                        if _check_nftables_rule("filter", output_chainname, output_rule):
-                            subprocess.call(["/usr/sbin/nft", "add", "filter", output_chainname] + output_cmd)
-                        else:
-                            if verbose:
-                                print("%s: OUTPUT rule already exists" % svc.name, file=sys.stderr)
+                        if not _check_nftables_rule_exists("ip6" if isinstance(ipaddr, ipaddress.IPv6Address) else "ip",
+                                                           "filter", output_chainname, output_rule, verbose):
+                            subprocess.call(["/usr/sbin/nft", "add"] + output_cmd)
 
 
 def main() -> None:
