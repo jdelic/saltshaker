@@ -8,3 +8,4 @@
 /etc/salt-master/pki
 *.lock
 *.bak
+.aider*
