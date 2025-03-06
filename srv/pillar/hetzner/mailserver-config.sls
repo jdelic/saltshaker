@@ -3,14 +3,20 @@
 
 smtp-incoming:
     hostname: mail.{{external_tld}}
+    bind-ipv4: True
+    bind-ipv6: True
 
 
 smtp-outgoing:
     hostname: smtp.{{external_tld}}
+    bind-ipv4: True
+    bind-ipv6: False
 
 
 imap-incoming:
     hostname: mail.{{external_tld}}
+    bind-ipv4: True
+    bind-ipv6: True
 
 # vim: syntax=yaml
 
