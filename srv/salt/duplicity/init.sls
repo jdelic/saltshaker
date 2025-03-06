@@ -90,6 +90,7 @@ duplicity-crontab:
         - mode: '0644'
         - template: jinja
         - context:
+            duplicity_enabled: {{pillar.get('duplicity-backup', {}).get('enabled', False)}}
             cleanup_enabled: {{pillar.get('duplicity-backup', {}).get('enable-cleanup-cron', False)}}
             cleanup_schedule: {{pillar.get('duplicity-backup', {}).get('cleanup-cron-schedule', '0 10 1 * *')}}
 {% endif %}
