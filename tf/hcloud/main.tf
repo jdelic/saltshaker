@@ -23,6 +23,7 @@ locals {
             server_type = "cx22"
             backup = 1
             additional_ipv4 = 0
+            additional_ipv6 = 0
             ipv6_only = 1
             internal_only = 1
             ptr = null
@@ -33,6 +34,7 @@ locals {
             server_type = "cx22"
             backup = 1
             additional_ipv4 = 1
+            additional_ipv6 = 1
             ipv6_only = 0
             internal_only = 0
             ptr = "mail.maurus.net"
@@ -43,6 +45,7 @@ locals {
             server_type = "cx32"
             backup = 0
             additional_ipv4 = 0
+            additional_ipv6 = 0
             ipv6_only = 1
             internal_only = 1
             ptr = null
@@ -53,6 +56,7 @@ locals {
             server_type = "cx22"
             backup = 0
             additional_ipv4 = 0
+            additional_ipv6 = 0
             ipv6_only = 1
             internal_only = 1
             ptr = null
@@ -63,6 +67,7 @@ locals {
             server_type = "cx22"
             backup = 0
             additional_ipv4 = 0
+            additional_ipv6 = 0
             ipv6_only = 1
             internal_only = 1
             ptr = null
@@ -73,6 +78,7 @@ locals {
             server_type = "cx22"
             backup = 0
             additional_ipv4 = 0
+            additional_ipv6 = 0
             ipv6_only = 1
             internal_only = 1
             ptr = null
@@ -83,6 +89,7 @@ locals {
             server_type = "cx22"
             backup = 0
             additional_ipv4 = 0
+            additional_ipv6 = 0
             ipv6_only = 0
             internal_only = 0
             ptr = null
@@ -193,6 +200,7 @@ resource "hcloud_server" "servers" {
     user_data = templatefile("${path.module}/../salt-minion.cloud-init.yml", {
                     saltmaster_ip = flatten(hcloud_server.saltmaster.network.*.ip)[0],
                     additional_ipv4 = each.value.additional_ipv4 == 1 ? hcloud_floating_ip.additional_ipv4[each.key].ip_address : false,
+                    additional_ipv6 = each.value.additional_ipv6 == 1 ? hcloud_floating_ip.additional_ipv6[each.key].ip_address : false,
                     roles = lookup(each.value, "roles", [])
                     ipv6_only = each.value.ipv6_only == 1,
                     hostname = each.key,
@@ -220,6 +228,19 @@ resource "hcloud_floating_ip" "additional_ipv4" {
 
 resource "hcloud_floating_ip_assignment" "additional_ipv4" {
     for_each  = hcloud_floating_ip.additional_ipv4
+    server_id = hcloud_server.servers[each.key].id
+    floating_ip_id = each.value.id
+}
+
+resource "hcloud_floating_ip" "additional_ipv6" {
+    for_each = { for k, v in local.server_config : k => v if v.additional_ipv6 == 1 }
+    name = each.key
+    type = "ipv6"
+    home_location = "hel1"
+}
+
+resource "hcloud_floating_ip_assignment" "additional_ipv6" {
+    for_each  = hcloud_floating_ip.additional_ipv6
     server_id = hcloud_server.servers[each.key].id
     floating_ip_id = each.value.id
 }
