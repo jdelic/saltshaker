@@ -221,27 +221,27 @@ resource "hcloud_server" "servers" {
 
 resource "hcloud_floating_ip" "additional_ipv4" {
     for_each = { for k, v in local.server_config : k => v if v.additional_ipv4 == 1 }
-    name = each.key
+    name = "ipv4-${each.key}"
     type = "ipv4"
     home_location = "hel1"
 }
 
 resource "hcloud_floating_ip_assignment" "additional_ipv4" {
     for_each  = hcloud_floating_ip.additional_ipv4
-    server_id = hcloud_server.servers[each.key].id
+    server_id = hcloud_server.servers[trimprefix(each.key, "ipv4-")].id
     floating_ip_id = each.value.id
 }
 
 resource "hcloud_floating_ip" "additional_ipv6" {
     for_each = { for k, v in local.server_config : k => v if v.additional_ipv6 == 1 }
-    name = each.key
+    name = "ipv6-${each.key}"
     type = "ipv6"
     home_location = "hel1"
 }
 
 resource "hcloud_floating_ip_assignment" "additional_ipv6" {
     for_each  = hcloud_floating_ip.additional_ipv6
-    server_id = hcloud_server.servers[each.key].id
+    server_id = hcloud_server.servers[trimprefix(each.key, "ipv6-")].id
     floating_ip_id = each.value.id
 }
 
@@ -287,11 +287,12 @@ resource "hcloud_firewall" "web" {
 
 output "ip_addresses" {
     value = {
-        for s in merge({"symbiont.maurus.net" = hcloud_server.saltmaster}, hcloud_server.servers) : s.name => concat(
+        for s in merge({"symbiont.mncn.de" = hcloud_server.saltmaster}, hcloud_server.servers) : s.name => concat(
             s.ipv4_address != "" ? [s.ipv4_address] : [],
             s.ipv6_address != "" ? [s.ipv6_address] : [],
             flatten(s.network.*.ip),
-            [for ip in hcloud_floating_ip.additional_ipv4 : ip.ip_address if ip.name == s.name]
+            [for ip in hcloud_floating_ip.additional_ipv4 : ip.ip_address if ip.name == "ipv4-${s.name}"],
+            [for ip in hcloud_floating_ip.additional_ipv6 : ip.ip_address if ip.name == "ipv6-${s.name}"]
         )
     }
 }
