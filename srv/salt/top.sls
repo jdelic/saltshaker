@@ -140,6 +140,6 @@ base:
         - basics.nftables.vagrant
 
     # put my personal user on every other machine
-    '(?!saltmaster).*?net(|.internal)$':
-        - match: pcre
+    'not *.test':
+        - match: compound
         - mn.users.jonas
