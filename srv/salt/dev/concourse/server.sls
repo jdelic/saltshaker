@@ -243,6 +243,8 @@ concourse-server:
             - service: concourse-web
         - require:
             - cmd: consul-template-sync
+            - nftables: concourse-tcp-in{{pillar.get('concourse-server', {}).get('atc-port', 8080)}}-recv-ipv4
+            - nftables: concourse-tcp-out{{pillar.get('concourse-server', {}).get('atc-port', 8080)}}-send-ipv4
             - cmd: smartstack-sync
         - require_in:
             - cmd: concourse-sync
