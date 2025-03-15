@@ -377,7 +377,7 @@ opensmtpd-servicedef-internal:
             - file: consul-service-dir
 
 
-{% for svc in ['receiver', 'internal_relay'] %}
+{% for svc in ['receiver', 'relay', 'internal_relay'] %}
     {% if opensmtpd_ips['ipv4'][svc] %}
 opensmtpd-{{svc}}-tcp-in25-recv-ipv4:
     nftables.append:
@@ -415,7 +415,7 @@ opensmtpd-{{svc}}-tcp-in25-recv-ipv6:
 {% endfor %}
 
 
-{% for svc in ['relay', 'receiver'] %}
+{% for svc in ['receiver', 'relay', 'internal_relay'] %}
     {% if opensmtpd_ips['ipv4'][svc] %}
 opensmtpd-{{svc}}-tcp-in465-recv-ipv4:
     nftables.append:
