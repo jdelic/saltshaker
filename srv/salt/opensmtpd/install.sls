@@ -488,14 +488,15 @@ opensmtpd-relay-out465-send-ipv4:
             - sls: basics.nftables.setup
 {% endif %}
 
-{% if pillar["smtp-outgoing"].get("bind-ipv6", False) %}
+{% if salt['network.ip_addrs6'](salt['network.default_route']('inet6')[0]['interface'], False) %}
+  {# if we have a default route, we can reach out to ipv6 mail servers #}
 opensmtpd-relay-out25-send-ipv6:
     nftables.append:
         - table: filter
         - chain: output
         - family: ip6
         - jump: accept
-        - source: {{salt['network.ip_addrs6'](salt['network.default_route']('inet6')[0]['interface'], True)[0]}}/128
+        - source: {{salt['network.ip_addrs6'](salt['network.default_route']('inet6')[0]['interface'], False)[0]}}/128
         - destination: ::/0
         - dport: 25
         - match: state
@@ -512,7 +513,7 @@ opensmtpd-relay-out465-send-ipv6:
         - chain: output
         - family: ip6
         - jump: accept
-        - source: {{salt['network.ip_addrs6'](salt['network.default_route']('inet6')[0]['interface'], True)[0]}}/128
+        - source: {{salt['network.ip_addrs6'](salt['network.default_route']('inet6')[0]['interface'], False)[0]}}/128
         - destination: ::/0
         - dport: 465
         - match: state
