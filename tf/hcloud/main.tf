@@ -30,16 +30,16 @@ locals {
             roles = ["database", "vault", "authserver", "consulserver"]
             firewall_ids = null
         }
-        "mail.maurus.net" = {
+        "mail.indevelopment.de" = {
             server_type = "cx22"
             backup = 1
             additional_ipv4 = 1
             additional_ipv6 = 1
             ipv6_only = 0
             internal_only = 0
-            ptr = "mail.maurus.net"
+            ptr = "mail.indevelopment.de"
             roles = ["mail", "consulserver"]
-            firewall_ids = [hcloud_firewall.mail.id]
+            firewall_ids = [hcloud_firewall.mail.id, hcloud_firewall.ping.id]
         }
         "dev.maurusnet.internal" = {
             server_type = "cx32"
@@ -85,7 +85,7 @@ locals {
             roles = ["apps", "nomadserver"]
             firewall_ids = null
         }
-        "lb1.maurus.net" = {
+        "lb1.indevelopment.de" = {
             server_type = "cx22"
             backup = 0
             additional_ipv4 = 0
@@ -94,7 +94,7 @@ locals {
             internal_only = 0
             ptr = null
             roles = ["loadbalancer"]
-            firewall_ids = [hcloud_firewall.web.id]
+            firewall_ids = [hcloud_firewall.web.id, hcloud_firewall.ping.id]
         }
 /*        backup.maurusnet.internal = {
             server_type = "bx11"
@@ -146,7 +146,7 @@ resource "hcloud_network_route" "nat-route" {
 }
 
 resource "hcloud_server" "saltmaster" {
-    name = "symbiont.maurus.net"
+    name = "symbiont.indevelopment.de"
     server_type = "cx22"
     image = "debian-12"
     location = "hel1"
@@ -165,13 +165,13 @@ resource "hcloud_server" "saltmaster" {
 
     user_data = templatefile("${path.module}/../salt-master.cloud-init.yml", {
         saltmaster_config = file("${path.module}/../../etc/salt-master/master.d/saltshaker.conf")
-        hostname = "symbiont.maurus.net",
+        hostname = "symbiont.indevelopment.de",
         server_type = "cx22",
     })
 
     backups = true
 
-    firewall_ids = [hcloud_firewall.ssh.id]
+    firewall_ids = [hcloud_firewall.ssh.id, hcloud_firewall.ping.id]
 
     # important as per hcloud docs as there's a race condition otherwise
     depends_on = [hcloud_network_subnet.internal-subnet, hcloud_firewall.ssh]
@@ -245,6 +245,16 @@ resource "hcloud_floating_ip_assignment" "additional_ipv6" {
     floating_ip_id = each.value.id
 }
 
+resource "hcloud_firewall" "ping" {
+    name = "ping"
+
+    rule {
+        direction = "in"
+        protocol  = "icmp"
+        source_ips = ["0.0.0.0/0", "::/0"]
+    }
+}
+
 resource "hcloud_firewall" "ssh" {
     name = "ssh"
 
@@ -263,6 +273,13 @@ resource "hcloud_firewall" "mail" {
         direction = "in"
         protocol  = "tcp"
         port      = 25
+        source_ips = ["0.0.0.0/0", "::/0"]
+    }
+
+    rule {
+        direction = "in"
+        protocol  = "tcp"
+        port      = 465
         source_ips = ["0.0.0.0/0", "::/0"]
     }
 }
@@ -287,7 +304,7 @@ resource "hcloud_firewall" "web" {
 
 output "ip_addresses" {
     value = {
-        for s in merge({"symbiont.mncn.de" = hcloud_server.saltmaster}, hcloud_server.servers) : s.name => concat(
+        for s in merge({"symbiont.indevelopment.de" = hcloud_server.saltmaster}, hcloud_server.servers) : s.name => concat(
             s.ipv4_address != "" ? [s.ipv4_address] : [],
             s.ipv6_address != "" ? [s.ipv6_address] : [],
             flatten(s.network.*.ip),

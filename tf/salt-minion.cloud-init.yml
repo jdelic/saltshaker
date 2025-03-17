@@ -15,20 +15,18 @@ write_files:
       content: |
           master: ${saltmaster_ip}
 %{ if additional_ipv4 != false || additional_ipv6 != false ~}
-    - path: /etc/network/interfaces.d/60-floating-ip.cfg
+    - path: /etc/network/interfaces.d/60-floating-ip
       permissions: '0644'
       content: |
           auto eth0:1
           %{ if additional_ipv4 != false ~}
           iface eth0:1 inet static
-              address ${additional_ipv4}
-              netmask 32
+              address ${additional_ipv4}/32
           %{ endif ~}
 
           %{ if additional_ipv6 != false ~}
           iface eth0:1 inet6 static
-              address ${additional_ipv6}
-              netmask 128
+              address ${additional_ipv6}/128
           %{ endif ~}
 %{ endif ~}
 
