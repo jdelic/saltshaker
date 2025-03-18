@@ -13,8 +13,17 @@ python-dev-packages:
             - libxml2-dev
             - libgd-dev
             - libffi-dev
+        - install_recommends: False
+        - require:
+            - pkg: build-essential
+
+
+python-libpq-dev:
+    pkg.installed:
+        - pkgs:
             - libpq-dev
         - install_recommends: False
+        - fromrepo: bookworm-pgdg
         - require:
             - pkg: build-essential
 
