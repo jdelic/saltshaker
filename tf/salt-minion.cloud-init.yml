@@ -45,10 +45,14 @@ runcmd:
     - mkdir -p /etc/apt/keyrings
     - apt update
     - apt -y install --no-install-recommends gnupg
-    - wget -O /etc/apt/keyrings/salt-archive-keyring-2023.gpg.tmp https://packages.broadcom.com/artifactory/api/security/keypair/SaltProjectKey/public
-    - gpg --dearmor -o /etc/apt/keyrings/salt-archive-keyring-2023.gpg /etc/apt/keyrings/salt-archive-keyring-2023.gpg.tmp
-    - rm /etc/apt/keyrings/salt-archive-keyring-2023.gpg.tmp
-    - /usr/bin/bash -c 'echo deb [signed-by=/etc/apt/keyrings/salt-archive-keyring-2023.gpg arch=amd64] https://packages.broadcom.com/artifactory/saltproject-deb/ stable main > /etc/apt/sources.list.d/salt.list'
+    #- wget -O /etc/apt/keyrings/salt-archive-keyring-2023.gpg.tmp https://packages.broadcom.com/artifactory/api/security/keypair/SaltProjectKey/public
+    #- gpg --dearmor -o /etc/apt/keyrings/salt-archive-keyring-2023.gpg /etc/apt/keyrings/salt-archive-keyring-2023.gpg.tmp
+    #- rm /etc/apt/keyrings/salt-archive-keyring-2023.gpg.tmp
+    #- /usr/bin/bash -c 'echo deb [signed-by=/etc/apt/keyrings/salt-archive-keyring-2023.gpg arch=amd64] https://packages.broadcom.com/artifactory/saltproject-deb/ stable main > /etc/apt/sources.list.d/salt.list'
+    - wget -O /etc/apt/keyrings/maurusnet-package-archive.gpg.tmp https://s3.eu-central-1.amazonaws.com/repo.maurus.net/02CBD940A78049AF.pem
+    - gpg --dearmor -o /etc/apt/keyrings/maurusnet-package-archive.gpg /etc/apt/keyrings/maurusnet-package-archive.gpg.tmp
+    - rm /etc/apt/keyrings/maurusnet-package-archive.gpg.tmp
+    - /usr/bin/bash -c 'echo deb [signed-by=/etc/apt/keyrings/maurusnet-package-archive.gpg arch=amd64] https://repo.maurus.net/saltmirror/bookworm/ saltmirror main > /etc/apt/sources.list.d/salt.list'
     - apt update
     - mkdir -p /etc/salt/roles.d
     - mkdir -p /etc/salt/env.d
@@ -57,7 +61,7 @@ runcmd:
     - echo true > /etc/salt/env.d/ipv6_only
 %{ endif ~}
     - echo ${server_type} > /etc/salt/env.d/server_type
-    - apt install -y --no-install-recommends git salt-minion
+    - apt install -y --no-install-recommends git salt-minion salt67882
     - chown -R salt:salt /etc/salt
     - systemctl restart salt-minion
 
