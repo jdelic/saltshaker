@@ -81,3 +81,12 @@ pdns-recursor-service:
             - cmd: consul-sync
         - require_in:
             - cmd: powerdns-sync
+
+
+pdns-consul-cache-wipe:
+    cmd.run:
+        - name: /usr/bin/rec_control wipe-cache service.consul$
+        - watch:
+            - service: consul-service-reload
+        - require_in:
+            - cmd: powerdns-sync
