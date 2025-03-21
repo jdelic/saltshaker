@@ -236,6 +236,7 @@ icmp-forward-ipv4:
             - pkg: nftables
 
 
+# This requires saltfix 67882 for icmpv6-type support.
 icmp-recv-ipv6:
     nftables.append:
         - table: filter
@@ -243,7 +244,11 @@ icmp-recv-ipv6:
         - chain: input
         - jump: accept
         - proto: icmp
-        - icmp-type: echo-reply,destination-unreachable,source-quench,redirect,echo-request,time-exceeded,parameter-problem,timestamp-request,timestamp-reply,info-request,info-reply,address-mask-request,address-mask-reply,router-advertisement,router-solicitation
+        - icmpv6-type: >
+            destination-unreachable,packet-too-big,time-exceeded,parameter-problem,echo-request,
+            echo-reply,mld-listener-query,mld-listener-report,mld-listener-done,mld-listener-reduction,
+            nd-router-solicit,nd-router-advert,nd-neighbor-solicit,nd-neighbor-advert,
+            nd-redirect,router-renumbering,ind-neighbor-solicit,ind-neighbor-advert,mld2-listener-report
         - order: 4
         - save: True
         - require:
@@ -257,7 +262,11 @@ icmp-send-ipv6:
         - chain: output
         - jump: accept
         - proto: icmp
-        - icmp-type: echo-reply,destination-unreachable,source-quench,redirect,echo-request,time-exceeded,parameter-problem,timestamp-request,timestamp-reply,info-request,info-reply,address-mask-request,address-mask-reply,router-advertisement,router-solicitation
+        - icmpv6-type: >
+              destination-unreachable,packet-too-big,time-exceeded,parameter-problem,echo-request,
+              echo-reply,mld-listener-query,mld-listener-report,mld-listener-done,mld-listener-reduction,
+              nd-router-solicit,nd-router-advert,nd-neighbor-solicit,nd-neighbor-advert,
+              nd-redirect,router-renumbering,ind-neighbor-solicit,ind-neighbor-advert,mld2-listener-report
         - order: 4
         - save: True
         - require:
@@ -271,7 +280,11 @@ icmp-forward-ipv6:
         - chain: forward
         - jump: accept
         - proto: icmp
-        - icmp-type: echo-reply,destination-unreachable,source-quench,redirect,echo-request,time-exceeded,parameter-problem,timestamp-request,timestamp-reply,info-request,info-reply,address-mask-request,address-mask-reply,router-advertisement,router-solicitation
+        - icmpv6-type: >
+              destination-unreachable,packet-too-big,time-exceeded,parameter-problem,echo-request,
+              echo-reply,mld-listener-query,mld-listener-report,mld-listener-done,mld-listener-reduction,
+              nd-router-solicit,nd-router-advert,nd-neighbor-solicit,nd-neighbor-advert,
+              nd-redirect,router-renumbering,ind-neighbor-solicit,ind-neighbor-advert,mld2-listener-report
         - order: 4
         - save: True
         - require:
