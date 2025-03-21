@@ -72,7 +72,7 @@ $remote_provision_script = <<SCRIPT
         wget -O /etc/apt/keyrings/maurusnet-package-archive.gpg.tmp https://s3.eu-central-1.amazonaws.com/repo.maurus.net/02CBD940A78049AF.pem
         gpg --dearmor -o /etc/apt/keyrings/maurusnet-package-archive.gpg /etc/apt/keyrings/maurusnet-package-archive.gpg.tmp
         rm /etc/apt/keyrings/maurusnet-package-archive.gpg.tmp
-        sh -c 'echo deb [signed-by=/etc/apt/keyrings/maurusnet-package-archive.gpg arch=amd64] http://repo.maurus.net/saltmirror/bookworm/ saltmirror main > /etc/apt/sources.list.d/saltmirror.list'
+        sh -c 'echo deb [signed-by=/etc/apt/keyrings/maurusnet-package-archive.gpg arch=amd64] http://repo.maurus.net/saltmirror/bookworm/ saltmirror main > /etc/apt/sources.list.d/salt.list'
         apt update
         groupadd -g 110 salt
         useradd -g salt -M -d /opt/saltstack/salt -s /usr/sbin/nologin salt
