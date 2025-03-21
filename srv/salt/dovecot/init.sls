@@ -177,7 +177,7 @@ dovecot-in{{port}}-recv-ipv6:
         - family: ip6
         - jump: accept
         - source: '::/0'
-        - destination: {{dovecot_ips['ipv6']}}
+        - destination: '{{dovecot_ips['ipv6']}}/128'
         - dport: {{port}}
         - match: state
         - connstate: new
