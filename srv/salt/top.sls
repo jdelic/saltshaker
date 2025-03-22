@@ -131,6 +131,7 @@ base:
 
     'roles:webdav':
         - match: grain
+        - fstab.secure
         - apache.webdav
 
     '*.test':
