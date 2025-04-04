@@ -45,7 +45,7 @@ locals {
             roles = ["mail", "consulserver"]
             firewall_ids = [hcloud_firewall.mail.id, hcloud_firewall.ping.id]
         }
-/*        "dev.maurusnet.internal" = {
+        "dev.maurusnet.internal" = {
             server_type = "cx32"
             backup = 0
             additional_ipv4 = 0
@@ -164,7 +164,7 @@ resource "hcloud_server" "saltmaster" {
     server_type = "cx22"
     image = "debian-12"
     location = "hel1"
-    ssh_keys = ["jonas@parasite", "jonas@hades"]
+    ssh_keys = ["jonas@hades"]
 
     network {
         network_id = hcloud_network.internal.id
@@ -198,7 +198,7 @@ resource "hcloud_server" "servers" {
     server_type = each.value.server_type
     image = "debian-12"
     location = "hel1"
-    ssh_keys = ["jonas@parasite", "jonas@hades"]
+    ssh_keys = ["jonas@hades"]
 
     network {
         network_id = hcloud_network.internal.id
