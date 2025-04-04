@@ -16,20 +16,21 @@
 
 ifassign:
     internal: {{iface_internal}}
-    internal-ip-index: 1
+    internal-ip-index: 0
     external: {{iface_external}}
-    external-ip-index: 1
+    external-ip-index: 0
     external-alt: {{iface_external2}}
     external-alt-ip-index: 1
 
 
 ifassign-ipv6:
     #internal: {{iface_internal}}
-    #internal-ip-index: 1
+    #internal-ip-suffix: 1
     external: {{iface_external}}
     external-ip-suffix: 1
     external-alt: {{iface_external2}}
-    external-alt-ip-suffix: 1
+    external-alt-ip-suffix: 2
+
 
 mine_functions:
     internal_ip:
