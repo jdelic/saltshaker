@@ -19,4 +19,3 @@ imap-incoming:
     bind-ipv6: True
 
 # vim: syntax=yaml
-

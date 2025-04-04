@@ -26,6 +26,8 @@ locals {
             additional_ipv6 = 0
             ipv6_only = 1
             internal_only = 1
+            desired_count_of_ipv6_ips = 0
+            desired_count_of_additional_ipv6_ips = 0
             ptr = null
             roles = ["database", "vault", "authserver", "consulserver"]
             firewall_ids = null
@@ -34,20 +36,24 @@ locals {
             server_type = "cx22"
             backup = 1
             additional_ipv4 = 1
-            additional_ipv6 = 1
+            additional_ipv6 = 0
             ipv6_only = 0
             internal_only = 0
+            desired_count_of_ipv6_ips = 2
+            desired_count_of_additional_ipv6_ips = 0
             ptr = "mail.indevelopment.de"
             roles = ["mail", "consulserver"]
             firewall_ids = [hcloud_firewall.mail.id, hcloud_firewall.ping.id]
         }
-        "dev.maurusnet.internal" = {
+/*        "dev.maurusnet.internal" = {
             server_type = "cx32"
             backup = 0
             additional_ipv4 = 0
             additional_ipv6 = 0
             ipv6_only = 1
             internal_only = 1
+            desired_count_of_ipv6_ips = 2
+            desired_count_of_additional_ipv6_ips = 0
             ptr = null
             roles = ["dev", "buildserver", "buildworker", "consulserver"]
             firewall_ids = null
@@ -59,6 +65,8 @@ locals {
             additional_ipv6 = 0
             ipv6_only = 1
             internal_only = 1
+            desired_count_of_ipv6_ips = 2
+            desired_count_of_additional_ipv6_ips = 0
             ptr = null
             roles = ["apps", "nomadserver"]
             firewall_ids = null
@@ -70,6 +78,8 @@ locals {
             additional_ipv6 = 0
             ipv6_only = 1
             internal_only = 1
+            desired_count_of_ipv6_ips = 2
+            desired_count_of_additional_ipv6_ips = 0
             ptr = null
             roles = ["apps", "nomadserver"]
             firewall_ids = null
@@ -81,6 +91,8 @@ locals {
             additional_ipv6 = 0
             ipv6_only = 1
             internal_only = 1
+            desired_count_of_ipv6_ips = 2
+            desired_count_of_additional_ipv6_ips = 0
             ptr = null
             roles = ["apps", "nomadserver"]
             firewall_ids = null
@@ -92,6 +104,8 @@ locals {
             additional_ipv6 = 0
             ipv6_only = 0
             internal_only = 0
+            desired_count_of_ipv6_ips = 2
+            desired_count_of_additional_ipv6_ips = 0
             ptr = null
             roles = ["loadbalancer"]
             firewall_ids = [hcloud_firewall.web.id, hcloud_firewall.ping.id]
@@ -201,8 +215,10 @@ resource "hcloud_server" "servers" {
                     saltmaster_ip = flatten(hcloud_server.saltmaster.network.*.ip)[0],
                     additional_ipv4 = each.value.additional_ipv4 == 1 ? hcloud_floating_ip.additional_ipv4[each.key].ip_address : false,
                     additional_ipv6 = each.value.additional_ipv6 == 1 ? hcloud_floating_ip.additional_ipv6[each.key].ip_address : false,
-                    roles = lookup(each.value, "roles", [])
+                    roles = lookup(each.value, "roles", []),
                     ipv6_only = each.value.ipv6_only == 1,
+                    desired_count_of_ipv6_ips = each.value.desired_count_of_ipv6_ips,
+                    desired_count_of_additional_ipv6_ips = each.value.desired_count_of_additional_ipv6_ips,
                     hostname = each.key,
                     server_type = each.value.server_type,
                 })

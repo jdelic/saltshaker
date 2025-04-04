@@ -14,28 +14,51 @@ write_files:
     - path: /etc/salt/minion.d/saltshaker.conf
       content: |
           master: ${saltmaster_ip}
+    - path: /tmp/get_ipv6.sh
+      permissions: '0750'
+      content: |
+          #!/bin/bash
+          curl -s http://169.254.169.254/hetzner/v1/metadata | yq -r '.["network-config"].config[0].subnets[] | select(.ipv6==true).address | rtrimstr("1/64")'
 %{ if additional_ipv4 != false || additional_ipv6 != false ~}
-    - path: /etc/network/interfaces.d/60-floating-ip
+    - path: /etc/network/interfaces.d/61-secondary-ips
       permissions: '0644'
       content: |
           auto eth0:1
-          %{ if additional_ipv4 != false ~}
+          %{ if additional_ipv4 != false }
           iface eth0:1 inet static
               address ${additional_ipv4}/32
           %{ endif ~}
 
           %{ if additional_ipv6 != false ~}
+              %{ for i in range(1, desired_count_of_additional_ipv6_ips) ~}
           iface eth0:1 inet6 static
-              address ${additional_ipv6}/128
+              address ${additional_ipv6}${i}/128
+              %{ endfor ~}
           %{ endif ~}
 %{ endif ~}
 
 
 runcmd:
+    - mkdir -p /etc/salt/env.d
+    - apt update
+    - apt -y install --no-install-recommends gnupg yq
+    - /tmp/get_ipv6.sh > /etc/salt/env.d/ipv6_subnet_1
+    - echo "${additional_ipv6}" > /etc/salt/env.d/ipv6_subnet_2
+    - echo "Configuring additional IPv6 addresses..."
+%{ if desired_count_of_ipv6_ips > 1 ~}
+    %{ for i in range(2, desired_count_of_ipv6_ips + 1) }
+    - echo "iface eth0 inet6 static" >> /etc/network/interfaces.d/60-additional-ips
+    - echo "    address $(/tmp/get_ipv6.sh)${i}/128" >> /etc/network/interfaces.d/60-additional-ips
+    - echo "" >> /etc/network/interfaces.d/60-additional-ips
+    %{ endfor }
+    - ifdown eth0
+    - ifup eth0
+%{ endif ~}
 %{ if additional_ipv4 != false || additional_ipv6 != false ~}
     - ifup eth0:1
 %{ endif ~}
 %{ if ipv6_only ~}
+    - echo true > /etc/salt/env.d/ipv6_only
     - ip route del default || /usr/bin/true
     - ip route add default via 10.0.0.1
     - echo "nameserver 8.8.8.8" >> /etc/resolv.conf
@@ -43,8 +66,6 @@ runcmd:
     - /usr/bin/bash -c 'until dig +tries=1 +retry=0 debian.org > /dev/null; do sleep 1; echo -n "."; done; echo "";'
 %{ endif ~}
     - mkdir -p /etc/apt/keyrings
-    - apt update
-    - apt -y install --no-install-recommends gnupg
     #- wget -O /etc/apt/keyrings/salt-archive-keyring-2023.gpg.tmp https://packages.broadcom.com/artifactory/api/security/keypair/SaltProjectKey/public
     #- gpg --dearmor -o /etc/apt/keyrings/salt-archive-keyring-2023.gpg /etc/apt/keyrings/salt-archive-keyring-2023.gpg.tmp
     #- rm /etc/apt/keyrings/salt-archive-keyring-2023.gpg.tmp
@@ -55,11 +76,7 @@ runcmd:
     - /usr/bin/bash -c 'echo deb [signed-by=/etc/apt/keyrings/maurusnet-package-archive.gpg arch=amd64] http://repo.maurus.net/saltmirror/bookworm/ saltmirror main > /etc/apt/sources.list.d/salt.list'
     - apt update
     - mkdir -p /etc/salt/roles.d
-    - mkdir -p /etc/salt/env.d
     ${indent(4, yamlencode([for r in roles: "touch /etc/salt/roles.d/${r}"]))}
-%{ if ipv6_only ~}
-    - echo true > /etc/salt/env.d/ipv6_only
-%{ endif ~}
     - echo ${server_type} > /etc/salt/env.d/server_type
     - apt install -y --no-install-recommends git salt-minion salt67882
     - chown -R salt:salt /etc/salt
