@@ -116,7 +116,7 @@ consul-common-config:
         - template: jinja
         - context:
             disable_update_check: >-
-                {% if pillar['nomad-cluster'].get('check-for-updates', 'false')|lower == 'true' -%}
+                {% if pillar['consul-cluster'].get('check-for-updates', 'false')|lower == 'true' -%}
                     false
                 {%- else -%}
                     true
