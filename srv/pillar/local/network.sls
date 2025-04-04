@@ -14,6 +14,13 @@ ifassign:
     external-alt: {{iface_external2}}
 
 
+ifassign-ipv6:
+    nat: {{iface_nat}}
+    internal: {{iface_internal}}
+    external: {{iface_external}}
+    external-alt: {{iface_external2}}
+
+
 mine_functions:
     internal_ip:
         - mine_function: network.interface_ip

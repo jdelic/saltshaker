@@ -216,21 +216,21 @@ opensmtpd-internal-relay-sslkey:
     "ipv6": {
         "relay":
             pillar.get('smtp-outgoing', {}).get(
-                'override-ipv6', grains['ip6_interfaces'].get(pillar['ifassign']['external-alt'])[
-                    pillar['ifassign'].get('external-alt-ipv6-index', 0)|int()
-                ]
+                'override-ipv6',
+                salt['network.calc_net'](grains['ip6_interfaces'].get(pillar['ifassign-ipv6']['external']).removesuffix("/64") +
+                pillar['ifassign-ipv6'].get('external-alt-ipv6-suffix', 2)|int()
             ) if pillar.get('smtp-outgoing', {}).get('bind-ipv6', False) else "",
         "receiver":
             pillar.get('smtp-incoming', {}).get(
-                'override-ipv6', grains['ip6_interfaces'].get(pillar['ifassign']['external'])[
-                    pillar['ifassign'].get('external-ipv6-index', 0)|int()
-                ]
+                'override-ipv6',
+                salt['network.calc_net'](grains['ip6_interfaces'].get(pillar['ifassign-ipv6']['external']).removesuffix("/64") +
+                pillar['ifassign-ipv6'].get('external-ipv6-suffix', 1)|int()
             ) if pillar.get('smtp-incoming', {}).get('bind-ipv6', False) else "",
         "internal_relay":
             pillar.get('smtp-local-relay', {}).get(
-                'override-ipv6', grains['ip6_interfaces'].get(pillar['ifassign']['internal'])[
-                    pillar['ifassign'].get('internal-ipv6-index', 0)|int()
-                ]
+                'override-ipv6',
+                salt['network.calc_net'](grains['ip6_interfaces'].get(pillar['ifassign-ipv6']['internal']).removesuffix("/64") +
+                pillar['ifassign-ipv6'].get('internal-ipv6-suffix', 2)|int()
             ) if pillar.get('smtp-local-relay', {}).get('bind-ipv6', False) else "",
     }
 } %}

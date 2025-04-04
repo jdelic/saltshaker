@@ -75,9 +75,9 @@ sa-learn-pipe-script:
             ) if pillar.get('imap-incoming', {}).get('bind-ipv4', True) else "",
     "ipv6":
         pillar.get('imap-incoming', {}).get(
-                'override-ipv6', grains['ip6_interfaces'].get(pillar['ifassign']['external'])[
-                    pillar['ifassign'].get('external-ip-index', 0)|int()
-                ]
+                'override-ipv6',
+                salt['network.calc_net'](grains['ip6_interfaces'].get(pillar['ifassign-ipv6']['external']).removesuffix("/64") +
+                pillar['ifassign-ipv6'].get('external-ipv6-suffix', 1)|int()
             ) if pillar.get('imap-incoming', {}).get('bind-ipv6', True) else ""
 } %}
 
@@ -134,17 +134,9 @@ dovecot-consul-servicedef:
         - mode: '0644'
         - template: jinja
         - context:
-            ip: {{pillar['imap'].get(
-                'bind-ip', grains['ip_interfaces'][pillar['ifassign']['external']][pillar['ifassign'].get(
-                    'external-ip-index', 0
-                )|int()]
-            )}}
+            ip: {{dovecot_ips['ipv4']}}
             port: 143
-            sslip: {{pillar['imap'].get(
-                'bind-ip', grains['ip_interfaces'][pillar['ifassign']['external']][pillar['ifassign'].get(
-                    'external-ip-index', 0
-                )|int()]
-            )}}
+            sslip: {{dovecot_ips['ipv4']}}
             sslport: 993
         - require:
             - file: consul-service-dir
