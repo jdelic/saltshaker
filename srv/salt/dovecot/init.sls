@@ -76,7 +76,7 @@ sa-learn-pipe-script:
     "ipv6":
         pillar.get('imap-incoming', {}).get(
                 'override-ipv6',
-                salt['network.calc_net'](grains['ip6_interfaces'].get(pillar['ifassign-ipv6']['external']).removesuffix("/64") +
+                salt['network.calc_net'](grains['ip6_interfaces'].get(pillar['ifassign-ipv6']['external'])).removesuffix("/64") +
                 pillar['ifassign-ipv6'].get('external-ipv6-suffix', 1)|int()
             ) if pillar.get('imap-incoming', {}).get('bind-ipv6', True) else ""
 } %}
