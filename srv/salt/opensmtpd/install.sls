@@ -217,19 +217,20 @@ opensmtpd-internal-relay-sslkey:
         "relay":
             pillar.get('smtp-outgoing', {}).get(
                 'override-ipv6',
-                salt['network.calc_net'](salt['network.ip_addrs6'](pillar['ifassign-ipv6']['external'], False, "2000::/4")[0]).removesuffix("/64") +
+                salt['network.calc_net'](salt['network.ip_addrs6'](pillar['ifassign-ipv6']['external'], False, "2000::/4")[0] + "/64").removesuffix("/64") +
                 pillar['ifassign-ipv6'].get('external-alt-ipv6-suffix', "2")
             ) if pillar.get('smtp-outgoing', {}).get('bind-ipv6', False) else "",
         "receiver":
             pillar.get('smtp-incoming', {}).get(
                 'override-ipv6',
-                salt['network.calc_net'](salt['network.ip_addrs6'](pillar['ifassign-ipv6']['external'], False, "2000::/4")[0]).removesuffix("/64") +
+                salt['network.calc_net'](salt['network.ip_addrs6'](pillar['ifassign-ipv6']['external'], False, "2000::/4")[0] + "/64").removesuffix("/64") +
                 pillar['ifassign-ipv6'].get('external-ipv6-suffix', "1")
             ) if pillar.get('smtp-incoming', {}).get('bind-ipv6', False) else "",
         "internal_relay":
             pillar.get('smtp-local-relay', {}).get(
                 'override-ipv6',
-                salt['network.calc_net'](salt['network.ip_addrs6'](pillar['ifassign-ipv6']['external'], False, "2000::/4")[0]).removesuffix("/64") +
+                salt['network.calc_net'](salt['network.ip_addrs6'](pillar['ifassign-ipv6']['external'], False, "2000::/4")[0] + "/64").removesuffix("/64") +
+                pillar['ifassign-ipv6'].get('internal-ipv6-suffix', "2")
                 pillar['ifassign-ipv6'].get('internal-ipv6-suffix', "2")
             ) if pillar.get('smtp-local-relay', {}).get('bind-ipv6', False) else "",
     }
@@ -403,7 +404,7 @@ opensmtpd-{{svc}}-tcp-in25-recv-ipv6:
         - family: ip6
         - jump: accept
         - source: '::/0'
-        - destination: {{opensmtpd_ips['ipv6'][svc]}}/128
+        - destination: '{{opensmtpd_ips['ipv6'][svc]}}'
         - dport: 25
         - match: state
         - connstate: new
@@ -441,7 +442,7 @@ opensmtpd-{{svc}}-tcp-in465-recv-ipv6:
         - family: ip6
         - jump: accept
         - source: '::/0'
-        - destination: {{opensmtpd_ips['ipv6'][svc]}}/128
+        - destination: '{{opensmtpd_ips['ipv6'][svc]}}'
         - dport: 465
         - match: state
         - connstate: new
@@ -496,8 +497,8 @@ opensmtpd-relay-out25-send-ipv6:
         - chain: output
         - family: ip6
         - jump: accept
-        - source: {{salt['network.ip_addrs6'](salt['network.default_route']('inet6')[0]['interface'], False)[0]}}/128
-        - destination: ::/0
+        - source: '{{salt['network.ip_addrs6'](salt['network.default_route']('inet6')[0]['interface'], False)[0]}}'
+        - destination: '::/0'
         - dport: 25
         - match: state
         - connstate: new
@@ -513,8 +514,8 @@ opensmtpd-relay-out465-send-ipv6:
         - chain: output
         - family: ip6
         - jump: accept
-        - source: {{salt['network.ip_addrs6'](salt['network.default_route']('inet6')[0]['interface'], False)[0]}}/128
-        - destination: ::/0
+        - source: '{{salt['network.ip_addrs6'](salt['network.default_route']('inet6')[0]['interface'], False)[0]}}'
+        - destination: '::/0'
         - dport: 465
         - match: state
         - connstate: new
