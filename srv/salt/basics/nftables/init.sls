@@ -252,7 +252,7 @@ icmp-recv-ipv6:
         - order: 4
         - save: True
         - require:
-              - pkg: nftables
+            - pkg: nftables
 
 
 icmp-send-ipv6:
@@ -270,7 +270,7 @@ icmp-send-ipv6:
         - order: 4
         - save: True
         - require:
-              - pkg: nftables
+            - pkg: nftables
 
 
 icmp-forward-ipv6:
@@ -288,7 +288,7 @@ icmp-forward-ipv6:
         - order: 4
         - save: True
         - require:
-              - pkg: nftables
+            - pkg: nftables
 
 
 # prevent tcp packets without a connection
