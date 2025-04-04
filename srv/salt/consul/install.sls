@@ -122,7 +122,7 @@ consul-common-config:
                     true
                 {%- endif %}
             local_ip: {{pillar.get('consul-instance', {}).get(
-                            'bind-ip', grains['ip_interfaces'][pillar['ifassign']['internal']][pillar['ifassign'].get(
+                            'bind-ip', grains['ip4_interfaces'][pillar['ifassign']['internal']][pillar['ifassign'].get(
                                 'internal-ip-index', 0
                             )|int()]
                         )
