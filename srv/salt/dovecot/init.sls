@@ -134,17 +134,9 @@ dovecot-consul-servicedef:
         - mode: '0644'
         - template: jinja
         - context:
-            ip: {{pillar['imap'].get(
-                'bind-ip', grains['ip_interfaces'][pillar['ifassign']['external']][pillar['ifassign'].get(
-                    'external-ip-index', 0
-                )|int()]
-            )}}
+            ip: {{dovecot_ips['ipv4']}}
             port: 143
-            sslip: {{pillar['imap'].get(
-                'bind-ip', grains['ip_interfaces'][pillar['ifassign']['external']][pillar['ifassign'].get(
-                    'external-ip-index', 0
-                )|int()]
-            )}}
+            sslip: {{dovecot_ips['ipv4']}}
             sslport: 993
         - require:
             - file: consul-service-dir
