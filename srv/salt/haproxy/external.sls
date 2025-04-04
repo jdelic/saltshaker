@@ -22,7 +22,7 @@ haproxy-config-template-external:
 {% set x = haproxy_ips.append(
                pillar.get('haproxy', {}).get('override-ipv6',
                    salt['network.calc_net'](salt['network.ip_addrs6'](pillar['ifassign-ipv6']['external'], False, "2000::/4")[0]).removesuffix("/64") +
-                   pillar['ifassign-ipv6'].get('external-ipv6-suffix', 1)
+                   pillar['ifassign-ipv6'].get('external-ipv6-suffix', "1")
            ) if pillar.get('haproxy', {}).get('bind-ipv6', False) %}
 smartstack-external:
     file.managed:
