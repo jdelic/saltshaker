@@ -318,6 +318,11 @@ resource "hcloud_firewall" "web" {
     }
 }
 
+resource "hcloud_ssh_key" "jm_parasite" {
+    name = "jonas@parasite"}
+    public_key = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAINuRkuMdRdZ8aNZu6X8qlAfrVWbRP2Bi9M96I2zdZ31O jonas@parasite"
+}
+
 output "ip_addresses" {
     value = {
         for s in merge({"symbiont.indevelopment.de" = hcloud_server.saltmaster}, hcloud_server.servers) : s.name => concat(
