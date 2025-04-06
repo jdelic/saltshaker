@@ -164,7 +164,7 @@ resource "hcloud_server" "saltmaster" {
     server_type = "cx22"
     image = "debian-12"
     location = "hel1"
-    ssh_keys = ["jonas@hades"]
+    ssh_keys = ["jonas@parasite", "jonas@hades"]
 
     network {
         network_id = hcloud_network.internal.id
@@ -198,7 +198,7 @@ resource "hcloud_server" "servers" {
     server_type = each.value.server_type
     image = "debian-12"
     location = "hel1"
-    ssh_keys = ["jonas@hades"]
+    ssh_keys = ["jonas@parasite", "jonas@hades"]
 
     network {
         network_id = hcloud_network.internal.id
@@ -319,8 +319,13 @@ resource "hcloud_firewall" "web" {
 }
 
 resource "hcloud_ssh_key" "jm_parasite" {
-    name = "jonas@parasite"}
+    name = "jonas@parasite"
     public_key = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAINuRkuMdRdZ8aNZu6X8qlAfrVWbRP2Bi9M96I2zdZ31O jonas@parasite"
+}
+
+resource "hcloud_ssh_key" "jm_hades" {
+    name       = "jonas@hades"
+    public_key = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIHS6w4Jzel7ef0jxiLG7s+8hvOaDx0SLWXr9PhC3ZnIb jonas@hades"
 }
 
 output "ip_addresses" {
