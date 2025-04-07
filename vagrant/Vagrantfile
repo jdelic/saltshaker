@@ -315,71 +315,182 @@ SCRIPT
         end
     end
 
-    # config.vm.define :dev do |dev|
-        # # see https://github.com/mitchellh/vagrant/issues/912
-        # dev.vm.provider :virtualbox do |vb|
-            # vb.customize ['modifyvm', :id, '--rtcuseutc', 'on']
-            # #vb.customize ['modifyvm', :id, '--nictype1', 'Am79C973']
-            # #vb.customize ['modifyvm', :id, '--natdnshostresolver1', 'on']
-            # #vb.gui = true
-            # #vb.customize ['modifyvm', :id, '--memory', '1024']
-        # end
+    config.vm.define :master13 do |master|
+        if OS.windows? or OS.mac?
+            master.vm.provider :virtualbox do |vb|
+                vb.memory = 3072
+                vb.cpus = 3
+            end
+            master.vm.box = 'debian/contrib-bookworm64'
+        else
+            master.vm.provider :libvirt do |lv|
+                #lv.customize ['modifyvm', :id, '--rtcuseutc', 'on']
+                lv.memory = 3072
+                lv.cpus = 4
+            end
+            master.vm.box = 'debian/testing64'
+        end
 
-        # # Every Vagrant virtual environment requires a box to build off of.
-        # dev.vm.box = 'maurusnet-debian'
 
-        # # The url from where the 'dev.vm.box' box will be fetched if you
-        # # don't have it already.
-        # dev.vm.box_url = $box_url
+        #master.vm.box_url = $box_url
+        master.vm.network :private_network,
+                          :ip => ip('88'),
+                          :libvirt__netmask => '255.255.255.0',
+                          :libvirt__network_name => 'mnet_vagrant',
+                          :libvirt__forward_mode => 'route'
+        master.vm.hostname = 'saltmaster.maurusnet.test'
 
-        # # Create a private network, which allows host-only access to the machine
-        # # using a specific IP.
-        # dev.vm.network :private_network, ip: '192.168.56.160'
+        sync_folder(master, '.', '/vagrant')
+        sync_folder(master, 'saltshaker/srv/salt', '/srv/salt')
+        sync_folder(master, 'saltshaker/srv/salt-modules', '/srv/salt-modules')
+        sync_folder(master, 'saltshaker/srv/pillar', '/srv/pillar')
+        sync_folder(master, 'saltshaker/srv/reactor', '/srv/reactor')
+        sync_folder(master, 'saltshaker/etc/salt-minion/minion.d', '/etc/salt/minion.d', mounttype: 'rsync')
+        sync_folder(master, 'saltshaker/etc/salt-master/master.d', '/etc/salt/master.d', mounttype: 'rsync')
 
-        # # set up key forwarding for GIT
-        # config.ssh.forward_agent = true
-        # #config.ssh.max_tries = 150
+        master.vm.provision :shell do |s|
+            if $local_provision
+                s.inline = $local_provision_script
+            else
+                s.inline = $remote_provision_script
+            end
 
-        # dev.vm.hostname = 'dev.maurus.net.test'
+            s.inline +=<<SCRIPT
+                mkdir -p /etc/salt/roles.d
+                touch /etc/salt/roles.d/vagrant
+                touch /etc/salt/roles.d/master
+                touch /etc/salt/roles.d/vault
+                touch /etc/salt/roles.d/consulserver
+                touch /etc/salt/roles.d/database
+                touch /etc/salt/roles.d/authserver
+                #touch /etc/salt/roles.d/dev
+SCRIPT
+        end
 
-        # dev.vm.provision :shell do |s|
-            # s.inline = $salt_script
-        # end
+        master.vm.provision :salt do |salt|
+            salt.run_highstate = false
+            salt.colorize = true
+            salt.log_level = 'info'
+            salt.verbose = true
+            salt.no_minion = true
+            salt.always_install = true
+            salt.install_master = true
+            salt.install_syndic = false
+            salt.bootstrap_script = 'saltshaker/vagrant/bootstrap-salt.sh'
+            salt.bootstrap_options = '-x python3 -r'
+            if $local_provision
+                # -l uses http instead of https
+                salt.bootstrap_options += " -l -R fileserver.maurusnet.test"
+            end
+            salt.master_pub = 'saltshaker/vagrant/preseed-keys/saltmaster.maurusnet.test.pub'
+            salt.master_key = 'saltshaker/vagrant/preseed-keys/saltmaster.maurusnet.test.pem'
+            salt.minion_pub = 'saltshaker/vagrant/preseed-keys/saltmaster.maurusnet.test.pub'
+            salt.minion_key = 'saltshaker/vagrant/preseed-keys/saltmaster.maurusnet.test.pem'
+            salt.seed_master = {
+              'saltmaster.maurusnet.test' => salt.minion_pub,
+              'test.maurusnet.test' => 'saltshaker/vagrant/preseed-keys/test.maurusnet.test.pub'
+            }
+        end
 
-        # dev.vm.provision :salt do |salt|
-            # salt.run_highstate = true
-            # # we installed using the shell provisioner above, because
-            # # bootstrap_salt.sh is broken on Debian 7
-            # salt.no_minion = true
-            # salt.verbose = true
-            # salt.minion_config = 'z:/saltshaker/etc/salt-minion/minion'
-            # salt.minion_key = 'z:/saltshaker/vagrant/preseed-keys/dev.maurus.net.pem'
-            # salt.minion_pub = 'z:/saltshaker/vagrant/preseed-keys/dev.maurus.net.pub'
-        # end
-    # end
+        master.vm.provision :shell, run: 'always' do |s|
+            s.inline = 'chown -R salt:salt /etc/salt; systemctl restart salt-master; sleep 1'
+        end
 
-    # config.vm.define :db do |db|
-        # db.vm.provider :virtualbox do |vb|
-            # vb.customize ['modifyvm', :id, '--rtcuseutc', 'on']
-        # end
+        master.vm.provision :salt do |salt|
+            salt.run_highstate = true
+            salt.colorize = true
+            salt.log_level = 'info'
+            salt.verbose = true
+            salt.no_minion = false
+            salt.always_install = true
+            salt.install_master = false
+            salt.install_syndic = false
+            salt.bootstrap_script = 'saltshaker/vagrant/bootstrap-salt.sh'
+            salt.bootstrap_options = '-x python3 -r -p salt67882'
+            if $local_provision
+                # -l uses http instead of https
+                salt.bootstrap_options = " -l -R fileserver.maurusnet.test"
+            end
+            salt.minion_pub = 'saltshaker/vagrant/preseed-keys/saltmaster.maurusnet.test.pub'
+            salt.minion_key = 'saltshaker/vagrant/preseed-keys/saltmaster.maurusnet.test.pem'
+        end
 
-        # db.vm.box = 'maurusnet-debian'
-        # db.vm.box_url = $box_url
-        # db.vm.network :private_network, ip: '192.168.56.161'
-        # config.ssh.forward_agent = true
-        # db.vm.hostname = 'db.maurusnet.internal.test'
+        # We have to restart salt-minion because the master's hostname is set in minion.d
+        # on a vboxsf mount when we bring the box back up after a 'vagrant halt'.
+        # We have to restart salt-master because the dynamicsecrets pillar is on the same
+        # vboxsf mount and needs to be loaded.
+        master.vm.provision :shell, run: 'always' do |s|
+            s.inline = 'systemctl restart salt-minion; sleep 1'
+        end
+    end
 
-        # db.vm.provision :shell do |s|
-            # s.inline = $salt_script
-        # end
+    config.vm.define :test13 do |test|
+        if OS.windows? or OS.mac?
+            test.vm.provider :virtualbox do |vb|
+                vb.memory = 3072
+                vb.cpus = 3
+            end
+            test.vm.box = 'debian/contrib-bullseye64'
+        else
+            test.vm.provider :libvirt do |lv|
+                #lv.customize ['modifyvm', :id, '--rtcuseutc', 'on']
+                lv.memory = 3072
+                lv.cpus = 3
+            end
+            test.vm.box = 'debian/testing64'
+        end
 
-        # db.vm.provision :salt do |salt|
-            # salt.run_highstate = true
-            # salt.no_minion = true
-            # salt.minion_config = 'z:/saltshaker/etc/salt-minion/minion'
-            # salt.minion_key = 'z:/saltshaker/vagrant/preseed-keys/db.maurusnet.internal.pem'
-            # salt.minion_pub = 'z:/saltshaker/vagrant/preseed-keys/db.maurusnet.internal.pub'
-        # end
-    # end
+        #test.vm.box_url = $box_url
+        test.vm.network :private_network, ip: ip('162')
+        test.vm.network :private_network, ip: ip('163')
+        test.vm.network :private_network, ip: ip('164')
+        test.vm.hostname = 'test.maurusnet.test'
 
+        sync_folder(test, '.', '/vagrant')
+        sync_folder(test, 'saltshaker/etc/salt-minion/minion.d', '/etc/salt/minion.d', mounttype: 'rsync')
+
+        test.vm.provision :shell do |s|
+            s.inline = $remote_provision_script
+            s.inline += "sh -c 'if ! grep -q " + ip('88') + " /etc/hosts; then echo \"" + ip('88') + "        saltmaster.maurusnet.test saltmaster\" >> /etc/hosts; fi'\n"
+            s.inline +=<<SCRIPT
+                mkdir -p /etc/salt/roles.d
+                chown 700 /etc/salt/roles.d
+                touch /etc/salt/roles.d/vagrant
+                touch /etc/salt/roles.d/mail
+                #touch /etc/salt/roles.d/pim
+                #touch /etc/salt/roles.d/dev
+                #touch /etc/salt/roles.d/buildserver
+                #touch /etc/salt/roles.d/buildworker
+                #touch /etc/salt/roles.d/apps
+                #touch /etc/salt/roles.d/loadbalancer
+                chown 600 /etc/salt/roles.d/*
+                chown -R salt:salt /etc/salt
+SCRIPT
+        end
+
+        test.vm.provision :salt do |salt|
+            salt.run_highstate = true
+            salt.colorize = true
+            salt.log_level = 'info'
+            salt.verbose = true
+            salt.no_minion = false
+            salt.always_install = false
+            salt.install_master = false
+            salt.install_syndic = false
+            salt.bootstrap_script = 'saltshaker/vagrant/bootstrap-salt.sh'
+            salt.bootstrap_options = '-x python3 -r'
+            if $local_provision
+                # -l uses http instead of https
+                salt.bootstrap_options += " -l -R fileserver.maurusnet.test"
+            end
+            salt.minion_key = 'saltshaker/vagrant/preseed-keys/test.maurusnet.test.pem'
+            salt.minion_pub = 'saltshaker/vagrant/preseed-keys/test.maurusnet.test.pub'
+        end
+
+        # we have to restart salt-minion because the master's hostname is set in minion.d
+        # on a vboxsf mount when we bring the box back up after a 'vagrant halt'
+        test.vm.provision :shell, run: 'always' do |s|
+            s.inline = 'systemctl restart salt-minion; sleep 1'
+        end
+    end
 end
