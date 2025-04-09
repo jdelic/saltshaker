@@ -78,6 +78,8 @@ authserver-rsyslog:
 authserver-config-secretid:
     cmd.run:
         - name: >-
+            touch /etc/appconfig/authserver/env/VAULT_SECRETID &&
+            chmod 0600 /etc/appconfig/authserver/env/VAULT_SECRETID &&
             /usr/local/bin/vault write -f -format=json \
                 auth/approle/role/authserver/secret-id |
                 jq -r .data.secret_id > /etc/appconfig/authserver/env/VAULT_SECRETID

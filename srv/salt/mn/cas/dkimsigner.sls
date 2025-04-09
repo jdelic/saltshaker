@@ -49,6 +49,8 @@ dkimsigner-rsyslog:
 dkimsigner-config-secretid:
     cmd.run:
         - name: >-
+            touch /etc/appconfig/dkimsigner/env/VAULT_SECRETID &&
+            chmod 0600 /etc/appconfig/dkimsigner/env/VAULT_SECRETID &&
             /usr/local/bin/vault write -f -format=json \
                 auth/approle/role/dkimsigner/secret-id |
                 jq -r .data.secret_id > /etc/appconfig/dkimsigner/env/VAULT_SECRETID

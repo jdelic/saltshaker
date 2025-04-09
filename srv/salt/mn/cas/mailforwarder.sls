@@ -51,6 +51,8 @@ mailforwarder-rsyslog:
 mailforwarder-config-secretid:
     cmd.run:
         - name: >-
+            touch /etc/appconfig/mailforwarder/env/VAULT_SECRETID &&
+            chmod 0600 /etc/appconfig/mailforwarder/env/VAULT_SECRETID &&
             /usr/local/bin/vault write -f -format=json \
                 auth/approle/role/mailforwarder/secret-id |
                 jq -r .data.secret_id > /etc/appconfig/mailforwarder/env/VAULT_SECRETID
