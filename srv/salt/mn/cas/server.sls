@@ -68,6 +68,8 @@ authserver-rsyslog:
     "CORS_ORIGIN_REGEX_WHITELIST": "^https://(\w+\.)?(maurusnet\.test|maurus\.net)$",
     "USE_X_FORWARDED_HOST": "true",
     "APPLICATION_LOGLEVEL": "INFO",
+    "AUTHSERVER_ENTITY_NAME": "maurus.networks",
+    "AUTHSERVER_ENTITY_LOGO": "/static/mn.png",
 } %}
 
 {# because we don't have jinja2.ext.do, we have to use the following work-around to set dict items #}
