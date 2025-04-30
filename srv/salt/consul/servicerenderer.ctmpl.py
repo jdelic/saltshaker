@@ -734,7 +734,8 @@ def main() -> None:
         sys.exit(0)
 
     if (_args.open_nftables and _args.only_nftables) or _args.debug_nftables:
-        _setup_nftables(context["services"], context["localips"], _args.open_nftables, debug=_args.debug_nftables,
+        _setup_nftables(context["services"], context["localips"], _args.open_nftables,
+                        _args.nftables_input_chain, _args.nftables_output_chain, debug=_args.debug_nftables,
                         verbose=_args.verbose)
         sys.exit(0)
 
@@ -749,7 +750,8 @@ def main() -> None:
         _setup_iptables(context["services"], context["localips"], _args.open_iptables, debug=_args.debug_iptables,
                         verbose=_args.verbose)
     if _args.open_nftables:
-        _setup_nftables(context["services"], context["localips"], _args.open_nftables, debug=_args.debug_nftables,
+        _setup_nftables(context["services"], context["localips"], _args.open_nftables,
+                        _args.nftables_input_chain, _args.nftables_output_chain, debug=_args.debug_nftables,
                         verbose=_args.verbose)
     if _args.command:
         if _args.verbose:
