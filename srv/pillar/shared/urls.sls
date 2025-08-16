@@ -13,10 +13,10 @@ repos:
     maurusnet-radicale: deb [signed-by=/etc/apt/keyrings/maurusnet-package-archive.gpg arch=amd64] http://repo.maurus.net/trixie/radicale/ mn-radicale main
     postgresql: deb [signed-by=/etc/apt/keyrings/postgresql-archive.gpg arch=amd64] http://apt.postgresql.org/pub/repos/apt/ trixie-pgdg main
     saltstack: deb [signed-by=/etc/apt/keyrings/salt-archive-keyring.gpg arch=amd64] https://packages.broadcom.com/artifactory/saltproject-deb/ stable main
-    trixie: deb http://ftp-stud.hs-esslingen.de/debian/ trixie main contrib
-    trixie-backports: deb http://ftp-stud.hs-esslingen.de/debian/ trixie-backports main
-    trixie-security: deb http://security.debian.org/debian-security trixie-security main
-    trixie-updates: deb http://deb.debian.org/debian trixie-updates main
+    trixie: deb [signed-by=/usr/share/keyrings/debian-archive-keyring.gpg arch=amd64] http://ftp-stud.hs-esslingen.de/debian/ trixie main contrib
+    trixie-backports: deb [signed-by=/usr/share/keyrings/debian-archive-keyring.gpg arch=amd64] http://ftp-stud.hs-esslingen.de/debian/ trixie-backports main
+    trixie-security: deb [signed-by=/usr/share/keyrings/debian-archive-keyring.gpg arch=amd64] http://security.debian.org/debian-security trixie-security main
+    trixie-updates: deb [signed-by=/usr/share/keyrings/debian-archive-keyring.gpg arch=amd64] http://deb.debian.org/debian trixie-updates main
 
 
 #   pgpkey: Set this to a salt:// url if you need to deploy your own repo signing key

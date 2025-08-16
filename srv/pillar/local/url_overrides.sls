@@ -4,19 +4,19 @@
 # mirror if you have such a thing
 
 repos:
-    aptly: deb http://fileserver.maurusnet.test/aptly/ squeeze main
-    aptly-nightly: deb http://fileserver.maurusnet.test/aptly-nightly/ nightly main
-    docker: deb http://fileserver.maurusnet.test/repo/ trixie stable
-    haproxy: deb http://fileserver.maurusnet.test/haproxy/ trixie-backports-3.2 main
-    maurusnet-apps: deb http://fileserver.maurusnet.test/mn-nightly/ mn-nightly main
-    maurusnet-opensmtpd: deb http://fileserver.maurusnet.test/mn-opensmtpd/ mn-opensmtpd main
-    maurusnet-radicale: deb http://fileserver.maurusnet.test/mn-radicale/ mn-radicale main
-    postgresql: deb http://fileserver.maurusnet.test/postgresql/ trixie-pgdg
-    saltstack: deb http://fileserver.maurusnet.test/saltproject-deb/ stable main
-    trixie: deb http://fileserver.maurusnet.test/debian/ trixie main
-    trixie-backports: deb http://fileserver.maurusnet.test/debian/ trixie-backports main
-    trixie-security: deb http://fileserver.maurusnet.test/debian/security/ trixie-security main
-    trixie-updates: deb http://fileserver.maurusnet.test/debian/updates/ trixie-updates main
+    aptly: deb [signed-by=/etc/apt/keyrings/maurusnet-package-archive.gpg] http://fileserver.maurusnet.test/aptly/ squeeze main
+    aptly-nightly: deb [signed-by=/etc/apt/keyrings/maurusnet-package-archive.gpg] http://fileserver.maurusnet.test/aptly-nightly/ nightly main
+    docker: deb [signed-by=/etc/apt/keyrings/maurusnet-package-archive.gpg] http://fileserver.maurusnet.test/repo/ trixie stable
+    haproxy: deb [signed-by=/etc/apt/keyrings/maurusnet-package-archive.gpg] http://fileserver.maurusnet.test/haproxy/ trixie-backports-3.2 main
+    maurusnet-apps: deb [signed-by=/etc/apt/keyrings/maurusnet-package-archive.gpg] http://fileserver.maurusnet.test/mn-nightly/ mn-nightly main
+    maurusnet-opensmtpd: deb [signed-by=/etc/apt/keyrings/maurusnet-package-archive.gpg] http://fileserver.maurusnet.test/mn-opensmtpd/ mn-opensmtpd main
+    maurusnet-radicale: deb [signed-by=/etc/apt/keyrings/maurusnet-package-archive.gpg] http://fileserver.maurusnet.test/mn-radicale/ mn-radicale main
+    postgresql: deb [signed-by=/etc/apt/keyrings/maurusnet-package-archive.gpg] http://fileserver.maurusnet.test/postgresql/ trixie-pgdg
+    saltstack: deb [signed-by=/etc/apt/keyrings/maurusnet-package-archive.gpg] http://fileserver.maurusnet.test/saltproject-deb/ stable main
+    trixie: deb [signed-by=/etc/apt/keyrings/maurusnet-package-archive.gpg] http://fileserver.maurusnet.test/debian/ trixie main
+    trixie-backports: deb [signed-by=/etc/apt/keyrings/maurusnet-package-archive.gpg] http://fileserver.maurusnet.test/debian/ trixie-backports main
+    trixie-security: deb [signed-by=/etc/apt/keyrings/maurusnet-package-archive.gpg] http://fileserver.maurusnet.test/debian/security/ trixie-security main
+    trixie-updates: [signed-by=/etc/apt/keyrings/maurusnet-package-archive.gpg] deb http://fileserver.maurusnet.test/debian/updates/ trixie-updates main
 
     pgpkey: salt://mn/fileserver_ACADBD6B.pgp.key
 
