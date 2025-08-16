@@ -5,7 +5,7 @@ duplicity:
         - pkgs:
             - duplicity
             - python3-paramiko
-            - python3-boto
+            - python3-botocore
         - install_recommends: False
 
 
