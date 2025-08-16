@@ -4,7 +4,7 @@ openssh:
             - ssh
             - openssh-server
             - openssh-client
-            - libssh2-1
+            - libssh2-1t64
         - install_recommends: False
     service.running:
         - name: sshd
