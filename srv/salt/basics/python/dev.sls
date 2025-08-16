@@ -23,7 +23,7 @@ python-libpq-dev:
         - pkgs:
             - libpq-dev
         - install_recommends: False
-        - fromrepo: bookworm-pgdg
+        - fromrepo: trixie-pgdg
         - require:
             - pkg: build-essential
 
