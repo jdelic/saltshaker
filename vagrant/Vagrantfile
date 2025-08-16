@@ -194,6 +194,8 @@ Vagrant.configure('2') do |config|
 
         master.vm.provision :shell, run: 'always' do |s|
             s.inline =<<SCRIPT
+                mkdir -p /etc/salt/roles.d
+                chown 700 /etc/salt/roles.d
                 touch /etc/salt/roles.d/vagrant
                 touch /etc/salt/roles.d/master
                 touch /etc/salt/roles.d/vault
