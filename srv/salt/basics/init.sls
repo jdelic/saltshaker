@@ -54,7 +54,7 @@ basic-required-packages:
             - bash-completion
             - coreutils
             - patch
-            - dnsutils
+            - bind9-dnsutils
             - unzip
             - net-tools
             - libcap2-bin
