@@ -74,7 +74,7 @@ runcmd:
     - mkdir -p /etc/salt/roles.d
     ${indent(4, yamlencode([for r in roles: "touch /etc/salt/roles.d/${r}"]))}
     - echo ${server_type} > /etc/salt/env.d/server_type
-    - apt install -y --no-install-recommends git salt-minion
+    - apt install -y --no-install-recommends git salt-minion=3007.6
     - chown -R salt:salt /etc/salt
     - systemctl restart salt-minion
 
