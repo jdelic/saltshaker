@@ -29,7 +29,7 @@ runcmd:
     - apt update
     - apt -y install --no-install-recommends gnupg
     - wget -O /etc/apt/keyrings/salt-archive-keyring.gpg.tmp https://packages.broadcom.com/artifactory/api/security/keypair/SaltProjectKey/public
-    - gpg --dearmor -o /etc/apt/keyrings/salt-archive-keyring-2023.gpg /etc/apt/keyrings/salt-archive-keyring.gpg.tmp
+    - gpg --dearmor -o /etc/apt/keyrings/salt-archive-keyring.gpg /etc/apt/keyrings/salt-archive-keyring.gpg.tmp
     - rm /etc/apt/keyrings/salt-archive-keyring.gpg.tmp
     - /usr/bin/bash -c 'echo deb [signed-by=/etc/apt/keyrings/salt-archive-keyring.gpg arch=amd64] https://packages.broadcom.com/artifactory/saltproject-deb/ stable main > /etc/apt/sources.list.d/salt.list'
     - apt update
