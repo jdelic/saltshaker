@@ -55,6 +55,6 @@ runcmd:
 final_message: |
     Next steps:
         - cd /srv
-        - git clone -b env/hcloud https://github.com/jdelic/saltshaker
+        - git clone -b env/hcloud+trixie https://github.com/jdelic/saltshaker
         - /srv/saltshaker/setup_srv_salt.sh
         - salt-call state.highstate
