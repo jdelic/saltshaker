@@ -162,7 +162,7 @@ resource "hcloud_network_route" "nat-route" {
 resource "hcloud_server" "saltmaster" {
     name = "symbiont.indevelopment.de"
     server_type = "cx22"
-    image = "debian-12"
+    image = "debian-13"
     location = "hel1"
     ssh_keys = ["jonas@parasite", "jonas@hades"]
 
