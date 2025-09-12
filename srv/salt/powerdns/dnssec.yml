@@ -1,0 +1,4 @@
+dnssec:
+    negative_trustanchors:
+        - name: consul.
+          reason: ".consul is not DNSSEC signed as its Consul's local DNS API"

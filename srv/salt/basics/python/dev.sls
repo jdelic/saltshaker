@@ -23,9 +23,12 @@ python-libpq-dev:
         - pkgs:
             - libpq-dev
         - install_recommends: False
-        - fromrepo: bookworm-pgdg
         - require:
             - pkg: build-essential
+  {% if "database" in grains.get("roles", []) %}
+            - pkgrepo: postgresql-repo
+        - fromrepo: trixie-pgdg
+  {% endif %}
 
 
 python-dev-backports:

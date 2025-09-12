@@ -10,8 +10,8 @@ pdns-recursor:
 
 pdns-recursor-config:
     file.managed:
-        - name: /etc/powerdns/recursor.conf
-        - source: salt://powerdns/recursor.jinja.conf
+        - name: /etc/powerdns/recursor.d/saltshaker.yml
+        - source: salt://powerdns/recursor.jinja.yml
         - user: root
         - group: root
         - mode: '0644'
@@ -30,11 +30,10 @@ pdns-recursor-config:
             provide_dns64: {{pillar.get('powerdns', {}).get('provide_dns64', False)}}
 
 
-pdns-recursor-lua-config:
+pdns-recursor-dnssec-config:
     file.managed:
-        - name: /etc/powerdns/config.lua
-        - contents: |
-            addNTA("consul", ".consul is not DNSSEC signed as its Consul's local DNS API")
+        - name: /etc/powerdns/recursor.d/dnssec.yml
+        - source: salt://powerdns/dnssec.yml
         - user: root
         - group: root
         - mode: '0644'
@@ -75,7 +74,7 @@ pdns-recursor-service:
         #- order: 10  # see ORDER.md
         - watch:
             - file: pdns-recursor-config
-            - file: pdns-recursor-lua-config
+            - file: pdns-recursor-dnssec-config
         - require:
             - pkg: pdns-recursor
             - cmd: consul-sync

@@ -8,7 +8,7 @@ opensmtpd:
         - pkgs:
             - opensmtpd
             - opensmtpd-extras
-        - fromrepo: bookworm-backports
+        #- fromrepo: trixie-backports
         - install_recommends: False
         - require:
             - pkg: no-exim

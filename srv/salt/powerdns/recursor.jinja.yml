@@ -1,0 +1,35 @@
+incoming:
+    allow_from:
+        - '127.0.0.0/8'
+        - '169.254.1.1/24'
+        - '::1/128'
+        - 'fe80::/10'
+        - 'fc00::/7'
+{%- for cidr in cidrs %}
+        - {{cidr}}
+{%- endfor -%}
+{% if accumulator is defined and 'powerdns-recursor-additional-cidrs' in accumulator -%}
+    {%- for cidr in accumulator['powerdns-recursor-additional-cidrs'] %}
+        - {{cidr}}
+    {%- endfor -%}
+{% endif %}
+    listen:
+        - '127.0.0.1'
+        - '169.254.1.1'
+        - '::1'
+{% if accumulator is defined and 'powerdns-recursor-additional-listen-ips' in accumulator -%}
+{%- for ip in accumulator['powerdns-recursor-additional-listen-ips'] %}        - '{{ip}}'{% endfor %}{% endif %}
+
+recursor:
+    forward_zones:
+        - zone: consul
+          recurse: false
+          forwarders:
+              - '169.254.1.1:8600'
+    serve_rfc1918: false
+    setgid: pdns
+    setuid: pdns
+{% if provide_dns64 %}
+    # this is a ipv4/ipv6 node that provides nat64
+    dns64_prefix: '64:ff9b/96'
+{% endif %}

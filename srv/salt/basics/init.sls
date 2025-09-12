@@ -54,7 +54,7 @@ basic-required-packages:
             - bash-completion
             - coreutils
             - patch
-            - dnsutils
+            - bind9-dnsutils
             - unzip
             - net-tools
             - libcap2-bin
@@ -95,10 +95,10 @@ no-sourceslist:
         - order: 1
 
 
-bookworm:
+trixie:
     pkgrepo.managed:
-        - name: {{pillar['repos']['bookworm']}}
-        - file: /etc/apt/sources.list.d/bookworm.list
+        - name: {{pillar['repos']['trixie']}}
+        - file: /etc/apt/sources.list.d/trixie.list
         {% if pillar['repos'].get('pgpkey', None) %}
         - key_url: {{pillar['repos']['pgpkey']}}
         - aptkey: False
@@ -106,36 +106,36 @@ bookworm:
         - order: 1  # execute this state early!
 
 
-updates-bookworm:
+updates-trixie:
     pkgrepo.managed:
-        - name: {{pillar['repos']['bookworm-updates']}}
-        - file: /etc/apt/sources.list.d/bookworm-updates.list
+        - name: {{pillar['repos']['trixie-updates']}}
+        - file: /etc/apt/sources.list.d/trixie-updates.list
         - order: 1  # execute this state early!
 
 
-security-updates-bookworm:
+security-updates-trixie:
     pkgrepo.managed:
-        - name: {{pillar['repos']['bookworm-security']}}
-        - file: /etc/apt/sources.list.d/bookworm-security.list
+        - name: {{pillar['repos']['trixie-security']}}
+        - file: /etc/apt/sources.list.d/trixie-security.list
         - order: 1  # execute this state early!
 
 
-backports-org-bookworm:
+backports-org-trixie:
     pkgrepo.managed:
-        - name: {{pillar['repos']['bookworm-backports']}}
-        - file: /etc/apt/sources.list.d/bookworm-backports.list
+        - name: {{pillar['repos']['trixie-backports']}}
+        - file: /etc/apt/sources.list.d/trixie-backports.list
         - order: 1  # execute this state early!
     file.managed:
-        - name: /etc/apt/preferences.d/bookworm-backports
-        - source: salt://basics/etc_mods/bookworm-backports
+        - name: /etc/apt/preferences.d/trixie-backports
+        - source: salt://basics/etc_mods/trixie-backports
 
 
 saltstack-repo:
     pkgrepo.managed:
         - name: {{pillar['repos']['saltstack']}}
         - file: /etc/apt/sources.list.d/salt.list
-        #- key_url: salt://saltstack_64CBBC8173D76B3F.pgp.key
-        - key_url: salt://mn/packaging_authority_A78049AF.pgp.key
+        - key_url: salt://saltstack_64CBBC8173D76B3F.pgp.key
+        #- key_url: salt://mn/packaging_authority_A78049AF.pgp.key
         - aptkey: False
         - order: 10  # execute this state early!
 
@@ -170,15 +170,29 @@ timezone-utc:
 
 
 # enforce en_us.UTF8
+
+# Ubuntu has removed this file again in bugs.launchpad.net/ubuntu/+source/systemd/+bug/2102028
+# but Debian in Trixie still has it.
+remove-locale-gen-dbus-restriction:
+    file.absent:
+        - name: /usr/share/dbus-1/system.d/systemd-localed-read-only.conf
+        - require:
+            - service: dbus
+
+
 default-locale-gen:
     locale.present:
         - name: en_US.UTF-8
+        - require:
+            - file: remove-locale-gen-dbus-restriction
+
 
 default-locale-set:
     locale.system:
         - name: en_US.UTF-8
         - require:
             - locale: default-locale-gen
+            - file: remove-locale-gen-dbus-restriction
         - order: 2
 
 
