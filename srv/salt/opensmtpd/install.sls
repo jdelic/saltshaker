@@ -197,7 +197,7 @@ opensmtpd-internal-relay-sslkey:
         "relay":
             pillar.get('smtp-outgoing', {}).get(
                 'override-ipv4', grains['ip4_interfaces'].get(pillar['ifassign']['external-alt'])[
-                        pillar['ifassign'].get('external-alt-ip-index', 0)|int()
+                    pillar['ifassign'].get('external-alt-ip-index', 0)|int()
                 ]
             ) if pillar.get('smtp-outgoing', {}).get('bind-ipv4', True) else "",
         "receiver":
