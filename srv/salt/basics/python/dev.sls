@@ -8,7 +8,7 @@ python-dev-packages:
             - libapt-pkg-dev
             - python-apt-dev
             - libjpeg62-turbo-dev
-            - libfreetype6-dev
+            - libfreetype-dev
             - libxslt1-dev
             - libxml2-dev
             - libgd-dev
