@@ -7,7 +7,7 @@ opensmtpd:
     pkg.installed:
         - pkgs:
             - opensmtpd
-            - opensmtpd-extras
+            - opensmtpd-table-postgres
         #- fromrepo: trixie-backports
         - install_recommends: False
         - require:
