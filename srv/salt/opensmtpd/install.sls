@@ -19,7 +19,7 @@ opensmtpd-filters:
         - pkgs:
             - opensmtpd-filter-greylistd
             - opensmtpd-filter-dnsbl
-        - fromrepo: mn-opensmtpd
+        - fromrepo: mn-nightly
         - install_recommends: False
         - require:
             - pkg: greylistd

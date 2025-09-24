@@ -140,21 +140,11 @@ saltstack-repo:
         - order: 10  # execute this state early!
 
 
-maurusnet-opensmtpd:
-    pkgrepo.managed:
-        - humanname: repo.maurus.net-opensmtpd
-        - name: {{pillar['repos']['maurusnet-opensmtpd']}}
-        - file: /etc/apt/sources.list.d/mn-opensmtpd.list
-        - key_url: salt://mn/packaging_authority_A78049AF.pgp.key
-        - aptkey: False
-        - order: 10
-
-
 maurusnet-apps:
     pkgrepo.managed:
         - humanname: repo.maurus.net-apps
-        - name: {{pillar['repos']['maurusnet-apps']}}
-        - file: /etc/apt/sources.list.d/mn-apps.list
+        - name: {{pillar['repos']['maurusnet']}}
+        - file: /etc/apt/sources.list.d/maurusnet.list
         - key_url: salt://mn/packaging_authority_A78049AF.pgp.key
         - aptkey: False
         - order: 10
