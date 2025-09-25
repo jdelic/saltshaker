@@ -129,6 +129,7 @@ EOF'
         useradd -g salt -M -d /opt/saltstack/salt -s /usr/sbin/nologin salt
 SCRIPT
 
+ENV['VAGRANT_NO_PARALLEL'] = 'yes'
 
 Vagrant.configure('2') do |config|
     config.ssh.insert_key = false
