@@ -196,7 +196,7 @@ Vagrant.configure('2') do |config|
         master.vm.provision :shell, run: 'always' do |s|
             s.inline =<<SCRIPT
                 mkdir -p /etc/salt/roles.d
-                chown 700 /etc/salt/roles.d
+                chmod 700 /etc/salt/roles.d
                 touch /etc/salt/roles.d/vagrant
                 touch /etc/salt/roles.d/master
                 touch /etc/salt/roles.d/vault
@@ -298,16 +298,16 @@ SCRIPT
         test.vm.provision :shell, run: 'always' do |s|
             s.inline =<<SCRIPT
                 mkdir -p /etc/salt/roles.d
-                chown 700 /etc/salt/roles.d
+                chmod 700 /etc/salt/roles.d
                 touch /etc/salt/roles.d/vagrant
                 touch /etc/salt/roles.d/mail
                 #touch /etc/salt/roles.d/pim
                 #touch /etc/salt/roles.d/dev
-                #touch /etc/salt/roles.d/buildserver
-                #touch /etc/salt/roles.d/buildworker
-                #touch /etc/salt/roles.d/apps
-                #touch /etc/salt/roles.d/loadbalancer
-                chown 600 /etc/salt/roles.d/*
+                touch /etc/salt/roles.d/buildserver
+                touch /etc/salt/roles.d/buildworker
+                touch /etc/salt/roles.d/apps
+                touch /etc/salt/roles.d/loadbalancer
+                chmod 600 /etc/salt/roles.d/*
                 chown -R salt:salt /etc/salt
 SCRIPT
             s.inline += 'systemctl restart salt-minion; sleep 1'
