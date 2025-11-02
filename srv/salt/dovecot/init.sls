@@ -7,8 +7,8 @@ dovecot:
     pkg.installed:
         - pkgs:
             - dovecot-core
+            - dovecot-flatcurve
             - dovecot-imapd
-            - dovecot-antispam
             - dovecot-pgsql
             - dovecot-sieve
             - dovecot-managesieved
