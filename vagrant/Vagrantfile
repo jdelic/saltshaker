@@ -269,7 +269,24 @@ SCRIPT
         test.vm.provision :shell do |s|
             s.inline = $remote_provision_script
             s.inline += "sh -c 'if ! grep -q " + ip('88') + " /etc/hosts; then echo \"" + ip('88') + "        saltmaster.maurusnet.test saltmaster\" >> /etc/hosts; fi'\n"
+            s.inline +=<<SCRIPT
+                mkdir -p /etc/salt/roles.d
+                chmod 700 /etc/salt/roles.d
+                touch /etc/salt/roles.d/vagrant
+                touch /etc/salt/roles.d/mail
+                #touch /etc/salt/roles.d/pim
+                #touch /etc/salt/roles.d/dev
+                touch /etc/salt/roles.d/buildserver
+                touch /etc/salt/roles.d/buildworker
+                touch /etc/salt/roles.d/apps
+                touch /etc/salt/roles.d/loadbalancer
+                chmod 600 /etc/salt/roles.d/*
+                chown -R salt:salt /etc/salt/roles.d
+SCRIPT
         end
+
+        sync_folder(test, '.', '/vagrant')
+        sync_folder(test, 'saltshaker/etc/salt-minion/minion.d', '/etc/salt/minion.d', mounttype: 'rsync')
 
         test.vm.provision :salt do |salt|
             salt.run_highstate = true
@@ -288,29 +305,6 @@ SCRIPT
             end
             salt.minion_key = 'saltshaker/vagrant/preseed-keys/test.maurusnet.test.pem'
             salt.minion_pub = 'saltshaker/vagrant/preseed-keys/test.maurusnet.test.pub'
-        end
-
-        sync_folder(test, '.', '/vagrant')
-        sync_folder(test, 'saltshaker/etc/salt-minion/minion.d', '/etc/salt/minion.d', mounttype: 'rsync')
-
-        # we have to restart salt-minion because the master's hostname is set in minion.d
-        # on a vboxsf mount when we bring the box back up after a 'vagrant halt'
-        test.vm.provision :shell, run: 'always' do |s|
-            s.inline =<<SCRIPT
-                mkdir -p /etc/salt/roles.d
-                chmod 700 /etc/salt/roles.d
-                touch /etc/salt/roles.d/vagrant
-                touch /etc/salt/roles.d/mail
-                #touch /etc/salt/roles.d/pim
-                #touch /etc/salt/roles.d/dev
-                touch /etc/salt/roles.d/buildserver
-                touch /etc/salt/roles.d/buildworker
-                touch /etc/salt/roles.d/apps
-                touch /etc/salt/roles.d/loadbalancer
-                chmod 600 /etc/salt/roles.d/*
-                chown -R salt:salt /etc/salt
-SCRIPT
-            s.inline += 'systemctl restart salt-minion; sleep 1'
         end
     end
 end
