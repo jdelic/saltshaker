@@ -45,7 +45,7 @@ runcmd:
     - chown -R salt:salt /etc/salt
     - chmod 700 /run/salt-bootstrap/bootstrap-salt.sh
     - apt -y install --no-install-recommends git
-    - /usr/bin/bash /run/salt-bootstrap/bootstrap-salt.sh -r -M stable 3007.6
+    - /usr/bin/bash /run/salt-bootstrap/bootstrap-salt.sh -r -M
     - echo Waiting for key registration...
     - /usr/bin/bash -c 'until /opt/saltstack/salt/salt-key --list=un | grep -q ${hostname}; do sleep 1; echo -n "."; done; echo "";'
     - /opt/saltstack/salt/salt-key --list=un
