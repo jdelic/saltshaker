@@ -110,13 +110,13 @@ consul-service:
             - systemdunit: consul-service
     cmd.run:
         - name: >
-            until test ${count} -gt 30; do
+            until test ${count} -gt 90; do
                 if test $(curl -s -H "X-Consul-Token: $CONSUL_ACL_MASTER_TOKEN" \
                             http://169.254.1.1:8500/v1/agent/members | jq 'length') -gt 0; then
                     break;
                 fi
                 sleep 1; count=$((count+1));
-            done; test ${count} -lt 30
+            done; test ${count} -lt 90
         - env:
             count: 0
             CONSUL_ACL_MASTER_TOKEN: {{pillar['dynamicsecrets']['consul-acl-master-token']}}
@@ -218,13 +218,13 @@ consul-service-restart:
             - systemdunit: consul-service  # if consul.service changes we want to *restart* (reload: False)
     cmd.run:
         - name: >
-            until test ${count} -gt 30; do
+            until test ${count} -gt 90; do
                 if test $(curl -s -H "X-Consul-Token: $CONSUL_ACL_MASTER_TOKEN" \
                             http://169.254.1.1:8500/v1/agent/members | jq 'length') -gt 0; then
                     break;
                 fi
                 sleep 1; count=$((count+1));
-            done; test ${count} -lt 30
+            done; test ${count} -lt 90
         - env:
             count: 0
             CONSUL_ACL_MASTER_TOKEN: {{pillar['dynamicsecrets']['consul-acl-master-token']}}
@@ -277,13 +277,13 @@ consul-service-reload:
             - cmd: consul-sync
     cmd.run:
         - name: >
-            until test ${count} -gt 30; do
+            until test ${count} -gt 90; do
                 if test $(curl -s -H "X-Consul-Token: $CONSUL_ACL_MASTER_TOKEN" \
                             http://169.254.1.1:8500/v1/agent/members | jq 'length') -gt 0; then
                     break;
                 fi
                 sleep 1; count=$((count+1));
-            done; test ${count} -lt 30
+            done; test ${count} -lt 90
         - env:
             count: 0
             CONSUL_ACL_MASTER_TOKEN: {{pillar['dynamicsecrets']['consul-acl-master-token']}}
