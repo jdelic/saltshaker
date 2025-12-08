@@ -1,6 +1,6 @@
 
 {% set conffiles = ['10-auth.conf', '10-ssl.conf', '10-master.conf', '10-mail.conf', '15-lda.conf',
-                    '20-managesieve.conf', '90-plugin.conf', '90-sieve.conf', 'auth-sql.conf.ext'] %}
+                    '20-managesieve.conf', '90-sieve.conf'] %}
 
 # http://wiki2.dovecot.org/Plugins/Antispam
 dovecot:
@@ -114,8 +114,8 @@ dovecot-config-{{file}}:
 
 dovecot-sql-config:
     file.managed:
-        - name: /etc/dovecot/dovecot-sql.conf.ext
-        - source: salt://dovecot/dovecot-sql.conf.jinja.ext
+        - name: /etc/dovecot/conf.d/auth-sql.conf.ext
+        - source: salt://dovecot/conf.d/auth-sql.conf.ext
         - template: jinja
         - context:
             dbname: {{pillar['authserver']['dbname']}}
