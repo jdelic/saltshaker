@@ -59,13 +59,13 @@ consul-service:
             - event: consul-register-acl
     cmd.run:
         - name: >
-            until test ${count} -gt 30; do
+            until test ${count} -gt 90; do
                 if test $(curl -s -H 'X-Consul-Token: anonymous' http://169.254.1.1:8500/v1/agent/members \
                             | jq 'length') -gt 0; then
                     break;
                 fi
                 sleep 1; count=$((count+1));
-            done; test ${count} -lt 30
+            done; test ${count} -lt 90
         - env:
             count: 0
         - onchanges:
@@ -96,13 +96,13 @@ consul-service-reload:
             - cmd: consul-sync
     cmd.run:
         - name: >
-            until test ${count} -gt 30; do
+            until test ${count} -gt 90; do
                 if test $(curl -s -H 'X-Consul-Token: anonymous' http://169.254.1.1:8500/v1/agent/members \
                             | jq 'length') -gt 0; then
                     break;
                 fi
                 sleep 1; count=$((count+1));
-            done; test ${count} -lt 30
+            done; test ${count} -lt 90
         - env:
             count: 0
         - onchanges:
