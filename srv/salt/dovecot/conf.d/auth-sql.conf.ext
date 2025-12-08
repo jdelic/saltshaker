@@ -1,18 +1,97 @@
-# Authentication for SQL users. Included from 10-auth.conf.
+# Authentication for SQL users. Included from auth.conf.
 #
-# <doc/wiki/AuthDatabase.SQL.txt>
+# <https://doc.dovecot.org/latest/core/config/auth/databases/sql.html>
 
-passdb {
-    driver = sql
+# For the sql passdb module, you'll need a database with a table that
+# contains fields for at least the username and password. If you want to
+# use the user@domain syntax, you might want to have a separate domain
+# field as well.
+#
+# If your users all have the same uig/gid, and have predictable home
+# directories, you can use the static userdb module to generate the home
+# dir based on the username and domain. In this case, you won't need fields
+# for home, uid, or gid in the database.
+#
+# If you prefer to use the sql userdb module, you'll want to add fields
+# for home, uid, and gid. Here is an example table:
+#
+# CREATE TABLE users (
+#     username VARCHAR(128) NOT NULL,
+#     domain VARCHAR(128) NOT NULL,
+#     password VARCHAR(64) NOT NULL,
+#     home VARCHAR(255) NOT NULL,
+#     uid INTEGER NOT NULL,
+#     gid INTEGER NOT NULL,
+#     active CHAR(1) DEFAULT 'Y' NOT NULL
+# );
 
-    # Path for SQL configuration file, see example-config/dovecot-sql.conf.ext
-    args = /etc/dovecot/dovecot-sql.conf.ext
+# Database driver: mysql, pgsql, sqlite
+sql_driver = pgsql
+
+# Database connection string. This is driver-specific setting.
+#
+# HA / round-robin load-balancing is supported by giving multiple host
+# settings, like: host=sql1.host.org host=sql2.host.org
+#
+# pgsql:
+#   For available options, see the PostgreSQL documentation for the
+#   PQconnectdb function of libpq.
+#   Use maxconns=n (default 5) to change how many connections Dovecot can
+#   create to pgsql.
+
+pgsql postgresql.local {
+    port=5432
+    dbname={{dbname}}
+    user={{dbuser}}
+    sslmode=verify-full
+    sslrootcert={{sslrootcert}}
+    password={{dbpassword}}
+    client_encoding=utf8
 }
 
-# If you don't have any user-specific settings, you can avoid the user_query
-# by using userdb static instead of userdb sql
-# <doc/wiki/UserDatabase.Static.txt>
-userdb {
-    driver = static
-    args = uid=virtmail gid=mail home=/secure/email/%Ld/%Ln/Maildir
+passdb sql {
+    default_password_scheme = SHA256-CRYPT
+
+# passdb query to retrieve the password. It can return fields:
+#   password - The user's password. This field must be returned.
+#   user - user@domain from the database. Needed with case-insensitive lookups.
+#   username and domain - An alternative way to represent the "user" field.
+#
+# The "user" field is often necessary with case-insensitive lookups to avoid
+# e.g. "name" and "nAme" logins creating two different mail directories. If
+# your user and domain names are in separate fields, you can return "username"
+# and "domain" fields instead of "user".
+#
+# The query can also return other fields which have a special meaning, see
+# https://doc.dovecot.org/latest/core/config/auth/passdb.html#extra-fields
+#
+# Commonly used available substitutions (see https://doc.dovecot.org/latest/core/settings/variables.html
+# for full list):
+#   %{user} = entire user@domain
+#   %{user|username} = user part of user@domain
+#   %{user|domain} = domain part of user@domain
+# 
+# Note that these can be used only as input to SQL query. If the query outputs
+# any of these substitutions, they're not touched. Otherwise it would be
+# difficult to have eg. usernames containing '%' characters.
+#
+# Example:
+#   query = SELECT userid AS user, pw AS password \
+#     FROM users WHERE userid = '%u' AND active = 'Y'
+#
+query = \
+    SELECT creds.primary_alias AS user, creds.password AS password FROM \
+        authserver_resolve_alias('%u', FALSE) AS res, \
+        authserver_get_credentials(res.alias) AS creds;
+}
+
+userdb static {
+    fields {
+        uid=virtmail
+        gid=mail
+        home={{salt['file.join'](pillar['emailstore']['path'], "%{user | domain | lower}",
+                                 "%{user | username | lower}", "sdbox")}}
+    }
+# you can remove next line if you want to always normalize your usernames
+#  skip = found
 }
