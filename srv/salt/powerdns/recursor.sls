@@ -58,7 +58,8 @@ pdns-dhclient-enforce-nameservers:
     file.append:
         - name: /etc/dhcp/dhclient.conf
         - text: |
-            supersede domain-name-servers 169.254.1.1, ::1;
+            supersede domain-name-servers 169.254.1.1;
+            supersede dhcp6.name-servers ::1;
         - require:
             - service: pdns-recursor-service
         - require_in:

@@ -196,7 +196,6 @@ Vagrant.configure('2') do |config|
         master.vm.provision :shell, run: 'always' do |s|
             s.inline =<<SCRIPT
                 mkdir -p /etc/salt/roles.d
-                chmod 700 /etc/salt/roles.d
                 touch /etc/salt/roles.d/vagrant
                 touch /etc/salt/roles.d/master
                 touch /etc/salt/roles.d/vault
@@ -267,11 +266,20 @@ SCRIPT
         test.vm.hostname = 'test.maurusnet.test'
 
         test.vm.provision :shell do |s|
-            s.inline = $remote_provision_script
-            s.inline += "sh -c 'if ! grep -q " + ip('88') + " /etc/hosts; then echo \"" + ip('88') + "        saltmaster.maurusnet.test saltmaster\" >> /etc/hosts; fi'\n"
+            if $local_provision
+                s.inline = $local_provision_script
+            else
+                s.inline = $remote_provision_script
+            end
+        end
+
+        sync_folder(test, '.', '/vagrant')
+        sync_folder(test, 'saltshaker/etc/salt-minion/minion.d', '/etc/salt/minion.d', mounttype: 'rsync')
+
+        test.vm.provision :shell do |s|
+            s.inline = "sh -c 'if ! grep -q " + ip('88') + " /etc/hosts; then echo \"" + ip('88') + "        saltmaster.maurusnet.test saltmaster\" >> /etc/hosts; fi'\n"
             s.inline +=<<SCRIPT
                 mkdir -p /etc/salt/roles.d
-                chmod 700 /etc/salt/roles.d
                 touch /etc/salt/roles.d/vagrant
                 touch /etc/salt/roles.d/mail
                 #touch /etc/salt/roles.d/pim
@@ -280,13 +288,8 @@ SCRIPT
                 touch /etc/salt/roles.d/buildworker
                 touch /etc/salt/roles.d/apps
                 touch /etc/salt/roles.d/loadbalancer
-                chmod 600 /etc/salt/roles.d/*
-                chown -R salt:salt /etc/salt/roles.d
 SCRIPT
         end
-
-        sync_folder(test, '.', '/vagrant')
-        sync_folder(test, 'saltshaker/etc/salt-minion/minion.d', '/etc/salt/minion.d', mounttype: 'rsync')
 
         test.vm.provision :salt do |salt|
             salt.run_highstate = true
@@ -306,5 +309,6 @@ SCRIPT
             salt.minion_key = 'saltshaker/vagrant/preseed-keys/test.maurusnet.test.pem'
             salt.minion_pub = 'saltshaker/vagrant/preseed-keys/test.maurusnet.test.pub'
         end
+
     end
 end
