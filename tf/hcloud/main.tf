@@ -4,6 +4,10 @@ terraform {
             source  = "hetznercloud/hcloud"
             version = "> 1.0"
         }
+        random = {
+            source  = "hashicorp/random"
+            version = "> 3.6.0"
+        }
     }
 }
 
@@ -159,6 +163,53 @@ resource "hcloud_network_route" "nat-route" {
     depends_on = [hcloud_server.saltmaster]
 }
 
+resource "random_password" "storage_box_root" {
+    length = 32
+    special = true
+    override_special = "$%+-#"
+    min_special = 1
+    upper = true
+    min_upper = 1
+    lower = true
+    min_lower = 1
+    min_numeric = 1
+}
+
+resource "hcloud_storage_box" "backup-box" {
+    name = "backup-box"
+    storage_box_type = "bx11"
+    location = "hel1"
+
+    password = random_password.storage_box_root.result
+
+    access_settings = {
+        ssh_enabled = true
+    }
+
+    ssh_keys = [hcloud_ssh_key.jm_hades.public_key, hcloud_ssh_key.jm_parasite.public_key]
+    delete_protection = false
+
+    depends_on = [hcloud_ssh_key.jm_hades, hcloud_ssh_key.jm_parasite]
+}
+
+#resource "random_password" "saltmaster_backup_account" {
+#    length = 32
+#    special = true
+#    override_special = "$%+-#"
+#    min_special = 1
+#    upper = true
+#    min_upper = 1
+#    lower = true
+#    min_lower = 1
+#    min_numeric = 1
+#}
+
+#resource "hcloud_storage_box_subaccount" "saltmaster" {
+#    storage_box_id = hcloud_storage_box.backup-box.id
+#    home_directory = "/server/saltmaster/"
+#    password = random_password.saltmaster_backup_account.result
+#}
+
 resource "hcloud_server" "saltmaster" {
     name = "symbiont.indevelopment.de"
     server_type = "cx22"
@@ -181,6 +232,10 @@ resource "hcloud_server" "saltmaster" {
         saltmaster_config = file("${path.module}/../../etc/salt-master/master.d/saltshaker.conf")
         hostname = "symbiont.indevelopment.de",
         server_type = "cx22",
+        backup_server = hcloud_storage_box.backup-box.server,
+        backup_username = hcloud_storage_box.backup-box.username,
+        backup_password = random_password.storage_box_root.result,
+        backup_homedir = "/server/saltmaster/"
     })
 
     backups = true
@@ -188,8 +243,36 @@ resource "hcloud_server" "saltmaster" {
     firewall_ids = [hcloud_firewall.ssh.id, hcloud_firewall.ping.id]
 
     # important as per hcloud docs as there's a race condition otherwise
-    depends_on = [hcloud_network_subnet.internal-subnet, hcloud_firewall.ssh]
+    depends_on = [hcloud_network_subnet.internal-subnet, hcloud_firewall.ssh, hcloud_storage_box.backup-box]
 }
+
+#resource "random_password" "backup_accounts" {
+#    for_each = local.server_config
+#
+#    length = 32
+#    special = true
+#    override_special = "$%+-#"
+#    min_special = 1
+#    upper = true
+#    min_upper = 1
+#    lower = true
+#    min_lower = 1
+#    min_numeric = 1
+#}
+
+#resource "hcloud_storage_box_subaccount" "serveraccounts" {
+#    for_each = local.server_config
+#
+#    storage_box_id = hcloud_storage_box.backup-box.id
+#    home_directory = "/server/${each.key}/"
+#    password = random_password.backup_accounts[each.key].result
+#
+#    access_settings = {
+#        ssh_enabled = true
+#    }
+#
+#    depends_on = [hcloud_storage_box.backup-box]
+#}
 
 resource "hcloud_server" "servers" {
     for_each = local.server_config
@@ -221,6 +304,10 @@ resource "hcloud_server" "servers" {
                     desired_count_of_additional_ipv6_ips = each.value.desired_count_of_additional_ipv6_ips,
                     hostname = each.key,
                     server_type = each.value.server_type,
+                    backup_server = hcloud_storage_box.backup-box.server,
+                    backup_username = hcloud_storage_box.backup-box.username,
+                    backup_password = random_password.storage_box_root.result,
+                    backup_homedir = "/server/${each.key}/"
                 })
 
     lifecycle {
@@ -338,4 +425,13 @@ output "ip_addresses" {
             [for ip in hcloud_floating_ip.additional_ipv6 : ip.ip_address if ip.name == "ipv6-${s.name}"]
         )
     }
+}
+
+output "storage_box_info" {
+    value = {
+        server = hcloud_storage_box.backup-box.server,
+        username = hcloud_storage_box.backup-box.username,
+        password = random_password.storage_box_root.result
+    }
+    sensitive = true
 }
