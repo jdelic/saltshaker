@@ -141,14 +141,15 @@ Vagrant.configure('2') do |config|
                 vb.memory = 3072
                 vb.cpus = 3
             end
-            master.vm.box = 'debian/contrib-bookworm64'
+            master.vm.box = 'debian/trixie64'
         else
             master.vm.provider :libvirt do |lv|
                 #lv.customize ['modifyvm', :id, '--rtcuseutc', 'on']
                 lv.memory = 3072
                 lv.cpus = 4
             end
-            master.vm.box = 'debian/testing64'
+            master.vm.box = 'debian-13-amd64'
+            master.vm.box_url = "https://s3.eu-central-1.amazonaws.com/vagrant.maurus.net/debian-13-amd64-libvirt.box"
         end
 
 
@@ -249,14 +250,15 @@ SCRIPT
                 vb.memory = 3072
                 vb.cpus = 3
             end
-            test.vm.box = 'debian/contrib-bullseye64'
+            test.vm.box = 'debian/trixie64'
         else
             test.vm.provider :libvirt do |lv|
                 #lv.customize ['modifyvm', :id, '--rtcuseutc', 'on']
                 lv.memory = 3072
                 lv.cpus = 3
             end
-            test.vm.box = 'debian/testing64'
+            test.vm.box = 'debian-13-amd64'
+            test.vm.box_url = "https://s3.eu-central-1.amazonaws.com/vagrant.maurus.net/debian-13-amd64-libvirt.box"
         end
 
         #test.vm.box_url = $box_url
