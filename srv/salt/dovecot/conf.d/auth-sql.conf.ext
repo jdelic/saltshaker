@@ -40,13 +40,16 @@ sql_driver = pgsql
 #   create to pgsql.
 
 pgsql postgresql.local {
-    port=5432
-    dbname={{dbname}}
-    user={{dbuser}}
-    sslmode=verify-full
-    sslrootcert={{sslrootcert}}
-    password={{dbpassword}}
-    client_encoding=utf8
+    host=postgresql.local
+    pgsql_parameters {
+        port=5432
+        dbname={{dbname}}
+        user={{dbuser}}
+        sslmode=verify-full
+        sslrootcert={{sslrootcert}}
+        password={{dbpassword}}
+        client_encoding=utf8
+    }
 }
 
 passdb sql {
