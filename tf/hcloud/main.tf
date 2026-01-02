@@ -24,7 +24,7 @@ locals {
 
     server_config = {
         "db.maurusnet.internal" = {
-            server_type = "cx22"
+            server_type = "cx23"
             backup = 1
             additional_ipv4 = 0
             additional_ipv6 = 0
@@ -37,7 +37,7 @@ locals {
             firewall_ids = null
         }
         "mail.indevelopment.de" = {
-            server_type = "cx22"
+            server_type = "cx23"
             backup = 1
             additional_ipv4 = 1
             additional_ipv6 = 0
@@ -50,7 +50,7 @@ locals {
             firewall_ids = [hcloud_firewall.mail.id, hcloud_firewall.ping.id]
         }
         "dev.maurusnet.internal" = {
-            server_type = "cx32"
+            server_type = "cx33"
             backup = 0
             additional_ipv4 = 0
             additional_ipv6 = 0
@@ -63,7 +63,7 @@ locals {
             firewall_ids = null
         }
         "apps1.maurusnet.internal" = {
-            server_type = "cx22"
+            server_type = "cx23"
             backup = 0
             additional_ipv4 = 0
             additional_ipv6 = 0
@@ -76,7 +76,7 @@ locals {
             firewall_ids = null
         }
         "apps2.maurusnet.internal" = {
-            server_type = "cx22"
+            server_type = "cx23"
             backup = 0
             additional_ipv4 = 0
             additional_ipv6 = 0
@@ -89,7 +89,7 @@ locals {
             firewall_ids = null
         }
         "apps3.maurusnet.internal" = {
-            server_type = "cx22"
+            server_type = "cx23"
             backup = 0
             additional_ipv4 = 0
             additional_ipv6 = 0
@@ -102,7 +102,7 @@ locals {
             firewall_ids = null
         }
         "lb1.indevelopment.de" = {
-            server_type = "cx22"
+            server_type = "cx23"
             backup = 0
             additional_ipv4 = 0
             additional_ipv6 = 0
@@ -212,7 +212,7 @@ resource "hcloud_storage_box" "backup-box" {
 
 resource "hcloud_server" "saltmaster" {
     name = "symbiont.indevelopment.de"
-    server_type = "cx22"
+    server_type = "cx23"
     image = "debian-13"
     location = "hel1"
     ssh_keys = ["jonas@parasite", "jonas@hades"]
@@ -279,7 +279,7 @@ resource "hcloud_server" "servers" {
 
     name = each.key
     server_type = each.value.server_type
-    image = "debian-12"
+    image = "debian-13"
     location = "hel1"
     ssh_keys = ["jonas@parasite", "jonas@hades"]
 
