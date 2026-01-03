@@ -82,6 +82,7 @@ runcmd:
     - echo ${backup_password} > /etc/salt/env.d/backup_password
     - apt install -y --no-install-recommends git salt-minion
     - chown -R salt:salt /etc/salt
+    - salt-pip install docker
     - systemctl restart salt-minion
 
 
