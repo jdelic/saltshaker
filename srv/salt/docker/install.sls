@@ -50,8 +50,8 @@ dockerd-service:
 docker-pdns-recursor-cidr:
   file.accumulated:
       - name: powerdns-recursor-additional-cidrs
-      - filename: /etc/powerdns/recursor.conf
-      - text: {{pillar['docker']['bridge-cidr']}}/24
+      - filename: /etc/powerdns/recursor.d/saltshaker.yml
+      - text: {{pillar['docker']['bridge-cidr']}}
       - require_in:
           - file: pdns-recursor-config
 
