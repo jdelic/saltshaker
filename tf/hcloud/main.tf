@@ -59,7 +59,7 @@ locals {
             desired_count_of_ipv6_ips = 2
             desired_count_of_additional_ipv6_ips = 0
             ptr = null
-            roles = ["dev", "buildserver", "buildworker", "consulserver"]
+            roles = ["dev", "buildserver", "buildworker", "consulserver", "docker-registry"]
             firewall_ids = null
         }
         "apps1.maurusnet.internal" = {
