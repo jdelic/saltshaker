@@ -5,7 +5,9 @@ include:
 
 
 pdns-recursor:
-    pkg.installed
+    pkg.installed:
+        - require_in:
+            - cmd: powerdns-pkg-installed-sync
 
 
 pdns-recursor-config:

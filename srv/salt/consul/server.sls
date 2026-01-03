@@ -6,6 +6,7 @@ include:
     - consul.install
     - consul.sync
     - consul.acl_install  # during firstrun, this state is empty
+    - powerdns.sync
 
 
 {% from 'consul/install.sls' import consul_user, consul_group %}
@@ -95,7 +96,7 @@ consul-service:
             - file: consul
             - file: consul-agent-absent
             # this is here so that the WantedBy in our systemd service definition is processed correctly
-            - pkg: pdns-recursor
+            - cmd: powerdns-pkg-installed-sync
         - unless:
             - sls: consul.agent
     service.running:
