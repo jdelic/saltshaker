@@ -240,7 +240,8 @@ SCRIPT
         # We have to restart salt-master because the dynamicsecrets pillar is on the same
         # vboxsf mount and needs to be loaded.
         master.vm.provision :shell, run: 'always' do |s|
-            s.inline = 'systemctl restart salt-minion; sleep 1'
+            s.inline = 'salt-pip install docker;'
+            s.inline += 'systemctl restart salt-minion; sleep 1'
         end
     end
 
@@ -312,5 +313,8 @@ SCRIPT
             salt.minion_pub = 'saltshaker/vagrant/preseed-keys/test.maurusnet.test.pub'
         end
 
+        test.vm.provision :shell do |s|
+            s.inline = "salt-pip install docker"
+        end
     end
 end
