@@ -56,7 +56,7 @@ locals {
             additional_ipv6 = 0
             ipv6_only = 1
             internal_only = 1
-            desired_count_of_ipv6_ips = 2
+            desired_count_of_ipv6_ips = 0
             desired_count_of_additional_ipv6_ips = 0
             ptr = null
             roles = ["dev", "buildserver", "buildworker", "consulserver", "docker-registry"]
@@ -69,7 +69,7 @@ locals {
             additional_ipv6 = 0
             ipv6_only = 1
             internal_only = 1
-            desired_count_of_ipv6_ips = 2
+            desired_count_of_ipv6_ips = 0
             desired_count_of_additional_ipv6_ips = 0
             ptr = null
             roles = ["apps", "nomadserver"]
@@ -82,7 +82,7 @@ locals {
             additional_ipv6 = 0
             ipv6_only = 1
             internal_only = 1
-            desired_count_of_ipv6_ips = 2
+            desired_count_of_ipv6_ips = 0
             desired_count_of_additional_ipv6_ips = 0
             ptr = null
             roles = ["apps", "nomadserver"]
@@ -95,7 +95,7 @@ locals {
             additional_ipv6 = 0
             ipv6_only = 1
             internal_only = 1
-            desired_count_of_ipv6_ips = 2
+            desired_count_of_ipv6_ips = 0
             desired_count_of_additional_ipv6_ips = 0
             ptr = null
             roles = ["apps", "nomadserver"]
@@ -108,20 +108,12 @@ locals {
             additional_ipv6 = 0
             ipv6_only = 0
             internal_only = 0
-            desired_count_of_ipv6_ips = 2
+            desired_count_of_ipv6_ips = 1
             desired_count_of_additional_ipv6_ips = 0
             ptr = null
             roles = ["loadbalancer"]
             firewall_ids = [hcloud_firewall.web.id, hcloud_firewall.ping.id]
         }
-/*        backup.maurusnet.internal = {
-            server_type = "bx11"
-            backup = 0
-            additional_ipv4 = 0
-            ipv6_only = 1
-            internal_only = 1
-            ptr = null
-        } */
     }
 }
 
