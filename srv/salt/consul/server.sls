@@ -212,6 +212,8 @@ consul-service-restart:
         - sig: consul
         - enable: True
         - init_delay: 2
+        - require:
+            - cmd: consul-sync-network
         - watch:
             - file: consul-acl-bootstrap-config
             - file: consul-common-config
@@ -264,6 +266,7 @@ consul-service-reload:
         - init_delay: 1
         - require:
             - systemdunit: consul-service  # if consul.service changes we want to *restart* (reload: False)
+            - cmd: consul-sync-network
         - watch:
             # If we detect a change in the service definitions reload, don't restart. This matches STATE names not FILE
             # names, so this watch ONLY works on STATES named /etc/consul/services.d/[whatever]!
