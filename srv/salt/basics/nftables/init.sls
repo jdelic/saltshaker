@@ -35,7 +35,7 @@ netfilter-persistent:
 
 nftables-temp-input-allow-ipv4:
     nftables.set_policy:
-        - policy: allow
+        - policy: accept
         - table: filter
         - family: ip4
         - chain: input
@@ -48,7 +48,7 @@ nftables-temp-input-allow-ipv4:
 
 nftables-temp-input-allow-ipv6:
     nftables.set_policy:
-        - policy: allow
+        - policy: accept
         - table: filter
         - family: ip6
         - chain: input
@@ -61,7 +61,7 @@ nftables-temp-input-allow-ipv6:
 
 nftables-temp-output-allow-ipv4:
     nftables.set_policy:
-        - policy: allow
+        - policy: accept
         - table: filter
         - family: ip4
         - chain: output
@@ -74,7 +74,7 @@ nftables-temp-output-allow-ipv4:
 
 nftables-temp-output-allow-ipv6:
     nftables.set_policy:
-        - policy: allow
+        - policy: accept
         - table: filter
         - family: ip6
         - chain: output
@@ -87,7 +87,7 @@ nftables-temp-output-allow-ipv6:
 
 nftables-temp-forward-allow-ipv4:
     nftables.set_policy:
-        - policy: allow
+        - policy: accept
         - table: filter
         - family: ip4
         - chain: forward
@@ -100,7 +100,7 @@ nftables-temp-forward-allow-ipv4:
 
 nftables-temp-forward-allow-ipv6:
     nftables.set_policy:
-        - policy: allow
+        - policy: accept
         - table: filter
         - family: ip6
         - chain: forward
