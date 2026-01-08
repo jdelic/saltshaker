@@ -57,7 +57,7 @@ duplicity-cron-backup-script:
         - context:
             additional_options: {{pillar['duplicity-backup'].get('additional-options', '')}}
             sign_key: {{host_key if pillar['gpg'].get('vault-create-perhost-key', False) else ''}}
-            backup_target_url: {{salt['file.join'](backup_target_url, grains['envdir']['backup_homedir'])}}
+            backup_target_url: {{backup_target_url}}
             gpg_keys: {{gpg_keys|tojson}}
             gpg_options: {{pillar['duplicity-backup'].get('gpg-options', '')}}
             envvars: {{envvars|tojson}}
