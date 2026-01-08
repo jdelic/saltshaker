@@ -22,6 +22,9 @@ duplicity-cron-config-folder:
 {% if 'GNUPGHOME' not in envvars %}
     {% set envvars = envvars | set_dict_key_value('GNUPGHOME', pillar['gpg']['shared-keyring-location']) %}
 {% endif %}
+{% if 'FTP_PASSWORD' not in envvars %}
+    {% set envvars = envvars | set_dict_key_value('FTP_PASSWORD', grains['envdir']['backup_password']) %}
+{% endif %}
 
 {# the following makes sure that the host gpg key comes first, as it has no passphrase #}
 {% set gpg_keys = [] %}
@@ -32,7 +35,8 @@ duplicity-cron-config-folder:
     {% set x = gpg_keys.append(gpg_key) %}
 {% endfor %}
 
-
+{% set backup_target_url = "sftp://{username}@{host}/".format(username=grains['envdir']['backup_username'],
+                                                              host=grains['envdir']['backup_server']) %}
 duplicity-cron-backup-script:
     file.managed:
         - name: /etc/duplicity.d/backup.sh
@@ -43,7 +47,7 @@ duplicity-cron-backup-script:
         - mode: '0700'
         - context:
             additional_options: {{pillar['duplicity-backup'].get('additional-options', '')}}
-            backup_target_url: {{pillar['duplicity-backup']['backup-target']}}
+            backup_target_url: {{salt['file.join'](backup_target_url, grains['envdir']['backup_homedir'])}}
             gpg_keys: {{gpg_keys|tojson}}
             gpg_options: {{pillar['duplicity-backup'].get('gpg-options', '')}}
             envvars: {{envvars|tojson}}
@@ -58,7 +62,7 @@ duplicity-cron-cleanup-script:
         - group: root
         - mode: '0700'
         - context:
-            backup_target_url: {{pillar['duplicity-backup']['backup-target']}}
+            backup_target_url: {{salt['file.join'](backup_target_url, grains['envdir']['backup_homedir'])}}
             cron_enabled: {{pillar.get('duplicity-backup', {}).get('enable-cleanup-cron', False)}}
             cleanup_mode: {{pillar.get('duplicity-backup', {}).get('cleanup-mode', 'remove-older-than')}}
             cleanup_selector: {{pillar.get('duplicity-backup', {}).get('cleanup-selector', '1y')}}
