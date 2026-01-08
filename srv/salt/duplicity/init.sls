@@ -28,15 +28,24 @@ duplicity-cron-config-folder:
 
 {# the following makes sure that the host gpg key comes first, as it has no passphrase #}
 {% set gpg_keys = [] %}
-{% if pillar['duplicity-backup'].get('encrypt-for-host', False) %}
-    {% set x = gpg_keys.append(grains['id']) %}
+{% if pillar['gpg'].get('vault-create-perhost-key', False) %}
+    {% set host_key = salt['cmd.run_stdout'](
+        "gpg --no-default-keyring --homedir {gpghomedir} --list-keys --with-colons {hostname} | grep -B 1 fpr | "
+        "grep -A 1 pub | grep fpr | cut -d':' -f 10".format(
+            gpghomedir=pillar['gpg']['shared-keyring-location'],
+            hostname=grains['id']), python_shell=True) %}
+{% endif %}
+{% if pillar['duplicity-backup'].get('encrypt-for-host', False) and pillar['gpg'].get('vault-create-perhost-key', False) %}
+    {% set x = gpg_keys.append(host_key) %}
 {% endif %}
 {% for gpg_key in pillar['duplicity-backup']['gpg-keys'] %}
     {% set x = gpg_keys.append(gpg_key) %}
 {% endfor %}
 
-{% set backup_target_url = "sftp://{username}@{host}/".format(username=grains['envdir']['backup_username'],
-                                                              host=grains['envdir']['backup_server']) %}
+{% set backup_target_url = "sftp://{username}@{host}{sep}{path}".format(username=grains['envdir']['backup_username'],
+                                                                   host=grains['envdir']['backup_server'],
+                                                                   sep='/' if not grains['envdir']['backup_homedir'].startswith('/') else '',
+                                                                   path=grains['envdir']['backup_homedir']) %}
 duplicity-cron-backup-script:
     file.managed:
         - name: /etc/duplicity.d/backup.sh
@@ -47,6 +56,7 @@ duplicity-cron-backup-script:
         - mode: '0700'
         - context:
             additional_options: {{pillar['duplicity-backup'].get('additional-options', '')}}
+            sign_key: {{host_key if pillar['gpg'].get('vault-create-perhost-key', False) else ''}}
             backup_target_url: {{salt['file.join'](backup_target_url, grains['envdir']['backup_homedir'])}}
             gpg_keys: {{gpg_keys|tojson}}
             gpg_options: {{pillar['duplicity-backup'].get('gpg-options', '')}}
