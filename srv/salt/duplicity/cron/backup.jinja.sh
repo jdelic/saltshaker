@@ -89,11 +89,13 @@ for LINK in /etc/duplicity.d/$1/folderlinks/*; do
     echo "Running duplicity {% if additional_options %}{{additional_options|replace('"', '\"')}}{% endif %}" \
          "{% for key_id in gpg_keys %}--encrypt-key={{key_id|replace('"', '\"')}} {% endfor %}" \
          "{% if gpg_options %}--gpg-options='{{gpg_options|replace('"', '\"')}}'{% endif %} " \
+         "{% if sign_key %}--sign-key={{sign_key}}{% endif %} " \
          "$FOLDER {{backup_target_url}}"
 
     /usr/bin/duplicity {% if additional_options %}{{additional_options}}{% endif %} \
         {% for key_id in gpg_keys %}--encrypt-key={{key_id}} {% endfor %} \
-        {% if gpg_options %}--gpg-options='{{gpg_options}}'{% endif %} $FOLDER {{backup_target_url}}
+        {% if gpg_options %}--gpg-options='{{gpg_options}}'{% endif %} \
+        {% if sign_key %}--sign-key={{sign_key}}{% endif %} $FOLDER {{backup_target_url}}
 
     if [ -d "/etc/duplicity.d/$1/postscripts/$BL" ]; then
         for POSTSCRIPT in /etc/duplicity.d/$1/postscripts/$BL/*; do
