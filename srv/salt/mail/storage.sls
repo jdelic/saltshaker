@@ -87,4 +87,16 @@ email-backup-symlink:
         - target: {{pillar['emailstore']['path']}}
         - require:
             - file: email-storage
+{% else %}
+email-backup-prescript-folder-absent:
+    file.absent:
+        - name: /etc/duplicity.d/daily/prescripts/secure-email
+
+email-backup-postscript-folder-absent:
+    file.absent:
+        - name: /etc/duplicity.d/daily/postscripts/secure-email
+
+email-backup-symlink-absent:
+    file.absent:
+        - name: /etc/duplicity.d/daily/folderlinks/secure-email
 {% endif %}

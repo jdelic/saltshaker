@@ -35,7 +35,7 @@ netfilter-persistent:
 
 nftables-temp-input-allow-ipv4:
     nftables.set_policy:
-        - policy: allow
+        - policy: accept
         - table: filter
         - family: ip4
         - chain: input
@@ -43,11 +43,12 @@ nftables-temp-input-allow-ipv4:
         - save: False
         - require:
             - pkg: nftables
+            - nftables: nftables-baseconfig-chain-ipv4-input
 
 
 nftables-temp-input-allow-ipv6:
     nftables.set_policy:
-        - policy: allow
+        - policy: accept
         - table: filter
         - family: ip6
         - chain: input
@@ -55,11 +56,12 @@ nftables-temp-input-allow-ipv6:
         - save: False
         - require:
             - pkg: nftables
+            - nftables: nftables-baseconfig-chain-ipv6-input
 
 
 nftables-temp-output-allow-ipv4:
     nftables.set_policy:
-        - policy: allow
+        - policy: accept
         - table: filter
         - family: ip4
         - chain: output
@@ -67,11 +69,12 @@ nftables-temp-output-allow-ipv4:
         - save: False
         - require:
             - pkg: nftables
+            - nftables: nftables-baseconfig-chain-ipv4-output
 
 
 nftables-temp-output-allow-ipv6:
     nftables.set_policy:
-        - policy: allow
+        - policy: accept
         - table: filter
         - family: ip6
         - chain: output
@@ -79,11 +82,12 @@ nftables-temp-output-allow-ipv6:
         - save: False
         - require:
             - pkg: nftables
+            - nftables: nftables-baseconfig-chain-ipv6-output
 
 
 nftables-temp-forward-allow-ipv4:
     nftables.set_policy:
-        - policy: allow
+        - policy: accept
         - table: filter
         - family: ip4
         - chain: forward
@@ -91,11 +95,12 @@ nftables-temp-forward-allow-ipv4:
         - save: False
         - require:
             - pkg: nftables
+            - nftables: nftables-baseconfig-chain-ipv4-forward
 
 
 nftables-temp-forward-allow-ipv6:
     nftables.set_policy:
-        - policy: allow
+        - policy: accept
         - table: filter
         - family: ip6
         - chain: forward
@@ -103,6 +108,7 @@ nftables-temp-forward-allow-ipv6:
         - save: True
         - require:
             - pkg: nftables
+            - nftables: nftables-baseconfig-chain-ipv6-forward
 
 
 nftables-baseconfig-chain-ipv4-input-flush:
@@ -112,7 +118,6 @@ nftables-baseconfig-chain-ipv4-input-flush:
         - family: ip4
         - order: 2
         - require:
-            - nftables: nftables-baseconfig-chain-ipv4-input
             - nftables: nftables-temp-input-allow-ipv4
 
 
@@ -123,7 +128,6 @@ nftables-baseconfig-chain-ipv6-input-flush:
         - family: ip6
         - order: 2
         - require:
-            - nftables: nftables-baseconfig-chain-ipv6-input
             - nftables: nftables-temp-input-allow-ipv6
 
 
@@ -134,7 +138,6 @@ nftables-baseconfig-chain-ipv4-output-flush:
         - family: ip4
         - order: 2
         - require:
-            - nftables: nftables-baseconfig-chain-ipv4-output
             - nftables: nftables-temp-output-allow-ipv4
 
 
@@ -145,7 +148,6 @@ nftables-baseconfig-chain-ipv6-output-flush:
         - family: ip6
         - order: 2
         - require:
-            - nftables: nftables-baseconfig-chain-ipv6-output
             - nftables: nftables-temp-output-allow-ipv6
 
 
@@ -156,7 +158,6 @@ nftables-baseconfig-chain-ipv4-forward-flush:
         - family: ip4
         - order: 2
         - require:
-            - nftables: nftables-baseconfig-chain-ipv4-forward
             - nftables: nftables-temp-forward-allow-ipv4
 
 
@@ -167,7 +168,6 @@ nftables-baseconfig-chain-ipv6-forward-flush:
         - family: ip6
         - order: 2
         - require:
-            - nftables: nftables-baseconfig-chain-ipv6-forward
             - nftables: nftables-temp-forward-allow-ipv6
 
 
