@@ -2,17 +2,19 @@
 Description=Nomad Cluster
 Wants=basic.target
 After=basic.target network.target
+# StartLimitInterval: try to restart for unlimited times, because this is an essential service!
+StartLimitIntervalSec=0
 
 [Service]
-User={{user}}
-Group={{group}}
+# User={{user}} when we can switch to a dedicated nomad user
+User=root
+# Group={{group}} when we can switch to a dedicated nomad group
+Group=root
 ExecStart=/usr/local/bin/nomad agent {{parameters}}
 ExecReload=/bin/kill -HUP $MAINPID
 KillMode=process
 Restart=on-failure
 PIDFile=/run/nomad/nomad.pid
-# StartLimitInterval: try to restart for unlimited times, because this is an essential service!
-StartLimitInterval=0
 RestartSec=42s
 
 [Install]

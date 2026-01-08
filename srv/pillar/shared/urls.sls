@@ -31,6 +31,7 @@ urls:
     consul-template: https://releases.hashicorp.com/consul-template/0.41.3/consul-template_0.41.3_linux_amd64.zip
     nomad: https://releases.hashicorp.com/nomad/1.11.1/nomad_1.11.1_linux_amd64.zip
     nomad-autoscaler: https://releases.hashicorp.com/nomad-autoscaler/0.4.9/nomad-autoscaler_0.4.9_linux_amd64.zip
+    nomad-driver-podman: https://releases.hashicorp.com/nomad-driver-podman/0.6.4/nomad-driver-podman_0.6.4_linux_amd64.zip
     nomad-pack: https://releases.hashicorp.com/nomad-pack/0.4.1/nomad-pack_0.4.1_linux_amd64.zip
     terraform: https://releases.hashicorp.com/terraform/1.14.3/terraform_1.14.3_linux_amd64.zip
     vault: https://releases.hashicorp.com/vault/1.21.2/vault_1.21.2_linux_amd64.zip
@@ -49,6 +50,7 @@ hashes:
     consul-template: sha256=f708323c5a9eeedf1e125662fa1dd3c54f8cadd0758ef2a9a27c7a22e181e93c
     nomad: sha256=8e8fbc9c3ddae39a63f7ed70a99bb4b936bb6e88ed9160ce0e9d36ff2909c1f3
     nomad-autoscaler: sha256=4b89c4d266663c9795b32930199c489a67606ac13f03e7fca8da15a0513a6ca7
+    nomad-driver-podman: sha256=5b9ac89585d7359f941a2504b11d50866f67c2887cb3716fba2bbaa0749a14a8
     nomad-pack: sha256=08e213dfe76152b512da9fd8c57c24365812a43c96deda6f88cde26aab03310b
     terraform: sha256=178b2a602251bb68b94732aceca2cc1023d87597cb83dba92cab31b6689edb4d
     vault: sha256=d2005a053a2ab75318d395ca8151aef9116fde67f75dc8f43a4fa9def6f3fc9e
