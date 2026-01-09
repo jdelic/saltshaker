@@ -83,7 +83,7 @@ passdb sql {
 #     FROM users WHERE userid = '%u' AND active = 'Y'
 #
     query = \
-        SELECT creds.primary_alias AS user, creds.password AS password FROM
+        SELECT creds.primary_alias AS user, creds.password AS password FROM \
             authserver_resolve_alias('%{user}', FALSE) AS res, \
             authserver_get_credentials(res.alias) AS creds;
 }
