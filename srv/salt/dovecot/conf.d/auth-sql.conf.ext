@@ -82,10 +82,10 @@ passdb sql {
 #   query = SELECT userid AS user, pw AS password \
 #     FROM users WHERE userid = '%u' AND active = 'Y'
 #
-query = \
-    SELECT creds.primary_alias AS user, creds.password AS password FROM \
-        authserver_resolve_alias('%u', FALSE) AS res, \
-        authserver_get_credentials(res.alias) AS creds;
+    query = \
+        SELECT creds.primary_alias AS user, creds.password AS password FROM
+            authserver_resolve_alias('%{user}', FALSE) AS res, \
+            authserver_get_credentials(res.alias) AS creds;
 }
 
 userdb static {
