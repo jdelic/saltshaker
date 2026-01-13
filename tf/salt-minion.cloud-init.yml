@@ -91,7 +91,7 @@ runcmd:
     - /usr/bin/bash -c 'until [ -e /dev/disk/by-id/scsi-0HC_Volume_${v_conf.id} ]; do sleep 1; echo -n "."; done; echo "";'
     - echo "Attached volume ${v_name}:${v_conf.id} is now available."
     - mkdir -p ${v_conf.mountpoint}
-    - echo "/dev/disk/by-id/scsi-0HC_Volume_${v_conf.id} /${v_conf.mountpoint} ext4 discard,nofail,defaults 0 0" >> /etc/fstab
+    - echo "/dev/disk/by-id/scsi-0HC_Volume_${v_conf.id} ${v_conf.mountpoint} ext4 discard,nofail,defaults 0 0" >> /etc/fstab
     %{ endfor ~}
 %{ endif ~}
 
