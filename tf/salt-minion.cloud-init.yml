@@ -93,6 +93,8 @@ runcmd:
     - mkdir -p ${v_conf.mountpoint}
     - echo "/dev/disk/by-id/scsi-0HC_Volume_${v_conf.id} ${v_conf.mountpoint} ext4 discard,nofail,defaults 0 0" >> /etc/fstab
     %{ endfor ~}
+    - systemctl daemon-reload
+    - mount -a
 %{ endif ~}
 
 
