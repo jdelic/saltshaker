@@ -84,6 +84,16 @@ runcmd:
     - chown -R salt:salt /etc/salt
     - salt-pip install docker
     - systemctl restart salt-minion
+%{ if length(volumes) > 0 ~}
+    - udevadm trigger -c add -s block -p ID_VENDOR=HC --verbose -p ID_MODEL=Volume
+    %{ for v_name, v_conf in volumes ~}
+    - echo "Waiting for attached volume ${v_name}:${v_conf.id} to be available..."
+    - /usr/bin/bash -c 'until [ -e /dev/disk/by-id/scsi-0HC_Volume_${v_conf.id} ]; do sleep 1; echo -n "."; done; echo "";'
+    - echo "Attached volume ${v_name}:${v_conf.id} is now available."
+    - mkdir -p ${v_conf.mountpoint}
+    - echo "/dev/disk/by-id/scsi-0HC_Volume_${v_conf.id} /${v_conf.mountpoint} ext4 discard,nofail,defaults 0 0" >> /etc/fstab
+    %{ endfor ~}
+%{ endif ~}
 
 
 final_message: |

@@ -35,6 +35,12 @@ locals {
             ptr = null
             roles = ["database", "vault", "authserver", "consulserver"]
             firewall_ids = null
+            volumes = {
+                "dbdata" = {
+                    size = 40
+                    mountpoint = "/secure"
+                }
+            }
         }
         "mail.indevelopment.de" = {
             server_type = "cx23"
@@ -48,6 +54,12 @@ locals {
             ptr = "mail.indevelopment.de"
             roles = ["mail"]
             firewall_ids = [hcloud_firewall.mail.id, hcloud_firewall.ping.id]
+            volumes = {
+                "maildata" = {
+                    size = 40
+                    mountpoint = "/secure"
+                }
+            }
         }
         "dev.maurusnet.internal" = {
             server_type = "cx33"
@@ -61,6 +73,7 @@ locals {
             ptr = null
             roles = ["dev", "buildserver", "buildworker", "consulserver", "docker-registry"]
             firewall_ids = null
+            volumes = {}
         }
         "apps1.maurusnet.internal" = {
             server_type = "cx23"
@@ -74,6 +87,7 @@ locals {
             ptr = null
             roles = ["apps", "nomadserver"]
             firewall_ids = null
+            volumes = {}
         }
         "apps2.maurusnet.internal" = {
             server_type = "cx23"
@@ -87,6 +101,7 @@ locals {
             ptr = null
             roles = ["apps", "nomadserver"]
             firewall_ids = null
+            volumes = {}
         }
         "apps3.maurusnet.internal" = {
             server_type = "cx23"
@@ -100,6 +115,7 @@ locals {
             ptr = null
             roles = ["apps", "nomadserver"]
             firewall_ids = null
+            volumes = {}
         }
         "lb1.indevelopment.de" = {
             server_type = "cx23"
@@ -113,8 +129,21 @@ locals {
             ptr = null
             roles = ["loadbalancer"]
             firewall_ids = [hcloud_firewall.web.id, hcloud_firewall.ping.id]
+            volumes = {}
         }
     }
+
+    volumes = merge([
+        for server_name, server_conf in local.server_config : {
+            for v_name, vol in server_conf.volumes :
+                v_name => {
+                    name = "vol-${v_name}"
+                    server = server_name
+                    size = vol.size
+                    mountpoint = vol.mountpoint
+                } if length(server_conf.volumes) > 0
+        }
+    ]...)
 }
 
 /*
@@ -266,6 +295,20 @@ resource "hcloud_server" "saltmaster" {
 #    depends_on = [hcloud_storage_box.backup-box]
 #}
 
+resource "hcloud_volume" "disks" {
+    for_each = local.volumes
+    name = each.value.name
+    size = each.value.size
+    format = "ext4"
+    location = "hel1"
+}
+
+resource "hcloud_volume_attachment" "disk_attachments" {
+    for_each = local.volumes
+    server_id = hcloud_server.servers[each.value.server].id
+    volume_id = hcloud_volume.disks[each.key].id
+}
+
 resource "hcloud_server" "servers" {
     for_each = local.server_config
 
@@ -299,7 +342,13 @@ resource "hcloud_server" "servers" {
                     backup_server = hcloud_storage_box.backup-box.server,
                     backup_username = hcloud_storage_box.backup-box.username,
                     backup_password = random_password.storage_box_root.result,
-                    backup_homedir = "/server/${each.key}/"
+                    backup_homedir = "/server/${each.key}/",
+                    volumes = { for vol_name, vol_conf in each.value.volumes: vol_name => merge(
+                        vol_conf,
+                        {
+                            "id" : hcloud_volume.disks[vol_name].id
+                        }
+                    )}
                 })
 
     lifecycle {
@@ -426,4 +475,8 @@ output "storage_box_info" {
         password = random_password.storage_box_root.result
     }
     sensitive = true
+}
+
+output "volumes" {
+    value = local.volumes
 }
