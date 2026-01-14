@@ -33,34 +33,17 @@ openssh-config-folder:
 
 openssh-config:
     file.managed:
-        - name: /etc/ssh/sshd_config.d/00-sshd_config
-        - source: salt://basics/crypto/sshd_config.jinja
+        - name: /etc/ssh/sshd_config.d/00-sshd_config.conf
+        - source: salt://basics/crypto/sshd_config.jinja.conf
         - template: jinja
         - require:
             - file: openssh-config-folder
-        - watch_in:
-            - cmd: openssh-config-builder
-
-
-openssh-config-builder:
-    file.managed:
-        - name: /etc/ssh/assemble-ssh-config.sh
-        - source: salt://basics/crypto/assemble-sshd-config.sh
-        - user: root
-        - group: root
-        - mode: '0750'
-        - require:
-            - file: openssh-config-folder
-    cmd.run:
-        - name: /etc/ssh/assemble-ssh-config.sh
-        - watch:
-            - file: /etc/ssh/sshd_config.d*
 
 
 openssh-client-config:
     file.managed:
         - name: /etc/ssh/ssh_config.d/mn_tmux.conf
-        - source: salt://basics/crypto/ssh_config.jinja
+        - source: salt://basics/crypto/ssh_config.jinja.conf
         - template: jinja
         - user: root
         - group: root
