@@ -37,7 +37,7 @@ locals {
             firewall_ids = null
             volumes = {
                 "dbdata" = {
-                    size = 40
+                    size = 10
                     mountpoint = "/secure"
                 }
             }
