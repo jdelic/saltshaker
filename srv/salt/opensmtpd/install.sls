@@ -282,6 +282,12 @@ opensmtpd-config:
                 {%- else -%}
                     {{pillar['smtp']['internal-relay']['sslkey']}}
                 {%- endif %}
+            {% if pillar['smtp'].get('relay-via', {}).get('url', False) %}
+            relay_via_url: pillar['smtp']['relay-via']['url']
+            {% endif %}
+            {% if pillar['smtp'].get('relay-via', {}).get('auth', False) %}
+            relay_via_auth: pillar['smtp']['relay-via']['auth']
+            {% endif %}
         - require:
             - pkg: opensmtpd
             - file: opensmtpd-authserver-config
