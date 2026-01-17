@@ -38,6 +38,8 @@ openssh-config:
         - template: jinja
         - require:
             - file: openssh-config-folder
+        - watch_in:
+            - service: openssh-reload
 
 
 openssh-client-config:
