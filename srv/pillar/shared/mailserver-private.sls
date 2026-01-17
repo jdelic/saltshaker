@@ -30,6 +30,9 @@ smtp:
         sslcert-content: ssl:smtp-local:combined
         sslkey-content: ssl:smtp-local:key
 
+    #relay-via:
+    #    url: smtps://ses@host/
+    #    auth: { ses=user:password }
 
 # vim: syntax=yaml
 
