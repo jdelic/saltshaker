@@ -213,23 +213,26 @@ resource "hcloud_storage_box" "backup-box" {
     depends_on = [hcloud_ssh_key.jm_hades, hcloud_ssh_key.jm_parasite]
 }
 
-#resource "random_password" "saltmaster_backup_account" {
-#    length = 32
-#    special = true
-#    override_special = "$%+-#"
-#    min_special = 1
-#    upper = true
-#    min_upper = 1
-#    lower = true
-#    min_lower = 1
-#    min_numeric = 1
-#}
-
-#resource "hcloud_storage_box_subaccount" "saltmaster" {
-#    storage_box_id = hcloud_storage_box.backup-box.id
-#    home_directory = "/server/saltmaster/"
-#    password = random_password.saltmaster_backup_account.result
-#}
+# resource "random_password" "saltmaster_backup_account" {
+#     length = 32
+#     special = true
+#     override_special = "$%+-#"
+#     min_special = 1
+#     upper = true
+#     min_upper = 1
+#     lower = true
+#     min_lower = 1
+#     min_numeric = 1
+# }
+#
+# resource "hcloud_storage_box_subaccount" "saltmaster" {
+#     name = "sbox-saltmaster"
+#     storage_box_id = hcloud_storage_box.backup-box.id
+#     home_directory = "/server/saltmaster/"
+#     password = random_password.saltmaster_backup_account.result
+#
+#     depends_on = [hcloud_storage_box.backup-box]
+# }
 
 resource "hcloud_server" "saltmaster" {
     name = "symbiont.indevelopment.de"
@@ -267,33 +270,34 @@ resource "hcloud_server" "saltmaster" {
     depends_on = [hcloud_network_subnet.internal-subnet, hcloud_firewall.ssh, hcloud_storage_box.backup-box]
 }
 
-#resource "random_password" "backup_accounts" {
-#    for_each = local.server_config
+# resource "random_password" "backup_accounts" {
+#     for_each = local.server_config
 #
-#    length = 32
-#    special = true
-#    override_special = "$%+-#"
-#    min_special = 1
-#    upper = true
-#    min_upper = 1
-#    lower = true
-#    min_lower = 1
-#    min_numeric = 1
-#}
-
-#resource "hcloud_storage_box_subaccount" "serveraccounts" {
-#    for_each = local.server_config
+#     length = 32
+#     special = true
+#     override_special = "$%+-#"
+#     min_special = 1
+#     upper = true
+#     min_upper = 1
+#     lower = true
+#     min_lower = 1
+#     min_numeric = 1
+# }
 #
-#    storage_box_id = hcloud_storage_box.backup-box.id
-#    home_directory = "/server/${each.key}/"
-#    password = random_password.backup_accounts[each.key].result
+# resource "hcloud_storage_box_subaccount" "serveraccounts" {
+#     for_each = local.server_config
 #
-#    access_settings = {
-#        ssh_enabled = true
-#    }
+#     name = "sbox-${each.key}"
+#     storage_box_id = hcloud_storage_box.backup-box.id
+#     home_directory = "/server/${each.key}/"
+#     password = random_password.backup_accounts[each.key].result
 #
-#    depends_on = [hcloud_storage_box.backup-box]
-#}
+#     access_settings = {
+#         ssh_enabled = true
+#     }
+#
+#     depends_on = [hcloud_storage_box.backup-box]
+# }
 
 resource "hcloud_volume" "disks" {
     for_each = local.volumes
