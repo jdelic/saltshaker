@@ -42,7 +42,7 @@ locals {
                 }
             }
         }
-        "mail.indevelopment.de" = {
+        "mail.maurus.net" = {
             server_type = "cx23"
             backup = 1
             additional_ipv4 = 1
@@ -51,7 +51,7 @@ locals {
             internal_only = 0
             desired_count_of_ipv6_ips = 2
             desired_count_of_additional_ipv6_ips = 0
-            ptr = "mail.indevelopment.de"
+            ptr = "mail.maurus.net"
             roles = ["mail"]
             firewall_ids = [hcloud_firewall.mail.id, hcloud_firewall.ping.id]
             volumes = {
@@ -117,7 +117,7 @@ locals {
             firewall_ids = null
             volumes = {}
         }
-        "lb1.indevelopment.de" = {
+        "lb1.maurus.net" = {
             server_type = "cx23"
             backup = 0
             additional_ipv4 = 0
@@ -213,29 +213,32 @@ resource "hcloud_storage_box" "backup-box" {
     depends_on = [hcloud_ssh_key.jm_hades, hcloud_ssh_key.jm_parasite]
 }
 
-# resource "random_password" "saltmaster_backup_account" {
-#     length = 32
-#     special = true
-#     override_special = "$%+-#"
-#     min_special = 1
-#     upper = true
-#     min_upper = 1
-#     lower = true
-#     min_lower = 1
-#     min_numeric = 1
-# }
-#
-# resource "hcloud_storage_box_subaccount" "saltmaster" {
-#     name = "sbox-saltmaster"
-#     storage_box_id = hcloud_storage_box.backup-box.id
-#     home_directory = "/server/saltmaster/"
-#     password = random_password.saltmaster_backup_account.result
-#
-#     depends_on = [hcloud_storage_box.backup-box]
-# }
+resource "random_password" "saltmaster_backup_account" {
+    length = 32
+    special = true
+    override_special = "$%+-#"
+    min_special = 1
+    upper = true
+    min_upper = 1
+    lower = true
+    min_lower = 1
+    min_numeric = 1
+}
+
+resource "hcloud_storage_box_subaccount" "saltmaster" {
+    storage_box_id = hcloud_storage_box.backup-box.id
+    home_directory = "server/saltmaster/"
+    password = random_password.saltmaster_backup_account.result
+
+    access_settings = {
+        ssh_enabled = true
+    }
+
+    depends_on = [hcloud_storage_box.backup-box]
+}
 
 resource "hcloud_server" "saltmaster" {
-    name = "symbiont.indevelopment.de"
+    name = "symbiont.maurus.net"
     server_type = "cx23"
     image = "debian-13"
     location = "hel1"
@@ -254,11 +257,11 @@ resource "hcloud_server" "saltmaster" {
 
     user_data = templatefile("${path.module}/../salt-master.cloud-init.yml", {
         saltmaster_config = file("${path.module}/../../etc/salt-master/master.d/saltshaker.conf")
-        hostname = "symbiont.indevelopment.de",
+        hostname = "symbiont.maurus.net",
         server_type = "cx22",
-        backup_server = hcloud_storage_box.backup-box.server,
-        backup_username = hcloud_storage_box.backup-box.username,
-        backup_password = random_password.storage_box_root.result,
+        backup_server = hcloud_storage_box_subaccount.saltmaster.server,
+        backup_username = hcloud_storage_box_subaccount.saltmaster.username,
+        backup_password = hcloud_storage_box_subaccount.saltmaster.password,
         backup_homedir = "/server/saltmaster/"
     })
 
@@ -270,34 +273,33 @@ resource "hcloud_server" "saltmaster" {
     depends_on = [hcloud_network_subnet.internal-subnet, hcloud_firewall.ssh, hcloud_storage_box.backup-box]
 }
 
-# resource "random_password" "backup_accounts" {
-#     for_each = local.server_config
-#
-#     length = 32
-#     special = true
-#     override_special = "$%+-#"
-#     min_special = 1
-#     upper = true
-#     min_upper = 1
-#     lower = true
-#     min_lower = 1
-#     min_numeric = 1
-# }
-#
-# resource "hcloud_storage_box_subaccount" "serveraccounts" {
-#     for_each = local.server_config
-#
-#     name = "sbox-${each.key}"
-#     storage_box_id = hcloud_storage_box.backup-box.id
-#     home_directory = "/server/${each.key}/"
-#     password = random_password.backup_accounts[each.key].result
-#
-#     access_settings = {
-#         ssh_enabled = true
-#     }
-#
-#     depends_on = [hcloud_storage_box.backup-box]
-# }
+resource "random_password" "backup_accounts" {
+    for_each = local.server_config
+
+    length = 32
+    special = true
+    override_special = "$%+-#"
+    min_special = 1
+    upper = true
+    min_upper = 1
+    lower = true
+    min_lower = 1
+    min_numeric = 1
+}
+
+resource "hcloud_storage_box_subaccount" "serveraccounts" {
+    for_each = local.server_config
+
+    storage_box_id = hcloud_storage_box.backup-box.id
+    home_directory = "server/${each.key}/"
+    password = random_password.backup_accounts[each.key].result
+
+    access_settings = {
+        ssh_enabled = true
+    }
+
+    depends_on = [hcloud_storage_box.backup-box]
+}
 
 resource "hcloud_volume" "disks" {
     for_each = local.volumes
@@ -343,9 +345,9 @@ resource "hcloud_server" "servers" {
                     desired_count_of_additional_ipv6_ips = each.value.desired_count_of_additional_ipv6_ips,
                     hostname = each.key,
                     server_type = each.value.server_type,
-                    backup_server = hcloud_storage_box.backup-box.server,
-                    backup_username = hcloud_storage_box.backup-box.username,
-                    backup_password = random_password.storage_box_root.result,
+                    backup_server = hcloud_storage_box_subaccount.serveraccounts[each.key].server,
+                    backup_username = hcloud_storage_box_subaccount.serveraccounts[each.key].username,
+                    backup_password = hcloud_storage_box_subaccount.serveraccounts[each.key].password,
                     backup_homedir = "/server/${each.key}/",
                     volumes = { for vol_name, vol_conf in each.value.volumes: vol_name => merge(
                         vol_conf,
@@ -462,7 +464,7 @@ resource "hcloud_ssh_key" "jm_hades" {
 
 output "ip_addresses" {
     value = {
-        for s in merge({"symbiont.indevelopment.de" = hcloud_server.saltmaster}, hcloud_server.servers) : s.name => concat(
+        for s in merge({"symbiont.maurus.net" = hcloud_server.saltmaster}, hcloud_server.servers) : s.name => concat(
             s.ipv4_address != "" ? [s.ipv4_address] : [],
             s.ipv6_address != "" ? [s.ipv6_address] : [],
             flatten(s.network.*.ip),
