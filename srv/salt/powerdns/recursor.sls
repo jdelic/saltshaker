@@ -98,7 +98,7 @@ pdns-recursor-service:
 
 pdns-consul-cache-wipe:
     cmd.run:
-        - name: /usr/bin/rec_control wipe-cache service.consul$
+        - name: /usr/bin/rec_control wipe-cache service.consul$; sleep 5
         - watch:
             - service: consul-service-reload
         - require_in:
