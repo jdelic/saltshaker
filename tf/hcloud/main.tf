@@ -39,6 +39,7 @@ locals {
                 "dbdata" = {
                     size = 10
                     mountpoint = "/secure"
+                    encrypted = true
                 }
             }
         }
@@ -58,6 +59,7 @@ locals {
                 "maildata" = {
                     size = 40
                     mountpoint = "/secure"
+                    encrypted = true
                 }
             }
         }
@@ -301,6 +303,7 @@ resource "hcloud_server" "saltmaster" {
 
 resource "hcloud_volume" "disks" {
     for_each = local.volumes
+
     name = each.value.name
     size = each.value.size
     format = "ext4"
@@ -309,6 +312,7 @@ resource "hcloud_volume" "disks" {
 
 resource "hcloud_volume_attachment" "disk_attachments" {
     for_each = local.volumes
+
     server_id = hcloud_server.servers[each.value.server].id
     volume_id = hcloud_volume.disks[each.key].id
 }
