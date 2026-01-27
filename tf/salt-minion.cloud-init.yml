@@ -98,7 +98,7 @@ runcmd:
     - vgcreate ${v_name}_vg /dev/mapper/${v_name}_crypt
     - lvcreate -l 100%FREE -n ${v_name} ${v_name}_vg
     - mkfs.ext4 /dev/${v_name}_vg/${v_name}
-    - echo "/dev/mapper/${v_name} ${v_conf.mountpoint} ext4 discard,nofail,defaults 0 0" >> /etc/fstab
+    - echo "/dev/${v_name}_vg/${v_name} ${v_conf.mountpoint} ext4 discard,nofail,defaults 0 0" >> /etc/fstab
     - echo "${v_name}_crypt UUID=$(blkid -s UUID -o value /dev/disk/by-id/scsi-0HC_Volume_${v_conf.id}) ${v_name}_crypt luks,discard" >> /etc/crypttab
         %{ else ~}
     - echo "/dev/disk/by-id/scsi-0HC_Volume_${v_conf.id} ${v_conf.mountpoint} ext4 discard,nofail,defaults 0 0" >> /etc/fstab
