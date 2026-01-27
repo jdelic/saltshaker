@@ -57,7 +57,7 @@ locals {
             firewall_ids = [hcloud_firewall.mail.id, hcloud_firewall.ping.id]
             volumes = {
                 "maildata" = {
-                    size = 40
+                    size = 80
                     mountpoint = "/secure"
                     encrypted = true
                 }
