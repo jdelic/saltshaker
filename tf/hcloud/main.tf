@@ -15,6 +15,12 @@ variable "hcloud_token" {
     sensitive = true
 }
 
+variable "location" {
+    type    = string
+    default = "fsn1"
+    description = "Hetzner Cloud location to deploy to (see https://docs.hetzner.com/cloud/general/locations/#what-locations-are-there)"
+}
+
 provider "hcloud" {
     token = var.hcloud_token
 }
@@ -201,7 +207,7 @@ resource "random_password" "storage_box_root" {
 resource "hcloud_storage_box" "backup-box" {
     name = "backup-box"
     storage_box_type = "bx11"
-    location = "hel1"
+    location = var.location
 
     password = random_password.storage_box_root.result
 
@@ -240,7 +246,7 @@ resource "hcloud_server" "saltmaster" {
     name = "symbiont.maurus.net"
     server_type = "cx23"
     image = "debian-13"
-    location = "hel1"
+    location = var.location
     ssh_keys = ["jonas@parasite", "jonas@hades"]
 
     network {
@@ -307,7 +313,7 @@ resource "hcloud_volume" "disks" {
     name = each.value.name
     size = each.value.size
     format = "ext4"
-    location = "hel1"
+    location = var.location
 }
 
 resource "hcloud_volume_attachment" "disk_attachments" {
@@ -323,7 +329,7 @@ resource "hcloud_server" "servers" {
     name = each.key
     server_type = each.value.server_type
     image = "debian-13"
-    location = "hel1"
+    location = var.location
     ssh_keys = ["jonas@parasite", "jonas@hades"]
 
     network {
@@ -375,7 +381,7 @@ resource "hcloud_floating_ip" "additional_ipv4" {
     for_each = { for k, v in local.server_config : k => v if v.additional_ipv4 == 1 }
     name = "ipv4-${each.key}"
     type = "ipv4"
-    home_location = "hel1"
+    home_location = var.location
 }
 
 resource "hcloud_floating_ip_assignment" "additional_ipv4" {
@@ -388,7 +394,7 @@ resource "hcloud_floating_ip" "additional_ipv6" {
     for_each = { for k, v in local.server_config : k => v if v.additional_ipv6 == 1 }
     name = "ipv6-${each.key}"
     type = "ipv6"
-    home_location = "hel1"
+    home_location = var.location
 }
 
 resource "hcloud_floating_ip_assignment" "additional_ipv6" {
