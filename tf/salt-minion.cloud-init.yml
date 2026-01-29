@@ -114,3 +114,7 @@ final_message: |
         Add the minion key on saltmaster. Execute highstate:
             salt-key -y -a ${hostname}
             salt '${hostname}' state.highstate
+%{for v_name, v_conf in volumes}%{if v_conf.encrypted ~}
+        You should change the encryption key for volume ${v_name} stored in /root/${v_name}_crypt.key.txt
+        to a new key! (cryptsetup luksChangeKey /dev/disk/by-id/scsi-0HC_Volume_${v_conf.id})
+%{endif}%{endfor}
