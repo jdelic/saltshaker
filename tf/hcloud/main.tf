@@ -43,7 +43,7 @@ locals {
                 }
             }
         }
-        "mail.indevelopment.de" = {
+        "mail.maurus.net" = {
             server_type = "cx23"
             backup = 1
             additional_ipv4 = 1
@@ -52,7 +52,7 @@ locals {
             internal_only = 0
             desired_count_of_ipv6_ips = 2
             desired_count_of_additional_ipv6_ips = 0
-            ptr = "mail.indevelopment.de"
+            ptr = "mail.maurus.net"
             roles = ["mail"]
             firewall_ids = [hcloud_firewall.mail.id, hcloud_firewall.ping.id]
             volumes = {
@@ -119,7 +119,7 @@ locals {
             firewall_ids = null
             volumes = {}
         }
-        "lb1.indevelopment.de" = {
+        "lb1.maurus.net" = {
             server_type = "cx23"
             backup = 0
             additional_ipv4 = 0
@@ -237,7 +237,7 @@ resource "hcloud_storage_box" "backup-box" {
 # }
 
 resource "hcloud_server" "saltmaster" {
-    name = "symbiont.indevelopment.de"
+    name = "symbiont.maurus.net"
     server_type = "cx23"
     image = "debian-13"
     location = "hel1"
@@ -256,7 +256,7 @@ resource "hcloud_server" "saltmaster" {
 
     user_data = templatefile("${path.module}/../salt-master.cloud-init.yml", {
         saltmaster_config = file("${path.module}/../../etc/salt-master/master.d/saltshaker.conf")
-        hostname = "symbiont.indevelopment.de",
+        hostname = "symbiont.maurus.net",
         server_type = "cx22",
         backup_server = hcloud_storage_box.backup-box.server,
         backup_username = hcloud_storage_box.backup-box.username,
