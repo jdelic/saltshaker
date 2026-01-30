@@ -440,6 +440,20 @@ resource "hcloud_firewall" "mail" {
         port      = 465
         source_ips = ["0.0.0.0/0", "::/0"]
     }
+
+    rule {
+        direction = "in"
+        protocol  = "tcp"
+        port      = 143
+        source_ips = ["0.0.0.0/0", "::/0"]
+    }
+
+    rule {
+        direction = "in"
+        protocol  = "tcp"
+        port      = 993
+        source_ips = ["0.0.0.0/0", "::/0"]
+    }
 }
 
 resource "hcloud_firewall" "web" {
