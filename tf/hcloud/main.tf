@@ -59,6 +59,7 @@ locals {
             desired_count_of_ipv6_ips = 2
             desired_count_of_additional_ipv6_ips = 0
             ptr = "mail.maurus.net"
+            additional_ip_ptr = "smtp.maurus.net"
             roles = ["mail", "webdav"]
             firewall_ids = [hcloud_firewall.mail.id, hcloud_firewall.ping.id]
             volumes = {
@@ -134,7 +135,7 @@ locals {
             internal_only = 0
             desired_count_of_ipv6_ips = 1
             desired_count_of_additional_ipv6_ips = 0
-            ptr = null
+            ptr = "lb1.maurus.net"
             roles = ["loadbalancer"]
             firewall_ids = [hcloud_firewall.web.id, hcloud_firewall.ping.id]
             volumes = {}
@@ -278,6 +279,22 @@ resource "hcloud_server" "saltmaster" {
     depends_on = [hcloud_network_subnet.internal-subnet, hcloud_firewall.ssh, hcloud_storage_box.backup-box]
 }
 
+resource "hcloud_rdns" "saltmaster_rdns_ipv4" {
+    server_id = hcloud_server.saltmaster.id
+    ip_address = hcloud_server.saltmaster.ipv4_address
+    dns_ptr = "symbiont.maurus.net"
+
+    depends_on = [hcloud_server.saltmaster]
+}
+
+resource "hcloud_rdns" "saltmaster_rdns_ipv6" {
+    server_id = hcloud_server.saltmaster.id
+    ip_address = hcloud_server.saltmaster.ipv6_address
+    dns_ptr = "symbiont.maurus.net"
+
+    depends_on = [hcloud_server.saltmaster]
+}
+
 # resource "random_password" "backup_accounts" {
 #     for_each = local.server_config
 #
@@ -377,11 +394,48 @@ resource "hcloud_server" "servers" {
     depends_on = [hcloud_network_route.nat-route, hcloud_network_subnet.internal-subnet, hcloud_server.saltmaster]
 }
 
+resource "hcloud_rdns" "server_rdns_ipv4" {
+    for_each = {
+        for k, v in local.server_config : k => v if v.ptr != null
+    }
+
+    server_id = hcloud_server.servers[each.key].id
+    ip_address = hcloud_server.servers[each.key].ipv4_address
+    dns_ptr = each.value.ptr
+
+    depends_on = [hcloud_server.servers]
+}
+
+resource "hcloud_rdns" "server_rdns_ipv6" {
+    for_each = {
+        for k, v in local.server_config : k => v if v.ptr != null && hcloud_server.servers[k].ipv6_address != ""
+    }
+
+    server_id = hcloud_server.servers[each.key].id
+    ip_address = hcloud_server.servers[each.key].ipv6_address
+    dns_ptr = each.value.ptr
+
+    depends_on = [hcloud_server.servers]
+}
+
 resource "hcloud_floating_ip" "additional_ipv4" {
     for_each = { for k, v in local.server_config : k => v if v.additional_ipv4 == 1 }
     name = "ipv4-${each.key}"
     type = "ipv4"
     home_location = var.location
+}
+
+resource "hcloud_rdns" "additional_ipv4_rdns" {
+    for_each = hcloud_floating_ip.additional_ipv4
+
+    floating_ip_id = each.value.id
+    ip_address = each.value.ip_address
+    dns_ptr = (local.server_config[trimprefix(each.key, "ipv4-")].additional_ip_ptr != null ?
+                  local.server_config[trimprefix(each.key, "ipv4-")].additional_ip_ptr :
+                      local.server_config[trimprefix(each.key, "ipv4-")].ptr != null ?
+                      local.server_config[trimprefix(each.key, "ipv4-")].ptr : "${trimprefix(each.key, "ipv4-")}")
+
+    depends_on = [hcloud_floating_ip.additional_ipv4]
 }
 
 resource "hcloud_floating_ip_assignment" "additional_ipv4" {
@@ -395,6 +449,16 @@ resource "hcloud_floating_ip" "additional_ipv6" {
     name = "ipv6-${each.key}"
     type = "ipv6"
     home_location = var.location
+}
+
+resource "hcloud_rdns" "additional_ipv6_rdns" {
+    for_each = hcloud_floating_ip.additional_ipv6
+
+    floating_ip_id = each.value.id
+    ip_address = each.value.ip_address
+    dns_ptr = local.server_config[trimprefix(each.key, "ipv6-")].ptr != null ? local.server_config[trimprefix(each.key, "ipv6-")].ptr : "${trimprefix(each.key, "ipv6-")}"
+
+    depends_on = [hcloud_floating_ip.additional_ipv6]
 }
 
 resource "hcloud_floating_ip_assignment" "additional_ipv6" {
