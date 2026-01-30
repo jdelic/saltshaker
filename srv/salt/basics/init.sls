@@ -207,9 +207,27 @@ openssh-in22-recv-ipv4:
         - match: state
         - connstate: new
         - save: True
+        - order: 4
+        - require:
+              - sls: basics.nftables.setup
+
+
+# always allow ssh in
+openssh-in22-recv-ipv6:
+    nftables.append:
+        - table: filter
+        - chain: input
+        - family: ip6
+        - jump: accept
+        - source: '::/0'
+        - proto: tcp
+        - dport: 22
+        - match: state
+        - connstate: new
+        - save: True
+        - order: 4
         - require:
             - sls: basics.nftables.setup
-        - order: 4
 
 
 # NETWORK SERVICES ON THE INTERNET ===========================================
@@ -236,6 +254,8 @@ basics-tcp-out{{port}}-send-ipv4:
         - proto: tcp
         - save: True
         - order: 4
+        - require:
+            - sls: basics.nftables.setup
 
 
 basics-tcp-out{{port}}-send-ipv6:
@@ -251,6 +271,8 @@ basics-tcp-out{{port}}-send-ipv6:
         - proto: tcp
         - save: True
         - order: 4
+        - require:
+            - sls: basics.nftables.setup
 {% endfor %}
 
 
@@ -266,6 +288,8 @@ basics-udp-out{{port}}-recv-ipv4:
         - sport: {{port}}
         - save: True
         - order: 4
+        - require:
+            - sls: basics.nftables.setup
 
 
 basics-udp-out{{port}}-recv-ipv6:
@@ -278,6 +302,8 @@ basics-udp-out{{port}}-recv-ipv6:
         - sport: {{port}}
         - save: True
         - order: 4
+        - require:
+            - sls: basics.nftables.setup
 
 
 # allow us to talk to others. For UDP we make this stateless here to guarantee it works.
@@ -291,6 +317,8 @@ basics-udp-out{{port}}-send-ipv4:
         - dport: {{port}}
         - save: True
         - order: 4
+        - require:
+            - sls: basics.nftables.setup
 
 
 basics-udp-out{{port}}-send-ipv6:
@@ -303,6 +331,8 @@ basics-udp-out{{port}}-send-ipv6:
         - dport: {{port}}
         - save: True
         - order: 4
+        - require:
+            - sls: basics.nftables.setup
 {% endfor %}
 
 
