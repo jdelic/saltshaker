@@ -27,9 +27,7 @@ if [[ "$CONSUL_SERVERS" -ge {{target_number}} ]]; then
         systemctl restart consul-server.service
 
         # Disable the timer and service as they are no longer needed
-        systemctl stop consul-check.timer
-        systemctl disable consul-check.timer
-        systemctl disable consul-check.service
+        systemctl disable --now consul-cluster-bootstrap.timer
         systemctl daemon-reload
     fi
 fi
