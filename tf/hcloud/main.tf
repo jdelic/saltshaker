@@ -59,7 +59,7 @@ locals {
             desired_count_of_ipv6_ips = 2
             desired_count_of_additional_ipv6_ips = 0
             ptr = "mail.maurus.net"
-            roles = ["mail"]
+            roles = ["mail", "webdav"]
             firewall_ids = [hcloud_firewall.mail.id, hcloud_firewall.ping.id]
             volumes = {
                 "maildata" = {
