@@ -82,6 +82,7 @@ authserver-config-secretid:
         - name: >-
             touch /etc/appconfig/authserver/env/VAULT_SECRETID &&
             chmod 0600 /etc/appconfig/authserver/env/VAULT_SECRETID &&
+            chown authserver:authserver /etc/appconfig/authserver/env/VAULT_SECRETID &&
             /usr/local/bin/vault write -f -format=json \
                 auth/approle/role/authserver/secret-id |
                 jq -r .data.secret_id > /etc/appconfig/authserver/env/VAULT_SECRETID
@@ -97,6 +98,7 @@ authserver-config-secretid:
             - service: authserver
         - require:
             - cmd: authserver-sync-vault
+            - pkg: authserver
     {% endif %}
 {% else %}
     {% set config = config | set_dict_key_value("DATABASE_URL",
@@ -110,9 +112,13 @@ authserver-config-{{loop.index}}:
     file.managed:
         - name: /etc/appconfig/authserver/env/{{envvar}}
         - contents: {{value}}
+        - user: authserver
+        - group: authserver
+        - mode: '0640'
         - require:
             - file: {{pillar['ssl']['service-rootca-cert']}}
             - appconfig: authserver-appconfig
+            - pkg: authserver
         - watch_in:
             - service: authserver
 {% endfor %}

@@ -10,7 +10,7 @@ def create_user(username, groups=None, optional_groups=None, key_pillars=None, p
 
     _groupstates = []
     for g in _groups:
-        st_group = state("groups-%s=%s" % (username, g)).group
+        st_group = state("groups-%s-%s" % (username, g)).group
         st_group.present(name=g)
         _groupstates.append(st_group)
 

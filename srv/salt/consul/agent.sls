@@ -6,6 +6,7 @@ include:
     - consul.install
     - consul.sync
     - consul.acl_install
+    - powerdns.sync
 
 
 {% from 'consul/install.sls' import consul_user, consul_group %}
@@ -40,7 +41,7 @@ consul-service:
             - file: consul
             - file: consul-server-absent
             # this is here so that the WantedBy in our systemd service definition is processed correctly
-            - pkg: pdns-recursor
+            - cmd: powerdns-pkg-installed-sync
         - unless:
             - sls: consul.server  # make consul.agent mutually exclusive with consul.server
     service.running:
@@ -59,13 +60,13 @@ consul-service:
             - event: consul-register-acl
     cmd.run:
         - name: >
-            until test ${count} -gt 30; do
+            until test ${count} -gt 90; do
                 if test $(curl -s -H 'X-Consul-Token: anonymous' http://169.254.1.1:8500/v1/agent/members \
                             | jq 'length') -gt 0; then
                     break;
                 fi
                 sleep 1; count=$((count+1));
-            done; test ${count} -lt 30
+            done; test ${count} -lt 90
         - env:
             count: 0
         - onchanges:
@@ -84,6 +85,7 @@ consul-service-reload:
         - reload: True  # makes Salt send a SIGHUP (systemctl reload consul) instead of restarting
         - require:
             - systemdunit: consul-service  # if consul.service changes we want to *restart* (reload: False)
+            - cmd: consul-sync-network
         - watch:
             # If we detect a change in the service definitions reload, don't restart. This matches STATE names not FILE
             # names, so this watch ONLY works on STATES named /etc/consul/services.d/[whatever]!
@@ -96,13 +98,13 @@ consul-service-reload:
             - cmd: consul-sync
     cmd.run:
         - name: >
-            until test ${count} -gt 30; do
+            until test ${count} -gt 90; do
                 if test $(curl -s -H 'X-Consul-Token: anonymous' http://169.254.1.1:8500/v1/agent/members \
                             | jq 'length') -gt 0; then
                     break;
                 fi
                 sleep 1; count=$((count+1));
-            done; test ${count} -lt 30
+            done; test ${count} -lt 90
         - env:
             count: 0
         - onchanges:

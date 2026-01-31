@@ -8,7 +8,7 @@ python-dev-packages:
             - libapt-pkg-dev
             - python-apt-dev
             - libjpeg62-turbo-dev
-            - libfreetype6-dev
+            - libfreetype-dev
             - libxslt1-dev
             - libxml2-dev
             - libgd-dev
@@ -23,9 +23,12 @@ python-libpq-dev:
         - pkgs:
             - libpq-dev
         - install_recommends: False
-        - fromrepo: bookworm-pgdg
         - require:
             - pkg: build-essential
+  {% if "database" in grains.get("roles", []) %}
+            - pkgrepo: postgresql-repo
+        - fromrepo: trixie-pgdg
+  {% endif %}
 
 
 python-dev-backports:

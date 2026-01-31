@@ -29,7 +29,7 @@ runcmd:
     - apt update
     - apt -y install --no-install-recommends gnupg
     - wget -O /etc/apt/keyrings/salt-archive-keyring.gpg.tmp https://packages.broadcom.com/artifactory/api/security/keypair/SaltProjectKey/public
-    - gpg --dearmor -o /etc/apt/keyrings/salt-archive-keyring-2023.gpg /etc/apt/keyrings/salt-archive-keyring.gpg.tmp
+    - gpg --dearmor -o /etc/apt/keyrings/salt-archive-keyring.gpg /etc/apt/keyrings/salt-archive-keyring.gpg.tmp
     - rm /etc/apt/keyrings/salt-archive-keyring.gpg.tmp
     - /usr/bin/bash -c 'echo deb [signed-by=/etc/apt/keyrings/salt-archive-keyring.gpg arch=amd64] https://packages.broadcom.com/artifactory/saltproject-deb/ stable main > /etc/apt/sources.list.d/salt.list'
     - apt update
@@ -40,12 +40,19 @@ runcmd:
     - touch /etc/salt/roles.d/consulbootstrapprimary
     - touch /etc/salt/roles.d/natgateway
     - echo ${server_type} > /etc/salt/env.d/server_type
+    - echo ${backup_server} > /etc/salt/env.d/backup_server
+    - echo ${backup_username} > /etc/salt/env.d/backup_username
+    - echo ${backup_homedir} > /etc/salt/env.d/backup_homedir
+    - touch /etc/salt/env.d/backup_password
+    - chmod 600 /etc/salt/env.d/backup_password
+    - echo ${backup_password} > /etc/salt/env.d/backup_password
     - mkdir /run/salt-bootstrap
     - wget -O /run/salt-bootstrap/bootstrap-salt.sh https://raw.githubusercontent.com/saltstack/salt-bootstrap/stable/bootstrap-salt.sh
     - chown -R salt:salt /etc/salt
     - chmod 700 /run/salt-bootstrap/bootstrap-salt.sh
     - apt -y install --no-install-recommends git
-    - /usr/bin/bash /run/salt-bootstrap/bootstrap-salt.sh -r -x python3 -M
+    - /usr/bin/bash /run/salt-bootstrap/bootstrap-salt.sh -r -M
+    - salt-pip install docker
     - echo Waiting for key registration...
     - /usr/bin/bash -c 'until /opt/saltstack/salt/salt-key --list=un | grep -q ${hostname}; do sleep 1; echo -n "."; done; echo "";'
     - /opt/saltstack/salt/salt-key --list=un
@@ -55,6 +62,6 @@ runcmd:
 final_message: |
     Next steps:
         - cd /srv
-        - git clone -b env/hcloud https://github.com/jdelic/saltshaker
+        - git clone -b env/hcloud+trixie https://github.com/jdelic/saltshaker
         - /srv/saltshaker/setup_srv_salt.sh
         - salt-call state.highstate

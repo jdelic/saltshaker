@@ -74,13 +74,50 @@ runcmd:
     - mkdir -p /etc/salt/roles.d
     ${indent(4, yamlencode([for r in roles: "touch /etc/salt/roles.d/${r}"]))}
     - echo ${server_type} > /etc/salt/env.d/server_type
+    - echo ${backup_server} > /etc/salt/env.d/backup_server
+    - echo ${backup_username} > /etc/salt/env.d/backup_username
+    - echo ${backup_homedir} > /etc/salt/env.d/backup_homedir
+    - touch /etc/salt/env.d/backup_password
+    - chmod 600 /etc/salt/env.d/backup_password
+    - echo ${backup_password} > /etc/salt/env.d/backup_password
     - apt install -y --no-install-recommends git salt-minion
     - chown -R salt:salt /etc/salt
+    - salt-pip install docker
     - systemctl restart salt-minion
+%{ if length(volumes) > 0 ~}
+    - udevadm trigger -c add -s block -p ID_VENDOR=HC --verbose -p ID_MODEL=Volume
+    %{ for v_name, v_conf in volumes ~}
+    - echo "Waiting for attached volume ${v_name}:${v_conf.id} to be available..."
+    - /usr/bin/bash -c 'until [ -e /dev/disk/by-id/scsi-0HC_Volume_${v_conf.id} ]; do sleep 1; echo -n "."; done; echo "";'
+    - echo "Attached volume ${v_name}:${v_conf.id} is now available."
+    - mkdir -p ${v_conf.mountpoint}
+        %{ if v_conf.encrypted ~}
+    - echo "Setting up LUKS encryption on volume ${v_name}:${v_conf.id}..."
+    - head -c 32 /dev/urandom | base64 -w0 | tee /root/${v_name}_crypt.key.txt | cryptsetup luksFormat -d - /dev/disk/by-id/scsi-0HC_Volume_${v_conf.id}
+    - cat /root/${v_name}_crypt.key.txt | cryptsetup luksOpen -d - /dev/disk/by-id/scsi-0HC_Volume_${v_conf.id} ${v_name}_crypt
+    - vgcreate ${v_name}_vg /dev/mapper/${v_name}_crypt
+    - lvcreate -l 100%FREE -n ${v_name} ${v_name}_vg
+    - mkfs.ext4 /dev/${v_name}_vg/${v_name}
+    - echo "/dev/${v_name}_vg/${v_name} ${v_conf.mountpoint} ext4 discard,nofail,defaults 0 0" >> /etc/fstab
+    - echo "${v_name}_crypt UUID=$(blkid -s UUID -o value /dev/disk/by-id/scsi-0HC_Volume_${v_conf.id}) ${v_name}_crypt luks,discard" >> /etc/crypttab
+        %{ else ~}
+    - echo "/dev/disk/by-id/scsi-0HC_Volume_${v_conf.id} ${v_conf.mountpoint} ext4 discard,nofail,defaults 0 0" >> /etc/fstab
+        %{ endif ~}
+    %{ endfor ~}
+    - systemctl daemon-reload
+    - mount -a
+%{ endif ~}
 
 
 final_message: |
     Next steps:
-        Add the minion key on saltmaster. Execute highstate:
+    🏃   Add the minion key on saltmaster. Execute highstate:
             salt-key -y -a ${hostname}
+            salt '${hostname}' saltutil.sync_all
+            salt '${hostname}' mine.update
+            salt '${hostname}' mine.get roles:consulserver internal_ip grain
             salt '${hostname}' state.highstate
+%{for v_name, v_conf in volumes}%{if v_conf.encrypted ~}
+    💾   You should change the encryption key for volume ${v_name} stored in /root/${v_name}_crypt.key.txt
+         to a new key! (cryptsetup luksChangeKey /dev/disk/by-id/scsi-0HC_Volume_${v_conf.id})
+%{endif}%{endfor}

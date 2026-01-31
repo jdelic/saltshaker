@@ -122,7 +122,7 @@ concourse-server-envvars{% if pillar['ci'].get('use-vault', True) %}-template{% 
             CONCOURSE_OIDC_DISPLAY_NAME="SSO Account (OpenIDC)"
             CONCOURSE_OIDC_CLIENT_ID="((oauth2_client_id))"
             CONCOURSE_OIDC_CLIENT_SECRET="((oauth2_client_secret))"
-            CONCOURSE_OIDC_ISSUER="https://{{pillar['authserver']['hostname']}}/o2"
+            CONCOURSE_OIDC_ISSUER="https://{{pillar['authserver']['hostname']}}/o2/"
             CONCOURSE_OIDC_GROUPS_KEY="groups"
 
 

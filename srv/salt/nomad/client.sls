@@ -103,3 +103,22 @@ nomad:
             - file: nomad-pidfile-dir
             - file: nomad-data-dir
             - archive: nomad
+
+
+nomad-driver-podman:
+    archive.extracted:
+        - name: /usr/local/bin
+        - source: {{pillar["urls"]["nomad-driver-podman"]}}
+        - source_hash: {{pillar["hashes"]["nomad-driver-podman"]}}
+        - archive_format: zip
+        - unless: test -f /usr/local/bin/nomad-driver-podman
+        - enforce_toplevel: False
+    file.managed:
+        - name: /usr/local/bin/nomad-driver-podman
+        - mode: '0755'
+        - user: {{nomad_user}}
+        - group: {{nomad_group}}
+        - replace: False
+        - require:
+            - user: nomad-user
+            - archive: nomad-driver-podman

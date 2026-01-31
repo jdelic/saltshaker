@@ -11,7 +11,7 @@ haproxy-repo:
 haproxy:
     pkg.installed:
         - install_recommends: False
-        - fromrepo: bookworm-backports-2.8
+        - fromrepo: trixie-backports-3.2
         - require:
             - pkgrepo: haproxy-repo
     service.dead:

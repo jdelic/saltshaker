@@ -4,11 +4,21 @@ terraform {
             source  = "hetznercloud/hcloud"
             version = "> 1.0"
         }
+        random = {
+            source  = "hashicorp/random"
+            version = "> 3.6.0"
+        }
     }
 }
 
 variable "hcloud_token" {
     sensitive = true
+}
+
+variable "location" {
+    type    = string
+    default = "fsn1"
+    description = "Hetzner Cloud location to deploy to (see https://docs.hetzner.com/cloud/general/locations/#what-locations-are-there)"
 }
 
 provider "hcloud" {
@@ -20,7 +30,7 @@ locals {
 
     server_config = {
         "db.maurusnet.internal" = {
-            server_type = "cx22"
+            server_type = "cx23"
             backup = 1
             additional_ipv4 = 0
             additional_ipv6 = 0
@@ -31,9 +41,16 @@ locals {
             ptr = null
             roles = ["database", "vault", "authserver", "consulserver"]
             firewall_ids = null
+            volumes = {
+                "dbdata" = {
+                    size = 10
+                    mountpoint = "/secure"
+                    encrypted = true
+                }
+            }
         }
-        "mail.indevelopment.de" = {
-            server_type = "cx22"
+        "mail.maurus.net" = {
+            server_type = "cx23"
             backup = 1
             additional_ipv4 = 1
             additional_ipv6 = 0
@@ -41,84 +58,101 @@ locals {
             internal_only = 0
             desired_count_of_ipv6_ips = 2
             desired_count_of_additional_ipv6_ips = 0
-            ptr = "mail.indevelopment.de"
-            roles = ["mail", "consulserver"]
+            ptr = "mail.maurus.net"
+            additional_ip_ptr = "smtp.maurus.net"
+            roles = ["mail", "webdav"]
             firewall_ids = [hcloud_firewall.mail.id, hcloud_firewall.ping.id]
+            volumes = {
+                "maildata" = {
+                    size = 80
+                    mountpoint = "/secure"
+                    encrypted = true
+                }
+            }
         }
         "dev.maurusnet.internal" = {
-            server_type = "cx32"
+            server_type = "cx33"
             backup = 0
             additional_ipv4 = 0
             additional_ipv6 = 0
             ipv6_only = 1
             internal_only = 1
-            desired_count_of_ipv6_ips = 2
+            desired_count_of_ipv6_ips = 0
             desired_count_of_additional_ipv6_ips = 0
             ptr = null
-            roles = ["dev", "buildserver", "buildworker", "consulserver"]
+            roles = ["dev", "buildserver", "buildworker", "consulserver", "docker-registry"]
             firewall_ids = null
+            volumes = {}
         }
         "apps1.maurusnet.internal" = {
-            server_type = "cx22"
+            server_type = "cx23"
             backup = 0
             additional_ipv4 = 0
             additional_ipv6 = 0
             ipv6_only = 1
             internal_only = 1
-            desired_count_of_ipv6_ips = 2
+            desired_count_of_ipv6_ips = 0
             desired_count_of_additional_ipv6_ips = 0
             ptr = null
             roles = ["apps", "nomadserver"]
             firewall_ids = null
+            volumes = {}
         }
         "apps2.maurusnet.internal" = {
-            server_type = "cx22"
+            server_type = "cx23"
             backup = 0
             additional_ipv4 = 0
             additional_ipv6 = 0
             ipv6_only = 1
             internal_only = 1
-            desired_count_of_ipv6_ips = 2
+            desired_count_of_ipv6_ips = 0
             desired_count_of_additional_ipv6_ips = 0
             ptr = null
             roles = ["apps", "nomadserver"]
             firewall_ids = null
+            volumes = {}
         }
         "apps3.maurusnet.internal" = {
-            server_type = "cx22"
+            server_type = "cx23"
             backup = 0
             additional_ipv4 = 0
             additional_ipv6 = 0
             ipv6_only = 1
             internal_only = 1
-            desired_count_of_ipv6_ips = 2
+            desired_count_of_ipv6_ips = 0
             desired_count_of_additional_ipv6_ips = 0
             ptr = null
             roles = ["apps", "nomadserver"]
             firewall_ids = null
+            volumes = {}
         }
-        "lb1.indevelopment.de" = {
-            server_type = "cx22"
+        "lb1.maurus.net" = {
+            server_type = "cx23"
             backup = 0
             additional_ipv4 = 0
             additional_ipv6 = 0
             ipv6_only = 0
             internal_only = 0
-            desired_count_of_ipv6_ips = 2
+            desired_count_of_ipv6_ips = 1
             desired_count_of_additional_ipv6_ips = 0
-            ptr = null
+            ptr = "lb1.maurus.net"
             roles = ["loadbalancer"]
             firewall_ids = [hcloud_firewall.web.id, hcloud_firewall.ping.id]
+            volumes = {}
         }
-/*        backup.maurusnet.internal = {
-            server_type = "bx11"
-            backup = 0
-            additional_ipv4 = 0
-            ipv6_only = 1
-            internal_only = 1
-            ptr = null
-        } */
     }
+
+    volumes = merge([
+        for server_name, server_conf in local.server_config : {
+            for v_name, vol in server_conf.volumes :
+                v_name => {
+                    name = "vol-${v_name}"
+                    server = server_name
+                    size = vol.size
+                    mountpoint = vol.mountpoint
+                } if length(server_conf.volumes) > 0
+        }
+    ]...)
 }
 
 /*
@@ -159,11 +193,61 @@ resource "hcloud_network_route" "nat-route" {
     depends_on = [hcloud_server.saltmaster]
 }
 
+resource "random_password" "storage_box_root" {
+    length = 32
+    special = true
+    override_special = "$%+-#"
+    min_special = 1
+    upper = true
+    min_upper = 1
+    lower = true
+    min_lower = 1
+    min_numeric = 1
+}
+
+resource "hcloud_storage_box" "backup-box" {
+    name = "backup-box"
+    storage_box_type = "bx11"
+    location = var.location
+
+    password = random_password.storage_box_root.result
+
+    access_settings = {
+        ssh_enabled = true
+    }
+
+    ssh_keys = [hcloud_ssh_key.jm_hades.public_key, hcloud_ssh_key.jm_parasite.public_key]
+    delete_protection = false
+
+    depends_on = [hcloud_ssh_key.jm_hades, hcloud_ssh_key.jm_parasite]
+}
+
+# resource "random_password" "saltmaster_backup_account" {
+#     length = 32
+#     special = true
+#     override_special = "$%+-#"
+#     min_special = 1
+#     upper = true
+#     min_upper = 1
+#     lower = true
+#     min_lower = 1
+#     min_numeric = 1
+# }
+#
+# resource "hcloud_storage_box_subaccount" "saltmaster" {
+#     name = "sbox-saltmaster"
+#     storage_box_id = hcloud_storage_box.backup-box.id
+#     home_directory = "/server/saltmaster/"
+#     password = random_password.saltmaster_backup_account.result
+#
+#     depends_on = [hcloud_storage_box.backup-box]
+# }
+
 resource "hcloud_server" "saltmaster" {
-    name = "symbiont.indevelopment.de"
-    server_type = "cx22"
-    image = "debian-12"
-    location = "hel1"
+    name = "symbiont.maurus.net"
+    server_type = "cx23"
+    image = "debian-13"
+    location = var.location
     ssh_keys = ["jonas@parasite", "jonas@hades"]
 
     network {
@@ -179,8 +263,12 @@ resource "hcloud_server" "saltmaster" {
 
     user_data = templatefile("${path.module}/../salt-master.cloud-init.yml", {
         saltmaster_config = file("${path.module}/../../etc/salt-master/master.d/saltshaker.conf")
-        hostname = "symbiont.indevelopment.de",
+        hostname = "symbiont.maurus.net",
         server_type = "cx22",
+        backup_server = hcloud_storage_box.backup-box.server,
+        backup_username = hcloud_storage_box.backup-box.username,
+        backup_password = random_password.storage_box_root.result,
+        backup_homedir = "/server/saltmaster/"
     })
 
     backups = true
@@ -188,7 +276,68 @@ resource "hcloud_server" "saltmaster" {
     firewall_ids = [hcloud_firewall.ssh.id, hcloud_firewall.ping.id]
 
     # important as per hcloud docs as there's a race condition otherwise
-    depends_on = [hcloud_network_subnet.internal-subnet, hcloud_firewall.ssh]
+    depends_on = [hcloud_network_subnet.internal-subnet, hcloud_firewall.ssh, hcloud_storage_box.backup-box]
+}
+
+resource "hcloud_rdns" "saltmaster_rdns_ipv4" {
+    server_id = hcloud_server.saltmaster.id
+    ip_address = hcloud_server.saltmaster.ipv4_address
+    dns_ptr = "symbiont.maurus.net"
+
+    depends_on = [hcloud_server.saltmaster]
+}
+
+resource "hcloud_rdns" "saltmaster_rdns_ipv6" {
+    server_id = hcloud_server.saltmaster.id
+    ip_address = hcloud_server.saltmaster.ipv6_address
+    dns_ptr = "symbiont.maurus.net"
+
+    depends_on = [hcloud_server.saltmaster]
+}
+
+# resource "random_password" "backup_accounts" {
+#     for_each = local.server_config
+#
+#     length = 32
+#     special = true
+#     override_special = "$%+-#"
+#     min_special = 1
+#     upper = true
+#     min_upper = 1
+#     lower = true
+#     min_lower = 1
+#     min_numeric = 1
+# }
+#
+# resource "hcloud_storage_box_subaccount" "serveraccounts" {
+#     for_each = local.server_config
+#
+#     name = "sbox-${each.key}"
+#     storage_box_id = hcloud_storage_box.backup-box.id
+#     home_directory = "/server/${each.key}/"
+#     password = random_password.backup_accounts[each.key].result
+#
+#     access_settings = {
+#         ssh_enabled = true
+#     }
+#
+#     depends_on = [hcloud_storage_box.backup-box]
+# }
+
+resource "hcloud_volume" "disks" {
+    for_each = local.volumes
+
+    name = each.value.name
+    size = each.value.size
+    format = "ext4"
+    location = var.location
+}
+
+resource "hcloud_volume_attachment" "disk_attachments" {
+    for_each = local.volumes
+
+    server_id = hcloud_server.servers[each.value.server].id
+    volume_id = hcloud_volume.disks[each.key].id
 }
 
 resource "hcloud_server" "servers" {
@@ -196,8 +345,8 @@ resource "hcloud_server" "servers" {
 
     name = each.key
     server_type = each.value.server_type
-    image = "debian-12"
-    location = "hel1"
+    image = "debian-13"
+    location = var.location
     ssh_keys = ["jonas@parasite", "jonas@hades"]
 
     network {
@@ -221,6 +370,16 @@ resource "hcloud_server" "servers" {
                     desired_count_of_additional_ipv6_ips = each.value.desired_count_of_additional_ipv6_ips,
                     hostname = each.key,
                     server_type = each.value.server_type,
+                    backup_server = hcloud_storage_box.backup-box.server,
+                    backup_username = hcloud_storage_box.backup-box.username,
+                    backup_password = random_password.storage_box_root.result,
+                    backup_homedir = "/server/${each.key}/",
+                    volumes = { for vol_name, vol_conf in each.value.volumes: vol_name => merge(
+                        vol_conf,
+                        {
+                            "id" : hcloud_volume.disks[vol_name].id
+                        }
+                    )}
                 })
 
     lifecycle {
@@ -235,11 +394,48 @@ resource "hcloud_server" "servers" {
     depends_on = [hcloud_network_route.nat-route, hcloud_network_subnet.internal-subnet, hcloud_server.saltmaster]
 }
 
+resource "hcloud_rdns" "server_rdns_ipv4" {
+    for_each = {
+        for k, v in local.server_config : k => v if v.ptr != null
+    }
+
+    server_id = hcloud_server.servers[each.key].id
+    ip_address = hcloud_server.servers[each.key].ipv4_address
+    dns_ptr = each.value.ptr
+
+    depends_on = [hcloud_server.servers]
+}
+
+resource "hcloud_rdns" "server_rdns_ipv6" {
+    for_each = {
+        for k, v in local.server_config : k => v if v.ptr != null && hcloud_server.servers[k].ipv6_address != ""
+    }
+
+    server_id = hcloud_server.servers[each.key].id
+    ip_address = hcloud_server.servers[each.key].ipv6_address
+    dns_ptr = each.value.ptr
+
+    depends_on = [hcloud_server.servers]
+}
+
 resource "hcloud_floating_ip" "additional_ipv4" {
     for_each = { for k, v in local.server_config : k => v if v.additional_ipv4 == 1 }
     name = "ipv4-${each.key}"
     type = "ipv4"
-    home_location = "hel1"
+    home_location = var.location
+}
+
+resource "hcloud_rdns" "additional_ipv4_rdns" {
+    for_each = hcloud_floating_ip.additional_ipv4
+
+    floating_ip_id = each.value.id
+    ip_address = each.value.ip_address
+    dns_ptr = (local.server_config[trimprefix(each.key, "ipv4-")].additional_ip_ptr != null ?
+                  local.server_config[trimprefix(each.key, "ipv4-")].additional_ip_ptr :
+                      local.server_config[trimprefix(each.key, "ipv4-")].ptr != null ?
+                      local.server_config[trimprefix(each.key, "ipv4-")].ptr : "${trimprefix(each.key, "ipv4-")}")
+
+    depends_on = [hcloud_floating_ip.additional_ipv4]
 }
 
 resource "hcloud_floating_ip_assignment" "additional_ipv4" {
@@ -252,7 +448,17 @@ resource "hcloud_floating_ip" "additional_ipv6" {
     for_each = { for k, v in local.server_config : k => v if v.additional_ipv6 == 1 }
     name = "ipv6-${each.key}"
     type = "ipv6"
-    home_location = "hel1"
+    home_location = var.location
+}
+
+resource "hcloud_rdns" "additional_ipv6_rdns" {
+    for_each = hcloud_floating_ip.additional_ipv6
+
+    floating_ip_id = each.value.id
+    ip_address = each.value.ip_address
+    dns_ptr = local.server_config[trimprefix(each.key, "ipv6-")].ptr != null ? local.server_config[trimprefix(each.key, "ipv6-")].ptr : "${trimprefix(each.key, "ipv6-")}"
+
+    depends_on = [hcloud_floating_ip.additional_ipv6]
 }
 
 resource "hcloud_floating_ip_assignment" "additional_ipv6" {
@@ -298,6 +504,20 @@ resource "hcloud_firewall" "mail" {
         port      = 465
         source_ips = ["0.0.0.0/0", "::/0"]
     }
+
+    rule {
+        direction = "in"
+        protocol  = "tcp"
+        port      = 143
+        source_ips = ["0.0.0.0/0", "::/0"]
+    }
+
+    rule {
+        direction = "in"
+        protocol  = "tcp"
+        port      = 993
+        source_ips = ["0.0.0.0/0", "::/0"]
+    }
 }
 
 resource "hcloud_firewall" "web" {
@@ -338,4 +558,17 @@ output "ip_addresses" {
             [for ip in hcloud_floating_ip.additional_ipv6 : ip.ip_address if ip.name == "ipv6-${s.name}"]
         )
     }
+}
+
+output "storage_box_info" {
+    value = {
+        server = hcloud_storage_box.backup-box.server,
+        username = hcloud_storage_box.backup-box.username,
+        password = random_password.storage_box_root.result
+    }
+    sensitive = true
+}
+
+output "volumes" {
+    value = local.volumes
 }

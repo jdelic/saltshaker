@@ -7,8 +7,8 @@ opensmtpd:
     pkg.installed:
         - pkgs:
             - opensmtpd
-            - opensmtpd-extras
-        - fromrepo: bookworm-backports
+            - opensmtpd-table-postgres
+        #- fromrepo: trixie-backports
         - install_recommends: False
         - require:
             - pkg: no-exim
@@ -19,7 +19,7 @@ opensmtpd-filters:
         - pkgs:
             - opensmtpd-filter-greylistd
             - opensmtpd-filter-dnsbl
-        - fromrepo: mn-opensmtpd
+        - fromrepo: mn-nightly
         - install_recommends: False
         - require:
             - pkg: greylistd
@@ -197,7 +197,7 @@ opensmtpd-internal-relay-sslkey:
         "relay":
             pillar.get('smtp-outgoing', {}).get(
                 'override-ipv4', grains['ip4_interfaces'].get(pillar['ifassign']['external-alt'])[
-                        pillar['ifassign'].get('external-alt-ip-index', 0)|int()
+                    pillar['ifassign'].get('external-alt-ip-index', 0)|int()
                 ]
             ) if pillar.get('smtp-outgoing', {}).get('bind-ipv4', True) else "",
         "receiver":
@@ -282,6 +282,12 @@ opensmtpd-config:
                 {%- else -%}
                     {{pillar['smtp']['internal-relay']['sslkey']}}
                 {%- endif %}
+            {% if pillar['smtp'].get('relay-via', {}).get('url', False) %}
+            relay_via_url: pillar['smtp']['relay-via']['url']
+            {% endif %}
+            {% if pillar['smtp'].get('relay-via', {}).get('auth', False) %}
+            relay_via_auth: pillar['smtp']['relay-via']['auth']
+            {% endif %}
         - require:
             - pkg: opensmtpd
             - file: opensmtpd-authserver-config
