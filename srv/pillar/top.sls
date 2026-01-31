@@ -9,7 +9,7 @@ base:
         - shared.gpg
         - shared.network
 
-    'saltmaster.maurusnet.test':
+    'saltmaster*.maurusnet.test':
         - shared.vault
         - local.vault
         - shared.secrets.vault-dev
@@ -30,6 +30,14 @@ base:
         - match: compound
         - shared.buildserver
         - shared.secrets.gpg-package-signing
+
+    'roles:loadbalancer':
+        - match: grain
+        - shared.loadbalancer
+
+    'roles:6to4gateway':
+        - match: grain
+        - shared.6to4
 
     # spaces ' ' are important after parentheses for the matcher to work (see
     # https://docs.saltstack.com/en/latest/topics/targeting/compound.html)

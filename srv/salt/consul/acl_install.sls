@@ -2,7 +2,7 @@
 # This state is run on two occasions. The first is: consul.agent and consul.server both include it
 # during a highstate after the ACL system is initialized on the salt-master (after the "firstrun").
 # The second is: When a minion boots
-#     - it sends a Salt event through the Salt event bus (salt/minion/<mid>/start)
+#     - it sends a Salt event through the Salt event bus (maurusnet/consul/installed)
 #     - which triggers a Salt reactor on the salt-master,
 #     - which runs a salt.orchestrate state which creates new
 #     - ACL tokens on the salt-master's consul server and then in turn
@@ -15,7 +15,9 @@
 
 include:
     - consul.sync
-    - iptables  # this is a necessary dependency, absolving us from passing dependencies in targeted state.sls runs
+    # basics.nftables.setup makes sure we have all necessary nftables tables and chains. This is a necessary
+    # dependency, absolving us from passing dependencies in targeted state.sls runs
+    - basics.nftables.setup
 {% if pillar['dynamicsecrets'].get('consul-acl-master-token', False) %}
     {# I didn't come up with a better idea to detect whether this runs on a consul.server or agent #}
     - consul.server
@@ -38,12 +40,14 @@ consul-register-acl:
     # this state then waits for the master orchestrator to do its job and attach the right policies to
     # the unconfigured token. To do so we need consul to run already.
     http.wait_for_successful_query:
-        - name: http://169.254.1.1:8500/v1/acl/info/{{pillar['dynamicsecrets']['consul-acl-token']['accessor_id']}}
+        - name: http://169.254.1.1:8500/v1/acl/token/self
         - wait_for: 10
         - request_interval: 1
         - raise_error: False  # only exists in 'tornado' backend
         - backend: tornado
         - status: 200
+        - header_dict:
+            X-Consul-Token: {{pillar['dynamicsecrets']['consul-acl-token']['secret_id']}}
         - require:
             - event: consul-register-acl
             - service: consul-service

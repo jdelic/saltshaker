@@ -15,13 +15,8 @@ base:
         - vault.install
         - mn.cas.client
 
-    'roles:xenserver':
-        - match: grain
-        - xen
-        - consul.server
-
     # everything that is not a consul server has a consul agent
-    'not G@roles:consulserver and not G@roles:xenserver':
+    'not G@roles:consulserver':
         - match: compound
         - consul.agent
 
@@ -34,9 +29,14 @@ base:
         - compilers
         - salt-master
 
+    'roles:vagrant':
+        - match: grain
+        - dev.dkms
+
     'roles:vault':
         - match: grain
         - vault
+        - vault.autounlock
         - mn.cas.vault_database
         - dev.concourse.vault_credentials
 
@@ -53,7 +53,7 @@ base:
 #        - dev.pypi
 #        - sentry
         - compilers
-        - python.dev
+        - basics.python.dev
         - docker.install
 
     'roles:buildserver':
@@ -95,7 +95,7 @@ base:
     # every node that's not a mailserver routes through a mailserver via smartstack
     'not G@roles:mail':
         - match: compound
-        - ssmtp
+        - msmtp
 
     'roles:mail':
         - match: grain
@@ -106,7 +106,7 @@ base:
         - mail.storage
         - mn.cas.dkimsigner
         - mn.cas.mailforwarder
-        - ssmtp.not
+        - msmtp.not
 
     'roles:pim':
         - match: grain
@@ -125,25 +125,22 @@ base:
         - match: grain
         - haproxy.external
 
-    'roles:vpngateway':
+    'roles:natgateway':
         - match: grain
-        - openvpn.gateway
-
-    'not G@roles:vpngateway':
-        - match: compound
-        - openvpn.gateway_accessible
+        - basics.nftables.nat
 
     'roles:webdav':
         - match: grain
+        - fstab.secure
         - apache.webdav
 
     '*.test':
         # put vagrant user config on .test machines
         - mn.users.vagrant
         # enable the NAT networking device for all network traffic
-        - iptables.vagrant
+        - basics.nftables.vagrant
 
     # put my personal user on every other machine
-    '(?!saltmaster).*?net(|.internal)$':
-        - match: pcre
+    'not *.test':
+        - match: compound
         - mn.users.jonas

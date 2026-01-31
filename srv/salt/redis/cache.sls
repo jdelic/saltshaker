@@ -27,23 +27,24 @@ redis-cache:
 
 # allow locals to contact us on port 6379
 redis-in{{pillar.get('redis-server', {}).get('bind-port', 6379)}}-recv:
-    iptables.append:
+    nftables.append:
         - table: filter
-        - chain: INPUT
-        - jump: ACCEPT
+        - chain: input
+        - family: ip4
+        - jump: accept
         - proto: tcp
         - source: '0/0'
-        - in-interface: {{pillar['ifassign']['internal']}}
+        - if: {{pillar['ifassign']['internal']}}
         - destination: {{pillar.get('redis-server', {}).get('bind-ip',
                             grains['ip_interfaces'][pillar['ifassign']['internal']][pillar['ifassign'].get(
                                 'internal-ip-index', 0)|int()]
                        )}}
         - dport: {{pillar.get('redis-server', {}).get('bind-port', 6379)}}
         - match: state
-        - connstate: NEW
+        - connstate: new
         - save: True
         - require:
-            - sls: iptables
+            - sls: basics.nftables.setup
 
 
 redis-servicedef:

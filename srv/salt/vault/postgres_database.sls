@@ -22,7 +22,7 @@ vault-postgres:
         - name: {{pillar['vault']['postgres']['dbuser']}}
         - createdb: False
         - createroles: False
-        - encrypted: True
+        - encrypted: scram-sha-256
         - login: True
         - inherit: False
         - superuser: False
@@ -47,6 +47,16 @@ vault-postgres:
         - order: 20  # see ORDER.md
         - require:
             - postgres_user: vault-postgres
+    postgres_privileges.present:
+        - name: {{pillar['vault']['postgres']['dbuser']}}
+        - object_name: public
+        - object_type: schema
+        - privileges:
+            - CREATE
+        - user: postgres
+        - maintenance_db: {{pillar['vault']['postgres']['dbname']}}
+        - require:
+            - postgres_database: vault-postgres
     cmd.script:
         - name: salt://vault/vault_postgresql_db.jinja.sh
         - template: jinja
@@ -59,10 +69,11 @@ vault-postgres:
         - order: 20  # see ORDER.md
         - onchanges:
             - postgres_database: vault-postgres
+            - postgres_privileges: vault-postgres
         - env:
             - PGPASSWORD: {{pillar['dynamicsecrets']['secure-vault']}}
         - require:
-            - postgres_database: vault-postgres
+            - postgres_privileges: vault-postgres
         - require_in:
             - cmd: vault-sync-database
 
@@ -70,8 +81,8 @@ vault-postgres:
 vault-postgres-ready:
     cmd.run:
         - name: >
-            until host postgresql.service.consul || test ${count} -gt 30; do sleep 1; count=$((count+1)); done &&
-            test ${count} -lt 30
+            until host postgresql.service.consul || test ${count} -gt 60; do sleep 1; count=$((count+1)); done &&
+            test ${count} -lt 120
         - env:
             count: 0
         - require_in:

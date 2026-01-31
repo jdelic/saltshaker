@@ -20,8 +20,8 @@ deploying them. Personally, I'm deploying this configuration on my laptop
 using Vagrant, on Digital Ocean and my own server on Hetzner which I configure
 with a XEN Hypervisor running VMs for all my development needs.
 
-Everything in here is based around **Debian 9.0 Stretch** (i.e. requires
-systemd and uses Debian package naming).
+Everything in here is based around **Debian 12.0 Bookworm** (i.e. requires
+systemd, nftables, and uses Debian package naming).
 
 Using these salt formulae you can bring up:
 
@@ -118,6 +118,10 @@ Deploying this salt configuration requires you to:
 You should clone the saltshaker repository and then as a first step, replace
 the git submodule in `srv/pillar/shared/secrets` with your own **private Git
 repository**.
+
+You can find an example pillar that you can modify for your own use in the
+[saltshaker-secrets-example](https://github.com/jdelic/saltshaker-secrets-example)
+repository.
 
 For my salt states to work, you **must** provide your own`shared.secrets`
 pillar in `srv/pillar/shared/secrets` that **must** contain the following
@@ -360,12 +364,12 @@ whatever... how do I plug this into this smartstack implementation?**
 
 **Answer:** You create a Salt state that registers these services as
 `smartstack:internal` services, assign them a port in your [port map](PORTS.md)
-and make sure haproxy instances can route to it.This will cause
+and make sure haproxy instances can route to it. This will cause
 `consul-template` instances on your machines to pick them up and make them
 available on `localhost:[port]`. The ideal machines to assign these states to
 in my opinion are all machines that have the `consulserver` role. Registering
 services with consul that way can either be done by dropping service
-definitions into `/etc/consul/services.d` or perhaps use
+definitions into `/etc/consul/services.d` or maybe
 [use salt consul states](https://github.com/pravka/salt-consul).
 
 A better idea security-wise is to create an "egress router" role that runs a
@@ -373,7 +377,7 @@ specialized version of haproxy-external that sends traffic from its internal IP
 to your external services. Then announce the internal IP+Port as an internal
 smartstack service. The external services can then still be registered with the
 local Consul cluster, but you also have a defined exit point for traffic to
-the external network.
+the external network (... or use NAT gateways).
 
 
 # Vault
@@ -444,49 +448,51 @@ SysCTL is set up to accept
    even if those don't exist yet. This reduces usage of the `0.0.0.0` wildcard
    allowing to write more secure configurations.
  * `net.ipv4.conf.all.route_localnet` allows packets to and from `localhost` to
-   pass through iptables, making it possible to route them. This is required so
+   pass through nftables, making it possible to route them. This is required so
    we can make consul services available on `localhost` even though consul runs 
    on its own `consul0` dummy interface.
 
-## iptables states
-iptables is configured by the `basics` and `iptables` states to use the
+## nftables states
+nftables is configured by the `basics` and `basics.nftables` states to use the
 `connstate`/`conntrack` module to allow incoming and outgoing packets in the
 `RELATED` state. So to enable new TCP services in the firewall on each
 individual machine managed through this saltshaker, only the connection
 creation needs to be managed in the machine's states.
 
 The naming standard for states that enable ports that get contacted is:
-`(servicename)-tcp-in(port)-recv`. For example:
+`(servicename)-tcp-in(port)-recv-{family}`. For example:
 
 ```yaml
-openssh-in22-recv:
-    iptables.append:
+openssh-in22-recv-ipv6:
+    nftables.append:
         - table: filter
-        - chain: INPUT
-        - jump: ACCEPT
+        - family: ip6
+        - chain: input
+        - jump: accept
         - source: '0/0'
         - proto: tcp
         - dport: 22
         - match: state
-        - connstate: NEW
+        - connstate: new
         - save: True
         - require:
-            - sls: iptables
+            - sls: basics.nftables
 ```
 
 The naming standard for states that enable ports that initiate connections is:
-`(servicename)-tcp-out(port)-send`. For example:
+`(servicename)-tcp-out(port)-send-{family}`. For example:
 
 ```yaml
-dns-tcp-out53-send:
-      iptables.append:
+dns-tcp-out53-send-ipv4:
+      nftables.append:
           - table: filter
-          - chain: OUTPUT
-          - jump: ACCEPT
+          - family: ip4
+          - chain: output
+          - jump: accept
           - destination: '0/0'
           - dport: 53
           - match: state
-          - connstate: NEW
+          - connstate: new
           - proto: tcp
           - save: True
 ```
@@ -557,6 +563,53 @@ Those are:
 
 
 # Configuration
+
+## Consul bootstrap
+
+Bootstrapping a production Consul cluster is automated within this Salt config.
+It uses Consul's manual bootstrap mode. This allows the first server to start
+(which must be assigned the `consulbootstrapprimary` role) to immediately act
+as cluster leader. Other servers can then come up in parallel.
+
+Only one node is allowed to have the `consulbootstrapprimary` role. This node
+will have `-bootstrap` set on its consul server instance. It will also get a
+systemd timer that will check every 30 seconds whether 
+`{{pillar['consul']['number-of-servers']}}` servers are up and running. When
+that condition is met, the timer will stop the consul service and remove the
+`-bootstrap` flag from the consul server systemd unit, then remove the
+`consulbootstrapprimary` role from the node, resync the Salt grains and restart
+the consul server.
+
+### Consul ACL bootstrap
+
+The Consul cluster is orchestrated such that it will automatically create ACLs
+for each node when the node starts. Dynamicsecrets has support for creating
+ACL tokens on consul through the secret type `consul-acl-token`. So what
+happens is that on the first Consul server the ACL system is bootstrapped with
+the dynamic secret `consul-acl-master-token` which is of type `uuid` by
+creating a ACL policy called `tempacl-policy-[nodeid]`. This policy is used
+by Salt on the Salt master node to create ACL tokens, i.e. dynamic secrets of
+type `consul-acl-token`.
+
+However, these tokens are created without any policies attached to them. For
+ACLs to be meaningful, the policies must be specific to the node. Therefor
+this is a two step process. Dynamicsecrets creates the ACL token without
+policies and the Salt minion sends a beacon event to the Salt master. The
+master then creates a policy for the node and attaches it to the token. This
+happens through the reactor system (`srv/reactor/consul-acl.sls`) and the
+`srv/salt/orchestrate/consul-node-setup.sls` state. The node's
+`consul.acl_install` state is set up to send the beacon event and then block
+and wait until the master has created the ACL policy and attached it to the
+token.
+
+To sum it all up:
+1. Dynamicsecrets knows a Consul ACL master token
+2. It uses that to create ACL tokens for each node when the pillars for that
+   node are rendered
+3. During the setup of each node the node will send a beacon event to the Salt
+   master which will attach a policy to the ACL token
+
+This allows dynamic initialization of ACLs on the Consul cluster.
 
 ## PostgreSQL
 

@@ -1,7 +1,7 @@
 
 salt-master:
     pkg.installed:
-        - order: 2
+        - order: 10
         - require:
             - pkgrepo: saltstack-repo
     service:
@@ -20,16 +20,17 @@ saltmaster-backup-symlink:
 
 {% for port in ['4505', '4506'] %}
 # allow the internal network to talk to us
-saltmaster-tcp-in{{port}}-recv:
-    iptables.append:
+saltmaster-tcp-in{{port}}-recv-ipv4:
+    nftables.append:
         - table: filter
-        - chain: INPUT
-        - jump: ACCEPT
-        - in-interface: {{pillar['ifassign']['internal']}}
+        - chain: input
+        - family: ip4
+        - jump: accept
+        - if: {{pillar['ifassign']['internal']}}
         - dport: {{port}}
         - proto: tcp
         - match: state
-        - connstate: NEW
+        - connstate: new
         # it's super important these go first so the local minion works
         - order: 2
         - save: True

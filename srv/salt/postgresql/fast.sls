@@ -4,7 +4,7 @@
 include:
     - postgresql.sync
 
-{% set postgres_version = pillar.get('postgresql', {}).get('version', '11') %}
+{% set postgres_version = pillar.get('postgresql', {}).get('version', '16') %}
 {% set port = pillar.get('postgresql', {}).get('bind-port', '5432') %}
 {% set ip = pillar.get('postgresql', {}).get(
               'bind-ip', grains['ip_interfaces'][pillar['ifassign']['internal']][pillar['ifassign'].get(
@@ -30,9 +30,10 @@ postgresql-repo:
     pkgrepo.managed:
         - humanname: PostgreSQL official repos
         # PostgreSQL APT allows you to pin a version as a component
-        - name: {{pillar["repos"]["postgresql"]}} main {{postgres_version}}
+        - name: {{pillar["repos"]["postgresql"]}} {{postgres_version}}
         - file: /etc/apt/sources.list.d/postgresql.list
         - key_url: salt://postgresql/postgresql_44A07FCC7D46ACCC4CF8.pgp.key
+        - aptkey: False
         - require:
             - file: postgresql-apt-pin
 
@@ -40,7 +41,7 @@ postgresql-repo:
 postgresql-step1:
     pkg.installed:
         - name: postgresql-common
-        - fromrepo: stretch-pgdg
+        - fromrepo: trixie-pgdg
         - require:
             - pkgrepo: postgresql-repo
         - install_recommends: False
@@ -64,12 +65,11 @@ data-base-dir:
 postgresql-step2:
     pkg.installed:
         - pkgs:
-            - postgresql
             - postgresql-{{postgres_version}}
             - postgresql-client-{{postgres_version}}
             - libpq5
         - install_recommends: False
-        - fromrepo: stretch-pgdg
+        - fromrepo: trixie-pgdg
         - require:
             - postgresql-step1
 
@@ -102,7 +102,7 @@ data-cluster-config-base:
         - text: |
             listen_addresses = '{{ip}}'
             max_wal_senders = 2  # minimum necessary for for hot backup without additional log shipping
-            wal_keep_segments = 3  # just as a precaution.
+            wal_keep_size = 128  # just as a precaution.
             wal_level = replica
             archive_mode = off  # we don't do log shipping, just hot backups, so we don't need archive_command
         - require:
@@ -234,21 +234,24 @@ postgresql-servicedef:
 {% endif %}
 
 
-postgresql-in{{port}}-recv:
-    iptables.append:
+postgresql-in{{port}}-recv-ip4:
+    nftables.append:
         - table: filter
-        - chain: INPUT
-        - jump: ACCEPT
+        - chain: input
+        - jump: accept
+        - family: ip4
         - proto: tcp
         - source: '0/0'
-        - in-interface: {{pillar['ifassign']['internal']}}
+        - if: {{pillar['ifassign']['internal']}}
         - destination: {{ip}}
         - dport: {{port}}
         - match: state
-        - connstate: NEW
+        - connstate: new
         - save: True
         - require:
-            - sls: iptables
+            - sls: basics.nftables.setup
+        - require_in:
+              - cmd: postgresql-sync
 
 
 {% if pillar.get('duplicity-backup', {}).get('enabled', False) %}
@@ -291,7 +294,7 @@ postgresql-backup-prescript:
         - contents: |
             #!/bin/bash
             # The below command will fail if there are more table spaces than those configured in this Salt config.
-            su -s /bin/bash -c "/usr/bin/pg_basebackup -D /secure/postgres-backup/backup \
+            su -s /usr/bin/bash -c "/usr/bin/pg_basebackup -D /secure/postgres-backup/backup \
                 --waldir /secure/postgres-backup/wal \
                 -X stream -R -T /secure/postgres/main=/secure/postgres-backup/backup-secure" postgres
         - user: root

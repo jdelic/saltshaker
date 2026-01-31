@@ -59,11 +59,12 @@ concourse-worker-envvars:
         - group: root
         - mode: '0600'
         - contents: |
-            CONCOURSE_GARDEN_NETWORK_POOL="{{pillar.get('ci', {}).get('garden-network-pool', '10.254.0.0/22')}}"
-            CONCOURSE_GARDEN_DOCKER_REGISTRY="{{pillar.get('ci', {}).get('garden-docker-registry',
+            CONCOURSE_CONTAINERD_NETWORK_POOL="{{pillar.get('ci', {}).get('backend-network-pool', '10.254.0.0/22')}}"
+            CONCOURSE_CONTAINERD_DOCKER_REGISTRY="{{pillar.get('ci', {}).get('docker-registry',
               'registry-1.docker.io')}}"
-            CONCOURSE_GARDEN_DNS_SERVER=169.254.1.1
-            CONCOURSE_GARDEN_DESTROY_CONTAINERS_ON_STARTUP=1
+            CONCOURSE_CONTAINERD_DNS_SERVER=169.254.1.1
+            CONCOURSE_CONTAINERD_DESTROY_CONTAINERS_ON_STARTUP=1
+            CONCOURSE_CONTAINERD_ALLOW_HOST_ACCESS=1
 
 
 concourse-worker:
@@ -79,6 +80,7 @@ concourse-worker:
             group: root
             # tsa-host on 127.0.0.1 works because there is haproxy@internal proxying it
             arguments: >
+                --runtime containerd
                 --work-dir /srv/concourse-worker
                 --bind-ip 127.0.0.1
                 --bind-port 7777
@@ -105,79 +107,84 @@ concourse-worker:
 
 # allow forwarding of outgoing dns/http/https traffic to the internet from concourse.ci/garden containers
 {% for port in ['53', '80', '443', '8100'] %}
-concourse-worker-tcp-out{{port}}-forward:
-    iptables.append:
+concourse-worker-tcp-out{{port}}-forward-ipv4:
+    nftables.append:
         - table: filter
-        - chain: FORWARD
-        - jump: ACCEPT
-        - source: {{pillar.get('ci', {}).get('garden-network-pool', '10.254.0.0/22')}}
+        - chain: forward
+        - family: ip4
+        - jump: accept
+        - source: {{pillar.get('ci', {}).get('backend-network-pool', '10.254.0.0/22')}}
         - destination: 0/0
         - dport: {{port}}
         - match: state
-        - connstate: NEW
+        - connstate: new
         - proto: tcp
         - save: True
         - require:
-            - sls: iptables
+            - sls: basics.nftables.setup
 {% endfor %}
 
 
 # allow incoming connections from concourse TSA. Outgoing connections for the web/server node are
 # covered by basics.sls for the internal network
 {% for port in ['7777', '7788', '7799'] %}
-concourse-worker-tcp-in{{port}}-recv:
-    iptables.append:
+concourse-worker-tcp-in{{port}}-recv-ipv4:
+    nftables.append:
         - table: filter
-        - chain: INPUT
-        - jump: ACCEPT
-        - in-interface: {{pillar['ifassign']['internal']}}
+        - chain: input
+        - family: ip4
+        - jump: accept
+        - if: {{pillar['ifassign']['internal']}}
         - dport: {{port}}
         - match: state
-        - connstate: NEW
+        - connstate: new
         - proto: tcp
         - save: True
         - require:
-            - sls: iptables
+            - sls: basics.nftables.setup
 {% endfor %}
 
 
-concourse-worker-udp-out53-forward:
-    iptables.append:
+concourse-worker-udp-out53-forward-ipv4:
+    nftables.append:
         - table: filter
-        - chain: FORWARD
-        - jump: ACCEPT
-        - source: {{pillar.get('ci', {}).get('garden-network-pool', '10.254.0.0/22')}}
+        - chain: forward
+        - family: ip4
+        - jump: accept
+        - source: {{pillar.get('ci', {}).get('backend-network-pool', '10.254.0.0/22')}}
         - destination: 0/0
         - dport: 53
         - match: state
-        - connstate: NEW
+        - connstate: new
         - proto: udp
         - save: True
         - require:
-            - sls: iptables
+            - sls: basics.nftables.setup
 
 
-concourse-allow-inter-container-traffic-recv:
-    iptables.append:
+concourse-allow-inter-container-traffic-recv-ipv4:
+    nftables.append:
         - table: filter
-        - chain: INPUT
-        - jump: ACCEPT
-        - source: {{pillar.get('ci', {}).get('garden-network-pool', '10.254.0.0/22')}}
-        - destination: {{pillar.get('ci', {}).get('garden-network-pool', '10.254.0.0/22')}}
+        - chain: input
+        - family: ip4
+        - jump: accept
+        - source: {{pillar.get('ci', {}).get('backend-network-pool', '10.254.0.0/22')}}
+        - destination: {{pillar.get('ci', {}).get('backend-network-pool', '10.254.0.0/22')}}
         - save: True
         - require:
-            - sls: iptables
+            - sls: basics.nftables.setup
 
 
-concourse-allow-inter-container-traffic-send:
-    iptables.append:
+concourse-allow-inter-container-traffic-send-ipv4:
+    nftables.append:
         - table: filter
-        - chain: OUTPUT
-        - jump: ACCEPT
-        - source: {{pillar.get('ci', {}).get('garden-network-pool', '10.254.0.0/22')}}
-        - destination: {{pillar.get('ci', {}).get('garden-network-pool', '10.254.0.0/22')}}
+        - chain: output
+        - family: ip4
+        - jump: accept
+        - source: {{pillar.get('ci', {}).get('backend-network-pool', '10.254.0.0/22')}}
+        - destination: {{pillar.get('ci', {}).get('backend-network-pool', '10.254.0.0/22')}}
         - save: True
         - require:
-            - sls: iptables
+            - sls: basics.nftables.setup
 
 # vim: syntax=yaml

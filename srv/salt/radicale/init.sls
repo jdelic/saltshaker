@@ -5,6 +5,7 @@
 #        - name: {{pillar['repos']['maurusnet-radicale']}}
 #        - file: /etc/apt/sources.list.d/mn-radicale.list
 #        - key_url: salt://mn/packaging_authority_A78049AF.pgp.key
+#        - aptkey: False
 
 
 radicale:
@@ -99,11 +100,12 @@ radicale-servicedef-external:
             - file: consul-service-dir
 
 
-radicale-tcp-in{{pillar.get('radicale', {}).get('bind-port', 8990)}}-recv:
-    iptables.append:
+radicale-tcp-in{{pillar.get('radicale', {}).get('bind-port', 8990)}}-recv-ipv4:
+    nftables.append:
         - table: filter
-        - chain: INPUT
-        - jump: ACCEPT
+        - chain: input
+        - family: ip4
+        - jump: accept
         - source: '0/0'
         - destination: {{pillar.get('calendar', {}).get(
               'bind-ip', grains['ip_interfaces'][pillar['ifassign']['internal']][pillar['ifassign'].get(
@@ -112,8 +114,8 @@ radicale-tcp-in{{pillar.get('radicale', {}).get('bind-port', 8990)}}-recv:
           )}}
         - dport: {{pillar.get('calendar', {}).get('bind-port', 8990)}}
         - match: state
-        - connstate: NEW
+        - connstate: new
         - proto: tcp
         - save: True
         - require:
-            - sls: iptables
+            - sls: basics.nftables.setup

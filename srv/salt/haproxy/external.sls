@@ -14,6 +14,17 @@ haproxy-config-template-external:
             - cmd: consul-template-servicerenderer
 
 
+{% set haproxy_ips = [] %}
+{% set x = haproxy_ips.append(
+               pillar.get('haproxy', {}).get('override-ipv4',
+                   grains['ip4_interfaces'].get(pillar['ifassign']['external'], {})[pillar['ifassign'].get('external-ip-index', 0)|int()])
+           ) if pillar.get('haproxy', {}).get('bind-ipv4', False) %}
+{% set x = haproxy_ips.append(
+               pillar.get('haproxy', {}).get('override-ipv6',
+                   salt['network.calc_net'](salt['network.ip_addrs6'](pillar['ifassign-ipv6']['external'], False, "2000::/4")[0] + "/64").removesuffix("/64") +
+                       pillar['ifassign-ipv6'].get('external-ipv6-suffix', "1")
+               )
+           ) if pillar.get('haproxy', {}).get('bind-ipv6', False) %}
 smartstack-external:
     file.managed:
         - name: /etc/consul/template.d/smartstack-external.conf
@@ -31,8 +42,10 @@ smartstack-external:
                 systemctl restart haproxy@external
             parameters: >
                 --include tags=smartstack:external
-                --open-iptables=conntrack
-                --smartstack-localip {{pillar.get('loadbalancer', {}).get('external-ip', grains['ip_interfaces'][pillar['ifassign']['external']][pillar['ifassign'].get('external-ip-index', 0)|int()])}}
+                --open-nftables=conntrack
+                {%- for ip in haproxy_ips -%}
+                    {{' '}}--smartstack-localip {{ip}}
+                {%- endfor %}
                 {%- if pillar.get('ssl', {}).get('sources', {}).get('default-cert', None) and
                       salt['pillar.fetch'](pillar['ssl']['sources']['default-cert'], None) -%}
                     {{' '}}-D maincert={{pillar['ssl']['filenames']['default-cert-full']}}
@@ -56,16 +69,19 @@ smartstack-external:
             - cmd: smartstack-external-sync
 
 
-# This is probably overkill, since consul-template already runs the smartstack script with --open-iptables=conntrack
-#smartstack-ensure-iptables-rules:
-#    cmd.run:
-#        - name: >
-#            /etc/consul/renders/smartstack-external.py
-#            --include tags=smartstack:external
-#            --open-iptables=conntrack
-#            --smartstack-localip {{pillar.get('loadbalancer', {}).get('external-ip', grains['ip_interfaces'][pillar['ifassign']['external']][pillar['ifassign'].get('external-ip-index', 0)|int()])}}
-#            --only-iptables
-#        - require:
-#            - file: smartstack-external
+# This is probably overkill, since consul-template already runs the smartstack script with --open-nftables=conntrack
+smartstack-ensure-nftables-rules:
+    cmd.run:
+        - name: >
+            /etc/consul/renders/smartstack-external.py
+            --include tags=smartstack:external
+            --open-nftables=conntrack
+            --smartstack-localip {{pillar.get('loadbalancer', {}).get('external-ip', grains['ip_interfaces'][pillar['ifassign']['external']][pillar['ifassign'].get('external-ip-index', 0)|int()])}}
+            --only-nftables
+        - require:
+            - file: smartstack-external
+        - require_in:
+              - cmd: smartstack-external-sync
+
 
 # vim: syntax=yaml

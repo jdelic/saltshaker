@@ -6,7 +6,7 @@ check() {
     echo "check team $1 $2" >&2
     if /usr/local/bin/fly teams -t salt_ciadmin -d --json | \
           jq '.[]|.name + "=" + .auth.owner.groups[],.name + "=" + .auth.owner.users[]' | \
-          grep "$1=oauth:$2" >/dev/null 2>/dev/null; then
+          grep "$1=oidc:$2" >/dev/null 2>/dev/null; then
         echo "found"
     else
         echo "not found";
@@ -20,7 +20,7 @@ setteam() {
     if test "$(check $1 $2)" == "found"; then
         RETCODE=0
     else
-        /usr/local/bin/fly set-team --non-interactive -t salt_ciadmin -n "$1" --oauth-group="$2"
+        /usr/local/bin/fly set-team --non-interactive -t salt_ciadmin -n "$1" --oidc-group="$2"
         RETCODE=$?
     fi
 }

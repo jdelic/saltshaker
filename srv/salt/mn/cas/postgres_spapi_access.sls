@@ -10,7 +10,7 @@ authserver-{{rolename}}-spapi-access:
             - name: {{rolename}}
             - createdb: False
             - createroles: False
-            - encrypted: True
+            - encrypted: scram-sha-256
             - login: True
             - inherit: False
             - superuser: False

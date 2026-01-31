@@ -116,13 +116,13 @@ consul-common-config:
         - template: jinja
         - context:
             disable_update_check: >-
-                {% if pillar['nomad-cluster'].get('check-for-updates', 'false')|lower == 'true' -%}
+                {% if pillar['consul-cluster'].get('check-for-updates', 'false')|lower == 'true' -%}
                     false
                 {%- else -%}
                     true
                 {%- endif %}
             local_ip: {{pillar.get('consul-instance', {}).get(
-                            'bind-ip', grains['ip_interfaces'][pillar['ifassign']['internal']][pillar['ifassign'].get(
+                            'bind-ip', grains['ip4_interfaces'][pillar['ifassign']['internal']][pillar['ifassign'].get(
                                 'internal-ip-index', 0
                             )|int()]
                         )
@@ -180,16 +180,16 @@ consul-rsyslog:
 
 
 # open consul interface
-consul-all-in-recv:
-    iptables.insert:
-        - position: 2
+consul-all-in-recv-ipv4:
+    nftables.append:
         - table: filter
-        - chain: INPUT
-        - jump: ACCEPT
+        - chain: input
+        - family: ip4
+        - jump: accept
         - destination: 169.254.1.1
         - save: True
         - require:
-            - sls: iptables
+            - sls: basics.nftables.setup
             - cmd: consul-network-interface
         - require_in:
             - cmd: consul-sync-network
@@ -198,19 +198,20 @@ consul-all-in-recv:
 # open consul ports TCP
 {% for port in ['8300', '8301', '8302', '8400', '8500', '8600'] %}
 # allow others to talk to us
-consul-tcp-in{{port}}-recv:
-    iptables.append:
+consul-tcp-in{{port}}-recv-ipv4:
+    nftables.append:
         - table: filter
-        - chain: INPUT
-        - jump: ACCEPT
-        - in-interface: {{pillar['ifassign']['internal']}}
+        - chain: input
+        - jump: accept
+        - family: ip4
+        - if: {{pillar['ifassign']['internal']}}
         - dport: {{port}}
         - proto: tcp
         - match: state
-        - connstate: NEW
+        - connstate: new
         - save: True
         - require:
-            - sls: iptables
+            - sls: basics.nftables.setup
         - require_in:
             - cmd: consul-sync-network
 {% endfor %}
@@ -219,16 +220,17 @@ consul-tcp-in{{port}}-recv:
 # open consul ports UDP
 {% for port in ['8301', '8302', '8600'] %}
 consul-udp-in{{port}}-recv:
-    iptables.append:
+    nftables.append:
         - table: filter
-        - chain: INPUT
-        - jump: ACCEPT
-        - in-interface: {{pillar['ifassign']['internal']}}
+        - chain: input
+        - family: ip4
+        - jump: accept
+        - if: {{pillar['ifassign']['internal']}}
         - dport: {{port}}
         - proto: udp
         - save: True
         - require:
-            - sls: iptables
+            - sls: basics.nftables.setup
         - require_in:
             - cmd: consul-sync-network
 {% endfor %}

@@ -8,18 +8,23 @@ def create_user(username, groups=None, optional_groups=None, key_pillars=None, p
     if create_default_group and username not in groups:
         _groups.insert(0, username)
 
-    st_group = state("groups-%s" % username).group
-    st_group.present(names=_groups)
+    _groupstates = []
+    for g in _groups:
+        st_group = state("groups-%s-%s" % (username, g)).group
+        st_group.present(name=g)
+        _groupstates.append(st_group)
 
     st_user = state(username).user
-    st_user.require(st_group)
+
+    for gs in _groupstates:
+        st_user.require(gs)
 
     st_user.present(
         groups=_groups,
         optional_groups=optional_groups,
         home='/home/%s' % username,
         password=password,
-        gid_from_name=create_default_group,
+        usergroup=False,
         shell="/bin/bash"
     )
 
@@ -34,12 +39,23 @@ def create_user(username, groups=None, optional_groups=None, key_pillars=None, p
         fn_auth(user=username, ssh_keys=ssh_keys)
 
     if enable_byobu:
-        st_byobu = state('byobu-%s' % username).cmd.run
+        st_byobu = state('byobu-%s' % username).file.append
         st_byobu.require(pkg='byobu')
         st_byobu(
-            name='/usr/bin/byobu-launcher-install',
-            runas=username,
+            name='/home/%s/.profile' % username,
+            text='''
+if [ "x$MN_TMUX" != "x1" ]; then _byobu_sourced=1 . /usr/bin/byobu-launch 2>/dev/null || true; export MN_TMUX=1; fi
+''',
             unless='grep -q byobu /home/%s/.profile' % username
+        )
+                
+        st_byobu_folder = state('byobu-%s-folder' % username).file.directory
+        sbf = st_byobu_folder(
+            '/home/%s/.byobu' % username,
+            user=username,
+            group=username,
+            makedirs=True,
+            mode='755'
         )
 
         st_byobu_tmux_config = state('byobu-%s-tmux-config' % username).file
@@ -50,7 +66,8 @@ def create_user(username, groups=None, optional_groups=None, key_pillars=None, p
             group=username,
             mode='644'
         )
-        sbcm.require(cmd='byobu-%s' % username)
+        sbcm.require(file='byobu-%s' % username)
+        sbcm.require(file='byobu-%s-folder' % username)
 
         st_byobu_status_config = state('byobu-%s-status-config' % username).file
         sbsc = st_byobu_status_config.managed(
@@ -60,7 +77,8 @@ def create_user(username, groups=None, optional_groups=None, key_pillars=None, p
             group=username,
             mode='644'
         )
-        sbsc.require(cmd='byobu-%s' % username)
+        sbsc.require(file='byobu-%s' % username)
+        sbsc.require(file='byobu-%s-folder' % username)
 
     if set_bashrc:
         file_bashrc = state('/home/%s/.bashrc' % username).file

@@ -7,7 +7,7 @@ include:
 authserver:
     pkg.installed:
         - name: authserver
-        #- fromrepo: mn-nightly  # install nightly version instead of release
+        - fromrepo: mn-nightly  # install nightly version instead of release
         - require:
             - appconfig: authserver-appconfig
     service.running:
@@ -68,6 +68,8 @@ authserver-rsyslog:
     "CORS_ORIGIN_REGEX_WHITELIST": "^https://(\w+\.)?(maurusnet\.test|maurus\.net)$",
     "USE_X_FORWARDED_HOST": "true",
     "APPLICATION_LOGLEVEL": "INFO",
+    "AUTHSERVER_ENTITY_NAME": "maurus.networks",
+    "AUTHSERVER_ENTITY_LOGO": "/static/mn.png",
 } %}
 
 {# because we don't have jinja2.ext.do, we have to use the following work-around to set dict items #}
@@ -78,6 +80,9 @@ authserver-rsyslog:
 authserver-config-secretid:
     cmd.run:
         - name: >-
+            touch /etc/appconfig/authserver/env/VAULT_SECRETID &&
+            chmod 0600 /etc/appconfig/authserver/env/VAULT_SECRETID &&
+            chown authserver:authserver /etc/appconfig/authserver/env/VAULT_SECRETID &&
             /usr/local/bin/vault write -f -format=json \
                 auth/approle/role/authserver/secret-id |
                 jq -r .data.secret_id > /etc/appconfig/authserver/env/VAULT_SECRETID
@@ -93,6 +98,7 @@ authserver-config-secretid:
             - service: authserver
         - require:
             - cmd: authserver-sync-vault
+            - pkg: authserver
     {% endif %}
 {% else %}
     {% set config = config | set_dict_key_value("DATABASE_URL",
@@ -106,9 +112,13 @@ authserver-config-{{loop.index}}:
     file.managed:
         - name: /etc/appconfig/authserver/env/{{envvar}}
         - contents: {{value}}
+        - user: authserver
+        - group: authserver
+        - mode: '0640'
         - require:
             - file: {{pillar['ssl']['service-rootca-cert']}}
             - appconfig: authserver-appconfig
+            - pkg: authserver
         - watch_in:
             - service: authserver
 {% endfor %}
@@ -118,10 +128,10 @@ authserver-spapi-install:
     cmd.run:
         - name: >
             /usr/local/authserver/bin/envdir /etc/appconfig/authserver/env/ \
-                /usr/local/authserver/bin/django-admin.py spapi --settings=authserver.settings install
+                /usr/local/authserver/bin/django-admin spapi --settings=authserver.settings install
         - unless: >
             /usr/local/authserver/bin/envdir /etc/appconfig/authserver/env/ \
-                /usr/local/authserver/bin/django-admin.py spapi --settings=authserver.settings check --installed
+                /usr/local/authserver/bin/django-admin spapi --settings=authserver.settings check --installed
         - require:
             - service: authserver
 
@@ -131,10 +141,10 @@ authserver-grant-spapi-access-{{spapi_user}}:
     cmd.run:
         - name: >-
             /usr/local/authserver/bin/envdir /etc/appconfig/authserver/env/ \
-                /usr/local/authserver/bin/django-admin.py spapi --settings=authserver.settings grant {{spapi_user}}
+                /usr/local/authserver/bin/django-admin spapi --settings=authserver.settings grant {{spapi_user}}
         - unless: >
             /usr/local/authserver/bin/envdir /etc/appconfig/authserver/env/ \
-                /usr/local/authserver/bin/django-admin.py spapi --settings=authserver.settings check \
+                /usr/local/authserver/bin/django-admin spapi --settings=authserver.settings check \
                     --grant={{spapi_user}}
         - require:
             - cmd: authserver-spapi-install
@@ -145,11 +155,11 @@ authserver-create-auth-domain:
     cmd.run:
         - name: >-
             /usr/local/authserver/bin/envdir /etc/appconfig/authserver/env/ \
-                /usr/local/authserver/bin/django-admin.py domain --settings=authserver.settings create \
+                /usr/local/authserver/bin/django-admin domain --settings=authserver.settings create \
                     --create-key jwt {{pillar['authserver'].get('sso-auth-domain', pillar['authserver']['hostname'])}}
         - unless: >-
             /usr/local/authserver/bin/envdir /etc/appconfig/authserver/env/ \
-                /usr/local/authserver/bin/django-admin.py domain --settings=authserver.settings list \
+                /usr/local/authserver/bin/django-admin domain --settings=authserver.settings list \
                     --include-parent-domain {{pillar['authserver']['hostname']}}
         - require:
             - service: authserver
@@ -192,18 +202,19 @@ authserver-servicedef-internal:
 
 
 authserver-tcp-in{{pillar.get('authserver', {}).get('bind-port', 8999)}}-recv:
-    iptables.append:
+    nftables.append:
         - table: filter
-        - chain: INPUT
-        - jump: ACCEPT
+        - chain: input
+        - family: ip4
+        - jump: accept
         - source: '0/0'
         - destination: {{config['BINDIP']}}/32
         - dport: {{config['BINDPORT']}}
         - match: state
-        - connstate: NEW
+        - connstate: new
         - proto: tcp
         - save: True
         - require:
-            - sls: iptables
+            - sls: basics.nftables.setup
 
 # vim: syntax=yaml

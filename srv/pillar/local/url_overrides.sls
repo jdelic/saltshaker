@@ -4,52 +4,56 @@
 # mirror if you have such a thing
 
 repos:
-    aptly: deb http://fileserver.maurusnet.test/aptly/ squeeze main
-    aptly-nightly: deb http://fileserver.maurusnet.test/aptly-nightly/ nightly main
-    docker: deb http://fileserver.maurusnet.test/repo/ buster main
-    stretch: deb http://fileserver.maurusnet.test/debian/ stretch main
-    stretch-backports: deb http://fileserver.maurusnet.test/debian/ stretch-backports main
-    stretch-security: deb http://fileserver.maurusnet.test/debian/security/ stretch-updates main
-    stretch-updates: deb http://fileserver.maurusnet.test/debian/ stretch-updates main
-    maurusnet-apps: deb http://fileserver.maurusnet.test/mn-nightly/ mn-nightly main
-    maurusnet-opensmtpd: deb http://fileserver.maurusnet.test/mn-opensmtpd/ mn-opensmtpd main
-    maurusnet-radicale: deb http://fileserver.maurusnet.test/mn-radicale/ mn-radicale main
-    postgresql: deb http://fileserver.maurusnet.test/postgresql/ stretch-pgdg
-    saltstack: deb http://fileserver.maurusnet.test/apt/debian/9/amd64/latest stretch main
-    haproxy: deb http://fileserver.maurusnet.test/haproxy/ stretch-backports-1.9 main
+    aptly: deb [signed-by=/etc/apt/keyrings/maurusnet-package-archive.gpg] http://fileserver.maurusnet.test/aptly/ squeeze main
+    aptly-nightly: deb [signed-by=/etc/apt/keyrings/maurusnet-package-archive.gpg] http://fileserver.maurusnet.test/aptly-nightly/ nightly main
+    docker: deb [signed-by=/etc/apt/keyrings/maurusnet-package-archive.gpg] http://fileserver.maurusnet.test/repo/ trixie stable
+    haproxy: deb [signed-by=/etc/apt/keyrings/maurusnet-package-archive.gpg] http://fileserver.maurusnet.test/haproxy/ trixie-backports-3.2 main
+    maurusnet: deb [signed-by=/etc/apt/keyrings/maurusnet-package-archive.gpg] http://fileserver.maurusnet.test/mn-nightly/ mn-nightly main
+    postgresql: deb [signed-by=/etc/apt/keyrings/maurusnet-package-archive.gpg] http://fileserver.maurusnet.test/postgresql/ trixie-pgdg
+    saltstack: deb [signed-by=/etc/apt/keyrings/maurusnet-package-archive.gpg] http://fileserver.maurusnet.test/saltproject-deb/ stable main
+    trixie: deb [signed-by=/etc/apt/keyrings/maurusnet-package-archive.gpg] http://fileserver.maurusnet.test/debian/ trixie main
+    trixie-backports: deb [signed-by=/etc/apt/keyrings/maurusnet-package-archive.gpg] http://fileserver.maurusnet.test/debian/ trixie-backports main
+    trixie-security: deb [signed-by=/etc/apt/keyrings/maurusnet-package-archive.gpg] http://fileserver.maurusnet.test/debian/security/ trixie-security main
+    trixie-updates: [signed-by=/etc/apt/keyrings/maurusnet-package-archive.gpg] deb http://fileserver.maurusnet.test/debian/updates/ trixie-updates main
 
     pgpkey: salt://mn/fileserver_ACADBD6B.pgp.key
 
 
 urls:
-    concourse: http://fileserver.maurusnet.test/downloads/concourse/concourse-5.5.0-linux-amd64.tgz
-    concourse-fly: http://fileserver.maurusnet.test/downloads/concourse/fly-5.5.0-linux-amd64.tgz
-    consul: http://fileserver.maurusnet.test/downloads/consul/consul_1.5.3_linux_amd64.zip
-    consul-esm: http://fileserver.maurusnet.test/downloads/consul-esm/consul-esm_0.3.3_linux_amd64.zip
+    acme: http://fileserver.maurusnet.test/downloads/acmesh/3.1.2.zip
+    concourse: http://fileserver.maurusnet.test/downloads/concourse/concourse-8.0.1-linux-amd64.tgz
+    concourse-fly: http://fileserver.maurusnet.test/downloads/concourse/fly-8.0.1-linux-amd64.tgz
+    consul: http://fileserver.maurusnet.test/downloads/consul/consul_1.22.3_linux_amd64.zip
+    consul-esm: http://fileserver.maurusnet.test/downloads/consul-esm/consul-esm_0.9.1_linux_amd64.zip
     consul-replicate: http://fileserver.maurusnet.test/downloads/consul-replicate/consul-replicate_0.4.0_linux_amd64.zip
-    consul-template: http://fileserver.maurusnet.test/downloads/consul-template/consul-template_0.20.1_linux_amd64.zip
-    exxo: http://fileserver.maurusnet.test/downloads/exxo/exxo-0.0.7.tar.xz
-    nomad: http://fileserver.maurusnet.test/downloads/nomad/nomad_0.9.4_linux_amd64.zip
-    pyrun35: http://fileserver.maurusnet.test/downloads/exxo/egenix-pyrun-2.2.3-py3.5_ucs4-linux-x86_64.tgz
-    terraform: http://fileserver.maurusnet.test/downloads/terraform/terraform_0.12.6_linux_amd64.zip
-    vault: http://fileserver.maurusnet.test/downloads/vault/vault_1.2.0_linux_amd64.zip
+    consul-template: http://fileserver.maurusnet.test/downloads/consul-template/consul-template_0.41.3_linux_amd64.zip
+    nomad: http://fileserver.maurusnet.test/downloads/nomad/nomad_1.11.1_linux_amd64.zip
+    nomad-autoscaler: http://fileserver.maurusnet.test/downloads/nomad-autoscaler/nomad-autoscaler_0.4.9_linux_amd64.zip
+    nomad-driver-podman: http://fileserver.maurusnet.test/downloads/nomad-driver-podman/nomad-driver-podman_0.6.4_linux_amd64.zip
+    nomad-pack: http://fileserver.maurusnet.test/downloads/nomad-pack/nomad-pack_0.4.1_linux_amd64.zip
+    terraform: http://fileserver.maurusnet.test/downloads/terraform/terraform_1.14.3_linux_amd64.zip
+    vault: http://fileserver.maurusnet.test/downloads/vault/vault_1.21.2_linux_amd64.zip
+    vault-auditor: http://fileserver.maurusnet.test/downloads/vault-auditor/vault-auditor_1.0.3_linux_amd64.zip
     vault-gpg-plugin: http://fileserver.maurusnet.test/downloads/vault-gpg-plugin/linux_amd64.zip
-    vault-ssh-helper: http://fileserver.maurusnet.test/downloads/vault/vault-ssh-helper_0.1.4_linux_amd64.zip
+    vault-ssh-helper: http://fileserver.maurusnet.test/downloads/vault/vault-ssh-helper_0.2.1_linux_amd64.zip
     fpmdeps: http://fileserver.maurusnet.test/downloads/ruby/fpm+deps.zip
 
 
 hashes:
-    concourse: sha256=d347c5f3b0f529f733fb76f8e15508e033286376ce62852fcf16112e8ecf2772
-    concourse-fly: sha256=f12d176d809711765cb0b9782c5a4c169530500cd05da32a7dda65e1b5c2d221
-    consul: sha256=b402e1a0db26adb9638a9e85c6c672acd137df233e8c69f26180f2e2fd6f4cbc
-    consul-esm: sha256=1553c59d0f93a467d8cf15135a5314f8058e8ca849b305c211dd9b9aaafbbf13
+    acme: sha256=0bff3addd5c01489c116064f053ae8a4baf33fe61ea456bdfd0939a3c378ac53
+    concourse: sha256=52fee46a10f638581e022b32052b9d28e116a04f113f607a5eae20b0e34132b8
+    concourse-fly: sha256=77d03d5788512876ad348196a365c5dd982af6e1bebdc54ca22fd9aebd545a2f
+    consul: sha256=0942ef6ed43522adfb4cddbefea2f0e64306318afb8aeab3727563f0caef04be
+    consul-esm: sha256=50d9367be90f542f659bbba9d8ec3510516d995dbb2f522c8618ae75fff31757
     consul-replicate: sha256=96c6651291c2f8e75d98d04b9b4653d8a02324edaa25783744d9ea1d8d411c61
-    consul-template: sha256=c5d6bb528ba1828b619147e482625d9fc3acc23f70eb97e03d590a31c9385c08
-    exxo: sha256=ce3d6ae10d364c5a0726cce127602fe6fa5d042b11afd21d79502f8216b42e1e
-    nomad: sha256=e0cdd0d787bb925910151f9e38fd6daa9590f1bf08d0c6703b7f544875b58c11
-    pyrun35: sha256=8bf8b374f582bb53600dd846a0cdb38e18586bbda06261321d48df69ddbf730e
-    terraform: sha256=6544eb55b3e916affeea0a46fe785329c36de1ba1bdb51ca5239d3567101876f
-    vault: sha256=392b45f0978791d2050c02835494f220f40b70896903197dd9f95033f8855358
-    vault-gpg-plugin: sha256=8826ea137898e572bef7d27b6544b4f46e42119c3c83f668858a529ff82ad8bd
-    vault-ssh-helper: sha256=156ce8250725e64a3e4dc51018a18813dd44d1f2a6c853976bc20e1625d631a1
+    consul-template: sha256=f708323c5a9eeedf1e125662fa1dd3c54f8cadd0758ef2a9a27c7a22e181e93c
+    nomad: sha256=8e8fbc9c3ddae39a63f7ed70a99bb4b936bb6e88ed9160ce0e9d36ff2909c1f3
+    nomad-autoscaler: sha256=4b89c4d266663c9795b32930199c489a67606ac13f03e7fca8da15a0513a6ca7
+    nomad-driver-podman: sha256=5b9ac89585d7359f941a2504b11d50866f67c2887cb3716fba2bbaa0749a14a8
+    nomad-pack: sha256=08e213dfe76152b512da9fd8c57c24365812a43c96deda6f88cde26aab03310b
+    terraform: sha256=178b2a602251bb68b94732aceca2cc1023d87597cb83dba92cab31b6689edb4d
+    vault: sha256=d2005a053a2ab75318d395ca8151aef9116fde67f75dc8f43a4fa9def6f3fc9e
+    vault-auditor: sha256=14aebc65351e52ff705fd9a4f3fb89655bf3a87a6c67a86ff8aa67ef5ff4837f
+    vault-gpg-plugin: sha256=975115ef6e870cd5429efe99cffc8ce1f8c17350d9fbab02527e4de9ff436e62
+    vault-ssh-helper: sha256=fe26f62e5822bdf66ea4bf874d1a535ffca19af07a27ff3bcd7e344bc1af39fe
     fpmdeps: sha256=acddcc12840c6684631d30b32c314a8f73d9319f69c26411ad90a7aa70b0a1df

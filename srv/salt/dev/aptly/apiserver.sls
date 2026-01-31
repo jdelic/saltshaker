@@ -60,7 +60,7 @@ aptly-service:
             # Temporarily use gnupg v1 until aptly supports v2
             # https://github.com/aptly-dev/aptly/issues/657
             # https://github.com/aptly-dev/aptly/pull/743
-            gpg_home: {{salt['file.join'](pillar['gpg']['shared-keyring-location'], 'v1')}}
+            gpg_home: {{pillar['gpg']['shared-keyring-location']}}
             ip: {{ip}}
             port: {{port}}
         - require:
@@ -92,16 +92,17 @@ aptly-servicedef:
 
 
 aptly-tcp-in{{port}}-recv:
-    iptables.append:
+    nftables.append:
         - table: filter
-        - chain: INPUT
-        - jump: ACCEPT
+        - chain: input
+        - family: ip4
+        - jump: accept
         - source: '0/0'
         - destination: {{ip}}
         - dport: {{port}}
         - match: state
-        - connstate: NEW
+        - connstate: new
         - proto: tcp
         - save: True
         - require:
-            - sls: iptables
+            - sls: basics.nftables.setup

@@ -239,7 +239,7 @@ authserver-vault-postgresql-policy:
             }' | /usr/local/bin/vault policy write postgresql_authserver_fullaccess -
         - env:
             - VAULT_ADDR: "https://vault.service.consul:8200/"
-        - unless: /usr/local/bin/vault policies | grep postgresql_authserver_fullaccess >/dev/null
+        - unless: /usr/local/bin/vault policy list | grep postgresql_authserver_fullaccess >/dev/null
         - onlyif: /usr/local/bin/vault operator init -status >/dev/null
         - require:
             - cmd: vault-sync
@@ -255,7 +255,7 @@ authserver-vault-oauth2-write-policy:
             }' | /usr/local/bin/vault policy write authserver_oauth2_write -
         - env:
             - VAULT_ADDR: "https://vault.service.consul:8200/"
-        - unless: /usr/local/bin/vault policies | grep authserver_oauth2_write >/dev/null
+        - unless: /usr/local/bin/vault policy list | grep authserver_oauth2_write >/dev/null
         - onlyif: /usr/local/bin/vault operator init -status >/dev/null
         - require:
             - cmd: vault-sync
@@ -271,7 +271,7 @@ mailforwarder-vault-postgresql-policy:
             }' | /usr/local/bin/vault policy write postgresql_authserver_mailforwarder -
         - env:
             - VAULT_ADDR: "https://vault.service.consul:8200/"
-        - unless: /usr/local/bin/vault policies | grep postgresql_authserver_mailforwarder >/dev/null
+        - unless: /usr/local/bin/vault policy list | grep postgresql_authserver_mailforwarder >/dev/null
         - onlyif: /usr/local/bin/vault operator init -status >/dev/null
         - require:
             - cmd: vault-sync
@@ -285,7 +285,7 @@ dkimsigner-vault-postgresql-policy:
             }' | /usr/local/bin/vault policy write postgresql_authserver_dkimsigner -
         - env:
             - VAULT_ADDR: "https://vault.service.consul:8200/"
-        - unless: /usr/local/bin/vault policies | grep postgresql_authserver_dkimsigner >/dev/null
+        - unless: /usr/local/bin/vault policy list | grep postgresql_authserver_dkimsigner >/dev/null
         - onlyif: /usr/local/bin/vault operator init -status >/dev/null
         - require:
             - cmd: vault-sync
@@ -310,7 +310,9 @@ authserver-vault-postgresql-connection:
             /usr/local/bin/vault write postgresql/config/{{pillar['authserver']['dbname']}} \
                 plugin_name=postgresql-database-plugin \
                 allowed_roles="authserver_fullaccess,authserver_mailforwarder,authserver_dkimsigner" \
-                connection_url="postgresql://{{pillar['authserver']['dbuser']}}:{{pillar['dynamicsecrets']['authserver']}}@postgresql.service.consul:5432/?sslmode=verify-full"
+                connection_url="postgresql://{{'{{'}}username{{'}}'}}:{{'{{'}}password{{'}}'}}@postgresql.service.consul:5432/{{pillar['authserver']['dbname']}}?sslmode=verify-full" \
+                username="{{pillar['vault']['managed-database-owner']}}" \
+                password="{{pillar['dynamicsecrets']['vault-db-credential-admin']}}"
         - onlyif: /usr/local/bin/vault operator init -status >/dev/null
         - unless: /usr/local/bin/vault list postgresql/config | grep authserver >/dev/null
         - env:
@@ -318,9 +320,20 @@ authserver-vault-postgresql-connection:
         - require:
             - cmd: vault-sync
             - cmd: authserver-vault-postgresql-backend
+            - cmd: authserver-sync-database
         - require_in:
             - cmd: authserver-sync-vault
 
+
+{% macro render_create_sql(rolename) -%}
+    {%- set create_sql = "CREATE ROLE \\\"{{name}}\\\" WITH LOGIN " +
+        "ENCRYPTED PASSWORD '\"'\"'{{password}}'\"'\"' " +
+        "VALID UNTIL '\"'\"'{{expiration}}'\"'\"' " +
+        "IN ROLE " + rolename + " INHERIT NOCREATEROLE NOCREATEDB " +
+        "NOSUPERUSER NOREPLICATION NOBYPASSRLS;" +
+        "GRANT CREATE ON SCHEMA public TO \\\"{{name}}\\\";" -%}
+    {{- create_sql -}}
+{% endmacro -%}
 
 # '"'"' is bash for ' when using single quotes around the json string
 authserver-vault-postgresql-role:
@@ -330,7 +343,7 @@ authserver-vault-postgresql-role:
                 "db_name": "{{pillar['authserver']['dbname']}}",
                 "default_ttl": "10m",
                 "max_ttl": "1h",
-                "creation_statements": "CREATE ROLE \"{{'{{'}}name{{'}}'}}\" WITH LOGIN ENCRYPTED PASSWORD '"'"'{{'{{'}}password{{'}}'}}'"'"' VALID UNTIL '"'"'{{'{{'}}expiration{{'}}'}}'"'"' IN ROLE \"{{pillar['authserver']['dbuser']}}\" INHERIT NOCREATEROLE NOCREATEDB NOSUPERUSER NOREPLICATION NOBYPASSRLS;",
+                "creation_statements": "{{render_create_sql(pillar['authserver']['dbuser'])}}",
                 "revocation_statements": "DROP ROLE \"{{'{{'}}name{{'}}'}}\";"
             }' | /usr/local/bin/vault write postgresql/roles/authserver_fullaccess -
         - env:
@@ -339,7 +352,7 @@ authserver-vault-postgresql-role:
         - unless: /usr/local/bin/vault list postgresql/roles | grep authserver_fullaccess >/dev/null
         - require:
             - cmd: vault-sync
-            - cmd: authserver-vault-postgresql-backend
+            - cmd: authserver-vault-postgresql-connection
         - require_in:
             - cmd: authserver-sync-vault
 
@@ -351,7 +364,7 @@ mailforwarder-vault-postgresql-role:
                 "db_name": "{{pillar['authserver']['dbname']}}",
                 "default_ttl": "10m",
                 "max_ttl": "1h",
-                "creation_statements": "CREATE ROLE \"{{'{{'}}name{{'}}'}}\" WITH LOGIN ENCRYPTED PASSWORD '"'"'{{'{{'}}password{{'}}'}}'"'"' VALID UNTIL '"'"'{{'{{'}}expiration{{'}}'}}'"'"' IN ROLE \"{{pillar['mailforwarder']['dbuser']}}\" INHERIT NOCREATEROLE NOCREATEDB NOSUPERUSER NOREPLICATION NOBYPASSRLS;",
+                "creation_statements": "{{render_create_sql(pillar['mailforwarder']['dbuser'])}}",
                 "revocation_statements": "DROP ROLE \"{{'{{'}}name{{'}}'}}\";"
             }' | /usr/local/bin/vault write postgresql/roles/authserver_mailforwarder -
         - env:
@@ -369,7 +382,7 @@ dkimsigner-vault-postgresql-role:
                 "db_name": "{{pillar['authserver']['dbname']}}",
                 "default_ttl": "10m",
                 "max_ttl": "1h",
-                "creation_statements": "CREATE ROLE \"{{'{{'}}name{{'}}'}}\" WITH LOGIN ENCRYPTED PASSWORD '"'"'{{'{{'}}password{{'}}'}}'"'"' VALID UNTIL '"'"'{{'{{'}}expiration{{'}}'}}'"'"' IN ROLE \"{{pillar['dkimsigner']['dbuser']}}\" INHERIT NOCREATEROLE NOCREATEDB NOSUPERUSER NOREPLICATION NOBYPASSRLS;",
+                "creation_statements": "{{render_create_sql(pillar['dkimsigner']['dbuser'])}}",
                 "revocation_statements": "DROP ROLE \"{{'{{'}}name{{'}}'}}\";"
             }' | /usr/local/bin/vault write postgresql/roles/authserver_dkimsigner -
         - env:

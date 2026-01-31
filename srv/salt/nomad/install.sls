@@ -98,62 +98,66 @@ nomad-service:
 # open nomad ports TCP https://www.nomadproject.io/docs/cluster/requirements.html
 {% for port in ['4646', '4647', '4648'] %}
 # allow others to talk to us
-nomad-tcp-in{{port}}-recv:
-    iptables.append:
+nomad-tcp-in{{port}}-recv-ipv4:
+    nftables.append:
         - table: filter
-        - chain: INPUT
-        - jump: ACCEPT
-        - in-interface: {{pillar['ifassign']['internal']}}
+        - chain: input
+        - family: ip4
+        - jump: accept
+        - if: {{pillar['ifassign']['internal']}}
         - dport: {{port}}
         - match: state
-        - connstate: NEW
+        - connstate: new
         - proto: tcp
         - save: True
         - require:
-            - sls: iptables
+            - sls: basics.nftables.setup
 
 
 # allow us to talk to others
-nomad-tcp-out{{port}}-send:
-    iptables.append:
+nomad-tcp-out{{port}}-send-ipv4:
+    nftables.append:
         - table: filter
-        - chain: OUTPUT
-        - jump: ACCEPT
-        - out-interface: {{pillar['ifassign']['internal']}}
+        - chain: output
+        - family: ip4
+        - jump: accept
+        - of: {{pillar['ifassign']['internal']}}
         - dport: {{port}}
         - match: state
-        - connstate: NEW
+        - connstate: new
         - proto: tcp
         - save: True
         - require:
-            - sls: iptables
+            - sls: basics.nftables.setup
 {% endfor %}
 
 
-nomad-udp-in4648-recv:
-    iptables.append:
+nomad-udp-in4648-recv-ipv4:
+    nftables.append:
         - table: filter
-        - chain: INPUT
-        - jump: ACCEPT
-        - in-interface: {{pillar['ifassign']['internal']}}
+        - chain: input
+        - family: ip4
+        - jump: accept
+        - if: {{pillar['ifassign']['internal']}}
         - dport: 4648
         - proto: udp
         - save: True
         - require:
-            - sls: iptables
+            - sls: basics.nftables.setup
 
 
-nomad-udp-in4648-send:
-    iptables.append:
+nomad-udp-in4648-send-ipv4:
+    nftables.append:
         - table: filter
-        - chain: OUTPUT
-        - jump: ACCEPT
-        - out-interface: {{pillar['ifassign']['internal']}}
+        - chain: output
+        - family: ip4
+        - jump: accept
+        - of: {{pillar['ifassign']['internal']}}
         - sport: 4648
         - proto: udp
         - save: True
         - require:
-            - sls: iptables
+            - sls: basics.nftables.setup
 
 
 nomad-envvar-config:

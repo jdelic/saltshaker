@@ -1,0 +1,10 @@
+#
+# msmtp configuration for smartstack mail submission
+#
+
+defaults
+host localhost
+port 25
+maildomain {{grains['id']}}
+domain {{grains['id']}}
+auto_from on

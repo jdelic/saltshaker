@@ -3,27 +3,36 @@
 
 include:
     - postgresql.sync
-
+    - vault.sync
+    - mn.cas.sync
 
 # only create this if the PostgreSQL backend is selected
 authserver-postgres:
-    postgres_user.present:
+    postgres_extuser.present:
         - name: {{pillar['authserver']['dbuser']}}
         - createdb: False
-{% if pillar['authserver'].get('use-vault', False) %}
+{% if pillar['authserver'].get('use-vault', False) and pillar.get('postgresql', {}).get('version', 16) < 16 %}
         - createroles: True
 {% else %}
         - createroles: False
 {% endif %}
-        - encrypted: True
+        - encrypted: scram-sha-256
         - login: True
         - inherit: True
         - superuser: False
         - replication: False
         - password: {{pillar['dynamicsecrets']['authserver']}}
         - user: postgres
+{% if pillar['authserver'].get('use-vault', False) and pillar.get('postgresql', {}).get('version', 16) >= 16 %}
+        - with_admin_option:
+            - {{pillar['vault']['managed-database-owner']}}
+{% endif %}
         - require:
             - service: data-cluster-service
+            - cmd: postgresql-sync
+{% if pillar['authserver'].get('use-vault', False) %}
+            - cmd: vault-sync-database
+{% endif %}
     file.accumulated:
         - name: postgresql-hba-md5users-accumulator
         - filename: {{pillar['postgresql']['hbafile']}}
@@ -38,29 +47,47 @@ authserver-postgres:
         - user: postgres
         - order: 20  # see ORDER.md
         - require:
-            - cmd: postgresql-sync
-            - postgres_user: authserver-postgres
+            - postgres_extuser: authserver-postgres
+    postgres_privileges.present:
+        - name: {{pillar['authserver']['dbuser']}}
+        - object_name: public
+        - object_type: schema
+        - privileges:
+            - CREATE
+        - user: postgres
+        - maintenance_db: {{pillar['authserver']['dbname']}}
+        - require_in:
+            - cmd: authserver-sync-database
+        - require:
+            - postgres_database: authserver-postgres
 
 
 {% for user in ['dkimsigner', 'mailforwarder'] %}
 {{user}}-postgres:
-    postgres_user.present:
+    postgres_extuser.present:
         - name: {{pillar[user]['dbuser']}}
         - createdb: False
-{% if pillar[user].get('use-vault', False) %}
-        - createroles: False
-{% else %}
+{% if pillar['authserver'].get('use-vault', False) and pillar.get('postgresql', {}).get('version', 16) < 16 %}
         - createroles: True
+{% else %}
+        - createroles: False
 {% endif %}
-        - encrypted: True
+        - encrypted: scram-sha-256
         - login: True
         - inherit: True
         - superuser: False
         - replication: False
         - password: {{pillar['dynamicsecrets'][user]}}
         - user: postgres
+{% if pillar['authserver'].get('use-vault', False) and pillar.get('postgresql', {}).get('version', 16) >= 16 %}
+        - with_admin_option:
+            - {{pillar['vault']['managed-database-owner']}}
+{% endif %}
         - require:
             - cmd: postgresql-sync
+{% if pillar['authserver'].get('use-vault', False) %}
+            - cmd: vault-sync-database
+{% endif %}
     # by default all users are allowed to create new tables in the 'public' schema in
     # a database. So we make sure to revoke that right, if we happen to have it because
     # the PostgreSQL server might not be hardened by using a database template that does
@@ -73,8 +100,10 @@ authserver-postgres:
             - CONNECT
         - user: postgres
         - maintenance_db: {{pillar['authserver']['dbname']}}
+        - require_in:
+            - cmd: authserver-sync-database
         - require:
-            - postgres_user: {{user}}-postgres
+            - postgres_extuser: {{user}}-postgres
 
 
 {{user}}-drop-create:
@@ -86,8 +115,10 @@ authserver-postgres:
             - CREATE
         - user: postgres
         - maintenance_db: {{pillar['authserver']['dbname']}}
+        - require_in:
+            - cmd: authserver-sync-database
         - require:
-            - postgres_user: {{user}}-postgres
+            - postgres_extuser: {{user}}-postgres
 
 
 {{user}}-usage-privileges:
@@ -99,8 +130,10 @@ authserver-postgres:
             - USAGE
         - user: postgres
         - maintenance_db: {{pillar['authserver']['dbname']}}
+        - require_in:
+            - cmd: authserver-sync-database
         - require:
-            - postgres_user: {{user}}-postgres
+            - postgres_extuser: {{user}}-postgres
 {% endfor %}
 
 

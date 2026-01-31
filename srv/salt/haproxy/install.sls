@@ -5,12 +5,13 @@ haproxy-repo:
         - name: {{pillar['repos']['haproxy']}}
         - file: /etc/apt/sources.list.d/haproxy.list
         - key_url: salt://haproxy/bernat.debian.org.pgp.key
+        - aptkey: False
 
 
 haproxy:
     pkg.installed:
         - install_recommends: False
-        - fromrepo: stretch-backports-1.8
+        - fromrepo: trixie-backports-3.2
         - require:
             - pkgrepo: haproxy-repo
     service.dead:

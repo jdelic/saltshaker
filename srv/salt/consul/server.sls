@@ -6,6 +6,7 @@ include:
     - consul.install
     - consul.sync
     - consul.acl_install  # during firstrun, this state is empty
+    - powerdns.sync
 
 
 {% from 'consul/install.sls' import consul_user, consul_group %}
@@ -83,7 +84,9 @@ consul-service:
         - context:
             user: {{consul_user}}
             group: {{consul_group}}
-            extra_parameters: -server -bootstrap-expect={{pillar['consul-cluster']['number-of-nodes']}} -ui
+            extra_parameters: >-
+                -server -ui {% if 'consulbootstrapprimary' in grains['roles'] %}-bootstrap{% endif %}
+                {% if single_node_cluster %}-bootstrap-expect={{pillar['consul-cluster']['number-of-nodes']}}{% endif %}
             single_node_cluster: {% if single_node_cluster %}True{% else %}False{% endif %}
             node_name: {{grains['id']}}
     {% if single_node_cluster %}
@@ -93,7 +96,7 @@ consul-service:
             - file: consul
             - file: consul-agent-absent
             # this is here so that the WantedBy in our systemd service definition is processed correctly
-            - pkg: pdns-recursor
+            - cmd: powerdns-pkg-installed-sync
         - unless:
             - sls: consul.agent
     service.running:
@@ -108,13 +111,13 @@ consul-service:
             - systemdunit: consul-service
     cmd.run:
         - name: >
-            until test ${count} -gt 30; do
+            until test ${count} -gt 90; do
                 if test $(curl -s -H "X-Consul-Token: $CONSUL_ACL_MASTER_TOKEN" \
                             http://169.254.1.1:8500/v1/agent/members | jq 'length') -gt 0; then
                     break;
                 fi
                 sleep 1; count=$((count+1));
-            done; test ${count} -lt 30
+            done; test ${count} -lt 90
         - env:
             count: 0
             CONSUL_ACL_MASTER_TOKEN: {{pillar['dynamicsecrets']['consul-acl-master-token']}}
@@ -145,7 +148,7 @@ consul-tempacl-create-policy:
                             policy = \"write\"
                         }
 
-                        node \"\" {
+                        node_prefix \"\" {
                             policy = \"read\"
                         }
 
@@ -198,6 +201,8 @@ consul-tempacl-server-config:
             - cmd: consul-tempacl-create-policy
         - watch_in:
             - service: consul-service-restart
+        - require_in:
+            - cmd: consul-sync-ready
 {% endif %}
 
 
@@ -207,6 +212,8 @@ consul-service-restart:
         - sig: consul
         - enable: True
         - init_delay: 2
+        - require:
+            - cmd: consul-sync-network
         - watch:
             - file: consul-acl-bootstrap-config
             - file: consul-common-config
@@ -214,13 +221,13 @@ consul-service-restart:
             - systemdunit: consul-service  # if consul.service changes we want to *restart* (reload: False)
     cmd.run:
         - name: >
-            until test ${count} -gt 30; do
+            until test ${count} -gt 90; do
                 if test $(curl -s -H "X-Consul-Token: $CONSUL_ACL_MASTER_TOKEN" \
                             http://169.254.1.1:8500/v1/agent/members | jq 'length') -gt 0; then
                     break;
                 fi
                 sleep 1; count=$((count+1));
-            done; test ${count} -lt 30
+            done; test ${count} -lt 90
         - env:
             count: 0
             CONSUL_ACL_MASTER_TOKEN: {{pillar['dynamicsecrets']['consul-acl-master-token']}}
@@ -230,7 +237,7 @@ consul-service-restart:
             - cmd: consul-sync-ready
 
 
-{% if pillar['consul-cluster']['number-of-nodes'] == 1 %}
+{% if single_node_cluster %}
 consul-singlenode-snapshot-timer:
     file.managed:
         - name: /etc/systemd/system/consul-snapshot.timer
@@ -259,6 +266,7 @@ consul-service-reload:
         - init_delay: 1
         - require:
             - systemdunit: consul-service  # if consul.service changes we want to *restart* (reload: False)
+            - cmd: consul-sync-network
         - watch:
             # If we detect a change in the service definitions reload, don't restart. This matches STATE names not FILE
             # names, so this watch ONLY works on STATES named /etc/consul/services.d/[whatever]!
@@ -273,13 +281,13 @@ consul-service-reload:
             - cmd: consul-sync
     cmd.run:
         - name: >
-            until test ${count} -gt 30; do
+            until test ${count} -gt 90; do
                 if test $(curl -s -H "X-Consul-Token: $CONSUL_ACL_MASTER_TOKEN" \
                             http://169.254.1.1:8500/v1/agent/members | jq 'length') -gt 0; then
                     break;
                 fi
                 sleep 1; count=$((count+1));
-            done; test ${count} -lt 30
+            done; test ${count} -lt 90
         - env:
             count: 0
             CONSUL_ACL_MASTER_TOKEN: {{pillar['dynamicsecrets']['consul-acl-master-token']}}
@@ -299,5 +307,38 @@ consul-agent-absent:
         - sig: consul
         - enable: False
 
+
+{% if 'consulbootstrapprimary' in grains['roles'] and not single_node_cluster %}
+consul-cluster-check-helper:
+    file.managed:
+        - name: /etc/consul/consul-cluster-bootstrap-helper.sh
+        - source: salt://consul/consul-cluster-bootstrap-helper.jinja.sh
+        - user: root
+        - group: root
+        - mode: '0700'
+        - template: jinja
+        - context:
+            target_number: {{pillar['consul-cluster']['number-of-nodes']}}
+
+
+consul-cluster-check-service:
+    file.managed:
+        - name: /etc/systemd/system/consul-cluster-bootstrap.service
+        - source: salt://consul/consul-cluster-bootstrap.service
+        - require:
+            - service: consul-service
+            - file: consul-cluster-check-helper
+
+
+consul-cluster-check-timer:
+    systemdunit.managed:
+        - name: /etc/systemd/system/consul-cluster-bootstrap.timer
+        - source: salt://consul/consul-cluster-bootstrap.timer
+    service.running:
+        - name: consul-cluster-bootstrap.timer
+        - enable: True
+        - require:
+            - file: consul-cluster-check-service
+{% endif %}
 
 # vim: syntax=yaml

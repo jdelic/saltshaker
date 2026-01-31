@@ -1,40 +1,65 @@
 
+include:
+    - basics.noexim
+
+
 opensmtpd:
     pkg.installed:
         - pkgs:
             - opensmtpd
-            - libmariadbclient18  # dependency of opensmtpd-extras
+            - opensmtpd-table-postgres
+        #- fromrepo: trixie-backports
         - install_recommends: False
+        - require:
+            - pkg: no-exim
 
 
-opensmtpd-extras:
+opensmtpd-filters:
     pkg.installed:
         - pkgs:
-            - opensmtpd-extras
             - opensmtpd-filter-greylistd
-        - fromrepo: mn-opensmtpd
+            - opensmtpd-filter-dnsbl
+        - fromrepo: mn-nightly
+        - install_recommends: False
         - require:
-            - pkg: opensmtpd
             - pkg: greylistd
 
 
 # opensmtpd doesn't call initgroups() for filters so we can't put filter-greylistd
 # in the greylist group. Instead we just change greylistd to run as the opensmtpd user.
 # This will not make us measurably more insecure, imho.
-greylistd-initd-user:
-    file.replace:
-        - name: /etc/init.d/greylistd
-        - pattern: ^user=greylist$
-        - repl: user=opensmtpd
-        - backup: False
+greylistd-systemd-service-user-override:
+    file.managed:
+        - name: /etc/systemd/system/greylistd.service.d/override.conf
+        - makedirs: True
+        - user: root
+        - group: root
+        - mode: 0644
+        - contents: |
+            [Service]
+            User=opensmtpd
+            Group=opensmtpd
 
 
-greylistd-initd-group:
-    file.replace:
-        - name: /etc/init.d/greylistd
-        - pattern: ^group=greylist$
-        - repl: group=opensmtpd
-        - backup: False
+greylistd-systemd-socket-user-override:
+    file.managed:
+        - name: /etc/systemd/system/greylistd.socket.d/override.conf
+        - makedirs: True
+        - user: root
+        - group: root
+        - mode: 0644
+        - contents: |
+            [Socket]
+            SocketUser=opensmtpd
+            SocketGroup=opensmtpd
+
+
+greylistd-systemd-override-reload:
+    module.run:
+        - name: service.systemctl_reload
+        - onchanges:
+            - file: greylistd-systemd-service-user-override
+            - file: greylistd-systemd-socket-user-override
 
 
 greylistd-modify-rundir:
@@ -69,8 +94,9 @@ greylistd:
         - enable: True
         - require:
             - pkg: greylistd
-            - file: greylistd-initd-user
-            - file: greylistd-initd-group
+            - file: greylistd-systemd-service-user-override
+            - file: greylistd-systemd-socket-user-override
+            - module: greylistd-systemd-override-reload
             - file: greylistd-modify-rundir
             - file: greylistd-modify-libdir
 
@@ -167,21 +193,46 @@ opensmtpd-internal-relay-sslkey:
 
 
 {% set opensmtpd_ips = {
-    "relay": pillar.get('smtp-outgoing', {}).get(
-                 'bind-ip', grains['ip_interfaces'][pillar['ifassign']['external-alt']][pillar['ifassign'].get(
-                     'external-alt-ip-index', 0
-                 )|int()]
-             ),
-    "receiver": pillar.get('smtp-incoming', {}).get(
-                    'bind-ip', grains['ip_interfaces'][pillar['ifassign']['external']][pillar['ifassign'].get(
-                        'external-ip-index', 0
-                    )|int()]
-                ),
-    "internal_relay": pillar.get('smtp-local-relay', {}).get(
-                          'bind-ip', grains['ip_interfaces'][pillar['ifassign']['internal']][pillar['ifassign'].get(
-                              'internal-ip-index', 0
-                          )|int()]
-                      ),
+    "ipv4": {
+        "relay":
+            pillar.get('smtp-outgoing', {}).get(
+                'override-ipv4', grains['ip4_interfaces'].get(pillar['ifassign']['external-alt'])[
+                    pillar['ifassign'].get('external-alt-ip-index', 0)|int()
+                ]
+            ) if pillar.get('smtp-outgoing', {}).get('bind-ipv4', True) else "",
+        "receiver":
+            pillar.get('smtp-incoming', {}).get(
+                'override-ipv4', grains['ip4_interfaces'].get(pillar['ifassign']['external'])[
+                    pillar['ifassign'].get('external-ip-index', 0)|int()
+                ]
+            ) if pillar.get('smtp-incoming', {}).get('bind-ipv4', True) else "",
+        "internal_relay":
+            pillar.get('smtp-local-relay', {}).get(
+                'override-ipv4', grains['ip4_interfaces'].get(pillar['ifassign']['internal'])[
+                    pillar['ifassign'].get('internal-ip-index', 0)|int()
+                ]
+            ) if pillar.get('smtp-local-relay', {}).get('bind-ipv4', True) else "",
+    },
+    "ipv6": {
+        "relay":
+            pillar.get('smtp-outgoing', {}).get(
+                'override-ipv6',
+                salt['network.calc_net'](salt['network.ip_addrs6'](pillar['ifassign-ipv6']['external'], False, "2000::/4")[0] + "/64").removesuffix("/64") +
+                pillar['ifassign-ipv6'].get('external-alt-ipv6-suffix', "2")
+            ) if pillar.get('smtp-outgoing', {}).get('bind-ipv6', False) else "",
+        "receiver":
+            pillar.get('smtp-incoming', {}).get(
+                'override-ipv6',
+                salt['network.calc_net'](salt['network.ip_addrs6'](pillar['ifassign-ipv6']['external'], False, "2000::/4")[0] + "/64").removesuffix("/64") +
+                pillar['ifassign-ipv6'].get('external-ipv6-suffix', "1")
+            ) if pillar.get('smtp-incoming', {}).get('bind-ipv6', False) else "",
+        "internal_relay":
+            pillar.get('smtp-local-relay', {}).get(
+                'override-ipv6',
+                salt['network.calc_net'](salt['network.ip_addrs6'](pillar['ifassign-ipv6']['external'], False, "2000::/4")[0] + "/64").removesuffix("/64") +
+                pillar['ifassign-ipv6'].get('internal-ipv6-suffix', "2")
+            ) if pillar.get('smtp-local-relay', {}).get('bind-ipv6', False) else "",
+    }
 } %}
 opensmtpd-config:
     file.managed:
@@ -192,9 +243,9 @@ opensmtpd-config:
             receiver_hostname: {{pillar['smtp-incoming']['hostname']}}
             relay_hostname: {{pillar['smtp-outgoing']['hostname']}}
             internal_relay_hostname: {{pillar['smtp']['smartstack-hostname']}}
-            receiver_ip: {{opensmtpd_ips['receiver']}}
-            relay_ip: {{opensmtpd_ips['relay']}}
-            internal_relay_ip: {{opensmtpd_ips['internal_relay']}}
+            receiver_ips: ["{{opensmtpd_ips['ipv4']['receiver']}}", "{{opensmtpd_ips['ipv6']['receiver']}}"]
+            relay_ips: ["{{opensmtpd_ips['ipv4']['relay']}}", "{{opensmtpd_ips['ipv6']['relay']}}"]
+            internal_relay_ips: ["{{opensmtpd_ips['ipv4']['internal_relay']}}", "{{opensmtpd_ips['ipv6']['internal_relay']}}"]
             receiver_certfile: >
                 {% if pillar['smtp']['receiver']['sslcert'] == 'default' -%}
                     {{pillar['ssl']['filenames']['default-cert-combined']}}
@@ -231,6 +282,12 @@ opensmtpd-config:
                 {%- else -%}
                     {{pillar['smtp']['internal-relay']['sslkey']}}
                 {%- endif %}
+            {% if pillar['smtp'].get('relay-via', {}).get('url', False) %}
+            relay_via_url: pillar['smtp']['relay-via']['url']
+            {% endif %}
+            {% if pillar['smtp'].get('relay-via', {}).get('auth', False) %}
+            relay_via_auth: pillar['smtp']['relay-via']['auth']
+            {% endif %}
         - require:
             - pkg: opensmtpd
             - file: opensmtpd-authserver-config
@@ -320,88 +377,155 @@ opensmtpd-servicedef-internal:
         - mode: '0644'
         - template: jinja
         - context:
-            relayip: {{opensmtpd_ips['internal_relay']}}
+            relayip: {{opensmtpd_ips['ipv4']['internal_relay']}}
             relayport: 25
         - require:
             - file: consul-service-dir
 
 
 {% for svc in ['receiver', 'relay', 'internal_relay'] %}
-opensmtpd-{{svc}}-tcp-in25-recv:
-    iptables.append:
+    {% if opensmtpd_ips['ipv4'][svc] %}
+opensmtpd-{{svc}}-tcp-in25-recv-ipv4:
+    nftables.append:
         - table: filter
-        - chain: INPUT
-        - jump: ACCEPT
+        - chain: input
+        - family: ip4
+        - jump: accept
         - source: '0/0'
-        - destination: {{opensmtpd_ips[svc]}}/32
+        - destination: {{opensmtpd_ips['ipv4'][svc]}}/32
         - dport: 25
         - match: state
-        - connstate: NEW
+        - connstate: new
         - proto: tcp
         - save: True
         - require:
-            - sls: iptables
+            - sls: basics.nftables.setup
+    {% endif %}
+    {% if opensmtpd_ips['ipv6'][svc] %}
+opensmtpd-{{svc}}-tcp-in25-recv-ipv6:
+    nftables.append:
+        - table: filter
+        - chain: input
+        - family: ip6
+        - jump: accept
+        - source: '::/0'
+        - destination: '{{opensmtpd_ips['ipv6'][svc]}}'
+        - dport: 25
+        - match: state
+        - connstate: new
+        - proto: tcp
+        - save: True
+        - require:
+            - sls: basics.nftables.setup
+    {% endif %}
 {% endfor %}
 
 
-opensmtpd-relay-tcp-in465-recv:
-    iptables.append:
+{% for svc in ['receiver', 'relay', 'internal_relay'] %}
+    {% if opensmtpd_ips['ipv4'][svc] %}
+opensmtpd-{{svc}}-tcp-in465-recv-ipv4:
+    nftables.append:
         - table: filter
-        - chain: INPUT
-        - jump: ACCEPT
+        - chain: input
+        - family: ip4
+        - jump: accept
         - source: '0/0'
-        - destination: {{opensmtpd_ips['relay']}}/32
+        - destination: {{opensmtpd_ips['ipv4'][svc]}}/32
         - dport: 465
         - match: state
-        - connstate: NEW
+        - connstate: new
         - proto: tcp
         - save: True
         - require:
-            - sls: iptables
-
-
-opensmtpd-receiver-tcp-in465-recv:
-    iptables.append:
+            - sls: basics.nftables.setup
+    {% endif %}
+    {% if opensmtpd_ips['ipv6'][svc] %}
+opensmtpd-{{svc}}-tcp-in465-recv-ipv6:
+    nftables.append:
         - table: filter
-        - chain: INPUT
-        - jump: ACCEPT
-        - source: '0/0'
-        - destination: {{opensmtpd_ips['receiver']}}/32
+        - chain: input
+        - family: ip6
+        - jump: accept
+        - source: '::/0'
+        - destination: '{{opensmtpd_ips['ipv6'][svc]}}'
         - dport: 465
         - match: state
-        - connstate: NEW
+        - connstate: new
         - proto: tcp
         - save: True
         - require:
-            - sls: iptables
+            - sls: basics.nftables.setup
+    {% endif %}
+{% endfor %}
 
 
-opensmtpd-relay-out25-send:
-    iptables.append:
+{% if pillar["smtp-outgoing"].get("bind-ipv4", True) %}
+opensmtpd-relay-out25-send-ipv4:
+    nftables.append:
         - table: filter
-        - chain: OUTPUT
-        - jump: ACCEPT
+        - chain: output
+        - family: ip4
+        - jump: accept
         - source: {{salt['network.interface_ip'](salt['network.default_route']('inet')[0]['interface'])}}/32
         - destination: 0/0
         - dport: 25
         - match: state
-        - connstate: NEW
+        - connstate: new
         - proto: tcp
         - save: True
         - require:
-            - sls: iptables
+            - sls: basics.nftables.setup
 
-opensmtpd-relay-out465-send:
-    iptables.append:
+
+opensmtpd-relay-out465-send-ipv4:
+    nftables.append:
         - table: filter
-        - chain: OUTPUT
-        - jump: ACCEPT
+        - chain: output
+        - family: ip4
+        - jump: accept
         - source: {{salt['network.interface_ip'](salt['network.default_route']('inet')[0]['interface'])}}/32
         - destination: 0/0
         - dport: 465
         - match: state
-        - connstate: NEW
+        - connstate: new
         - proto: tcp
         - save: True
         - require:
-            - sls: iptables
+            - sls: basics.nftables.setup
+{% endif %}
+
+{% if salt['network.ip_addrs6'](salt['network.default_route']('inet6')[0]['interface'], False) %}
+  {# if we have a default route, we can reach out to ipv6 mail servers #}
+opensmtpd-relay-out25-send-ipv6:
+    nftables.append:
+        - table: filter
+        - chain: output
+        - family: ip6
+        - jump: accept
+        - source: '{{salt['network.ip_addrs6'](salt['network.default_route']('inet6')[0]['interface'], False)[0]}}'
+        - destination: '::/0'
+        - dport: 25
+        - match: state
+        - connstate: new
+        - proto: tcp
+        - save: True
+        - require:
+            - sls: basics.nftables.setup
+
+
+opensmtpd-relay-out465-send-ipv6:
+    nftables.append:
+        - table: filter
+        - chain: output
+        - family: ip6
+        - jump: accept
+        - source: '{{salt['network.ip_addrs6'](salt['network.default_route']('inet6')[0]['interface'], False)[0]}}'
+        - destination: '::/0'
+        - dport: 465
+        - match: state
+        - connstate: new
+        - proto: tcp
+        - save: True
+        - require:
+            - sls: basics.nftables.setup
+{% endif %}

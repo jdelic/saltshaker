@@ -23,3 +23,8 @@ dkimsigner-sync-vault:
 mailforwarder-sync-vault:
     cmd.run:
         - name: /bin/true mailforwarder-sync-vault
+
+
+authserver-sync-database:
+    cmd.run:
+        - name: /bin/true authserver-sync-database

@@ -62,8 +62,9 @@ vault-plugin-gpg:
         - source_hash: {{pillar["hashes"]["vault-gpg-plugin"]}}
         - archive_format: zip
         - unless: test -f /usr/local/lib/vault/vault-gpg-plugin  # workaround for https://github.com/saltstack/salt/issues/42681
-        - if_missing: /usr/local/lib/vault-vault-gpg-plugin
+        - if_missing: /usr/local/lib/vault/vault-gpg-plugin
         - enforce_toplevel: False
+        - options: -j
         - require:
             - file: vault-plugin-dir
     file.managed:
@@ -353,7 +354,7 @@ vault-install-gpg-plugin:
     cmd.run:
         - name: >-
             /usr/local/bin/vault plugin register \
-                -sha256="$(cat /usr/local/lib/vault/linux_amd64.sha256sum | cut -d' ' -f1)" \
+                -sha256="$(cat /usr/local/lib/vault/vault-gpg-plugin.sha256sum | cut -d' ' -f1)" \
                 -command=vault-gpg-plugin gpg
         - env:
             - VAULT_ADDR: "https://vault.service.consul:8200/"
@@ -559,16 +560,17 @@ vault-ssl-key:
 
 
 # This is for contacting Vault. Outgoing connections to port 8200 are covered by basics.sls
-vault-tcp8200-recv:
-    iptables.append:
+vault-tcp8200-recv-ipv4:
+    nftables.append:
         - table: filter
-        - chain: INPUT
-        - jump: ACCEPT
-        - in-interface: {{pillar['ifassign']['internal']}}
+        - chain: input
+        - family: ip4
+        - jump: accept
+        - if: {{pillar['ifassign']['internal']}}
         - dport: 8200
         - match: state
-        - connstate: NEW
+        - connstate: new
         - proto: tcp
         - save: True
         - require:
-            - sls: iptables
+            - sls: basics.nftables.setup
