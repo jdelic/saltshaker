@@ -19,12 +19,14 @@ haproxy-config-template-external:
                pillar.get('haproxy', {}).get('override-ipv4',
                    grains['ip4_interfaces'].get(pillar['ifassign']['external'], {})[pillar['ifassign'].get('external-ip-index', 0)|int()])
            ) if pillar.get('haproxy', {}).get('bind-ipv4', False) %}
-{% set x = haproxy_ips.append(
-               pillar.get('haproxy', {}).get('override-ipv6',
-                   salt['network.calc_net'](salt['network.ip_addrs6'](pillar['ifassign-ipv6']['external'], False, "2000::/4")[0] + "/64").removesuffix("/64") +
-                       pillar['ifassign-ipv6'].get('external-ipv6-suffix', "1")
-               )
-           ) if pillar.get('haproxy', {}).get('bind-ipv6', False) %}
+{% if salt['network.ip_addrs6'](pillar['ifassign-ipv6']['external'], False, "2000::/4")|length > 0 %}
+    {% set x = haproxy_ips.append(
+                   pillar.get('haproxy', {}).get('override-ipv6',
+                       salt['network.calc_net'](salt['network.ip_addrs6'](pillar['ifassign-ipv6']['external'], False, "2000::/4")[0] + "/64").removesuffix("/64") +
+                           pillar['ifassign-ipv6'].get('external-ipv6-suffix', "1")
+                   )
+               ) if pillar.get('haproxy', {}).get('bind-ipv6', False) %}
+{% endif %}
 smartstack-external:
     file.managed:
         - name: /etc/consul/template.d/smartstack-external.conf

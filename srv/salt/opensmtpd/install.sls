@@ -219,18 +219,21 @@ opensmtpd-internal-relay-sslkey:
                 'override-ipv6',
                 salt['network.calc_net'](salt['network.ip_addrs6'](pillar['ifassign-ipv6']['external'], False, "2000::/4")[0] + "/64").removesuffix("/64") +
                 pillar['ifassign-ipv6'].get('external-alt-ipv6-suffix', "2")
+                    if salt['network.ip_addrs6'](pillar['ifassign-ipv6']['external'], False, "2000::/4")|length > 0 else ""
             ) if pillar.get('smtp-outgoing', {}).get('bind-ipv6', False) else "",
         "receiver":
             pillar.get('smtp-incoming', {}).get(
                 'override-ipv6',
                 salt['network.calc_net'](salt['network.ip_addrs6'](pillar['ifassign-ipv6']['external'], False, "2000::/4")[0] + "/64").removesuffix("/64") +
                 pillar['ifassign-ipv6'].get('external-ipv6-suffix', "1")
+                    if salt['network.ip_addrs6'](pillar['ifassign-ipv6']['external'], False, "2000::/4")|length > 0 else ""
             ) if pillar.get('smtp-incoming', {}).get('bind-ipv6', False) else "",
         "internal_relay":
             pillar.get('smtp-local-relay', {}).get(
                 'override-ipv6',
                 salt['network.calc_net'](salt['network.ip_addrs6'](pillar['ifassign-ipv6']['external'], False, "2000::/4")[0] + "/64").removesuffix("/64") +
                 pillar['ifassign-ipv6'].get('internal-ipv6-suffix', "2")
+                    if salt['network.ip_addrs6'](pillar['ifassign-ipv6']['external'], False, "2000::/4")|length > 0 else ""
             ) if pillar.get('smtp-local-relay', {}).get('bind-ipv6', False) else "",
     }
 } %}

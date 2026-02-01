@@ -5,8 +5,16 @@ include:
 
 msmtp:
     pkg.installed:
+        - pkgs:
+            - msmtp
+            - msmtp-mta
         - require:
             - pkg: no-exim
+    service.dead:
+        - name: msmtpd
+        - enable: False
+        - require:
+            - pkg: msmtp
 
 
 msmtp-config:
