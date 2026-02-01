@@ -73,7 +73,7 @@ docker-registry-servicedef:
             - file: consul-service-dir
 
 
-docker-registry-tcp-in{{pillar.get('docker', {}).get('registry', {}).get('bind-port', 5000)}}-recv-ipv4:
+docker-registry-tcp-in{{registry_port}}-recv-ipv4:
     nftables.append:
         - table: filter
         - chain: input
@@ -84,6 +84,20 @@ docker-registry-tcp-in{{pillar.get('docker', {}).get('registry', {}).get('bind-p
         - dport: {{registry_port}}
         - match: state
         - connstate: new
+        - proto: tcp
+        - save: True
+        - require:
+            - sls: basics.nftables.setup
+
+
+docker-registry-tcp-in{{registry_port}}-forward-ipv4:
+    nftables.append:
+        - table: filter
+        - chain: forward
+        - family: ip4
+        - jump: accept
+        - destination: {{registry_ip}}
+        - dport: {{registry_port}}
         - proto: tcp
         - save: True
         - require:
