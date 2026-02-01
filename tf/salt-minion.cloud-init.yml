@@ -39,6 +39,15 @@ write_files:
 
 
 runcmd:
+    - dd if=/dev/zero of=/swapfile bs=1M count=4096
+    - chmod 600 /swapfile
+    - echo "cryptswap /swapfile /dev/urandom swap,cipher=aes-xts-plain64,size=256" >> /etc/crypttab
+    - echo "/dev/mapper/cryptswap none swap sw 0 0" >> /etc/fstab
+    - cryptsetup open --type plain -d /dev/urandom --cipher aes-xts-plain64 --key-size 256 /swapfile cryptswap
+    - mkswap /dev/mapper/cryptswap
+    - swapon /dev/mapper/cryptswap
+    - sysctl vm.swappiness=15
+    - echo "vm.swappiness=15" >> /etc/sysctl.d/99-swappiness.conf
     - mkdir -p /etc/salt/env.d
     - apt update
     - apt -y install --no-install-recommends gnupg yq
