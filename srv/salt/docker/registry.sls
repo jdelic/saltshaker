@@ -96,7 +96,6 @@ docker-registry-tcp-in{{registry_port}}-forward-ipv4:
         - chain: forward
         - family: ip4
         - jump: accept
-        - destination: {{registry_ip}}
         - dport: {{registry_port}}
         - proto: tcp
         - save: True
