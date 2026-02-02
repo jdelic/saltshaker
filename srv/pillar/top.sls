@@ -6,7 +6,6 @@ base:
         - allenvs.wellknown
         - shared.saltmine
         - shared.ssl
-        - shared.ssh
         - shared.gpg
         - shared.network
 

@@ -1,5 +1,5 @@
 {%- set users = pillar.get('users', {}) %}
-{%- set sshkeys = pillar.get('sshkeys', {}) %}
+{%- set sshkeys = None %}
 
 {%- for username, user in users.items() %}
 {%- set base_groups = user.get('groups', []) %}
@@ -54,11 +54,7 @@ sshkeys-{{ username }}:
     - user: {{ username }}
     - ssh_keys:
 {%- for key_id in ssh_key_ids %}
-{%- if sshkeys.get(key_id) %}
-      - {{ sshkeys.get(key_id) | json }}
-{%- else %}
       - {{ key_id | json }}
-{%- endif %}
 {%- endfor %}
     - require:
       - user: user-{{ username }}
