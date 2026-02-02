@@ -17,5 +17,15 @@ root-bashrc:
         - group: root
         - mode: 640
 
+
+root-dotssh:
+    file.directory:
+        - name: /root/.ssh
+        - user: root
+        - group: root
+        - mode: 700
+        - require:
+            - user: root
+
 # vim: syntax=yaml
 
