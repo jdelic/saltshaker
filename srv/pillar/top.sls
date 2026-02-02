@@ -93,5 +93,11 @@ base:
         - local.duplicity
         # - local.url_overrides
         - shared.urls
+        - shared.dev-users
+
+    # every non-test node gets the live user set
+    'not *.test':
+        - match: compound
+        - shared.live-users
 
 # vim: syntax=yaml
