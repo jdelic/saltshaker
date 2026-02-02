@@ -111,8 +111,8 @@ runcmd:
     - echo "${v_name}_crypt UUID=$(blkid -s UUID -o value /dev/disk/by-id/scsi-0HC_Volume_${v_conf.id}) ${v_name}_crypt luks,discard" >> /etc/crypttab
         %{ else ~}
     - echo "/dev/disk/by-id/scsi-0HC_Volume_${v_conf.id} ${v_conf.mountpoint} ext4 discard,nofail,defaults 0 0" >> /etc/fstab
-        %{ endif ~}
-    %{ endfor ~}
+        %{ endif }
+    %{ endfor }
     - systemctl daemon-reload
     - mount -a
 %{ endif ~}
