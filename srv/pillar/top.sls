@@ -2,6 +2,7 @@
 base:
     # assign global shared config to every node
     '*':
+        - config
         - allenvs.wellknown
         - shared.saltmine
         - shared.ssl

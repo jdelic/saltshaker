@@ -1,4 +1,4 @@
-{% from 'shared/network.sls' import local_domain %}
+{% from 'config.sls' import local_domain %}
 
 # Configuration values that should be accessible to all nodes in all environments.
 # This should include configuration values that have no security impact and are widely required to run multiple
