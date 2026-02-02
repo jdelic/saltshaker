@@ -28,13 +28,14 @@ root-dotssh:
             - user: root
 
 
-file.managed:
-    - name: /root/.ssh/known_hosts
-    - user: root
-    - group: root
-    - mode: 640
-    - require:
-        - file: root-dotssh
+root-dotssh-known-hosts:
+    file.managed:
+        - name: /root/.ssh/known_hosts
+        - user: root
+        - group: root
+        - mode: 640
+        - require:
+            - file: root-dotssh
 
 
 # vim: syntax=yaml
