@@ -119,9 +119,8 @@ def write_file(path: Path, content: str, *, force: bool) -> None:
 
 def sls_block(var_name: str, pem: str) -> str:
     pem = pem.strip() + "\n"
-    return textwrap.dedent(
-        f"""\
-        {{% set {var_name} = "\n{pem}"|indent(12) %}}
+    return textwrap.dedent(f"""
+            {{% set {var_name} = "\n{pem}"|indent(12) %}}
         """
     )
 
@@ -131,8 +130,7 @@ def load_pem(path: Path) -> str:
 
 
 def build_ca_openssl_conf(subject: str) -> str:
-    return textwrap.dedent(
-        f"""\
+    return textwrap.dedent(f"""
         [ req ]
         distinguished_name = dn
         x509_extensions = v3_ca
@@ -151,8 +149,7 @@ def build_ca_openssl_conf(subject: str) -> str:
 
 
 def build_intermediate_ext() -> str:
-    return textwrap.dedent(
-        """\
+    return textwrap.dedent("""
         [ v3_intermediate_ca ]
         subjectKeyIdentifier=hash
         authorityKeyIdentifier=keyid:always,issuer
@@ -164,8 +161,7 @@ def build_intermediate_ext() -> str:
 
 def build_leaf_ext(san: Iterable[str]) -> str:
     san_line = ", ".join(f"DNS:{name}" for name in san)
-    return textwrap.dedent(
-        f"""\
+    return textwrap.dedent(f"""
         [ v3_req ]
         basicConstraints = CA:FALSE
         keyUsage = critical, digitalSignature, keyEncipherment
@@ -375,13 +371,15 @@ def build_ssl_sls(
         + sls_block(f"{cert_name}_certificate", cert)
         + sls_block(f"{cert_name}_key", key)
         + sls_block(f"{cert_name}_certchain", certchain)
-        + textwrap.dedent(
-            f"""\
-            \nssl:
+        + textwrap.dedent(f"""
+            ssl:
                 {key_label}:
-                    cert: | {{{{{cert_name}_certificate}}}}
-                    key: | {{{{{cert_name}_key}}}}
-                    certchain: | {{{{{cert_name}_certchain}}}}
+                    cert: | 
+                        {{{{{cert_name}_certificate}}}}
+                    key: | 
+                        {{{{{cert_name}_key}}}}
+                    certchain: | 
+                        {{{{{cert_name}_certchain}}}}
                     combined: |
                         {{{{{cert_name}_certificate}}}}
                         {{{{{cert_name}_certchain}}}}
@@ -401,11 +399,11 @@ def build_gpg_sls(key_block: str) -> str:
     return (
         sls_block("MN_gpg_signing_key", key_block)
         + "\n"
-        + textwrap.dedent(
-            """\
+        + textwrap.dedent("""
             gpg:
                 keys:
-                    package-signing: | {{ MN_gpg_signing_key }}
+                    package-signing: | 
+                        {{ MN_gpg_signing_key }}
 
 
             # vim: syntax=yaml
