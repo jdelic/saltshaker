@@ -9,6 +9,18 @@ terraform {
             version = "> 3.6.0"
         }
     }
+
+    # use
+    #     aws configure export-credentials --profile tfstate --format env
+    # to set credentials in your environment
+    backend "s3" {
+        bucket = "terraform.maurus.net"
+        key = "terraform.tfstate"
+        region = "eu-central-1"
+
+        encrypt      = true
+        use_lockfile = true
+    }
 }
 
 variable "hcloud_token" {
