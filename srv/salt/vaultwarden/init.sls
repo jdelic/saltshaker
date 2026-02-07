@@ -49,7 +49,8 @@ vaultwarden-envfile-base:
             SMTP_PORT=25
             SMTP_FROM=vaultwarden@{{pillar['vaultwarden']['hostname']}}
             DATABASE_URL=postgres://vaultwarden:{{pillar['dynamicsecrets']['vaultwarden-db']}}@{{pillar['postgresql']['smartstack-hostname']}}/vaultwarden?sslmode=require&sslrootcert={{pillar['ssl']['service-rootca-cert']}}
-
+            EXTENDED_LOGGING=true
+            LOG_LEVEL=debug
             # Filled later if Vault available
             SSO_CLIENT_ID=UNKNOWN_RERUN_SALT
             SSO_CLIENT_SECRET=UNKNOWN_RERUN_SALT
@@ -113,6 +114,7 @@ vaultwarden-container:
                 -v {{pillar['ssl']['service-rootca-cert']}}:{{pillar['ssl']['service-rootca-cert']}}:ro \
                 -p {{ip}}:{{port}}:80/tcp \
                 --add-host {{pillar['postgresql']['smartstack-hostname']}}:{{pillar['docker']['bridge-ip']}} \
+                --add-host {{pillar['authserver']['hostname']}}:192.168.123.163 \
                 vaultwarden/server:latest >/dev/null
         - require:
             - file: vaultwarden-data
@@ -155,17 +157,34 @@ vaultwarden-http-tcp-in{{port}}-forward-ipv4:
             - sls: basics.nftables.setup
 
 
-vaultwarden-postgres-tcp-in5432-forward-ipv4:
+vaultwarden-postgres-tcp-out5432-forward-ipv4:
     nftables.append:
         - table: filter
         - chain: forward
         - family: ip4
         - jump: accept
         - dport: 5432
+        - match: state
+        - connstate: new
         - proto: tcp
         - save: True
         - require:
             - sls: basics.nftables.setup
+
+
+#vaultwarden-postgres-tcp-in5432-ipv4:
+#    nftables.append:
+#        - table: filter
+#        - chain: input
+#        - family: ip4
+#        - jump: accept
+#        - source: '0/0'
+#        - destination: {{ip}}/32
+#        - sport: 5432
+#        - proto: tcp
+#        - save: True
+#        - require:
+#            - sls: basics.nftables.setup
 
 
 vaultwarden-servicedef-external:
