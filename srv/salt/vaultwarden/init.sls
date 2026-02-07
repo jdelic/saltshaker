@@ -1,13 +1,13 @@
 include:
     - vaultwarden.sync
 
-{% set ip = pillar.get('vaultwarden', {}).get('webdav', {}).get(
+{% set ip = pillar.get('vaultwarden', {}).get(
                 'bind-ip', grains['ip_interfaces'][pillar['ifassign']['internal']][pillar['ifassign'].get(
                     'internal-ip-index', 0
                 )|int()]
             ) %}
 
-{% set port = pillar.get('vaultwarden', {}).get('webdav', {}).get('bind-port', 31080) %}
+{% set port = pillar.get('vaultwarden', {}).get('bind-port', 31080) %}
 
 vaultwarden-data:
     file.directory:
@@ -25,8 +25,10 @@ vaultwarden:
         - name: vaultwarden
         - image: vaultwarden/server:latest
         - restart_policy: unless-stopped
-        - ports:
-            - "{{ip}}:{{port}}:80"
+        - binds:
+            - /vw-data:/secure/vaultwarden
+        - publish:
+            - "{{ip}}:{{port}}:80/tcp"
         - environment:
             - SSO_ENABLED: True
             - SSO_AUTHORITY: https://{{pillar['authserver']['hostname']}}/o2/
@@ -42,8 +44,6 @@ vaultwarden:
                                                                'VAULT_TOKEN': pillar['dynamicsecrets']['vaultwarden-oidc-reader-token']})}}
         - extra_hosts:
             - "{{pillar['postgresql']['smartstack-hostname']}}:{{pillar['docker']['bridge-ip']}}"
-        - volumes:
-            - /vw-data:/secure/vaultwarden
         - require:
             - cmd: vaultwarden-sync-postgres
             - cmd: vaultwarden-sync-oidc
@@ -53,7 +53,7 @@ vaultwarden:
             - cmd: vaultwarden-sync
 
 
-vaultwarden-http-tcp-in80-ipv4:
+vaultwarden-http-tcp-in{{port}}-ipv4:
     nftables.append:
         - table: filter
         - chain: input
@@ -64,6 +64,19 @@ vaultwarden-http-tcp-in80-ipv4:
         - dport: {{port}}
         - match: state
         - connstate: new
+        - proto: tcp
+        - save: True
+        - require:
+            - sls: basics.nftables.setup
+
+
+vaultwarden-http-tcp-in{{port}}-forward-ipv4:
+    nftables.append:
+        - table: filter
+        - chain: forward
+        - family: ip4
+        - jump: accept
+        - dport: {{port}}
         - proto: tcp
         - save: True
         - require:
