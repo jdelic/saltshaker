@@ -20,11 +20,13 @@ base:
         - shared.postgresql
         - shared.secrets.postgresql
         - shared.authserver
+        - shared.vaultwarden
 
     'roles:vault':
         - match: grain
         - shared.buildserver
         - shared.authserver
+        - shared.vaultwarden
 
     'G@roles:dev or G@roles:buildserver or G@roles:buildworker':
         - match: compound
@@ -71,10 +73,15 @@ base:
     'roles:authserver':
         - match: grain
         - shared.authserver
+        - shared.vaultwarden
 
     'roles:nomadserver':
         - match: grain
         - allenvs.nomadserver
+
+    'roles:vaultwarden':
+        - match: grain
+        - shared.vaultwarden
 
     # every minion ID ending in ".test" is a local dev environment
     '*.test':

@@ -26,7 +26,7 @@ vaultwarden:
         - image: vaultwarden/server:latest
         - restart_policy: unless-stopped
         - ports:
-            - "80:{{ip}}:{{port}}"
+            - "{{ip}}:{{port}}:80"
         - environment:
             - SSO_ENABLED: True
             - SSO_AUTHORITY: https://{{pillar['authserver']['hostname']}}/o2/
@@ -34,9 +34,12 @@ vaultwarden:
             - SMTP_PORT: 25
             - SMTP_FROM: vaultwarden@{{pillar['vaultwarden']['hostname']}}
             - DATABASE_URL: postgres://vaultwarden:{{pillar['dynamicsecrets']['vaultwarden-db']}}@{{pillar['postgresql']['smartstack-hostname']}}/vaultwarden
-            - SSO_CLIENT_ID: vaultwarden
-            # TODO!
-            - SSO_CLIENT_SECRET: {{pillar['vaultwarden']['oidc-client-secret']}}
+            - SSO_CLIENT_ID: {{salt['cmd.run_stdout']('/usr/local/bin/vault kv get -field=client_id secret/oauth2/vaultwarden',
+                                                      env={'VAULT_ADDR': 'https://{hostname}/'.format(hostname=pillar['vault']['smartstack-hostname']),
+                                                           'VAULT_TOKEN': pillar['dynamicsecrets']['vaultwarden-oidc-reader-token']})}}
+            - SSO_CLIENT_SECRET: {{salt['cmd.run_stdout']('/usr/local/bin/vault kv get -field=client_secret secret/oauth2/vaultwarden',
+                                                          env={'VAULT_ADDR': 'https://{hostname}/'.format(hostname=pillar['vault']['smartstack-hostname']),
+                                                               'VAULT_TOKEN': pillar['dynamicsecrets']['vaultwarden-oidc-reader-token']})}}
         - extra_hosts:
             - "{{pillar['postgresql']['smartstack-hostname']}}:{{pillar['docker']['bridge-ip']}}"
         - volumes:
@@ -44,6 +47,7 @@ vaultwarden:
         - require:
             - cmd: vaultwarden-sync-postgres
             - cmd: vaultwarden-sync-oidc
+            - cmd: vaultwarden-sync-vault
             - file: vaultwarden-data
         - require_in:
             - cmd: vaultwarden-sync

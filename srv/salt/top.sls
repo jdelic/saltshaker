@@ -39,6 +39,7 @@ base:
         - vault.autounlock
         - mn.cas.vault_database
         - dev.concourse.vault_credentials
+        - vaultwarden.vault_setup
 
     'roles:docker-registry':
         - match: grain
@@ -91,6 +92,7 @@ base:
         - vault.postgres_admin  # gives Vault admin rights for using the postgresql Vault secret backend
         - mn.cas.postgres_database # this state is empty if authserver doesn't use a database backend
         - mn.cas.postgres_spapi_access # ^ ditto
+        - vaultwarden.postgres_database # this state is empty if vaultwarden doesn't use a database backend
 
     # every node that's not a mailserver routes through a mailserver via smartstack
     'not G@roles:mail':
@@ -120,6 +122,7 @@ base:
         - docker.authserver_dockerregistry  # empty unless a JWT key is configured
         - apache.webdav_permissions_py
         - dev.concourse.authserver_oauth2
+        - vaultwarden.authserver_permissions
 
     'roles:loadbalancer':
         - match: grain
@@ -133,6 +136,10 @@ base:
         - match: grain
         - fstab.secure
         - apache.webdav
+
+    'roles:vaultwarden':
+        - match: grain
+        - vaultwarden
 
     '*.test':
         # put vagrant user config on .test machines

@@ -1,6 +1,9 @@
 include:
-    - authserver.sync
+    - mn.cas.sync
+    - vaultwarden.sync
 
+
+{% if pillar['vaultwarden'].get('enabled', False) %}
 
 authserver-vaultwarden-create-permissions:
     cmd.run:
@@ -68,3 +71,5 @@ authserver-vaultwarden-require-permissions:
             - cmd: authserver-vaultwarden-create-permissions
         - require_in:
             - cmd: vaultwarden-sync-oidc
+
+{% endif %}

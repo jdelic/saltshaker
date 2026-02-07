@@ -1,8 +1,10 @@
-# this state should be run on a server role with postgressql.fast
+# this state should be run on a server role with postgressql.secure
 
 include:
     - postgresql.sync
+    - vaultwarden.sync
 
+{% if pillar['vaultwarden'].get('enabled', False) %}
 
 vaultwarden-db-role:
     postgres_user.present:
@@ -37,3 +39,5 @@ vaultwarden-db:
             - postgres_user: vaultwarden-db-role
         - require_in:
             - cmd: vaultwarden-sync-postgres
+
+{% endif %}
