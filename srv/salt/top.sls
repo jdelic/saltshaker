@@ -139,6 +139,7 @@ base:
 
     'roles:vaultwarden':
         - match: grain
+        - fstab.secure
         - vaultwarden
 
     '*.test':
