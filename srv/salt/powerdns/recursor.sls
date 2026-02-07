@@ -71,7 +71,7 @@ pdns-dhcpcd-enforce-nameservers:
     file.append:
         - name: /etc/dhcpcd.conf
         - text: |
-            static domain_name_servers=169.254.1.1, ::1
+            static domain_name_servers=169.254.1.1 ::1
         - require:
             - service: pdns-recursor-service
         - require_in:
