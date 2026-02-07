@@ -139,6 +139,7 @@ base:
 
     'roles:vaultwarden':
         - match: grain
+        - docker.install
         - fstab.secure
         - vaultwarden
 
