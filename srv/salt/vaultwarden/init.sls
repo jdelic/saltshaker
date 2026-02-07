@@ -1,14 +1,19 @@
 include:
     - vaultwarden.sync
     - vault.sync
+    - vault.install
+
 
 {% set ip = pillar.get('vaultwarden', {}).get(
-                'bind-ip', grains['ip_interfaces'][pillar['ifassign']['internal']][pillar['ifassign'].get(
-                    'internal-ip-index', 0
-                )|int()]
-            ) %}
+        'bind-ip',
+        grains['ip_interfaces'][pillar['ifassign']['internal']][
+            pillar['ifassign'].get('internal-ip-index', 0)|int
+        ]
+    )
+%}
 
 {% set port = pillar.get('vaultwarden', {}).get('bind-port', 31080) %}
+
 
 vaultwarden-data:
     file.directory:
@@ -21,39 +26,103 @@ vaultwarden-data:
             - secure-mount
 
 
-vaultwarden:
-    docker_container.running:
-        - name: vaultwarden
-        - image: vaultwarden/server:latest
-        - restart_policy: unless-stopped
-        - binds:
-            - /secure/vaultwarden:/data
-            - {{pillar['ssl']['service-rootca-cert']}}:{{pillar['ssl']['service-rootca-cert']}}
-        - publish:
-            - "{{ip}}:{{port}}:80/tcp"
-        - environment:
-            - SSO_ENABLED: True
-            - SSO_AUTHORITY: https://{{pillar['authserver']['hostname']}}/o2/
-            - SMTP_HOST: {{pillar['smtp']['smartstack-hostname']}}
-            - SMTP_PORT: 25
-            - SMTP_FROM: vaultwarden@{{pillar['vaultwarden']['hostname']}}
-            - DATABASE_URL: postgres://vaultwarden:{{pillar['dynamicsecrets']['vaultwarden-db']}}@{{pillar['postgresql']['smartstack-hostname']}}/vaultwarden?sslmode=require&sslrootcert={{pillar['ssl']['service-rootca-cert']}}
-            - SSO_CLIENT_ID: {{salt['cmd.run_stdout']('/usr/local/bin/vault kv get -field=client_id secret/oauth2/vaultwarden',
-                                                      env={'VAULT_ADDR': 'https://vault.service.consul:8200/',
-                                                           'VAULT_TOKEN': pillar['dynamicsecrets']['vaultwarden-oidc-reader-token']})}}
-            - SSO_CLIENT_SECRET: {{salt['cmd.run_stdout']('/usr/local/bin/vault kv get -field=client_secret secret/oauth2/vaultwarden',
-                                                          env={'VAULT_ADDR': 'https://vault.service.consul:8200/',
-                                                               'VAULT_TOKEN': pillar['dynamicsecrets']['vaultwarden-oidc-reader-token']})}}
-        - extra_hosts:
-            - "{{pillar['postgresql']['smartstack-hostname']}}:{{pillar['docker']['bridge-ip']}}"
+vaultwarden-envdir:
+    file.directory:
+        - name: /etc/appconfig/vaultwarden/env
+        - user: root
+        - group: root
+        - mode: '0750'
+        - makedirs: True
+
+
+vaultwarden-envfile-base:
+    file.managed:
+        - name: /etc/appconfig/vaultwarden/env/env-file
+        - user: root
+        - group: root
+        - mode: '0640'
+        - contents: |
+            # Managed by Salt
+            SSO_ENABLED=True
+            SSO_AUTHORITY=https://{{pillar['authserver']['hostname']}}/o2/
+            SMTP_HOST={{pillar['smtp']['smartstack-hostname']}}
+            SMTP_PORT=25
+            SMTP_FROM=vaultwarden@{{pillar['vaultwarden']['hostname']}}
+            DATABASE_URL=postgres://vaultwarden:{{pillar['dynamicsecrets']['vaultwarden-db']}}@{{pillar['postgresql']['smartstack-hostname']}}/vaultwarden?sslmode=require&sslrootcert={{pillar['ssl']['service-rootca-cert']}}
+
+            # Filled later if Vault available
+            SSO_CLIENT_ID=UNKNOWN_RERUN_SALT
+            SSO_CLIENT_SECRET=UNKNOWN_RERUN_SALT
         - require:
+            - file: vaultwarden-envdir
+
+
+vaultwarden-envfile-secrets:
+    cmd.run:
+        - name: |
+            set -eu
+
+            ENV_FILE="/etc/appconfig/vaultwarden/env/env-file"
+
+            CID="$(/usr/local/bin/vault kv get -field=client_id secret/oauth2/vaultwarden)"
+            CSEC="$(/usr/local/bin/vault kv get -field=client_secret secret/oauth2/vaultwarden)"
+
+            if grep -q '^SSO_CLIENT_ID=' "$ENV_FILE"; then
+                sed -i "s/^SSO_CLIENT_ID=.*/SSO_CLIENT_ID=${CID}/" "$ENV_FILE"
+            else
+                echo "SSO_CLIENT_ID=${CID}" >> "$ENV_FILE"
+            fi
+
+            if grep -q '^SSO_CLIENT_SECRET=' "$ENV_FILE"; then
+                sed -i "s/^SSO_CLIENT_SECRET=.*/SSO_CLIENT_SECRET=${CSEC}/" "$ENV_FILE"
+            else
+                echo "SSO_CLIENT_SECRET=${CSEC}" >> "$ENV_FILE"
+            fi
+        - env:
+            VAULT_ADDR: https://vault.service.consul:8200/
+            VAULT_TOKEN: {{pillar.get('dynamicsecrets', {}).get('vaultwarden-oidc-reader-token', '')}}
+        - require:
+            - file: vaultwarden-envfile-base
+            - sls: vault.install
+            - cmd: vault-sync
+        - onlyif:
+            - test -x /usr/local/bin/vault
+            - test -n "{{pillar.get('dynamicsecrets', {}).get('vaultwarden-oidc-reader-token', '')}}"
+
+
+vaultwarden-container:
+    cmd.run:
+        - name: |
+            set -eu
+
+            docker pull vaultwarden/server:latest >/dev/null
+
+            if docker ps --format '{{"{{"}}.Names{{"}}"}}' | grep -qx 'vaultwarden'; then
+                docker stop -t 30 vaultwarden
+            fi
+
+            if docker ps -a --format '{{"{{"}}.Names{{"}}"}}' | grep -qx 'vaultwarden'; then
+                docker rm vaultwarden
+            fi
+
+            docker run -d \
+                --name vaultwarden \
+                --restart unless-stopped \
+                --env-file /etc/appconfig/vaultwarden/env/env-file \
+                -v /secure/vaultwarden:/data \
+                -v {{pillar['ssl']['service-rootca-cert']}}:{{pillar['ssl']['service-rootca-cert']}}:ro \
+                -p {{ip}}:{{port}}:80/tcp \
+                --add-host {{pillar['postgresql']['smartstack-hostname']}}:{{pillar['docker']['bridge-ip']}} \
+                vaultwarden/server:latest >/dev/null
+        - require:
+            - file: vaultwarden-data
+            - file: vaultwarden-envfile-base
             - cmd: vaultwarden-sync-postgres
             - cmd: vaultwarden-sync-oidc
             - cmd: vaultwarden-sync-vault
-            - file: vaultwarden-data
-            - cmd: vault-sync  # require vault-sync separately here as if the box doesn't have vault locally, this state ensures the vault binary is installed
-        - require_in:
-            - cmd: vaultwarden-sync
+        - watch:
+            - file: vaultwarden-envfile-base
+            - cmd: vaultwarden-envfile-secrets
 
 
 vaultwarden-http-tcp-in{{port}}-ipv4:
