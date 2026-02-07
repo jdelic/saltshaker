@@ -26,6 +26,7 @@ smartstack-docker:
                 --include tags=smartstack:internal
                 --smartstack-localip {{pillar.get('docker', {}).get('bridge-ip', grains['ip_interfaces']['docker0'])}}
                 -D transparent_bind=1
+                -D socketsuffix=docker
                 {% if pillar.get("crypto", {}).get("generate-secure-dhparams", True) -%}
                     -D load_dhparams=True
                 {%- endif %}
