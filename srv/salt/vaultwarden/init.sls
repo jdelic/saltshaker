@@ -27,6 +27,7 @@ vaultwarden:
         - restart_policy: unless-stopped
         - binds:
             - /secure/vaultwarden:/data
+            - {{pillar['ssl']['service-rootca-cert']}}:{{pillar['ssl']['service-rootca-cert']}}
         - publish:
             - "{{ip}}:{{port}}:80/tcp"
         - environment:
@@ -35,7 +36,7 @@ vaultwarden:
             - SMTP_HOST: {{pillar['smtp']['smartstack-hostname']}}
             - SMTP_PORT: 25
             - SMTP_FROM: vaultwarden@{{pillar['vaultwarden']['hostname']}}
-            - DATABASE_URL: postgres://vaultwarden:{{pillar['dynamicsecrets']['vaultwarden-db']}}@{{pillar['postgresql']['smartstack-hostname']}}/vaultwarden
+            - DATABASE_URL: postgres://vaultwarden:{{pillar['dynamicsecrets']['vaultwarden-db']}}@{{pillar['postgresql']['smartstack-hostname']}}/vaultwarden?sslmode=require&sslrootcert={{pillar['ssl']['service-rootca-cert']}}
             - SSO_CLIENT_ID: {{salt['cmd.run_stdout']('/usr/local/bin/vault kv get -field=client_id secret/oauth2/vaultwarden',
                                                       env={'VAULT_ADDR': 'https://vault.service.consul:8200/',
                                                            'VAULT_TOKEN': pillar['dynamicsecrets']['vaultwarden-oidc-reader-token']})}}
