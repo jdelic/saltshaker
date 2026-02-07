@@ -26,7 +26,7 @@ vaultwarden:
         - image: vaultwarden/server:latest
         - restart_policy: unless-stopped
         - binds:
-            - /secure/vaultwarden:/vw-data
+            - /secure/vaultwarden:/data
         - publish:
             - "{{ip}}:{{port}}:80/tcp"
         - environment:
