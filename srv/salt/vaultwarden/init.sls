@@ -1,5 +1,6 @@
 include:
     - vaultwarden.sync
+    - vault.sync
 
 {% set ip = pillar.get('vaultwarden', {}).get(
                 'bind-ip', grains['ip_interfaces'][pillar['ifassign']['internal']][pillar['ifassign'].get(
@@ -50,6 +51,7 @@ vaultwarden:
             - cmd: vaultwarden-sync-oidc
             - cmd: vaultwarden-sync-vault
             - file: vaultwarden-data
+            - cmd: vault-sync  # require vault-sync separately here as if the box doesn't have vault locally, this state ensures the vault binary is installed
         - require_in:
             - cmd: vaultwarden-sync
 
@@ -78,6 +80,19 @@ vaultwarden-http-tcp-in{{port}}-forward-ipv4:
         - family: ip4
         - jump: accept
         - dport: {{port}}
+        - proto: tcp
+        - save: True
+        - require:
+            - sls: basics.nftables.setup
+
+
+vaultwarden-postgres-tcp-in5432-forward-ipv4:
+    nftables.append:
+        - table: filter
+        - chain: forward
+        - family: ip4
+        - jump: accept
+        - dport: 5432
         - proto: tcp
         - save: True
         - require:
