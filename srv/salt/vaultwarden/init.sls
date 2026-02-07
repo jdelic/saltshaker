@@ -26,7 +26,7 @@ vaultwarden:
         - image: vaultwarden/server:latest
         - restart_policy: unless-stopped
         - binds:
-            - /vw-data:/secure/vaultwarden
+            - /secure/vaultwarden:/vw-data
         - publish:
             - "{{ip}}:{{port}}:80/tcp"
         - environment:
@@ -37,10 +37,10 @@ vaultwarden:
             - SMTP_FROM: vaultwarden@{{pillar['vaultwarden']['hostname']}}
             - DATABASE_URL: postgres://vaultwarden:{{pillar['dynamicsecrets']['vaultwarden-db']}}@{{pillar['postgresql']['smartstack-hostname']}}/vaultwarden
             - SSO_CLIENT_ID: {{salt['cmd.run_stdout']('/usr/local/bin/vault kv get -field=client_id secret/oauth2/vaultwarden',
-                                                      env={'VAULT_ADDR': 'https://{hostname}/'.format(hostname=pillar['vault']['smartstack-hostname']),
+                                                      env={'VAULT_ADDR': 'https://vault.service.consul:8200/',
                                                            'VAULT_TOKEN': pillar['dynamicsecrets']['vaultwarden-oidc-reader-token']})}}
             - SSO_CLIENT_SECRET: {{salt['cmd.run_stdout']('/usr/local/bin/vault kv get -field=client_secret secret/oauth2/vaultwarden',
-                                                          env={'VAULT_ADDR': 'https://{hostname}/'.format(hostname=pillar['vault']['smartstack-hostname']),
+                                                          env={'VAULT_ADDR': 'https://vault.service.consul:8200/',
                                                                'VAULT_TOKEN': pillar['dynamicsecrets']['vaultwarden-oidc-reader-token']})}}
         - extra_hosts:
             - "{{pillar['postgresql']['smartstack-hostname']}}:{{pillar['docker']['bridge-ip']}}"
