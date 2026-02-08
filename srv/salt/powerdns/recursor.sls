@@ -6,6 +6,7 @@ include:
 
 pdns-recursor:
     pkg.installed:
+        - order: 9
         - require_in:
             - cmd: powerdns-pkg-installed-sync
 
@@ -41,6 +42,17 @@ pdns-recursor-dnssec-config:
         - user: root
         - group: root
         - mode: '0644'
+        - require:
+            - pkg: pdns-recursor
+
+
+pdns-recursor-zone-dir:
+    file.directory:
+        - name: /etc/powerdns/zones
+        - makedirs: True
+        - user: root
+        - group: root
+        - mode: '0755'
         - require:
             - pkg: pdns-recursor
 
