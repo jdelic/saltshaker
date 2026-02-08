@@ -1,4 +1,4 @@
-{% from salt['file.join'](tpldir, 'wellknown.sls') import external_tld %}
+{% from 'config.sls' import external_tld %}
 
 # importable variables for reuse
 {% set iface_nat = 'eth0' %}

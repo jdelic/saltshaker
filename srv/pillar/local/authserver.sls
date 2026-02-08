@@ -1,6 +1,5 @@
-{% from 'shared/network.sls' import local_domain %}
+{% from 'config.sls' import local_domain, external_tld %}
 {% from 'shared/ssl.sls' import localca_location %}
-{% from salt['file.join'](tpldir, 'wellknown.sls') import external_tld %}
 
 authserver:
     hostname: auth.{{external_tld}}
