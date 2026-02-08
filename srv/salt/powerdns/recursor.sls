@@ -95,7 +95,7 @@ pdns-recursor-local-zone:
               ns1         IN  A   127.0.0.1
 
               {% for service in pillar['smartstack-services'] %}{% if pillar['smartstack-services'][service].get('smartstack-hostname', False) %}
-              {{pillar['smartstack-services'][service]['smartstack-hostname']|trim('.%s' % pillar['config']['domains']['local'])}} IN A 127.0.0.1
+              {{pillar['smartstack-services'][service]['smartstack-hostname'][:-(pillar['config']['domains']['local']|length|int + 1)]}} IN A 127.0.0.1
               {% endif %}{% endfor %}
         - user: root
         - group: root
