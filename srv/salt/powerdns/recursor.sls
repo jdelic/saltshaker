@@ -62,8 +62,8 @@ pdns-recursor-local-zone-config:
         - name: /etc/powerdns/recursor.d/local-zones.yml
         - contents: |
             recursor:
-            {% if pillar.get('resolve_wellknown_hosts', False) %}
                 auth_zones:
+            {% if pillar.get('resolve_wellknown_hosts', False) %}
                     - zone: {{pillar['config']['domains']['external']}}
                       file: /etc/powerdns/zones/{{pillar['config']['domains']['external']}}.zone
             {% endif %}
