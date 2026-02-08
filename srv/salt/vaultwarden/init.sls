@@ -43,8 +43,9 @@ vaultwarden-envfile-base:
         - mode: '0640'
         - contents: |
             # Managed by Salt
+            DOMAIN=https://{{pillar['vaultwarden']['hostname']}}
             SSO_ENABLED=True
-            SSO_AUTHORITY=https://{{pillar['authserver']['hostname']}}/o2/
+            SSO_AUTHORITY=https://{{pillar['authserver']['hostname']}}/o2
             SMTP_HOST={{pillar['smtp']['smartstack-hostname']}}
             SMTP_PORT=25
             SMTP_FROM=vaultwarden@{{pillar['vaultwarden']['hostname']}}
@@ -111,9 +112,10 @@ vaultwarden-container:
                 --restart unless-stopped \
                 --env-file /etc/appconfig/vaultwarden/env/env-file \
                 -v /secure/vaultwarden:/data \
-                -v {{pillar['ssl']['service-rootca-cert']}}:{{pillar['ssl']['service-rootca-cert']}}:ro \
+                -v /etc/ssl/certs/ca-certificates.crt:/etc/ssl/certs/ca-certificates.crt:ro \
                 -p {{ip}}:{{port}}:80/tcp \
                 --add-host {{pillar['postgresql']['smartstack-hostname']}}:{{pillar['docker']['bridge-ip']}} \
+                --add-host {{pillar['smtp']['smartstack-hostname']}}:{{pillar['docker']['bridge-ip']}} \
                 --add-host {{pillar['authserver']['hostname']}}:192.168.123.163 \
                 vaultwarden/server:latest >/dev/null
         - require:
