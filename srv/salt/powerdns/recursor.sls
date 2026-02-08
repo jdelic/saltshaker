@@ -107,7 +107,6 @@ pdns-recursor-local-zone:
 # If we're in a development environment, install a list of local well-known hosts in /etc/hosts
 # so we don't need a local DNS server.
 {% if pillar.get('local-development-environment-dns', False) %}
-    {% set ipprefix = salt['network.interface_ip'](pillar['ifassign']['external']).split(".")[0:3]|join(".") %}
 # You shouldn't use this outside of a LOCAL VAGRANT NETWORK. This configuration
 # saves you from setting up a DNS server by replicating it in all nodes' /etc/hosts files.
 pdns-recursor-external-zone:
@@ -130,12 +129,12 @@ pdns-recursor-external-zone:
             ns1         IN  A   127.0.0.1
             
             ; /etc/hosts mappings
-            saltmaster  IN  A   {{ipprefix}}.88
-            auth        IN  A   {{ipprefix}}.163
-            mail        IN  A   {{ipprefix}}.163
-            calendar    IN  A   {{ipprefix}}.163
-            ci          IN  A   {{ipprefix}}.163
-            smtp        IN  A   {{ipprefix}}.164
+            saltmaster  IN  A   192.168.123.88
+            auth        IN  A   192.168.123.163
+            mail        IN  A   192.168.123.163
+            calendar    IN  A   192.168.123.163
+            ci          IN  A   192.168.123.163
+            smtp        IN  A   192.168.123.164
         - user: root
         - group: root
         - mode: '0644'
