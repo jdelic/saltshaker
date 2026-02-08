@@ -3,7 +3,7 @@ base:
     # assign global shared config to every node
     '*':
         - config
-        - allenvs.wellknown
+        - allenvs.smartstack
         - shared.saltmine
         - shared.ssl
         - shared.gpg
@@ -78,7 +78,7 @@ base:
 
     # every minion ID ending in ".test" is a local dev environment
     '*.test':
-        - local.wellknown
+        - local.config
         - local.mailserver-config
         - local.calendar
         - local.network
@@ -88,7 +88,6 @@ base:
         - local.buildserver
         - local.crypto
         - local.ssl
-        - local.authserver
         - local.duplicity
         # - local.url_overrides
         - shared.urls

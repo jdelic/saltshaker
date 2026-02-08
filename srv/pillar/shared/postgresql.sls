@@ -6,6 +6,7 @@ postgresql:
     start-cluster: True
 
     # 'default' should be interpreted as a reference to the default certificates in ssl.sls
+    pinned-ca-cert: default
     sslcert: {{salt['file.join'](certificate_location, 'postgresql.crt')}}
     sslkey: {{salt['file.join'](secret_key_location, 'postgresql.key')}}
 

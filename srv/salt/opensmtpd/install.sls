@@ -245,7 +245,7 @@ opensmtpd-config:
         - context:
             receiver_hostname: {{pillar['smtp-incoming']['hostname']}}
             relay_hostname: {{pillar['smtp-outgoing']['hostname']}}
-            internal_relay_hostname: {{pillar['smtp']['smartstack-hostname']}}
+            internal_relay_hostname: {{pillar['service']['smtp']['smartstack-hostname']}}
             receiver_ips: ["{{opensmtpd_ips['ipv4']['receiver']}}", "{{opensmtpd_ips['ipv6']['receiver']}}"]
             relay_ips: ["{{opensmtpd_ips['ipv4']['relay']}}", "{{opensmtpd_ips['ipv6']['relay']}}"]
             internal_relay_ips: ["{{opensmtpd_ips['ipv4']['internal_relay']}}", "{{opensmtpd_ips['ipv6']['internal_relay']}}"]

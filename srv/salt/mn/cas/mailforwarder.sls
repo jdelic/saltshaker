@@ -41,7 +41,7 @@ mailforwarder-rsyslog:
     "POSTGRESQL_CA": pillar['ssl']['service-rootca-cert'] if
         pillar['postgresql'].get('pinned-ca-cert', 'default') == 'default'
         else pillar['postgresql']['pinned-ca-cert'],
-    "ALLOWED_HOSTS": "%s,%s"|format(pillar['authserver']['hostname'], pillar['authserver']['smartstack-hostname']),
+    "ALLOWED_HOSTS": "%s,%s"|format(pillar['service']['authserver']['hostname'], pillar['service']['authserver']['smartstack-hostname']),
     "APPLICATION_LOGLEVEL": "INFO",
 } %}
 {% if pillar['mailforwarder'].get('use-vault', False) %}
