@@ -1,4 +1,4 @@
-{% from 'config.sls' import local_domain, external_tld %}
+{% from 'config.sls' import local_domain %}
 
 # Configuration values that should be accessible to all nodes in all environments.
 # This should include configuration values that have no security impact and are widely required to run multiple
@@ -7,7 +7,6 @@
 smartstack-services:
     vault:
         smartstack-hostname: vault.{{local_domain}}
-        hostname: vault.{{external_tld}}
 
 
     postgresql:
@@ -18,6 +17,7 @@ smartstack-services:
     smtp:
         # no-authentication email sender
         smartstack-hostname: smtp.{{local_domain}}
+
 
     authserver:
         protocol: https
