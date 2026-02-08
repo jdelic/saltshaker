@@ -146,49 +146,6 @@ vaultwarden-http-tcp-in{{port}}-ipv4:
             - sls: basics.nftables.setup
 
 
-vaultwarden-http-tcp-in{{port}}-forward-ipv4:
-    nftables.append:
-        - table: filter
-        - chain: forward
-        - family: ip4
-        - jump: accept
-        - dport: {{port}}
-        - proto: tcp
-        - save: True
-        - require:
-            - sls: basics.nftables.setup
-
-
-vaultwarden-postgres-tcp-out5432-forward-ipv4:
-    nftables.append:
-        - table: filter
-        - chain: forward
-        - family: ip4
-        - jump: accept
-        - dport: 5432
-        - match: state
-        - connstate: new
-        - proto: tcp
-        - save: True
-        - require:
-            - sls: basics.nftables.setup
-
-
-#vaultwarden-postgres-tcp-in5432-ipv4:
-#    nftables.append:
-#        - table: filter
-#        - chain: input
-#        - family: ip4
-#        - jump: accept
-#        - source: '0/0'
-#        - destination: {{ip}}/32
-#        - sport: 5432
-#        - proto: tcp
-#        - save: True
-#        - require:
-#            - sls: basics.nftables.setup
-
-
 vaultwarden-servicedef-external:
     file.managed:
         - name: /etc/consul/services.d/vaultwarden-external.json
