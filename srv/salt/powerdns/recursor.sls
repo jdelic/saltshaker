@@ -192,6 +192,8 @@ pdns-recursor-service:
         - watch:
             - file: pdns-recursor-config
             - file: pdns-recursor-dnssec-config
+            - file: /etc/powerdns/zones/*
+            - file: /etc/powerdns/recursor.d/*
         - require:
             - pkg: pdns-recursor
             - cmd: consul-sync
