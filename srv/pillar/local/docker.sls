@@ -1,7 +1,7 @@
 {% from 'config.sls' import external_tld %}
 
-docker:
-    registry:
+service:
+    docker-registry:
         enabled: True
         hostname: registry.{{external_tld}}
 
