@@ -102,6 +102,7 @@ pdns-recursor-local-zone:
         - mode: '0644'
         - require:
             - file: pdns-recursor-local-zone-config
+            - file: pdns-recursor-zone-dir
 
 
 # If we're in a development environment, install a list of local well-known hosts in /etc/hosts
@@ -140,6 +141,7 @@ pdns-recursor-external-zone:
         - mode: '0644'
         - require:
             - file: pdns-recursor-local-zone-config
+            - file: pdns-recursor-zone-dir
 {% endif %}
 
 
