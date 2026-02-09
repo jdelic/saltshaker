@@ -46,10 +46,10 @@ vaultwarden-envfile-base:
             DOMAIN=https://{{pillar['vaultwarden']['hostname']}}
             SSO_ENABLED=True
             SSO_AUTHORITY=https://{{pillar['authserver']['hostname']}}/o2
-            SMTP_HOST={{pillar['smtp']['smartstack-hostname']}}
+            SMTP_HOST={{pillar['smartstack-services']['smtp']['smartstack-hostname']}}
             SMTP_PORT=25
             SMTP_FROM=vaultwarden@{{pillar['vaultwarden']['hostname']}}
-            DATABASE_URL=postgres://vaultwarden:{{pillar['dynamicsecrets']['vaultwarden-db']}}@{{pillar['postgresql']['smartstack-hostname']}}/vaultwarden?sslmode=require&sslrootcert={{pillar['ssl']['service-rootca-cert']}}
+            DATABASE_URL=postgres://vaultwarden:{{pillar['dynamicsecrets']['vaultwarden-db']}}@{{pillar['smartstack-services']['postgresql']['smartstack-hostname']}}/vaultwarden?sslmode=require&sslrootcert={{pillar['ssl']['service-rootca-cert']}}
             EXTENDED_LOGGING=true
             LOG_LEVEL=debug
             # Filled later if Vault available
