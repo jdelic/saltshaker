@@ -49,6 +49,9 @@ dkimsigner-rsyslog:
 dkimsigner-config-secretid:
     cmd.run:
         - name: >-
+            touch /etc/appconfig/dkimsigner/env/VAULT_SECRETID &&
+            chmod 0600 /etc/appconfig/dkimsigner/env/VAULT_SECRETID &&
+            chown authserver:authserver /etc/appconfig/dkimsigner/env/VAULT_SECRETID &&
             /usr/local/bin/vault write -f -format=json \
                 auth/approle/role/dkimsigner/secret-id |
                 jq -r .data.secret_id > /etc/appconfig/dkimsigner/env/VAULT_SECRETID
@@ -62,6 +65,9 @@ dkimsigner-config-secretid:
             test $? -eq 0
         - watch_in:
             - service: dkimsigner
+        - require:
+            - pkg: dkimsigner
+            - appconfig: dkimsigner-appconfig
     {% endif %}
 {% else %}
     {% set config = config | set_dict_key_value("DATABASE_URL", 'postgresql://%s:@postgresql.local:5432/%s'|format(pillar['dkimsigner']['dbuser'],
