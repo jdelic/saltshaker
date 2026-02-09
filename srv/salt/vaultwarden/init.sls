@@ -52,6 +52,7 @@ vaultwarden-envfile-base:
             DATABASE_URL=postgres://vaultwarden:{{pillar['dynamicsecrets']['vaultwarden-db']}}@{{pillar['smartstack-services']['postgresql']['smartstack-hostname']}}/vaultwarden?sslmode=require&sslrootcert={{pillar['ssl']['service-rootca-cert']}}
             EXTENDED_LOGGING=true
             LOG_LEVEL=debug
+            SIGNUPS_ALLOWED=false
             # Filled later if Vault available
             SSO_CLIENT_ID=UNKNOWN_RERUN_SALT
             SSO_CLIENT_SECRET=UNKNOWN_RERUN_SALT
