@@ -82,6 +82,7 @@ base:
     'roles:vaultwarden':
         - match: grain
         - shared.vaultwarden
+        - shared.authserver
 
     # every minion ID ending in ".test" is a local dev environment. We assign all config to these nodes
     # as the list of roles and services changes all the time for testing and development, so it's easier to
