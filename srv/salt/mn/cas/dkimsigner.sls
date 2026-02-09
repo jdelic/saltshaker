@@ -39,7 +39,7 @@ dkimsigner-rsyslog:
     "POSTGRESQL_CA": pillar['ssl']['service-rootca-cert'] if
         pillar['postgresql'].get('pinned-ca-cert', 'default') == 'default'
         else pillar['postgresql']['pinned-ca-cert'],
-    "ALLOWED_HOSTS": "%s,%s"|format(pillar['authserver']['hostname'], pillar['authserver']['smartstack-hostname']),
+    "ALLOWED_HOSTS": "%s,%s"|format(pillar['authserver']['hostname'], pillar['smartstack-services']['authserver']['smartstack-hostname']),
     "APPLICATION_LOGLEVEL": "INFO",
 } %}
 {% if pillar['dkimsigner'].get('use-vault', False) %}

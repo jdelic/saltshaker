@@ -2,6 +2,9 @@
 sudo:
     pkg.installed
 
+include:
+    - mn.users.manage
+
 root:
     user.present:
         - uid: 0
@@ -39,4 +42,3 @@ root-dotssh-known-hosts:
 
 
 # vim: syntax=yaml
-

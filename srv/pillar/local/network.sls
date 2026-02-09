@@ -1,4 +1,4 @@
-{% from salt['file.join'](tpldir, 'wellknown.sls') import external_tld %}
+{% from 'config.sls' import external_tld %}
 
 # importable variables for reuse
 {% set iface_nat = 'eth0' %}
@@ -26,6 +26,4 @@ mine_functions:
         - mine_function: network.interface_ip
         - {{iface_internal}}
 
-
-install_wellknown_hosts: true
 # vim: syntax=yaml

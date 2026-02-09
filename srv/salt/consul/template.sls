@@ -58,7 +58,7 @@ consul-template-config:
             cacert: {{pillar['ssl']['service-rootca-cert']
                         if pillar['vault'].get('pinned-ca-cert', 'default') == 'default'
                         else pillar['vault']['pinned-ca-cert']}}
-            vault_url: https://{{pillar['vault']['smartstack-hostname']}}:8200/
+            vault_url: https://{{pillar['smartstack-services']['vault']['smartstack-hostname']}}:8200/
         - require:
             - file: consul-basedir
 

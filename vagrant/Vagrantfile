@@ -284,12 +284,13 @@ SCRIPT
             s.inline +=<<SCRIPT
                 mkdir -p /etc/salt/roles.d
                 touch /etc/salt/roles.d/vagrant
-                touch /etc/salt/roles.d/mail
+                #touch /etc/salt/roles.d/mail
                 #touch /etc/salt/roles.d/pim
                 #touch /etc/salt/roles.d/dev
-                touch /etc/salt/roles.d/buildserver
-                touch /etc/salt/roles.d/buildworker
-                touch /etc/salt/roles.d/apps
+                #touch /etc/salt/roles.d/buildserver
+                #touch /etc/salt/roles.d/buildworker
+                #touch /etc/salt/roles.d/apps
+                touch /etc/salt/roles.d/vaultwarden
                 touch /etc/salt/roles.d/loadbalancer
 SCRIPT
         end
