@@ -2,4 +2,4 @@
 
 vaultwarden:
     enabled: True
-    hostname: bitwarden.{{external_tld}}
+    hostname: pwd.{{external_tld}}
