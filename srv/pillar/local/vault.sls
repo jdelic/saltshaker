@@ -8,6 +8,27 @@
 #
 
 vault:
+    # Set this to 'True' to make this Salt config initialize Vault automatically
+    initialize: True
+    create-database: True
+
+    # On first setup and therefor for Salt states using Vault, this Salt config will
+    # also *unseal* Vault the first time Vault is initialized (at which point it should
+    # be empty and therefor that's not a dangerous operation). Salt will then promptly
+    # forget the unseal keys. On every subsequent run, an administrator will have to
+    # unseal Vault first.
+    #
+    # By default, the configuration will save the keys in /root/vault_keys.txt. If
+    # you set 'encrypt-with-gpg' to a known GPG public key ID in the managed keyring,
+    # Vault's unseal keys will be saved in /root/vault_keys.txt.gpg instead without
+    # ever being written to disk.
+    #
+    # PROVIDE A HEX ID! AND YOU MUST AT LEAST PROVIDE THE KEY'S LONG ID (last 16
+    # characters).
+    # encrypt-vault-keys-with-gpg: 23FC12D75291ED448C0728C877C339AB7CDC4589
+    # On local test machines, do not encrypt Vault keys
+    encrypt-vault-keys-with-gpg: False
+
     # "mysql", "postgresql" or "consul" or "s3". Only "consul" supports redundancy (more than one vault server
     # in the cluster with leader elections. However, "consul" is *only* a good choice if your consul nodes run
     # on multiple physical machines.
@@ -31,6 +52,10 @@ vault:
         dbname: vault  # only needed for postgres backend
         dbuser: vault  # the password is created via the dynamicsecrets ext_pillar
 
+    # name of the MySQL/PostgreSQL role managing database credentials on behalf of applications
+    # This *must* own all databases managed by Vault.
+    managed-database-owner: vaultadmin
+
     s3:
         bucket: vault-dev
         aws-region: eu-central-1
@@ -44,9 +69,6 @@ vault:
     #    statsd:    # a statsd endpoint
     #    disable_hostname: False  # whether Vault should prepend stats with the machine's hostname
 
+
     # default_lease_ttl: (default: 30 days)
     # max_lease_ttl: (default: 1 year)
-    hostname: vault.{{external_tld}}
-
-    # On local test machines, do not encrypt Vault keys
-    encrypt-vault-keys-with-gpg: False

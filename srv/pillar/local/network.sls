@@ -26,6 +26,4 @@ mine_functions:
         - mine_function: network.interface_ip
         - {{iface_internal}}
 
-
-install_wellknown_hosts: true
 # vim: syntax=yaml
