@@ -76,6 +76,17 @@ pdns-dhcpcd-enforce-nameservers:
             - service: pdns-recursor-service
         - require_in:
             - cmd: powerdns-sync
+
+pdns-dhcpcd-remove-nameservers-option:
+    file.replace:
+        - name: /etc/dhcpcd.conf
+        - pattern: '^option domain_name_servers,(.*)$'
+        - repl: 'option \1'
+        - backup: True
+        - require:
+            - service: pdns-recursor-service
+        - require_in:
+            - cmd: powerdns-sync
 {% endif %}
 
 
