@@ -78,6 +78,21 @@ docker-bridge-udp-ipv4-accept:
             - sls: basics.nftables.setup
 
 
+docker-bridge-ipv4-forward-accept:
+    nftables.append:
+        - table: filter
+        - chain: forward
+        - family: ip4
+        - jump: accept
+        - if: {{pillar['ifassign']['internal']}}
+        - of: docker0
+        - match: state
+        - connstate: new
+        - save: True
+        - require:
+            - sls: basics.nftables.setup
+
+
 docker-pdns-recursor-cidr:
   file.accumulated:
       - name: powerdns-recursor-additional-cidrs
