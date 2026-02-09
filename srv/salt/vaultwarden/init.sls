@@ -91,6 +91,7 @@ vaultwarden-envfile-secrets:
         - onlyif:
             - test -x /usr/local/bin/vault
             - test -n "{{pillar.get('dynamicsecrets', {}).get('vaultwarden-oidc-reader-token', '')}}"
+            - grep -q '^SSO_CLIENT_ID=UNKNOWN_RERUN_SALT' /etc/appconfig/vaultwarden/env/env-file
 
 
 vaultwarden-container:
