@@ -20,16 +20,6 @@ base:
         - shared.secrets.vault-live
         - shared.secrets.vault-ssl
 
-    'not *.test and G@roles:xenserver':
-        - match: compound
-        - hetzner.xenserver
-
-    # everything not in Vagrant (*.test) is at Hetzner and everything not a xenserver
-    # is a VM
-    'not *.test and not G@roles:xenserver':
-        - match: compound
-        - hetzner.vm_config
-
     'roles:database':
         - match: grain
         - shared.postgresql
@@ -108,22 +98,27 @@ base:
         - shared.vaultwarden
         - shared.authserver
 
+    'not *.test and G@roles:vault':
+        - match: compound
+        - hetzner.vault
+
     # every minion ID not ending in "test" is at Hetzner right now
     'not *.test':
         - match: compound
-        - hetzner.wellknown
-        - hetzner.mailserver-config
-        - hetzner.calendar
-        - hetzner.consul
-        - hetzner.nomad
-        - hetzner.docker
-        - hetzner.buildserver
-        - hetzner.crypto
-        - hetzner.ssl
         - hetzner.authserver
+        - hetzner.buildserver
+        - hetzner.calendar
+        - hetzner.config
+        - hetzner.consul
+        - hetzner.crypto
+        - hetzner.docker
         - hetzner.duplicity
+        - hetzner.mailserver-config
+        - hetzner.network
+        - hetzner.nomad
+        - hetzner.postgresql
+        - hetzner.ssl
         - shared.urls
-        - shared.secrets.live-backup
 
 
     # every minion ID ending in ".test" is a local dev environment. We assign all config to these nodes

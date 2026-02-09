@@ -38,8 +38,4 @@ mine_functions:
         - {{iface_internal}}
 
 
-enable_byobu:
-    jonas: True
-
 # vim: syntax=yaml
-

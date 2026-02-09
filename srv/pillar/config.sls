@@ -5,7 +5,7 @@
 
 {% set internal_domain = "internal" %}
 {% set local_domain = "local" %}
-{% set external_tld = "maurusnet.test" %}
+{% set external_tld = "maurus.net" %}
 
 config:
     domains:
