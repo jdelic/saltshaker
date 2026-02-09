@@ -4,6 +4,7 @@ base:
     '*':
         - config
         - allenvs.smartstack
+        - shared.authserver
         - shared.saltmine
         - shared.ssl
         - shared.gpg
@@ -24,13 +25,11 @@ base:
         - match: grain
         - shared.postgresql
         - shared.secrets.postgresql
-        - shared.authserver
         - shared.vaultwarden
 
     'roles:vault':
         - match: grain
         - shared.buildserver
-        - shared.authserver
         - shared.vaultwarden
         - shared.vault
 
@@ -77,16 +76,13 @@ base:
         - match: grain
         - shared.secrets.smtp
         - shared.mailserver-private
-        - shared.authserver
 
     'roles:pim':
         - match: grain
         - shared.calendar
-        - shared.authserver
 
     'roles:authserver':
         - match: grain
-        - shared.authserver
         - shared.vaultwarden
 
     'roles:nomadserver':
@@ -96,7 +92,6 @@ base:
     'roles:vaultwarden':
         - match: grain
         - shared.vaultwarden
-        - shared.authserver
 
     'not *.test and G@roles:vault':
         - match: compound
