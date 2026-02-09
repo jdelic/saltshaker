@@ -119,7 +119,7 @@ base:
         - hetzner.postgresql
         - hetzner.ssl
         - shared.urls
-
+        - shared.live-users
 
     # every minion ID ending in ".test" is a local dev environment. We assign all config to these nodes
     # as the list of roles and services changes all the time for testing and development, so it's easier to
@@ -143,9 +143,5 @@ base:
         - shared.urls
         - shared.dev-users
 
-    # every non-test node gets the live user set
-    'not *.test':
-        - match: compound
-        - shared.live-users
 
 # vim: syntax=yaml
