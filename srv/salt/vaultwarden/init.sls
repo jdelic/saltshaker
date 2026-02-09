@@ -114,9 +114,9 @@ vaultwarden-container:
                 -v /secure/vaultwarden:/data \
                 -v /etc/ssl/certs/ca-certificates.crt:/etc/ssl/certs/ca-certificates.crt:ro \
                 -p {{ip}}:{{port}}:80/tcp \
-                --add-host {{pillar['postgresql']['smartstack-hostname']}}:{{pillar['docker']['bridge-ip']}} \
-                --add-host {{pillar['smtp']['smartstack-hostname']}}:{{pillar['docker']['bridge-ip']}} \
-                --add-host {{pillar['authserver']['hostname']}}:192.168.123.163 \
+                {%- for s in pillar['smartstack-services'] %}
+                --add-host={{pillar['smartstack-services'][s]['smartstack-hostname']}}:{{pillar['docker']['bridge-ip']}} \
+                {%- endfor %}
                 vaultwarden/server:latest >/dev/null
         - require:
             - file: vaultwarden-data
