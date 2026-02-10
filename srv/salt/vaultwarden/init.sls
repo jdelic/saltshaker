@@ -51,7 +51,7 @@ vaultwarden-envfile-base:
             SMTP_FROM=vaultwarden@{{pillar['vaultwarden']['hostname']}}
             DATABASE_URL=postgres://vaultwarden:{{pillar['dynamicsecrets']['vaultwarden-db']}}@{{pillar['smartstack-services']['postgresql']['smartstack-hostname']}}/vaultwarden?sslmode=require&sslrootcert={{pillar['ssl']['service-rootca-cert']}}
             EXTENDED_LOGGING=true
-            LOG_LEVEL=debug
+            LOG_LEVEL=warn
             SIGNUPS_ALLOWED=false
             ADMIN_TOKEN={{pillar['dynamicsecrets']['vaultwarden-admin-token']}}
             # Filled later when Vault is available
