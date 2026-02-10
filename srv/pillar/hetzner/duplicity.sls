@@ -1,3 +1,4 @@
+{% from 'config.sls' import external_tld %}
 # configuration pillar for duplicity backup
 
 duplicity-backup:
@@ -13,3 +14,4 @@ duplicity-backup:
     cleanup-mode: remove-older-than
     cleanup-selector: 6M
     # backup-target is set in shared.secrets.live-backup
+    cron-mailto: sysop@{{external_tld}}
