@@ -33,6 +33,9 @@ duplicity-backup:
     # example: delete all backups older than a year
     cleanup-selector: 1y
 
+    # MAILTO for cronjob output. Set to empty string to disable email output.
+    cron-mailto: sysop@{{external_tld}}
+
     # set to a dict of environment variables to be set in the script. This is useful to pass
     # additional configuration to duplicity, like AWS credentials
     envvars: {}
