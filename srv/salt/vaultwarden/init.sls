@@ -77,6 +77,7 @@ vaultwarden-add-encrypted-admin-token:
                      --batch \
                      --trusted-key {{long_id}} -a -e \
                      -r {{long_id}} >/root/vaultwarden_admin_token.txt.gpg;
+                 echo -n "ADMIN_TOKEN=" >> /etc/appconfig/vaultwarden/env/envvars;
              } 5> >(argon2 $(head -c 16 /dev/urandom | base64) -e >> /etc/appconfig/vaultwarden/env/envvars)
         - require:
             - pkg: vaultwarden-add-encrypted-admin-token
@@ -88,6 +89,7 @@ vaultwarden-add-encrypted-admin-token:
     {% else %}
     cmd.run:
         - name: |
+            echo -n "ADMIN_TOKEN=" >> /etc/appconfig/vaultwarden/env/envvars;
             head -c 20 /dev/urandom | base64 | tee /root/vaultwarden_admin_token.txt |
             argon2 $(head -c 16 /dev/urandom | base64) -e >> /etc/appconfig/vaultwarden/env/envvars
         - require:
