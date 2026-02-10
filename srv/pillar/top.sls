@@ -135,6 +135,7 @@ base:
         - local.postgresql
         - local.ssl
         - local.vault
+        - local.vaultwarden
         # - local.url_overrides
         - shared.urls
         - shared.dev-users
