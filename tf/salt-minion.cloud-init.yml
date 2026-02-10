@@ -82,13 +82,13 @@ runcmd:
     - apt update
     - mkdir -p /etc/salt/roles.d
     ${indent(4, yamlencode([for r in roles: "touch /etc/salt/roles.d/${r}"]))}
-    - echo ${server_type} > /etc/salt/env.d/server_type
-    - echo ${backup_server} > /etc/salt/env.d/backup_server
-    - echo ${backup_username} > /etc/salt/env.d/backup_username
-    - echo ${backup_homedir} > /etc/salt/env.d/backup_homedir
+    - echo "${server_type}" > /etc/salt/env.d/server_type
+    - echo "${backup_server}" > /etc/salt/env.d/backup_server
+    - echo "${backup_username}" > /etc/salt/env.d/backup_username
+    - echo "${backup_homedir}" > /etc/salt/env.d/backup_homedir
     - touch /etc/salt/env.d/backup_password
     - chmod 600 /etc/salt/env.d/backup_password
-    - echo ${backup_password} > /etc/salt/env.d/backup_password
+    - echo "${backup_password}" > /etc/salt/env.d/backup_password
     - apt install -y --no-install-recommends git salt-minion
     - chown -R salt:salt /etc/salt
     - salt-pip install docker
