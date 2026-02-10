@@ -71,7 +71,7 @@ vaultwarden-add-encrypted-admin-token:
         # hash it at the same time to write it to the config envvars.
         - name: |
              {
-                 head -c 20 /dev/urandom | tee /dev/fd/5 |
+                 head -c 20 /dev/urandom | base64 | tee /dev/fd/5 |
                  gpg --homedir {{keyloc}} \
                      --no-default-keyring \
                      --batch \
@@ -88,7 +88,7 @@ vaultwarden-add-encrypted-admin-token:
     {% else %}
     cmd.run:
         - name: |
-            head -c 20 /dev/urandom | tee /root/vaultwarden_admin_token.txt |
+            head -c 20 /dev/urandom | base64 | tee /root/vaultwarden_admin_token.txt |
             argon2 $(head -c 16 /dev/urandom | base64) -e >> /etc/appconfig/vaultwarden/env/envvars
         - require:
             - pkg: vaultwarden-add-encrypted-admin-token
