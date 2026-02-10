@@ -113,6 +113,7 @@ base:
         - hetzner.nomad
         - hetzner.postgresql
         - hetzner.ssl
+        - hetzner.vaultwarden
         - shared.urls
         - shared.live-users
 
