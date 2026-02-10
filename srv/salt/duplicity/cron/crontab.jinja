@@ -1,5 +1,7 @@
 # backup folders linked in /etc/duplicity.d/(hourly|daily)/folders
 
+MAILTO={{pillar['duplicity']['cron-mailto']}}
+
 {% if duplicity_enabled %}
 0  * * * *    root    /etc/duplicity.d/backup.sh hourly
 0  5 * * *    root    /etc/duplicity.d/backup.sh daily
