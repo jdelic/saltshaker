@@ -41,6 +41,7 @@ vaultwarden-envfile-base:
         - user: root
         - group: root
         - mode: '0640'
+        - replace: False
         - contents: |
             # Managed by Salt
             DOMAIN=https://{{pillar['vaultwarden']['hostname']}}
