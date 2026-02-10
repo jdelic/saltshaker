@@ -37,7 +37,7 @@ vaultwarden-envdir:
 
 vaultwarden-envfile-base:
     file.managed:
-        - name: /etc/appconfig/vaultwarden/env/env-file
+        - name: /etc/appconfig/vaultwarden/env/envvars
         - user: root
         - group: root
         - mode: '0640'
@@ -66,7 +66,7 @@ vaultwarden-envfile-secrets:
         - name: |
             set -eu
 
-            ENV_FILE="/etc/appconfig/vaultwarden/env/env-file"
+            ENV_FILE="/etc/appconfig/vaultwarden/env/envvars"
 
             CID="$(/usr/local/bin/vault kv get -field=client_id secret/oauth2/vaultwarden)"
             CSEC="$(/usr/local/bin/vault kv get -field=client_secret secret/oauth2/vaultwarden)"
@@ -92,7 +92,7 @@ vaultwarden-envfile-secrets:
         - onlyif:
             - test -x /usr/local/bin/vault
             - test -n "{{pillar.get('dynamicsecrets', {}).get('vaultwarden-oidc-reader-token', '')}}"
-            - grep -q '^SSO_CLIENT_ID=UNKNOWN_RERUN_SALT' /etc/appconfig/vaultwarden/env/env-file
+            - grep -q '^SSO_CLIENT_ID=UNKNOWN_RERUN_SALT' /etc/appconfig/vaultwarden/env/envvars
 
 
 vaultwarden-container:
@@ -113,7 +113,7 @@ vaultwarden-container:
             docker run -d \
                 --name vaultwarden \
                 --restart unless-stopped \
-                --env-file /etc/appconfig/vaultwarden/env/env-file \
+                --env-file /etc/appconfig/vaultwarden/env/envvars \
                 -v /secure/vaultwarden:/data \
                 -v /etc/ssl/certs/ca-certificates.crt:/etc/ssl/certs/ca-certificates.crt:ro \
                 -p {{ip}}:{{port}}:80/tcp \
