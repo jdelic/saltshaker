@@ -53,12 +53,50 @@ vaultwarden-envfile-base:
             EXTENDED_LOGGING=true
             LOG_LEVEL=warn
             SIGNUPS_ALLOWED=false
-            ADMIN_TOKEN={{pillar['dynamicsecrets']['vaultwarden-admin-token']}}
             # Filled later when Vault is available
             SSO_CLIENT_ID=UNKNOWN_RERUN_SALT
             SSO_CLIENT_SECRET=UNKNOWN_RERUN_SALT
         - require:
             - file: vaultwarden-envdir
+
+
+vaultwarden-add-encrypted-admin-token:
+    {% set long_id = pillar['vaultwarden']['encrypt-admin-token-with-gpg-key'] %}
+    {% set keyloc = pillar[ 'gpg' ][ 'shared-keyring-location' ] %}
+    pkg.installed:
+        - name: argon2
+    {% if long_id %}
+    cmd.run:
+        # we use bash process groups to gpg encrypt the token for the admin without ever writing it to disk and
+        # hash it at the same time to write it to the config envvars.
+        - name: |
+             {
+                 head -c 20 /dev/urandom | tee /dev/fd/5 |
+                 gpg --homedir {{keyloc}} \
+                     --no-default-keyring \
+                     --batch \
+                     --trusted-key {{long_id}} -a -e \
+                     -r {{long_id}} >/root/vaultwarden_admin_token.txt.gpg;
+             } 5> >(argon2 $(head -c 16 /dev/urandom | base64) -e >> /etc/appconfig/vaultwarden/env/envvars)
+        - require:
+            - pkg: vaultwarden-add-encrypted-admin-token
+            - file: vaultwarden-envfile-base
+            - file: managed-keyring
+        - unless:
+            - test -f /root/vaultwarden_admin_token.txt.gpg
+            - grep -q '^ADMIN_TOKEN=' /etc/appconfig/vaultwarden/env/envvars
+    {% else %}
+    cmd.run:
+        - name: |
+            head -c 20 /dev/urandom | tee /root/vaultwarden_admin_token.txt |
+            argon2 $(head -c 16 /dev/urandom | base64) -e >> /etc/appconfig/vaultwarden/env/envvars
+        - require:
+            - pkg: vaultwarden-add-encrypted-admin-token
+            - file: vaultwarden-envfile-base
+        - unless:
+            - test -f/root/vaultwarden_admin_token.txt
+            - grep -q '^ADMIN_TOKEN=' /etc/appconfig/vaultwarden/env/envvars
+    {% endif %}
 
 
 vaultwarden-envfile-secrets:
@@ -130,6 +168,7 @@ vaultwarden-container:
         - watch:
             - file: vaultwarden-envfile-base
             - cmd: vaultwarden-envfile-secrets
+            - cmd: vaultwarden-add-encrypted-admin-token
 
 
 vaultwarden-http-tcp-in{{port}}-ipv4:
