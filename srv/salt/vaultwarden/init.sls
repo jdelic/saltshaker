@@ -53,7 +53,8 @@ vaultwarden-envfile-base:
             EXTENDED_LOGGING=true
             LOG_LEVEL=debug
             SIGNUPS_ALLOWED=false
-            # Filled later if Vault available
+            ADMIN_TOKEN={{pillar['dynamicsecrets']['vaultwarden-admin-token']}}
+            # Filled later when Vault is available
             SSO_CLIENT_ID=UNKNOWN_RERUN_SALT
             SSO_CLIENT_SECRET=UNKNOWN_RERUN_SALT
         - require:
