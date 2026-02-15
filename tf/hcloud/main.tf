@@ -288,6 +288,10 @@ resource "hcloud_server" "saltmaster" {
         backup_homedir = "/server/saltmaster/"
     })
 
+    lifecycle {
+        ignore_changes = [user_data]
+    }
+
     backups = true
 
     firewall_ids = [hcloud_firewall.ssh.id, hcloud_firewall.ping.id, hcloud_firewall.mosh.id]
