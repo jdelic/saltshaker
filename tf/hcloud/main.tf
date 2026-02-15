@@ -229,7 +229,11 @@ resource "hcloud_storage_box" "backup-box" {
     }
 
     ssh_keys = [hcloud_ssh_key.jm_hades.public_key, hcloud_ssh_key.jm_parasite.public_key]
-    delete_protection = false
+    delete_protection = true
+
+    lifecycle {
+        prevent_destroy = true
+    }
 
     depends_on = [hcloud_ssh_key.jm_hades, hcloud_ssh_key.jm_parasite]
 }
@@ -344,6 +348,12 @@ resource "hcloud_volume" "disks" {
     size = each.value.size
     format = "ext4"
     location = var.location
+
+    delete_protection = true
+
+    lifecycle {
+        prevent_destroy = true
+    }
 }
 
 resource "hcloud_volume_attachment" "disk_attachments" {
