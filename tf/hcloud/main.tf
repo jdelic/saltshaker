@@ -260,6 +260,7 @@ resource "hcloud_server" "saltmaster" {
     server_type = "cx23"
     image = "debian-13"
     location = var.location
+    # these are just for initial connection. Salt manages those once it's running.
     ssh_keys = ["jonas@parasite", "jonas@hades"]
 
     network {
@@ -285,7 +286,7 @@ resource "hcloud_server" "saltmaster" {
 
     backups = true
 
-    firewall_ids = [hcloud_firewall.ssh.id, hcloud_firewall.ping.id]
+    firewall_ids = [hcloud_firewall.ssh.id, hcloud_firewall.ping.id, hcloud_firewall.mosh.id]
 
     # important as per hcloud docs as there's a race condition otherwise
     depends_on = [hcloud_network_subnet.internal-subnet, hcloud_firewall.ssh, hcloud_storage_box.backup-box]
@@ -359,6 +360,7 @@ resource "hcloud_server" "servers" {
     server_type = each.value.server_type
     image = "debian-13"
     location = var.location
+    # these are just for initial connection. Salt manages those once it's running.
     ssh_keys = ["jonas@parasite", "jonas@hades"]
 
     network {
@@ -499,6 +501,18 @@ resource "hcloud_firewall" "ssh" {
         source_ips = ["0.0.0.0/0", "::/0"]
     }
 }
+
+resource "hcloud_firewall" "mosh" {
+    name = "mosh"
+
+    rule {
+        direction = "in"
+        protocol  = "udp"
+        port      = "60000-60010"
+        source_ips = ["0.0.0.0/0", "::/0"]
+    }
+}
+
 
 resource "hcloud_firewall" "mail" {
     name = "mail"
