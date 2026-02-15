@@ -192,7 +192,7 @@ vault-init:
                             --no-default-keyring \
                             --batch \
                             --trusted-key {{long_id}} -a -e \
-                            -r {{pillar['vault']['encrypt-vault-keys-with-gpg']}} >/root/vault_keys.txt.gpg;
+                            -r {{long_id]}} >/root/vault_keys.txt.gpg;
                     } 5>&1 |
                     grep "Initial Root Token" |
                     cut -f2 -d":" |

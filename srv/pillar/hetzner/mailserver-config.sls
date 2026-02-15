@@ -1,4 +1,4 @@
-{% from salt['file.join'](tpldir, 'wellknown.sls') import external_tld %}
+{% from 'config.sls' import external_tld %}
 # look at local.mailserver-config for a documented full-fledged example
 
 smtp-incoming:

@@ -27,6 +27,9 @@ that case, using a requisite directive is usually impossible since those
 can't be made optional. If there is a dependency chain, values between `100`
 and `199` and `200` and `299` are used respectively.
 
+It's preferable to use the sync requisite pattern instead. (See vault.sync
+for an example.)
+
 `order: 20` is used to make sure that a database exists for a subsequently
 installed *unordered* state if **the database and state exist on the same 
 server**. Otherwise you must make sure to install one machine after the other.

@@ -3,15 +3,15 @@ base:
     # assign global shared config to every node
     '*':
         - config
-        - allenvs.wellknown
+        - allenvs.smartstack
+        - shared.authserver
         - shared.saltmine
         - shared.ssl
         - shared.gpg
         - shared.network
+        - shared.vault
 
     'saltmaster*.maurusnet.test':
-        - shared.vault
-        - local.vault
         - shared.secrets.vault-dev
         - shared.secrets.vault-ssl
 
@@ -21,26 +21,17 @@ base:
         - shared.secrets.vault-live
         - shared.secrets.vault-ssl
 
-    'not *.test and G@roles:xenserver':
-        - match: compound
-        - hetzner.xenserver
-
-    # everything not in Vagrant (*.test) is at Hetzner and everything not a xenserver
-    # is a VM
-    'not *.test and not G@roles:xenserver':
-        - match: compound
-        - hetzner.vm_config
-
     'roles:database':
         - match: grain
         - shared.postgresql
         - shared.secrets.postgresql
-        - shared.authserver
+        - shared.vaultwarden
 
     'roles:vault':
         - match: grain
         - shared.buildserver
-        - shared.authserver
+        - shared.vaultwarden
+        - shared.vault
 
     'G@roles:dev or G@roles:buildserver or G@roles:buildworker':
         - match: compound
@@ -85,59 +76,69 @@ base:
         - match: grain
         - shared.secrets.smtp
         - shared.mailserver-private
-        - shared.authserver
 
     'roles:pim':
         - match: grain
         - shared.calendar
-        - shared.authserver
 
     'roles:authserver':
         - match: grain
-        - shared.authserver
+        - shared.vaultwarden
 
     'roles:nomadserver':
         - match: grain
         - allenvs.nomadserver
 
+    'roles:vaultwarden':
+        - match: grain
+        - shared.vaultwarden
+
+    'not *.test and G@roles:vault':
+        - match: compound
+        - hetzner.vault
+
     # every minion ID not ending in "test" is at Hetzner right now
     'not *.test':
         - match: compound
-        - hetzner.wellknown
-        - hetzner.mailserver-config
-        - hetzner.calendar
-        - hetzner.consul
-        - hetzner.nomad
-        - hetzner.docker
-        - hetzner.buildserver
-        - hetzner.crypto
-        - hetzner.ssl
         - hetzner.authserver
+        - hetzner.buildserver
+        - hetzner.calendar
+        - hetzner.config
+        - hetzner.consul
+        - hetzner.crypto
+        - hetzner.docker
         - hetzner.duplicity
+        - hetzner.mailserver-config
+        - hetzner.network
+        - hetzner.nomad
+        - hetzner.postgresql
+        - hetzner.ssl
+        - hetzner.vaultwarden
         - shared.urls
-        - shared.secrets.live-backup
+        - shared.live-users
 
-    # every minion ID ending in ".test" is a local dev environment
+    # every minion ID ending in ".test" is a local dev environment. We assign all config to these nodes
+    # as the list of roles and services changes all the time for testing and development, so it's easier to
+    # just assign everything to these nodes.
     '*.test':
-        - local.wellknown
-        - local.mailserver-config
-        - local.calendar
-        - local.network
-        - local.consul
-        - local.nomad
-        - local.docker
-        - local.buildserver
-        - local.crypto
-        - local.ssl
         - local.authserver
+        - local.buildserver
+        - local.calendar
+        - local.config
+        - local.consul
+        - local.crypto
+        - local.docker
         - local.duplicity
+        - local.mailserver-config
+        - local.network
+        - local.nomad
+        - local.postgresql
+        - local.ssl
+        - local.vault
+        - local.vaultwarden
         # - local.url_overrides
         - shared.urls
         - shared.dev-users
 
-    # every non-test node gets the live user set
-    'not *.test':
-        - match: compound
-        - shared.live-users
 
 # vim: syntax=yaml

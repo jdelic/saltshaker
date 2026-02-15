@@ -2,7 +2,5 @@
 # This should include configuration values that have no security impact and are widely required to run multiple
 # services and can be reasonably expected to remain constant across an environment.
 
-{% from 'config.sls' import external_tld %}
-
-sudoers_allow_nopasswd: True
-tld: {{external_tld}}
+sudoers-allow-nopasswd: True
+local-development-environment-dns: true

@@ -41,7 +41,7 @@ mailforwarder-rsyslog:
     "POSTGRESQL_CA": pillar['ssl']['service-rootca-cert'] if
         pillar['postgresql'].get('pinned-ca-cert', 'default') == 'default'
         else pillar['postgresql']['pinned-ca-cert'],
-    "ALLOWED_HOSTS": "%s,%s"|format(pillar['authserver']['hostname'], pillar['authserver']['smartstack-hostname']),
+    "ALLOWED_HOSTS": "%s,%s"|format(pillar['authserver']['hostname'], pillar['smartstack-services']['authserver']['smartstack-hostname']),
     "APPLICATION_LOGLEVEL": "INFO",
 } %}
 {% if pillar['mailforwarder'].get('use-vault', False) %}
@@ -53,6 +53,7 @@ mailforwarder-config-secretid:
         - name: >-
             touch /etc/appconfig/mailforwarder/env/VAULT_SECRETID &&
             chmod 0600 /etc/appconfig/mailforwarder/env/VAULT_SECRETID &&
+            chown authserver:authserver /etc/appconfig/mailforwarder/env/VAULT_SECRETID &&
             /usr/local/bin/vault write -f -format=json \
                 auth/approle/role/mailforwarder/secret-id |
                 jq -r .data.secret_id > /etc/appconfig/mailforwarder/env/VAULT_SECRETID
@@ -66,6 +67,9 @@ mailforwarder-config-secretid:
             test $? -eq 0
         - watch_in:
             - service: mailforwarder
+        - require:
+            - pkg: mailforwarder
+            - appconfig: mailforwarder-appconfig
     {% endif %}
 {% else %}
     {% set config = config | set_dict_key_value("DATABASE_URL", 'postgresql://%s:@postgresql.local:5432/%s'|format(pillar['mailforwarder']['dbuser'],

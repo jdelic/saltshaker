@@ -6,6 +6,7 @@ include:
 
 pdns-recursor:
     pkg.installed:
+        - order: 9
         - require_in:
             - cmd: powerdns-pkg-installed-sync
 
@@ -30,6 +31,8 @@ pdns-recursor-config:
                       '10.254.0.0/22')}}
             {% endif %}
             provide_dns64: {{pillar.get('powerdns', {}).get('provide_dns64', False)}}
+        - require:
+            - pkg: pdns-recursor
 
 
 pdns-recursor-dnssec-config:
@@ -39,6 +42,107 @@ pdns-recursor-dnssec-config:
         - user: root
         - group: root
         - mode: '0644'
+        - require:
+            - pkg: pdns-recursor
+
+
+pdns-recursor-zone-dir:
+    file.directory:
+        - name: /etc/powerdns/zones
+        - makedirs: True
+        - user: root
+        - group: root
+        - mode: '0755'
+        - require:
+            - pkg: pdns-recursor
+
+
+pdns-recursor-local-zone-config:
+    file.managed:
+        - name: /etc/powerdns/recursor.d/local-zones.yml
+        - contents: |
+            recursor:
+                auth_zones:
+            {% if pillar.get('local-development-environment-dns', False) %}
+                    - zone: {{pillar['config']['domains']['external']}}
+                      file: /etc/powerdns/zones/{{pillar['config']['domains']['external']}}.zone
+            {% endif %}
+                    - zone: local
+                      file: /etc/powerdns/zones/local.zone
+        - user: root
+        - group: root
+        - mode: '0644'
+        - require:
+            - pkg: pdns-recursor
+
+
+pdns-recursor-local-zone:
+    file.managed:
+        - name: /etc/powerdns/zones/local.zone
+        - contents: |
+              $ORIGIN local.
+              $TTL 60
+
+              @   IN  SOA ns1.local. hostmaster.local. (
+                      2026020801 ; serial
+                      3600       ; refresh
+                      600        ; retry
+                      1209600    ; expire
+                      60         ; minimum
+              )
+                  IN  NS  ns1.local.
+
+              ns1         IN  A   127.0.0.1
+
+              {% for service in pillar['smartstack-services'] %}{% if pillar['smartstack-services'][service].get('smartstack-hostname', False) %}
+              {{pillar['smartstack-services'][service]['smartstack-hostname'][:-(pillar['config']['domains']['local']|length|int + 1)]}} IN A 127.0.0.1
+              {% endif %}{% endfor %}
+        - user: root
+        - group: root
+        - mode: '0644'
+        - require:
+            - file: pdns-recursor-local-zone-config
+            - file: pdns-recursor-zone-dir
+
+
+# If we're in a development environment, install a list of local well-known hosts in /etc/hosts
+# so we don't need a local DNS server.
+{% if pillar.get('local-development-environment-dns', False) %}
+# You shouldn't use this outside of a LOCAL VAGRANT NETWORK. This configuration
+# saves you from setting up a DNS server by replicating it in all nodes' /etc/hosts files.
+pdns-recursor-external-zone:
+    file.managed:
+        - name: /etc/powerdns/zones/{{pillar['config']['domains']['external']}}.zone
+        - contents: |
+            $ORIGIN {{pillar['config']['domains']['external']}}.
+            $TTL 60
+            
+            @   IN  SOA ns1.{{pillar['config']['domains']['external']}}. hostmaster.{{pillar['config']['domains']['external']}}. (
+            2026020801 ; serial
+            3600       ; refresh
+            600        ; retry
+            1209600    ; expire
+            60         ; minimum
+            )
+            IN  NS  ns1.{{pillar['config']['domains']['external']}}.
+            
+            ; nameserver glue (pick an IP that makes sense for your environment)
+            ns1         IN  A   127.0.0.1
+            
+            ; /etc/hosts mappings
+            saltmaster  IN  A   192.168.123.88
+            auth        IN  A   192.168.123.163
+            mail        IN  A   192.168.123.163
+            calendar    IN  A   192.168.123.163
+            ci          IN  A   192.168.123.163
+            smtp        IN  A   192.168.123.164
+        - user: root
+        - group: root
+        - mode: '0644'
+        - require:
+            - file: pdns-recursor-local-zone-config
+            - file: pdns-recursor-zone-dir
+{% endif %}
 
 
 pnds-recursor-override-resolv.conf:
@@ -76,6 +180,17 @@ pdns-dhcpcd-enforce-nameservers:
             - service: pdns-recursor-service
         - require_in:
             - cmd: powerdns-sync
+
+pdns-dhcpcd-remove-nameservers-option:
+    file.replace:
+        - name: /etc/dhcpcd.conf
+        - pattern: '^option domain_name_servers,(.*)$'
+        - repl: 'option \1'
+        - backup: True
+        - require:
+            - service: pdns-recursor-service
+        - require_in:
+            - cmd: powerdns-sync
 {% endif %}
 
 
@@ -89,6 +204,8 @@ pdns-recursor-service:
         - watch:
             - file: pdns-recursor-config
             - file: pdns-recursor-dnssec-config
+            - file: /etc/powerdns/zones/*
+            - file: /etc/powerdns/recursor.d/*
         - require:
             - pkg: pdns-recursor
             - cmd: consul-sync

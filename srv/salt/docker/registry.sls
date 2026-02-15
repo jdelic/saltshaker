@@ -1,4 +1,5 @@
 
+
 include:
     - haproxy.sync
     - consul.sync
@@ -48,7 +49,7 @@ docker-registry:
         - restart_policy: always
         - environment:
             - REGISTRY_AUTH_TOKEN_REALM: >
-                {{pillar['authserver']['protocol']}}://{{pillar['authserver']['hostname']}}/docker/token/
+                https://{{pillar['authserver']['hostname']}}/docker/token/
             - REGISTRY_AUTH_TOKEN_SERVICE: {{registry_hostname}}
             - REGISTRY_AUTH_TOKEN_ISSUER: {{pillar['authserver']['hostname']}}
             - REGISTRY_AUTH_TOKEN_ROOTCERTBUNDLE: /var/lib/registry/docker_jwt.crt

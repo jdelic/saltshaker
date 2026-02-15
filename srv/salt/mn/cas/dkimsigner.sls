@@ -39,7 +39,7 @@ dkimsigner-rsyslog:
     "POSTGRESQL_CA": pillar['ssl']['service-rootca-cert'] if
         pillar['postgresql'].get('pinned-ca-cert', 'default') == 'default'
         else pillar['postgresql']['pinned-ca-cert'],
-    "ALLOWED_HOSTS": "%s,%s"|format(pillar['authserver']['hostname'], pillar['authserver']['smartstack-hostname']),
+    "ALLOWED_HOSTS": "%s,%s"|format(pillar['authserver']['hostname'], pillar['smartstack-services']['authserver']['smartstack-hostname']),
     "APPLICATION_LOGLEVEL": "INFO",
 } %}
 {% if pillar['dkimsigner'].get('use-vault', False) %}
@@ -51,6 +51,7 @@ dkimsigner-config-secretid:
         - name: >-
             touch /etc/appconfig/dkimsigner/env/VAULT_SECRETID &&
             chmod 0600 /etc/appconfig/dkimsigner/env/VAULT_SECRETID &&
+            chown authserver:authserver /etc/appconfig/dkimsigner/env/VAULT_SECRETID &&
             /usr/local/bin/vault write -f -format=json \
                 auth/approle/role/dkimsigner/secret-id |
                 jq -r .data.secret_id > /etc/appconfig/dkimsigner/env/VAULT_SECRETID
@@ -64,6 +65,9 @@ dkimsigner-config-secretid:
             test $? -eq 0
         - watch_in:
             - service: dkimsigner
+        - require:
+            - pkg: dkimsigner
+            - appconfig: dkimsigner-appconfig
     {% endif %}
 {% else %}
     {% set config = config | set_dict_key_value("DATABASE_URL", 'postgresql://%s:@postgresql.local:5432/%s'|format(pillar['dkimsigner']['dbuser'],
