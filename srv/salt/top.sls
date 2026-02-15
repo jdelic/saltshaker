@@ -28,6 +28,7 @@ base:
         - match: grain
         - compilers
         - salt-master
+        - basics.crypto.mosh
 
     'roles:vagrant':
         - match: grain
