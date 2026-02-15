@@ -1,6 +1,5 @@
 # importable variables for reuse
-{% set internal_domain = "internal" %}  # for the local network
-{% set local_domain = "local" %}  # for localhost only
+{% from 'config.sls' import internal_domain, local_domain %}
 
 internal-domain: {{internal_domain}}
 local-domain: {{local_domain}}

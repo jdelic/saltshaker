@@ -7,6 +7,7 @@ include:
     - .ssl
     - .gpg
     - .ssh
+    - .mosh
 
 
 # vim: syntax=yaml

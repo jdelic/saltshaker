@@ -1,4 +1,4 @@
-{% from salt['file.join'](tpldir, 'wellknown.sls') import external_tld %}
+{% from 'config.sls' import external_tld %}
 {% from 'shared/ssl.sls' import localca_location, certificate_location, secret_key_location %}
 
 #

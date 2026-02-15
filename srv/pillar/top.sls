@@ -2,10 +2,10 @@
 base:
     # assign global shared config to every node
     '*':
+        - config
         - allenvs.wellknown
         - shared.saltmine
         - shared.ssl
-        - shared.ssh
         - shared.gpg
         - shared.network
 
@@ -133,5 +133,11 @@ base:
         - local.duplicity
         # - local.url_overrides
         - shared.urls
+        - shared.dev-users
+
+    # every non-test node gets the live user set
+    'not *.test':
+        - match: compound
+        - shared.live-users
 
 # vim: syntax=yaml

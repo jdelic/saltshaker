@@ -136,11 +136,9 @@ base:
 
     '*.test':
         # put vagrant user config on .test machines
-        - mn.users.vagrant
         # enable the NAT networking device for all network traffic
         - basics.nftables.vagrant
 
     # put my personal user on every other machine
     'not *.test':
         - match: compound
-        - mn.users.jonas
