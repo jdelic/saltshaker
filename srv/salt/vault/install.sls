@@ -1,3 +1,5 @@
+include:
+    - vault.sync
 
 {% set vault_user = "vault" %}
 {% set vault_group = "vault" %}

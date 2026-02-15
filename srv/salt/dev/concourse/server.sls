@@ -102,7 +102,7 @@ concourse-server-envvars{% if pillar['ci'].get('use-vault', True) %}-template{% 
         - contents: |
             CONCOURSE_MAIN_TEAM_LOCAL_USER="sysop"
             CONCOURSE_ADD_LOCAL_USER="sysop:{{pillar['dynamicsecrets']['concourse-sysop']}}"
-            CONCOURSE_POSTGRES_HOST="{{pillar['postgresql']['smartstack-hostname']}}"
+            CONCOURSE_POSTGRES_HOST="{{pillar['smartstack-services']['postgresql']['smartstack-hostname']}}"
             CONCOURSE_POSTGRES_PORT="5432"
             CONCOURSE_POSTGRES_USER="concourse"
             CONCOURSE_POSTGRES_PASSWORD="{{pillar['dynamicsecrets']['concourse-db']}}"
@@ -115,14 +115,14 @@ concourse-server-envvars{% if pillar['ci'].get('use-vault', True) %}-template{% 
             CONCOURSE_COOKIE_SECURE=true
 
 {%- if pillar['ci'].get('use-vault', True) %}
-            CONCOURSE_VAULT_URL="https://{{pillar['vault']['smartstack-hostname']}}:8200/"
+            CONCOURSE_VAULT_URL="https://{{pillar['smartstack-services']['vault']['smartstack-hostname']}}:8200/"
             CONCOURSE_VAULT_CA_CERT="{{pillar['ssl']['service-rootca-cert']}}"
             CONCOURSE_VAULT_AUTH_BACKEND="approle"
             CONCOURSE_VAULT_AUTH_PARAM="role_id:{{pillar['dynamicsecrets']['concourse-role-id']}},secret_id:((secret_id))"
             CONCOURSE_OIDC_DISPLAY_NAME="SSO Account (OpenIDC)"
             CONCOURSE_OIDC_CLIENT_ID="((oauth2_client_id))"
             CONCOURSE_OIDC_CLIENT_SECRET="((oauth2_client_secret))"
-            CONCOURSE_OIDC_ISSUER="https://{{pillar['authserver']['hostname']}}/o2/"
+            CONCOURSE_OIDC_ISSUER="https://{{pillar['authserver']['hostname']}}/o2"
             CONCOURSE_OIDC_GROUPS_KEY="groups"
 
 

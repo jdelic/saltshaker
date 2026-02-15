@@ -46,6 +46,66 @@ dockerd-service:
 # TODO: add a DROP rule to the FORWARD chain so not every container gets hooked up
 # to the internet
 
+docker-bridge-tcp-ipv4-accept:
+    nftables.append:
+        - table: filter
+        - chain: input
+        - family: ip4
+        - jump: accept
+        - source: {{pillar['docker']['bridge-cidr']}}
+        - destination: {{pillar['docker']['bridge-cidr']}}
+        - if: docker0
+        - match: state
+        - connstate: new
+        - proto: tcp
+        - save: True
+        - require:
+            - sls: basics.nftables.setup
+
+
+docker-bridge-udp-ipv4-accept:
+    nftables.append:
+        - table: filter
+        - chain: input
+        - family: ip4
+        - jump: accept
+        - source: {{pillar['docker']['bridge-cidr']}}
+        - destination: {{pillar['docker']['bridge-cidr']}}
+        - if: docker0
+        - proto: udp
+        - save: True
+        - require:
+            - sls: basics.nftables.setup
+
+
+docker-bridge-ipv4-forward-accept:
+    nftables.append:
+        - table: filter
+        - chain: forward
+        - family: ip4
+        - jump: accept
+        - if: {{pillar['ifassign']['internal']}}
+        - of: docker0
+        - match: state
+        - connstate: new
+        - save: True
+        - require:
+            - sls: basics.nftables.setup
+
+
+docker-bridge-ipv4-forward-reverse:
+    nftables.append:
+        - table: filter
+        - chain: forward
+        - family: ip4
+        - jump: accept
+        - if: docker0
+        - match: state
+        - connstate: new
+        - save: True
+        - require:
+            - sls: basics.nftables.setup
+
 
 docker-pdns-recursor-cidr:
   file.accumulated:

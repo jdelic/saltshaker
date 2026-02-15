@@ -3,15 +3,15 @@ base:
     # assign global shared config to every node
     '*':
         - config
-        - allenvs.wellknown
+        - allenvs.smartstack
+        - shared.authserver
         - shared.saltmine
         - shared.ssl
         - shared.gpg
         - shared.network
+        - shared.vault
 
     'saltmaster*.maurusnet.test':
-        - shared.vault
-        - local.vault
         - shared.secrets.vault-dev
         - shared.secrets.vault-ssl
 
@@ -19,12 +19,13 @@ base:
         - match: grain
         - shared.postgresql
         - shared.secrets.postgresql
-        - shared.authserver
+        - shared.vaultwarden
 
     'roles:vault':
         - match: grain
         - shared.buildserver
-        - shared.authserver
+        - shared.vaultwarden
+        - shared.vault
 
     'G@roles:dev or G@roles:buildserver or G@roles:buildworker':
         - match: compound
@@ -61,35 +62,42 @@ base:
         - match: grain
         - shared.secrets.smtp
         - shared.mailserver-private
-        - shared.authserver
 
     'roles:pim':
         - match: grain
         - shared.calendar
-        - shared.authserver
 
     'roles:authserver':
         - match: grain
-        - shared.authserver
+        - shared.vaultwarden
 
     'roles:nomadserver':
         - match: grain
         - allenvs.nomadserver
 
-    # every minion ID ending in ".test" is a local dev environment
+    'roles:vaultwarden':
+        - match: grain
+        - shared.vaultwarden
+
+    # every minion ID ending in ".test" is a local dev environment. We assign all config to these nodes
+    # as the list of roles and services changes all the time for testing and development, so it's easier to
+    # just assign everything to these nodes.
     '*.test':
-        - local.wellknown
-        - local.mailserver-config
-        - local.calendar
-        - local.network
-        - local.consul
-        - local.nomad
-        - local.docker
-        - local.buildserver
-        - local.crypto
-        - local.ssl
         - local.authserver
+        - local.buildserver
+        - local.calendar
+        - local.config
+        - local.consul
+        - local.crypto
+        - local.docker
         - local.duplicity
+        - local.mailserver-config
+        - local.network
+        - local.nomad
+        - local.postgresql
+        - local.ssl
+        - local.vault
+        - local.vaultwarden
         # - local.url_overrides
         - shared.urls
         - shared.dev-users
