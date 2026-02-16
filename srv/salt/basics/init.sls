@@ -41,10 +41,10 @@ policy-deny:
 # at the end we remove the policy-rc.d file again to restore default behavior...
 # it might be worthwhile to switch all Debian boxes to a default policy of "deny"
 # and remove this state.
-policy-allow:
-    file.absent:
-        - name: /usr/sbin/policy-rc.d
-        - order: last  # remove the file when we're basically done
+#policy-allow:
+#    file.absent:
+#        - name: /usr/sbin/policy-rc.d
+#        - order: last  # remove the file when we're basically done
 
 
 basic-required-packages:
