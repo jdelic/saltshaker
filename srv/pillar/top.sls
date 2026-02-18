@@ -77,6 +77,10 @@ base:
         - shared.secrets.smtp
         - shared.mailserver-private
 
+    'not *.text and G@roles:mail':
+        - match: compound
+        - shared.secrets.smtp-relay
+
     'roles:pim':
         - match: grain
         - shared.calendar
