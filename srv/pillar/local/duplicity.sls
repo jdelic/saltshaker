@@ -1,3 +1,4 @@
+{% from 'config.sls' import external_tld %}
 # configuration pillar for duplicity backup
 
 duplicity-backup:
