@@ -57,6 +57,7 @@ base:
         - compilers
         - basics.python.dev
         - docker.install
+        - dev.git.miniserver
 
     'roles:buildserver':
         - match: grain
