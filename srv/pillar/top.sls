@@ -112,6 +112,7 @@ base:
         - hetzner.crypto
         - hetzner.docker
         - hetzner.duplicity
+        - hetzner.gitserver
         - hetzner.mailserver-config
         - hetzner.network
         - hetzner.nomad
