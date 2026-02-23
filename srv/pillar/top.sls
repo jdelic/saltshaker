@@ -91,6 +91,7 @@ base:
         - local.crypto
         - local.docker
         - local.duplicity
+        - local.gitserver
         - local.mailserver-config
         - local.network
         - local.nomad
