@@ -7,10 +7,6 @@ user-git:
         - usergroup: True
         - createhome: True
         - shell: /bin/bash
-        - groups:
-            - git
-        - require:
-            - group: git-user
 
 
 sshkeys-git:
