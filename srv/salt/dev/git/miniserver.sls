@@ -28,3 +28,17 @@ sshkeys-git:
             - user: user-{{git_user}}
     {%- endif %}
 {%- endfor %}
+
+
+{% if pillar.get('duplicity-backup', {}).get('enabled', False) %}
+git-miniserver-backup-symlink:
+    file.symlink:
+        - name: /etc/duplicity.d/daily/folderlinks/git-miniserver
+        - target: /home/git
+        - require:
+            - user: user-git
+{% else %}
+git-miniserver-backup-symlink-absent:
+    file.absent:
+        - name: /etc/duplicity.d/daily/folderlinks/git-miniserver
+{% endif %}
