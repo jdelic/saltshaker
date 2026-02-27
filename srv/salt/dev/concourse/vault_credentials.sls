@@ -72,6 +72,33 @@ concourse-secret-mount:
             - cmd: concourse-sync-vault
 
 
+{% if pillar['dynamicsecrets'].get('concourse-ssh-git', None) %}
+    {% set tmpfile = salt['temp.file']() %}
+concourse-ssh-git-tmp-file:
+    file.managed:
+        - name: {{tmpfile}}
+        - contents_pillar: dynamicsecrets:concourse-ssh-git:key
+        - show_changes: False  # let's not output the secret key in the logs
+        - mode: 0600
+        - require:
+            - cmd: vault-sync
+
+concourse-ssh-git-key-to-vault:
+    cmd.run:
+        - name: >-
+            vault kv put concourse/git-ssh private_key=@{{tmpfile}};
+            vault kv put concourse/git-ssh public_key="{{pillar['dynamicsecrets']['concourse-ssh-git']['public']}}";
+            rm -f {{tmpfile}}
+        - env:
+            - VAULT_ADDR: "https://vault.service.consul:8200/"
+        - unless: /usr/local/bin/vault kv get concourse/git-ssh public_key >/dev/null
+        - require:
+            - file: concourse-ssh-git-tmp-file
+        - require_in:
+            - cmd: concourse-sync-vault
+{% endif %}
+
+
 vault-concourse-oauth2-read-policy:
     cmd.run:
         - name: >-
