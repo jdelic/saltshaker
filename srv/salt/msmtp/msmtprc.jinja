@@ -8,4 +8,4 @@ host localhost
 port 25
 maildomain {{grains['id']}}
 domain {{grains['id']}}
-auto_from on
+from root@{{grains['id']}}
