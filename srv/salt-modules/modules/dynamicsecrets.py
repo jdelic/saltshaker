@@ -7,7 +7,7 @@ import logging
 import sqlite3
 import requests
 
-from Cryptodome.PublicKey import RSA  # zeromq depends on pycrypto and salt depends on 0mq, so we know pycrypto exists
+from Cryptodome.PublicKey import RSA, ECC  # zeromq depends on pycrypto and salt depends on 0mq, so we know pycrypto exists
 from requests import RequestException
 from six.moves.urllib.parse import urljoin
 
@@ -73,11 +73,18 @@ class DynamicSecretsStore(object):
     def _deserialize_secret(secret, secrettype):
         # type: (str, str) -> Union[Dict[str, str], ConsulAclToken, str]
         if secrettype == "rsa":
-            key = RSA.importKey(secret)
+            key = RSA.import_key(secret)
             return {
-                "key": key.exportKey("PEM"),
-                "public": key.exportKey("OpenSSH"),
-                "public_pem": key.publickey().exportKey("PEM"),
+                "key": key.export_key(format="PEM"),
+                "public": key.public_key().export_key(format="OpenSSH").rstrip(),
+                "public_pem": key.public_key().export_key(format="PEM"),
+            }
+        elif secrettype == "ecc":
+            key = ECC.import_key(secret)
+            return {
+                "key": key.export_key(format="PEM"),
+                "public": key.public_key().export_key(format="OpenSSH").rstrip(),
+                "public_pem": key.public_key().export_key(format="PEM"),
             }
         elif secrettype == "consul-acl-token":
             accessor_id, secret_id = secret.split(",")
@@ -157,7 +164,7 @@ class DynamicSecretsPillar(DynamicSecretsStore):
         # type: (Dict[str, Union[str, int, bool]]) -> str
         secret_type = "password"
         if "type" in secret_config:
-            if secret_config["type"] in ["password", "rsa", "uuid", "consul-acl-token"]:
+            if secret_config["type"] in ["password", "rsa", "ecc", "uuid", "consul-acl-token"]:
                 secret_type = secret_config["type"]
             else:
                 raise ValueError("Not a valid secret type: %s", secret_config["type"])
@@ -206,6 +213,10 @@ class DynamicSecretsPillar(DynamicSecretsStore):
             key = RSA.generate(keylen)
             # Save only the private key to the database, we calculate the public key on read
             self.save(secret_name, secret_type, key.exportKey("PEM"), host)
+        elif secret_type == "ecc":
+            key = ECC.generate(curve='ed25519')
+            # Save only the private key to the database, we calculate the public key on read
+            self.save(secret_name, secret_type, key.export_key(format="PEM"), host)
         elif secret_type == "uuid":
             # uuid.uuid4() uses os.urandom(), so this should be reasonably unguessable
             self.save(secret_name, secret_type, str(uuid.uuid4()), host)
