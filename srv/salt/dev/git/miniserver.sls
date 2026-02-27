@@ -14,7 +14,11 @@ sshkeys-git:
         - user: git
         - ssh_keys:
 {%- for key_id in pillar['gitserver']['allowed_ssh_keys'] %}
+    {%- if key_id.startswith('dynamicsecrets:') %}
+            - {{pillar['dynamicsecrets'].get(key_id.split(':', 1)[1])['public'] | json }}
+    {%- else %}
             - {{key_id | json}}
+    {% endif %}
 {%- endfor %}
 {%- for git_user in pillar['gitserver']['allowed_users'] %}
     {%- for key_id in pillar['users'].get(git_user, {}).get('ssh_keys', []) %}
