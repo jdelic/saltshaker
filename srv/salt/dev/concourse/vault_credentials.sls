@@ -86,8 +86,7 @@ concourse-ssh-git-tmp-file:
 concourse-ssh-git-key-to-vault:
     cmd.run:
         - name: >-
-            vault kv put concourse/common/git-ssh private_key=@{{tmpfile}};
-            vault kv put concourse/common/git-ssh public_key="{{pillar['dynamicsecrets']['concourse-ssh-git']['public']}}";
+            vault kv put concourse/common/git-ssh private_key=@{{tmpfile}} public_key="{{pillar['dynamicsecrets']['concourse-ssh-git']['public']}}";
             rm -f {{tmpfile}}
         - env:
             - VAULT_ADDR: "https://vault.service.consul:8200/"
