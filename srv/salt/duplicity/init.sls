@@ -73,7 +73,7 @@ duplicity-cron-cleanup-script:
         - group: root
         - mode: '0700'
         - context:
-            backup_target_url: {{salt['file.join'](backup_target_url, grains['envdir']['backup_homedir'])}}
+            backup_target_url: {{backup_target_url}}
             cron_enabled: {{pillar.get('duplicity-backup', {}).get('enable-cleanup-cron', False)}}
             cleanup_mode: {{pillar.get('duplicity-backup', {}).get('cleanup-mode', 'remove-older-than')}}
             cleanup_selector: {{pillar.get('duplicity-backup', {}).get('cleanup-selector', '1y')}}
