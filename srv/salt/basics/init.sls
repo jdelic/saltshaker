@@ -65,6 +65,7 @@ basic-required-packages:
             - dbus-user-session
             - jq
             - curl
+            - systemd-cryptsetup
             - systemd-timesyncd
             - gpg
         -  order: 9  # execute this state early, because later states need unzip
