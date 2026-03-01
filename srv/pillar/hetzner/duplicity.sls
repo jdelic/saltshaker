@@ -15,3 +15,4 @@ duplicity-backup:
     cleanup-selector: 6M
     # backup-target is set in shared.secrets.live-backup
     cron-mailto: sysop@{{external_tld}}
+    cron-mailfrom: root@{{external_tld}}
