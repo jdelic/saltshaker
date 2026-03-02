@@ -4,3 +4,4 @@
 
 sudoers-allow-nopasswd: False
 local-development-environment-dns: False
+secure-is-a-mount: True
