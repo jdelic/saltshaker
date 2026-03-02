@@ -25,6 +25,19 @@ dovecot:
             - file: sa-learn-pipe-script
 
 
+dovecot-systemd-secure-override:
+    file.managed:
+        - name: /etc/systemd/system/dovecot.service.d/secure-mount.conf
+        - source: salt://dovecot/systemd-override.jinja.conf
+        - mode: 644
+        - makedirs: True
+        - template: jinja
+        - watch_in:
+            - service: dovecot
+        - require:
+            - file: email-storage
+
+
 {% if pillar['imap']['sslcert'] != 'default' %}
 dovecot-ssl-cert:
     file.managed:

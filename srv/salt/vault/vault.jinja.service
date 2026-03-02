@@ -1,18 +1,25 @@
 [Unit]
 Description=Vault Server
 Wants=basic.target
-After=basic.target network.target
+After=basic.target network.target consul.service consul-server.service {{after}}
+# StartLimitIntervalSec: try to restart for unlimited times, because this is an essential service!
+StartLimitIntervalSec=0
 
 [Service]
 User={{user}}
 Group={{group}}
 Environment=GOMAXPROCS=2
+{% if connection_host %}
+ExecStartPre=/bin/sh -ec '\
+    if systemctl --quiet list-unit-files postgresql.service; then \
+        command -v pg_isready >/dev/null 2>&1 || exit 1; \
+        pg_isready -q -h {{connection_host}} -p 5432 || exit 1; \
+    fi'
+{% endif %}
 ExecStart=/usr/local/bin/vault server -config=/etc/vault/vault.conf
 ExecReload=/bin/kill -HUP $MAINPID
 KillMode=process
 Restart=on-failure
-# StartLimitInterval: try to restart for unlimited times, because this is an essential service!
-StartLimitInterval=0
 RestartSec=42s
 
 [Install]

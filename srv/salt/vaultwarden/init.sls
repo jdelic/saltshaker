@@ -136,32 +136,22 @@ vaultwarden-envfile-secrets:
             - grep -q '^SSO_CLIENT_ID=UNKNOWN_RERUN_SALT' /etc/appconfig/vaultwarden/env/envvars
 
 
-vaultwarden-container:
-    cmd.run:
-        - name: |
-            set -eu
-
-            docker pull vaultwarden/server:latest >/dev/null
-
-            if docker ps --format '{{"{{"}}.Names{{"}}"}}' | grep -qx 'vaultwarden'; then
-                docker stop -t 30 vaultwarden
-            fi
-
-            if docker ps -a --format '{{"{{"}}.Names{{"}}"}}' | grep -qx 'vaultwarden'; then
-                docker rm vaultwarden
-            fi
-
-            docker run -d \
-                --name vaultwarden \
-                --restart unless-stopped \
-                --env-file /etc/appconfig/vaultwarden/env/envvars \
-                -v /secure/vaultwarden:/data \
-                -v /etc/ssl/certs/ca-certificates.crt:/etc/ssl/certs/ca-certificates.crt:ro \
-                -p {{ip}}:{{port}}:80/tcp \
-                {%- for s in pillar['smartstack-services'] %}
-                --add-host={{pillar['smartstack-services'][s]['smartstack-hostname']}}:{{pillar['docker']['bridge-ip']}} \
-                {%- endfor %}
-                vaultwarden/server:latest >/dev/null
+vaultwarden:
+    systemdunit.managed:
+        - name: /etc/systemd/system/vaultwarden.service
+        - source: salt://vaultwarden/vaultwarden.jinja.service
+        - template: jinja
+        - user: root
+        - group: root
+        - mode: '0644'
+        - context:
+            ip: {{ip}}
+            port: {{port}}
+            smartstack_services: {{pillar['smartstack-services']}}
+            docker_bridge_ip: {{pillar['docker']['bridge-ip']}}
+    service.running:
+        - name: vaultwarden
+        - enable: True
         - require:
             - file: vaultwarden-data
             - file: vaultwarden-envfile-base
@@ -172,6 +162,7 @@ vaultwarden-container:
             - file: vaultwarden-envfile-base
             - cmd: vaultwarden-envfile-secrets
             - cmd: vaultwarden-add-encrypted-admin-token
+            - systemdunit: vaultwarden
 
 
 vaultwarden-http-tcp-in{{port}}-ipv4:

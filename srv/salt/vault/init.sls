@@ -99,6 +99,15 @@ vault-config-dir:
             - group: vault
 
 
+{% if pillar['vault'].get('backend', '') == 'postgresql' %}
+    {% set connection_host = pillar['smartstack-services']['postgresql']['smartstack-hostname'] %}
+    {% if 'database' in grains['roles'] %}
+        {% set connection_host = 'postgresql.service.consul' %}
+    {% endif %}
+{% else %}
+    {% set connection_host = '' %}
+{% endif %}
+
 vault-config:
     file.managed:
         - name: /etc/vault/vault.conf
@@ -114,6 +123,7 @@ vault-config:
                     )|int()]
                 )}}
             port: {{pillar.get('vault', {}).get('bind-port', 8200)}}
+            connection_host: {{connection_host}}
         - require:
             - file: vault-config-dir
 
@@ -126,6 +136,8 @@ vault-service:
         - context:
             user: {{vault_user}}
             group: {{vault_group}}
+            after: {% if pillar['vault'].get('backend') == 'postgresql' %}postgresql.service{% endif %}}
+            connection_host: {{connection_host}}
         - require:
             - file: vault
             - cmd: vault-setcap
