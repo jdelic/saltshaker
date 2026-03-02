@@ -139,7 +139,7 @@ vaultwarden-envfile-secrets:
 vaultwarden:
     systemdunit.managed:
         - name: /etc/systemd/system/vaultwarden.service
-        - source: salt://vaultwarden/vaultwarden.service
+        - source: salt://vaultwarden/vaultwarden.jinja.service
         - template: jinja
         - user: root
         - group: root

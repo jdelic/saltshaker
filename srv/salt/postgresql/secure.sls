@@ -40,9 +40,10 @@ secure-tablespace:
 postgresql-systemd-secure-mount-override:
     file.managed:
         - name: /etc/systemd/system/postgresql.service.d/secure-mount.conf
-        - source: salt://postgresql/systemd-override.conf
+        - source: salt://postgresql/systemd-override.jinja.conf
         - mode: 644
         - makedirs: True
+        - template: jinja
         - require:
             - file: secure-tablespace-dir
         - watch_in:

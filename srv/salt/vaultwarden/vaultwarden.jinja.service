@@ -2,7 +2,9 @@
 Description=Vaultwarden container
 After=docker.service network-online.target
 Requires=docker.service
+{% if pillar['secure-is-a-mount'] %}
 ConditionPathIsMountPoint=/secure
+{% endif %}
 
 [Service]
 Type=simple
