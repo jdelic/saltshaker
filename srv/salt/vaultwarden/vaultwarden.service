@@ -1,0 +1,26 @@
+[Unit]
+Description=Vaultwarden container
+After=docker.service network-online.target
+Requires=docker.service
+ConditionPathIsMountPoint=/secure
+
+[Service]
+Type=simple
+Restart=always
+RestartSec=60
+ExecStartPre=-/usr/bin/docker rm -f vaultwarden
+ExecStartPre=/usr/bin/docker pull vaultwarden/server:latest
+ExecStart=/usr/bin/docker run --name vaultwarden --rm \
+    --env-file /etc/appconfig/vaultwarden/env/envvars \
+    -v /secure/vaultwarden:/data \
+    -v /etc/ssl/certs/ca-certificates.crt:/etc/ssl/certs/ca-certificates.crt:ro \
+    -p {{ip}}:{{port}}:80/tcp \
+{%- for s in smartstack_services %}
+    --add-host={{smartstack_services[s]['smartstack-hostname']}}:{{docker_bridge_ip}} \
+{%- endfor %}
+    vaultwarden/server:latest
+ExecStop=/usr/bin/docker stop -t 30 vaultwarden
+
+[Install]
+WantedBy=multi-user.target
+
