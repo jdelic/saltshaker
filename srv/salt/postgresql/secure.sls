@@ -37,4 +37,15 @@ secure-tablespace:
             - cmd: postgresql-sync
 {% endif %}
 
+postgresql-systemd-secure-mount-override:
+    file.managed:
+        - name: /etc/systemd/system/postgresql.service.d/secure-mount.conf
+        - source: salt://postgresql/systemd-override.conf
+        - require:
+            - file: secure-tablespace-dir
+        - watch_in:
+            - service: data-cluster-service
+        - require_in:
+            - cmd: postgresql-sync
+
 # vim: syntax=yaml
