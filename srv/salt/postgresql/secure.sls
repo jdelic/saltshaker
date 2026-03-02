@@ -42,6 +42,7 @@ postgresql-systemd-secure-mount-override:
         - name: /etc/systemd/system/postgresql.service.d/secure-mount.conf
         - source: salt://postgresql/systemd-override.conf
         - mode: 644
+        - makedirs: True
         - require:
             - file: secure-tablespace-dir
         - watch_in:

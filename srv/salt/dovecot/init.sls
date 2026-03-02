@@ -30,6 +30,7 @@ dovecot-systemd-secure-override:
         - name: /etc/systemd/system/dovecot.service.d/secure-mount.conf
         - source: salt://dovecot/systemd-override.conf
         - mode: 644
+        - makedirs: True
         - watch_in:
             - service: dovecot
         - require:
