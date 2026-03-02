@@ -11,8 +11,7 @@ Group={{group}}
 Environment=GOMAXPROCS=2
 {% if connection_host %}
 ExecStartPre=/bin/sh -ec '\
-    if systemctl list-unit-files --quiet postgresql.service; then \
-        systemctl --quiet is-active postgresql.service || exit 1; \
+    if systemctl --quiet list-unit-files postgresql.service; then \
         command -v pg_isready >/dev/null 2>&1 || exit 1; \
         pg_isready -q -h {{connection_host}} -p 5432 || exit 1; \
     fi'
