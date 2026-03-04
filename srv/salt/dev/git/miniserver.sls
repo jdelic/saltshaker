@@ -46,3 +46,14 @@ git-miniserver-backup-symlink-absent:
     file.absent:
         - name: /etc/duplicity.d/daily/folderlinks/git-miniserver
 {% endif %}
+
+
+git-miniserver-consul-servicedef:
+    file.managed:
+        - name: /etc/consul/services.d/git-miniserver.json
+        - source: salt://gitserver/consul/git-miniserver.jinja.json
+        - mode: '0644'
+        - template: jinja
+        - context:
+            ip: grains['ip4_interfaces'].get(pillar['ifassign']['internal'])[pillar['ifassign'].get('internal-ip-index', 0)|int()]
+            port: 22
