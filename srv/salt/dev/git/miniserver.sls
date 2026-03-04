@@ -51,7 +51,7 @@ git-miniserver-backup-symlink-absent:
 git-miniserver-consul-servicedef:
     file.managed:
         - name: /etc/consul/services.d/git-miniserver.json
-        - source: salt://gitserver/consul/git-miniserver.jinja.json
+        - source: salt://dev/git/consul/git-miniserver.jinja.json
         - mode: '0644'
         - template: jinja
         - context:
