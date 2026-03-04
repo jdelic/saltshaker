@@ -55,5 +55,5 @@ git-miniserver-consul-servicedef:
         - mode: '0644'
         - template: jinja
         - context:
-            ip: grains['ip4_interfaces'].get(pillar['ifassign']['internal'])[pillar['ifassign'].get('internal-ip-index', 0)|int()]
+            ip: {{grains['ip4_interfaces'].get(pillar['ifassign']['internal'])[pillar['ifassign'].get('internal-ip-index', 0)|int()]}}
             port: 22
