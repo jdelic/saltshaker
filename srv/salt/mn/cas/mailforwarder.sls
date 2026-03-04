@@ -43,6 +43,7 @@ mailforwarder-rsyslog:
         else pillar['postgresql']['pinned-ca-cert'],
     "ALLOWED_HOSTS": "%s,%s"|format(pillar['authserver']['hostname'], pillar['smartstack-services']['authserver']['smartstack-hostname']),
     "APPLICATION_LOGLEVEL": "INFO",
+    "MAILFORWARDER_SRS_SECRET": pillar['dynamicsecrets']['mailforwarder-srs-secret'],
 } %}
 {% if pillar['mailforwarder'].get('use-vault', False) %}
     {% set config = config | set_dict_key_value("VAULT_DATABASE_PATH", 'postgresql/creds/authserver_mailforwarder') %}
