@@ -54,6 +54,7 @@ docker-registry:
             - REGISTRY_AUTH_TOKEN_ISSUER: {{pillar['authserver']['hostname']}}
             - REGISTRY_AUTH_TOKEN_ROOTCERTBUNDLE: /var/lib/registry/docker_jwt.crt
             - REGISTRY_HTTP_HOST: https://{{registry_hostname}}/
+            - OTEL_TRACES_EXPORTER: none
         - extra_hosts: {{registry_hostname}}:{{registry_ip}}
         - require:
             - file: docker-registry-volume
