@@ -113,13 +113,12 @@ concourse-server-envvars{% if pillar['ci'].get('use-vault', True) %}-template{% 
             CONCOURSE_POSTGRES_DATABASE="concourse"
             CONCOURSE_ENCRYPTION_KEY="{{pillar['dynamicsecrets']['concourse-encryption']}}"
             CONCOURSE_COOKIE_SECURE=true
-
 {%- if pillar['ci'].get('use-vault', True) %}
             CONCOURSE_VAULT_URL="https://{{pillar['smartstack-services']['vault']['smartstack-hostname']}}:8200/"
             CONCOURSE_VAULT_CA_CERT="{{pillar['ssl']['service-rootca-cert']}}"
             CONCOURSE_VAULT_AUTH_BACKEND="approle"
             CONCOURSE_VAULT_AUTH_PARAM="role_id:{{pillar['dynamicsecrets']['concourse-role-id']}},secret_id:((secret_id))"
-            CONCOURSE_VAULT_SHARED_PATH=="common"
+            CONCOURSE_VAULT_SHARED_PATH="common"
             CONCOURSE_OIDC_DISPLAY_NAME="SSO Account (OpenIDC)"
             CONCOURSE_OIDC_CLIENT_ID="((oauth2_client_id))"
             CONCOURSE_OIDC_CLIENT_SECRET="((oauth2_client_secret))"
