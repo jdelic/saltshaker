@@ -35,6 +35,7 @@ def ext_pillar(minion_id, pillar, **pillarconfig):
     # make sure all required secrets exist and filter them
     # according to the current minion's roles or host id
     this_node_secrets = {}
+    secret_key_access = {}
     if "config" not in pillarconfig:
         pillarconfig["config"] = {}
     if "grainmapping" not in pillarconfig:
@@ -72,9 +73,11 @@ def ext_pillar(minion_id, pillar, **pillarconfig):
 
                     # only send private keys to nodes that have been explicitly configured to receive them
                     _log.debug("Grainmappings: %s", grainmappings)
-                    if not grainmappings.get(secret_name, {}).get("secret-key-access", False):
-                        if isinstance(this_node_secrets[secret_name], dict) and "key" in this_node_secrets[secret_name]:
-                            del this_node_secrets[secret_name]["key"]
+                    if grainmappings.get(secret_name, {}).get("secret-key-access", False):
+                        secret_key_access[secret_name] = True
+                    else:
+                        if not secret_name in secret_key_access:
+                            secret_key_access[secret_name] = False
 
     for pillar in pillarconfig["pillarmapping"]:
         for pillarvalue in pillarconfig["pillarmapping"][pillar]:
@@ -99,9 +102,11 @@ def ext_pillar(minion_id, pillar, **pillarconfig):
                         this_node_secrets[secret_name] = db.get_or_create(secret_config, secret_name, host)
 
                     # only send private keys to nodes that have been explicitly configured to receive them
-                    if not pillarmappings.get(secret_name, {}).get("secret-key-access", False):
-                        if isinstance(this_node_secrets[secret_name], dict) and "key" in this_node_secrets[secret_name]:
-                            del this_node_secrets[secret_name]["key"]
+                    if pillarmappings.get(secret_name, {}).get("secret-key-access", False):
+                        secret_key_access[secret_name] = True
+                    else:
+                        if not secret_name in secret_key_access:
+                            secret_key_access[secret_name] = False
 
     minion_match_keys = __salt__['dynamicsecrets.match_minion_id'](minion_id, pillarconfig["hostmapping"])
     for minion_match_key in minion_match_keys:
@@ -124,10 +129,16 @@ def ext_pillar(minion_id, pillar, **pillarconfig):
                 this_node_secrets[secret_name] = db.get_or_create(secret_config, secret_name, host)
 
             # only send private keys to nodes that have been explicitly configured to receive them
-            if not hostmappings.get(secret_name, {}).get("secret-key-access", False):
-                if isinstance(this_node_secrets[secret_name], dict) and "key" in this_node_secrets[secret_name]:
-                    del this_node_secrets[secret_name]["key"]
+            if hostmappings.get(secret_name, {}).get("secret-key-access", False):
+                secret_key_access[secret_name] = True
+            else:
+                if not secret_name in secret_key_access:
+                    secret_key_access[secret_name] = False
 
+    for secret_name in secret_key_access.keys():
+        if not secret_key_access[secret_name]:
+            if isinstance(this_node_secrets[secret_name], dict) and "key" in this_node_secrets[secret_name]:
+                del this_node_secrets[secret_name]["key"]
 
     return {
         "dynamicsecrets": this_node_secrets
