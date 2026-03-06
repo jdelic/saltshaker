@@ -145,6 +145,12 @@ base:
         - fstab.secure
         - vaultwarden
 
+    'roles:standardnotes':
+        - match: grain
+        - docker.install
+        - fstab.secure
+        - standardnotes
+
     '*.test':
         # put vagrant user config on .test machines
         # enable the NAT networking device for all network traffic

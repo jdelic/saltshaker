@@ -79,6 +79,10 @@ base:
         - match: grain
         - shared.vaultwarden
 
+    'roles:standardnotes':
+        - match: grain
+        - shared.standardnotes
+
     # every minion ID ending in ".test" is a local dev environment. We assign all config to these nodes
     # as the list of roles and services changes all the time for testing and development, so it's easier to
     # just assign everything to these nodes.
@@ -97,6 +101,7 @@ base:
         - local.nomad
         - local.postgresql
         - local.ssl
+        - local.standardnotes
         - local.vault
         - local.vaultwarden
         # - local.url_overrides

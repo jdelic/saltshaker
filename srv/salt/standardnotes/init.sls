@@ -1,0 +1,243 @@
+include:
+    - standardnotes.sync
+
+
+{% set standardnotes = pillar.get('standardnotes', {}) %}
+{% set ip = standardnotes.get(
+        'bind-ip',
+        grains['ip_interfaces'][pillar['ifassign']['internal']][
+            pillar['ifassign'].get('internal-ip-index', 0)|int
+        ]
+    )
+%}
+{% set port = 31300 %}
+
+
+{% if standardnotes.get('enabled', False) %}
+
+standardnotes-docker-compose-plugin:
+    pkg.installed:
+        - name: docker-compose-plugin
+
+
+standardnotes-config-dir:
+    file.directory:
+        - name: /etc/standardnotes
+        - user: root
+        - group: root
+        - mode: '0750'
+        - makedirs: True
+
+
+standardnotes-base-dir:
+    file.directory:
+        - name: /secure/standardnotes
+        - user: root
+        - group: root
+        - mode: '0750'
+        - makedirs: True
+        - require:
+            - secure-mount
+
+
+standardnotes-db-import-dir:
+    file.directory:
+        - name: /secure/standardnotes/db-import
+        - user: root
+        - group: root
+        - mode: '0750'
+        - makedirs: True
+        - require:
+            - file: standardnotes-base-dir
+
+
+standardnotes-db-dir:
+    file.directory:
+        - name: /secure/standardnotes/db
+        - user: root
+        - group: root
+        - mode: '0750'
+        - makedirs: True
+        - require:
+            - file: standardnotes-base-dir
+
+
+standardnotes-logs-dir:
+    file.directory:
+        - name: /secure/standardnotes/logs
+        - user: root
+        - group: root
+        - mode: '0750'
+        - makedirs: True
+        - require:
+            - file: standardnotes-base-dir
+
+
+standardnotes-uploads-dir:
+    file.directory:
+        - name: /secure/standardnotes/uploads
+        - user: root
+        - group: root
+        - mode: '0750'
+        - makedirs: True
+        - require:
+            - file: standardnotes-base-dir
+
+
+standardnotes-redis-dir:
+    file.directory:
+        - name: /secure/standardnotes/redis
+        - user: root
+        - group: root
+        - mode: '0750'
+        - makedirs: True
+        - require:
+            - file: standardnotes-base-dir
+
+
+standardnotes-envfile-base:
+    file.managed:
+        - name: /etc/standardnotes/.env
+        - user: root
+        - group: root
+        - mode: '0640'
+        - contents: |
+            # Managed by Salt
+            DB_HOST=db
+            DB_PORT=3306
+            DB_USERNAME={{standardnotes.get('db-username', 'std_notes_user')}}
+            DB_PASSWORD={{pillar.get('dynamicsecrets', {}).get(
+                'standardnotes-db', standardnotes.get('db-password', 'UNKNOWN_RERUN_SALT'))}}
+            DB_DATABASE={{standardnotes.get('db-database', 'standard_notes_db')}}
+            DB_TYPE=mysql
+            REDIS_PORT=6379
+            REDIS_HOST=cache
+            CACHE_TYPE=redis
+            MYSQL_ROOT_PASSWORD={{pillar.get('dynamicsecrets', {}).get(
+                'standardnotes-db-root', standardnotes.get('db-root-password', 'UNKNOWN_RERUN_SALT'))}}
+            AUTH_JWT_SECRET={{pillar.get('dynamicsecrets', {}).get(
+                'standardnotes-auth-jwt-secret', standardnotes.get('auth-jwt-secret', 'UNKNOWN_RERUN_SALT'))}}
+            AUTH_SERVER_ENCRYPTION_SERVER_KEY={{pillar.get('dynamicsecrets', {}).get(
+                'standardnotes-auth-server-encryption-server-key',
+                standardnotes.get('auth-server-encryption-server-key', 'UNKNOWN_RERUN_SALT'))}}
+            VALET_TOKEN_SECRET={{pillar.get('dynamicsecrets', {}).get(
+                'standardnotes-valet-token-secret', standardnotes.get('valet-token-secret', 'UNKNOWN_RERUN_SALT'))}}
+        - require:
+            - file: standardnotes-config-dir
+
+
+standardnotes-compose-file:
+    file.managed:
+        - name: /etc/standardnotes/docker-compose.yml
+        - source: salt://standardnotes/docker-compose.jinja.yml
+        - template: jinja
+        - user: root
+        - group: root
+        - mode: '0640'
+        - context:
+            ip: {{ip}}
+            port: {{port}}
+            standardnotes: {{standardnotes}}
+        - require:
+            - file: standardnotes-config-dir
+
+
+standardnotes-localstack-bootstrap:
+    file.managed:
+        - name: /etc/standardnotes/localstack_bootstrap.sh
+        - source: salt://standardnotes/localstack_bootstrap.sh
+        - user: root
+        - group: root
+        - mode: '0750'
+        - require:
+            - file: standardnotes-config-dir
+
+
+standardnotes-systemd:
+    systemdunit.managed:
+        - name: /etc/systemd/system/standardnotes-compose.service
+        - source: salt://standardnotes/standardnotes-compose.jinja.service
+        - template: jinja
+        - user: root
+        - group: root
+        - mode: '0644'
+    service.running:
+        - name: standardnotes-compose
+        - enable: True
+        - require:
+            - pkg: standardnotes-docker-compose-plugin
+            - file: standardnotes-base-dir
+            - file: standardnotes-db-dir
+            - file: standardnotes-logs-dir
+            - file: standardnotes-uploads-dir
+            - file: standardnotes-db-import-dir
+            - file: standardnotes-redis-dir
+            - file: standardnotes-envfile-base
+            - file: standardnotes-compose-file
+            - file: standardnotes-localstack-bootstrap
+            - cmd: standardnotes-sync
+        - watch:
+            - file: standardnotes-envfile-base
+            - file: standardnotes-compose-file
+            - file: standardnotes-localstack-bootstrap
+            - systemdunit: standardnotes-systemd
+
+
+standardnotes-http-tcp-in{{port}}-ipv4:
+    nftables.append:
+        - table: filter
+        - chain: input
+        - family: ip4
+        - jump: accept
+        - source: '0/0'
+        - destination: {{ip}}/32
+        - dport: {{port}}
+        - match: state
+        - connstate: new
+        - proto: tcp
+        - save: True
+        - require:
+            - sls: basics.nftables.setup
+
+
+standardnotes-servicedef-external:
+    file.managed:
+        - name: /etc/consul/services.d/standardnotes-external.json
+        - source: salt://standardnotes/consul/standardnotes.jinja.json
+        - mode: '0644'
+        - template: jinja
+        - context:
+            ip: {{ip}}
+            port: {{port}}
+            hostname: {{standardnotes.get('hostname', 'notes.local')}}
+        - require:
+            - file: consul-service-dir
+
+
+{% if pillar.get('duplicity-backup', {}).get('enabled', False) %}
+standardnotes-backup-symlink:
+    file.symlink:
+        - name: /etc/duplicity.d/daily/folderlinks/standardnotes
+        - target: /secure/standardnotes
+        - require:
+            - file: standardnotes-base-dir
+
+
+standardnotes-config-backup-symlink:
+    file.symlink:
+        - name: /etc/duplicity.d/daily/folderlinks/standardnotes-config
+        - target: /etc/standardnotes
+        - require:
+            - file: standardnotes-config-dir
+{% else %}
+standardnotes-backup-symlink-absent:
+    file.absent:
+        - name: /etc/duplicity.d/daily/folderlinks/standardnotes
+
+
+standardnotes-config-backup-symlink-absent:
+    file.absent:
+        - name: /etc/duplicity.d/daily/folderlinks/standardnotes-config
+{% endif %}
+
+{% endif %}

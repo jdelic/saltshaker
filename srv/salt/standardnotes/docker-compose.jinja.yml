@@ -1,0 +1,60 @@
+services:
+  server:
+    image: {{standardnotes.get('server-image', 'standardnotes/server')}}
+    env_file: /etc/standardnotes/.env
+    container_name: standardnotes_server
+    restart: unless-stopped
+    ports:
+      - "{{ip}}:{{port}}:3000"
+    volumes:
+      - /secure/standardnotes/logs:/var/lib/server/logs
+      - /secure/standardnotes/uploads:/opt/server/packages/files/dist/uploads
+    networks:
+      - standardnotes_self_hosted
+
+  localstack:
+    image: {{standardnotes.get('localstack-image', 'localstack/localstack:3.0')}}
+    container_name: standardnotes_localstack
+    expose:
+      - 4566
+    restart: unless-stopped
+    environment:
+      - SERVICES=sns,sqs
+      - HOSTNAME_EXTERNAL=localstack
+      - LS_LOG=warn
+    volumes:
+      - /etc/standardnotes/localstack_bootstrap.sh:/etc/localstack/init/ready.d/localstack_bootstrap.sh
+    networks:
+      - standardnotes_self_hosted
+
+  db:
+    image: {{standardnotes.get('mysql-image', 'mysql:8')}}
+    container_name: standardnotes_db
+    environment:
+      - MYSQL_DATABASE=${DB_DATABASE}
+      - MYSQL_USER=${DB_USERNAME}
+      - MYSQL_ROOT_PASSWORD=${MYSQL_ROOT_PASSWORD}
+      - MYSQL_PASSWORD=${DB_PASSWORD}
+    expose:
+      - 3306
+    restart: unless-stopped
+    volumes:
+      - /secure/standardnotes/db:/var/lib/mysql
+      - /secure/standardnotes/db-import:/docker-entrypoint-initdb.d
+    networks:
+      - standardnotes_self_hosted
+
+  cache:
+    image: {{standardnotes.get('redis-image', 'redis:6.0-alpine')}}
+    container_name: standardnotes_cache
+    expose:
+      - 6379
+    restart: unless-stopped
+    volumes:
+      - /secure/standardnotes/redis:/data
+    networks:
+      - standardnotes_self_hosted
+
+networks:
+  standardnotes_self_hosted:
+    name: standardnotes_self_hosted
