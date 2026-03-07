@@ -67,23 +67,34 @@ if ! PASSWORD_HASH="$(hash_password "$PASSWORD")"; then
     exit 1
 fi
 
-ROLE_UUID="$(docker exec \
-    -e DB_NAME="$DB_NAME" \
-    -e DB_USER="$DB_USER" \
-    -e DB_PASSWORD="$DB_PASSWORD" \
-    standardnotes_db sh -lc 'mysql -Nse "SELECT uuid FROM roles WHERE name='\''CORE_USER'\'' LIMIT 1" -u"$DB_USER" -p"$DB_PASSWORD" "$DB_NAME"')"
+sql_escape() {
+    printf '%s' "$1" | sed "s/'/''/g"
+}
+
+mysql_scalar() {
+    local query="$1"
+    docker exec \
+        -e MYSQL_PWD="$DB_PASSWORD" \
+        standardnotes_db \
+        mysql -Nse "$query" -u"$DB_USER" "$DB_NAME"
+}
+
+ROLE_UUID="$(mysql_scalar "SELECT uuid FROM roles WHERE name='CORE_USER' LIMIT 1" | tr -d '[:space:]')"
 
 if [ -z "$ROLE_UUID" ]; then
     echo "could not find CORE_USER role in database" >&2
     exit 1
 fi
 
-EXISTING_COUNT="$(docker exec \
-    -e DB_NAME="$DB_NAME" \
-    -e DB_USER="$DB_USER" \
-    -e DB_PASSWORD="$DB_PASSWORD" \
-    -e USER_EMAIL="$EMAIL" \
-    standardnotes_db sh -lc 'mysql -Nse "SELECT COUNT(*) FROM users WHERE email='\''$USER_EMAIL'\''" -u"$DB_USER" -p"$DB_PASSWORD" "$DB_NAME"')"
+EMAIL_SQL="$(sql_escape "$EMAIL")"
+USER_UUID_SQL="$(sql_escape "$USER_UUID")"
+PW_NONCE_SQL="$(sql_escape "$PW_NONCE")"
+KP_CREATED_SQL="$(sql_escape "$KP_CREATED")"
+NOW_UTC_SQL="$(sql_escape "$NOW_UTC")"
+PASSWORD_HASH_SQL="$(sql_escape "$PASSWORD_HASH")"
+ROLE_UUID_SQL="$(sql_escape "$ROLE_UUID")"
+
+EXISTING_COUNT="$(mysql_scalar "SELECT COUNT(*) FROM users WHERE email='${EMAIL_SQL}'" | tr -d '[:space:]')"
 
 if [ "$EXISTING_COUNT" != "0" ]; then
     echo "user already exists: $EMAIL" >&2
@@ -91,31 +102,22 @@ if [ "$EXISTING_COUNT" != "0" ]; then
 fi
 
 docker exec \
-    -e DB_NAME="$DB_NAME" \
-    -e DB_USER="$DB_USER" \
-    -e DB_PASSWORD="$DB_PASSWORD" \
-    -e USER_UUID="$USER_UUID" \
-    -e USER_EMAIL="$EMAIL" \
-    -e PASSWORD_HASH="$PASSWORD_HASH" \
-    -e PW_NONCE="$PW_NONCE" \
-    -e KP_CREATED="$KP_CREATED" \
-    -e NOW_UTC="$NOW_UTC" \
-    -e ROLE_UUID="$ROLE_UUID" \
-    standardnotes_db sh -lc '
-mysql -u"$DB_USER" -p"$DB_PASSWORD" "$DB_NAME" <<SQL
+    -i \
+    -e MYSQL_PWD="$DB_PASSWORD" \
+    standardnotes_db \
+    mysql -u"$DB_USER" "$DB_NAME" <<SQL
 START TRANSACTION;
 INSERT INTO users (
     uuid, version, email, pw_nonce, kp_created, kp_origination,
     encrypted_password, encrypted_server_key, server_encryption_version,
     created_at, updated_at, locked_until, num_failed_attempts
 ) VALUES (
-    '$USER_UUID', '004', '$USER_EMAIL', '$PW_NONCE', '$KP_CREATED', 'registration',
-    '$PASSWORD_HASH', NULL, 0,
-    '$NOW_UTC', '$NOW_UTC', NULL, 0
+    '${USER_UUID_SQL}', '004', '${EMAIL_SQL}', '${PW_NONCE_SQL}', '${KP_CREATED_SQL}', 'registration',
+    '${PASSWORD_HASH_SQL}', NULL, 0,
+    '${NOW_UTC_SQL}', '${NOW_UTC_SQL}', NULL, 0
 );
-INSERT INTO user_roles (user_uuid, role_uuid) VALUES ('$USER_UUID', '$ROLE_UUID');
+INSERT INTO user_roles (user_uuid, role_uuid) VALUES ('${USER_UUID_SQL}', '${ROLE_UUID_SQL}');
 COMMIT;
 SQL
-'
 
 printf 'username: %s\npassword: %s\n' "$EMAIL" "$PASSWORD"
