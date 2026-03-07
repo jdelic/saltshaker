@@ -3,7 +3,7 @@
 standardnotes:
     hostname: stdnotesapi.{{external_tld}}
     webapp-hostname: notes.{{external_tld}}
-    default-sync-server: https://stdnotes.{{external_tld}}
+    default-sync-server: https://stdnotesapi.{{external_tld}}
 
     # this IP must not be routed in your network
     bridge-ip: 192.168.56.1
