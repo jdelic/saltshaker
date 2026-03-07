@@ -122,7 +122,7 @@ standardnotes-envfile-base:
             DISABLE_USER_REGISTRATION=true
             COOKIE_DOMAIN={{cookie_domain}}
             COOKIE_SAME_SITE={{standardnotes.get('cookie-same-site', 'None')}}
-            COOKIE_SECURE={{'true' if standardnotes.get('cookie-secure', True) else 'false'}}
+            COOKIE_SECURE={{'false' if not standardnotes.get('cookie-secure', True) else 'true'}}
             COOKIE_PARTITIONED={{'true' if standardnotes.get('cookie-partitioned', False) else 'false'}}
         - require:
             - file: standardnotes-config-dir
