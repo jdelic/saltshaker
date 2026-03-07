@@ -113,7 +113,7 @@ standardnotes-envfile-base:
             CACHE_TYPE=redis
             MYSQL_ROOT_PASSWORD={{pillar['dynamicsecrets']['standardnotes-db-root']}}
             AUTH_JWT_SECRET={{pillar['dynamicsecrets']['standardnotes-auth-jwt-secret']}}
-            AUTH_SERVER_ENCRYPTION_SERVER_KEY={{pillar['dynamicsecrets']['standardnotes-auth-server-encryption-server-key']}}
+            AUTH_SERVER_ENCRYPTION_SERVER_KEY={{pillar['dynamicsecrets']['standardnotes-auth-server-encryption-server-key-hex']}}
             VALET_TOKEN_SECRET={{pillar['dynamicsecrets']['standardnotes-valet-token-secret']}}
         - require:
             - file: standardnotes-config-dir

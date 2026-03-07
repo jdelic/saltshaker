@@ -20,7 +20,8 @@ services:
         restart: unless-stopped
         environment:
             - SERVICES=sns,sqs
-            - HOSTNAME_EXTERNAL=localstack
+            - LOCALSTACK_HOST=localstack:4566
+            - SQS_ENDPOINT_STRATEGY=path
             - LS_LOG=warn
         volumes:
             - /etc/standardnotes/localstack_bootstrap.sh:/etc/localstack/init/ready.d/localstack_bootstrap.sh
