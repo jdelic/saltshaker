@@ -13,8 +13,6 @@ include:
 {% set port = 31300 %}
 
 
-{% if standardnotes.get('enabled', False) %}
-
 standardnotes-docker-compose-plugin:
     pkg.installed:
         - name: docker-compose-plugin
@@ -238,6 +236,4 @@ standardnotes-backup-symlink-absent:
 standardnotes-config-backup-symlink-absent:
     file.absent:
         - name: /etc/duplicity.d/daily/folderlinks/standardnotes-config
-{% endif %}
-
 {% endif %}
