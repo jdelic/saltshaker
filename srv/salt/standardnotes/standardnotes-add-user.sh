@@ -2,12 +2,33 @@
 
 set -euo pipefail
 
-if [ "${1:-}" = "" ] || [ "${2:-}" != "" ]; then
-    echo "usage: standardnotes-add-user <email>" >&2
+usage() {
+    cat >&2 <<'EOF'
+usage:
+  standardnotes-add-user <email>
+  standardnotes-add-user --delete <email>
+  standardnotes-add-user --recreate <email>
+EOF
+}
+
+MODE="create"
+case "${1:-}" in
+    --delete|-d)
+        MODE="delete"
+        shift
+        ;;
+    --recreate|-r)
+        MODE="recreate"
+        shift
+        ;;
+esac
+
+if [ "$#" -ne 1 ]; then
+    usage
     exit 1
 fi
 
-EMAIL="$(printf '%s' "$1" | tr '[:upper:]' '[:lower:]')"
+EMAIL="$(printf '%s' "${1}" | tr '[:upper:]' '[:lower:]')"
 if ! printf '%s\n' "$EMAIL" | grep -Eq '^[^[:space:]@]+@[^[:space:]@]+\.[^[:space:]@]+$'; then
     echo "invalid email address: $EMAIL" >&2
     exit 1
@@ -34,6 +55,57 @@ for var_name in DB_NAME DB_USER DB_PASSWORD; do
         exit 1
     fi
 done
+
+sql_escape() {
+    printf '%s' "$1" | sed "s/'/''/g"
+}
+
+mysql_scalar() {
+    local query="$1"
+    docker exec \
+        -e MYSQL_PWD="$DB_PASSWORD" \
+        standardnotes_db \
+        mysql -Nse "$query" -u"$DB_USER" "$DB_NAME"
+}
+
+delete_user() {
+    local email_sql user_uuid user_uuid_sql
+    email_sql="$(sql_escape "$EMAIL")"
+    user_uuid="$(mysql_scalar "SELECT uuid FROM users WHERE email='${email_sql}' LIMIT 1" | tr -d '[:space:]')"
+
+    if [ -z "$user_uuid" ]; then
+        return 1
+    fi
+
+    user_uuid_sql="$(sql_escape "$user_uuid")"
+
+    docker exec \
+        -i \
+        -e MYSQL_PWD="$DB_PASSWORD" \
+        standardnotes_db \
+        mysql -u"$DB_USER" "$DB_NAME" <<SQL
+START TRANSACTION;
+DELETE FROM sessions WHERE user_uuid='${user_uuid_sql}';
+DELETE FROM users WHERE uuid='${user_uuid_sql}';
+COMMIT;
+SQL
+}
+
+if [ "$MODE" = "delete" ]; then
+    if ! delete_user; then
+        echo "user not found: $EMAIL" >&2
+        exit 1
+    fi
+
+    echo "deleted user: $EMAIL"
+    exit 0
+fi
+
+if [ "$MODE" = "recreate" ]; then
+    if delete_user; then
+        echo "deleted existing user: $EMAIL"
+    fi
+fi
 
 PASSWORD=""
 while [ "${#PASSWORD}" -lt 24 ]; do
@@ -127,18 +199,6 @@ if ! PASSWORD_HASH="$(hash_password "$SERVER_PASSWORD")"; then
     exit 1
 fi
 
-sql_escape() {
-    printf '%s' "$1" | sed "s/'/''/g"
-}
-
-mysql_scalar() {
-    local query="$1"
-    docker exec \
-        -e MYSQL_PWD="$DB_PASSWORD" \
-        standardnotes_db \
-        mysql -Nse "$query" -u"$DB_USER" "$DB_NAME"
-}
-
 ROLE_UUID="$(mysql_scalar "SELECT uuid FROM roles WHERE name='CORE_USER' LIMIT 1" | tr -d '[:space:]')"
 
 if [ -z "$ROLE_UUID" ]; then
@@ -157,7 +217,7 @@ ROLE_UUID_SQL="$(sql_escape "$ROLE_UUID")"
 EXISTING_COUNT="$(mysql_scalar "SELECT COUNT(*) FROM users WHERE email='${EMAIL_SQL}'" | tr -d '[:space:]')"
 
 if [ "$EXISTING_COUNT" != "0" ]; then
-    echo "user already exists: $EMAIL" >&2
+    echo "user already exists: $EMAIL (use --recreate to replace)" >&2
     exit 1
 fi
 
