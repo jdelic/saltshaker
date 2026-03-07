@@ -20,6 +20,7 @@ services:
             - "{{ip}}:{{standardnotes.get('webapp-bind-port', 31301)}}:80"
         environment:
             - DEFAULT_SYNC_SERVER={{standardnotes.get('default-sync-server', 'https://' + standardnotes.get('hostname'))}}
+            - DISABLE_USER_REGISTRATION=true
         networks:
             - standardnotes_self_hosted
 
