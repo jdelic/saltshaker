@@ -58,3 +58,10 @@ services:
 networks:
     standardnotes_self_hosted:
         name: standardnotes_self_hosted
+        driver_opts:
+            com.docker.network.bridge.name: standardnotes0
+        ipam:
+            driver: default
+            config:
+                - subnet: {{standardnotes.get('bridge-cidr')}}
+                  ip_range: {{standardnotes.get('container-cidr')}}

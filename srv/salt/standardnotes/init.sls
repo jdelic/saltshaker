@@ -192,6 +192,76 @@ standardnotes-http-tcp-in{{port}}-ipv4:
             - sls: basics.nftables.setup
 
 
+standardnotes-bridge-tcp-ipv4-accept:
+    nftables.append:
+        - table: filter
+        - chain: input
+        - family: ip4
+        - jump: accept
+        - source: {{pillar['standardnotes']['bridge-cidr']}}
+        - destination: {{pillar['standardnotes']['bridge-cidr']}}
+        - if: standardnotes0
+        - match: state
+        - connstate: new
+        - proto: tcp
+        - save: True
+        - require:
+            - sls: basics.nftables.setup
+
+
+standardnotes-bridge-udp-ipv4-accept:
+    nftables.append:
+        - table: filter
+        - chain: input
+        - family: ip4
+        - jump: accept
+        - source: {{pillar['standardnotes']['bridge-cidr']}}
+        - destination: {{pillar['standardnotes']['bridge-cidr']}}
+        - if: standardnotes0
+        - proto: udp
+        - save: True
+        - require:
+            - sls: basics.nftables.setup
+
+
+standardnotes-bridge-ipv4-forward-accept:
+    nftables.append:
+        - table: filter
+        - chain: forward
+        - family: ip4
+        - jump: accept
+        - if: {{pillar['ifassign']['internal']}}
+        - of: standardnotes0
+        - match: state
+        - connstate: new
+        - save: True
+        - require:
+            - sls: basics.nftables.setup
+
+
+standardnotes-bridge-ipv4-forward-reverse:
+    nftables.append:
+        - table: filter
+        - chain: forward
+        - family: ip4
+        - jump: accept
+        - if: standardnotes0
+        - match: state
+        - connstate: new
+        - save: True
+        - require:
+            - sls: basics.nftables.setup
+
+
+standardnotes-pdns-recursor-cidr:
+    file.accumulated:
+        - name: powerdns-recursor-additional-cidrs
+        - filename: /etc/powerdns/recursor.d/saltshaker.yml
+        - text: {{pillar['standardnotes']['bridge-cidr']}}
+        - require_in:
+            - file: pdns-recursor-config
+
+
 standardnotes-servicedef-external:
     file.managed:
         - name: /etc/consul/services.d/standardnotes-external.json
