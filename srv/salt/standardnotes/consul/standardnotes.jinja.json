@@ -1,6 +1,6 @@
 {
     "service": {
-        "name": "standardnotes-ext",
+        "name": "{{service}}-{{suffix}}",
         "tags": ["smartstack:external", "smartstack:port:{{port}}", "smartstack:mode:http",
                  "smartstack:hostname:{{hostname}}", "smartstack:protocol:https", "smartstack:https-redirect"],
         "address": "{{ip}}",
@@ -8,4 +8,3 @@
         {# TODO: add service checks here? #}
     }
 }
-

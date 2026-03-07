@@ -21,6 +21,7 @@ PORT     | SMARTSTACK | ASSIGNED SERVICE
   8999   |      X     | authserver
  31080   |      X     | vaultwarden API
  31300   |      X     | standardnotes API
+ 31301   |      X     | standardnotes web app
  32022   |      X     | SSH port forward for git miniserver
  32080   |      X     | apache HTTP
  32443   |      X     | apache HTTPS

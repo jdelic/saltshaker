@@ -12,6 +12,17 @@ services:
         networks:
             - standardnotes_self_hosted
 
+    webapp:
+        image: {{standardnotes.get('webapp-image', 'standardnotes/web')}}
+        container_name: standardnotes_webapp
+        restart: unless-stopped
+        ports:
+            - "{{ip}}:{{standardnotes.get('webapp-bind-port', 31301)}}:80"
+        environment:
+            - DEFAULT_SYNC_SERVER={{standardnotes.get('default-sync-server', 'https://' + standardnotes.get('hostname'))}}
+        networks:
+            - standardnotes_self_hosted
+
     localstack:
         image: {{standardnotes.get('localstack-image', 'localstack/localstack:3.0')}}
         container_name: standardnotes_localstack

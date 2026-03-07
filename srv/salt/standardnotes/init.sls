@@ -12,6 +12,7 @@ include:
 %}
 
 {% set port = pillar.get('standardnotes', {}).get('bind-port', 31300) %}
+{% set webapp_port = pillar.get('standardnotes', {}).get('webapp-bind-port', 31301) %}
 
 
 standardnotes-docker-compose-plugin:
@@ -115,6 +116,7 @@ standardnotes-envfile-base:
             AUTH_JWT_SECRET={{pillar['dynamicsecrets']['standardnotes-auth-jwt-secret']}}
             AUTH_SERVER_ENCRYPTION_SERVER_KEY={{pillar['dynamicsecrets']['standardnotes-auth-server-encryption-server-key-hex']}}
             VALET_TOKEN_SECRET={{pillar['dynamicsecrets']['standardnotes-valet-token-secret']}}
+            AUTH_SERVER_DISABLE_USER_REGISTRATION=true
         - require:
             - file: standardnotes-config-dir
 
@@ -146,6 +148,17 @@ standardnotes-localstack-bootstrap:
             - file: standardnotes-config-dir
 
 
+standardnotes-add-user-script:
+    file.managed:
+        - name: /usr/local/bin/standardnotes-add-user
+        - source: salt://standardnotes/standardnotes-add-user.sh
+        - user: root
+        - group: root
+        - mode: '0750'
+        - require:
+            - file: standardnotes-envfile-base
+
+
 standardnotes-systemd:
     systemdunit.managed:
         - name: /etc/systemd/system/standardnotes-compose.service
@@ -168,6 +181,7 @@ standardnotes-systemd:
             - file: standardnotes-envfile-base
             - file: standardnotes-compose-file
             - file: standardnotes-localstack-bootstrap
+            - file: standardnotes-add-user-script
             - cmd: standardnotes-sync
         - watch:
             - file: standardnotes-envfile-base
@@ -185,6 +199,23 @@ standardnotes-http-tcp-in{{port}}-ipv4:
         - source: '0/0'
         - destination: {{ip}}/32
         - dport: {{port}}
+        - match: state
+        - connstate: new
+        - proto: tcp
+        - save: True
+        - require:
+            - sls: basics.nftables.setup
+
+
+standardnotes-webapp-http-tcp-in{{webapp_port}}-ipv4:
+    nftables.append:
+        - table: filter
+        - chain: input
+        - family: ip4
+        - jump: accept
+        - source: '0/0'
+        - destination: {{ip}}/32
+        - dport: {{webapp_port}}
         - match: state
         - connstate: new
         - proto: tcp
@@ -265,14 +296,39 @@ standardnotes-pdns-recursor-cidr:
 
 standardnotes-servicedef-external:
     file.managed:
-        - name: /etc/consul/services.d/standardnotes-external.json
+        - name: /etc/consul/services.d/standardnotes-api-external.json
         - source: salt://standardnotes/consul/standardnotes.jinja.json
         - mode: '0644'
         - template: jinja
         - context:
+            service: standardnotes-api
+            suffix: ext
             ip: {{ip}}
             port: {{port}}
             hostname: {{standardnotes['hostname']}}
+        - require:
+            - file: consul-service-dir
+
+
+standardnotes-servicedef-external-legacy-absent:
+    file.absent:
+        - name: /etc/consul/services.d/standardnotes-external.json
+        - require:
+            - file: consul-service-dir
+
+
+standardnotes-webapp-servicedef-external:
+    file.managed:
+        - name: /etc/consul/services.d/standardnotes-web-external.json
+        - source: salt://standardnotes/consul/standardnotes.jinja.json
+        - mode: '0644'
+        - template: jinja
+        - context:
+            service: standardnotes-web
+            suffix: ext
+            ip: {{ip}}
+            port: {{webapp_port}}
+            hostname: {{standardnotes['webapp-hostname']}}
         - require:
             - file: consul-service-dir
 
