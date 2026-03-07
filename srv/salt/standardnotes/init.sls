@@ -103,23 +103,17 @@ standardnotes-envfile-base:
             # Managed by Salt
             DB_HOST=db
             DB_PORT=3306
-            DB_USERNAME={{standardnotes.get('db-username', 'std_notes_user')}}
-            DB_PASSWORD={{pillar.get('dynamicsecrets', {}).get(
-                'standardnotes-db', standardnotes.get('db-password', 'UNKNOWN_RERUN_SALT'))}}
-            DB_DATABASE={{standardnotes.get('db-database', 'standard_notes_db')}}
+            DB_USERNAME={{standardnotes.get('db-username', 'stdnotes')}}
+            DB_PASSWORD={{pillar['dynamicsecrets']['standardnotes-db']}}
+            DB_DATABASE={{standardnotes.get('db-database', 'standardnotes')}}
             DB_TYPE=mysql
             REDIS_PORT=6379
             REDIS_HOST=cache
             CACHE_TYPE=redis
-            MYSQL_ROOT_PASSWORD={{pillar.get('dynamicsecrets', {}).get(
-                'standardnotes-db-root', standardnotes.get('db-root-password', 'UNKNOWN_RERUN_SALT'))}}
-            AUTH_JWT_SECRET={{pillar.get('dynamicsecrets', {}).get(
-                'standardnotes-auth-jwt-secret', standardnotes.get('auth-jwt-secret', 'UNKNOWN_RERUN_SALT'))}}
-            AUTH_SERVER_ENCRYPTION_SERVER_KEY={{pillar.get('dynamicsecrets', {}).get(
-                'standardnotes-auth-server-encryption-server-key',
-                standardnotes.get('auth-server-encryption-server-key', 'UNKNOWN_RERUN_SALT'))}}
-            VALET_TOKEN_SECRET={{pillar.get('dynamicsecrets', {}).get(
-                'standardnotes-valet-token-secret', standardnotes.get('valet-token-secret', 'UNKNOWN_RERUN_SALT'))}}
+            MYSQL_ROOT_PASSWORD={{pillar['dynamicsecrets']['standardnotes-db-root']}}
+            AUTH_JWT_SECRET={{pillar['dynamicsecrets']['standardnotes-auth-jwt-secret']}}
+            AUTH_SERVER_ENCRYPTION_SERVER_KEY={{pillar['dynamicsecrets']['standardnotes-auth-server-encryption-server-key']}}
+            VALET_TOKEN_SECRET={{pillar['dynamicsecrets']['standardnotes-valet-token-secret']}}
         - require:
             - file: standardnotes-config-dir
 
@@ -207,7 +201,7 @@ standardnotes-servicedef-external:
         - context:
             ip: {{ip}}
             port: {{port}}
-            hostname: {{standardnotes.get('hostname', 'notes.local')}}
+            hostname: {{standardnotes['hostname']}}}}
         - require:
             - file: consul-service-dir
 
