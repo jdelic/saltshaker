@@ -45,7 +45,32 @@ PW_NONCE="$(openssl rand -hex 32)"
 KP_CREATED="$(date +%s%3N)"
 NOW_UTC="$(date -u '+%Y-%m-%d %H:%M:%S')"
 
-PASSWORD_HASH="$(docker exec standardnotes_server node -e 'const bcrypt = require("bcryptjs"); process.stdout.write(bcrypt.hashSync(process.argv[1], 11));' "$PASSWORD")"
+hash_password() {
+    local password="$1"
+
+    if docker exec \
+        -e SN_PASSWORD="$password" \
+        standardnotes_server \
+        sh -lc 'cd /opt/server && node -r ./.pnp.cjs -e "const bcrypt = require(\"bcryptjs\"); process.stdout.write(bcrypt.hashSync(process.env.SN_PASSWORD, 11));"' \
+        2>/dev/null; then
+        return 0
+    fi
+
+    if docker exec \
+        -e SN_PASSWORD="$password" \
+        standardnotes_server \
+        node -e 'const bcrypt = require("bcryptjs"); process.stdout.write(bcrypt.hashSync(process.env.SN_PASSWORD, 11));' \
+        2>/dev/null; then
+        return 0
+    fi
+
+    return 1
+}
+
+if ! PASSWORD_HASH="$(hash_password "$PASSWORD")"; then
+    echo "could not create password hash inside standardnotes_server (bcryptjs unavailable)" >&2
+    exit 1
+fi
 
 ROLE_UUID="$(docker exec \
     -e DB_NAME="$DB_NAME" \
