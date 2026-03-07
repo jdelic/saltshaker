@@ -43,7 +43,7 @@ standardnotes-db-import-dir:
         - name: /secure/standardnotes/db-import
         - user: root
         - group: root
-        - mode: '0750'
+        - mode: '0755'
         - makedirs: True
         - require:
             - file: standardnotes-base-dir
