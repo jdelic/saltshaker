@@ -7,7 +7,7 @@ if [ "${1:-}" = "" ] || [ "${2:-}" != "" ]; then
     exit 1
 fi
 
-EMAIL="$1"
+EMAIL="$(printf '%s' "$1" | tr '[:upper:]' '[:lower:]')"
 if ! printf '%s\n' "$EMAIL" | grep -Eq '^[^[:space:]@]+@[^[:space:]@]+\.[^[:space:]@]+$'; then
     echo "invalid email address: $EMAIL" >&2
     exit 1
@@ -45,9 +45,69 @@ PW_NONCE="$(openssl rand -hex 32)"
 KP_CREATED="$(date +%s%3N)"
 NOW_UTC="$(date -u '+%Y-%m-%d %H:%M:%S')"
 
+derive_server_password() {
+    local identifier="$1"
+    local seed="$2"
+    local passphrase="$3"
+
+    SN_IDENTIFIER="$identifier" SN_SEED="$seed" SN_PASSPHRASE="$passphrase" python3 - <<'PY'
+import hashlib
+import os
+import sys
+
+identifier = os.environ["SN_IDENTIFIER"]
+seed = os.environ["SN_SEED"]
+passphrase = os.environ["SN_PASSPHRASE"].encode("utf-8")
+salt = bytes.fromhex(hashlib.sha256(f"{identifier}:{seed}".encode("utf-8")).hexdigest()[:32])
+
+derived = None
+
+try:
+    from nacl.bindings import crypto_pwhash
+
+    derived = crypto_pwhash.crypto_pwhash_alg(
+        outlen=64,
+        passwd=passphrase,
+        salt=salt,
+        opslimit=5,
+        memlimit=67108864,
+        alg=crypto_pwhash.crypto_pwhash_ALG_DEFAULT,
+    )
+except ModuleNotFoundError:
+    pass
+except Exception:
+    pass
+
+if derived is None:
+    try:
+        from argon2.low_level import Type, hash_secret_raw
+
+        derived = hash_secret_raw(
+            passphrase,
+            salt,
+            time_cost=5,
+            memory_cost=65536,
+            parallelism=1,
+            hash_len=64,
+            type=Type.ID,
+        )
+    except ModuleNotFoundError:
+        sys.exit(3)
+
+derived_hex = derived.hex()
+server_password = derived_hex[len(derived_hex) // 2 :]
+sys.stdout.write(server_password)
+PY
+}
+
+if ! SERVER_PASSWORD="$(derive_server_password "$EMAIL" "$PW_NONCE" "$PASSWORD")"; then
+    echo "could not derive Standard Notes server password; install python3-nacl or python3-argon2" >&2
+    exit 1
+fi
+
 hash_password() {
-    local password="$1"
-    SN_PASSWORD="$password" python3 - <<'PY'
+    local password_to_hash="$1"
+    SN_PASSWORD="$password_to_hash" python3 - <<'PY'
 import os
 import sys
 
@@ -62,7 +122,7 @@ sys.stdout.write(hashed.decode("utf-8"))
 PY
 }
 
-if ! PASSWORD_HASH="$(hash_password "$PASSWORD")"; then
+if ! PASSWORD_HASH="$(hash_password "$SERVER_PASSWORD")"; then
     echo "could not create password hash with python3-bcrypt" >&2
     exit 1
 fi
