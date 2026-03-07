@@ -117,6 +117,7 @@ standardnotes-envfile-base:
             AUTH_SERVER_ENCRYPTION_SERVER_KEY={{pillar['dynamicsecrets']['standardnotes-auth-server-encryption-server-key-hex']}}
             VALET_TOKEN_SECRET={{pillar['dynamicsecrets']['standardnotes-valet-token-secret']}}
             AUTH_SERVER_DISABLE_USER_REGISTRATION=true
+            DISABLE_USER_REGISTRATION=true
         - require:
             - file: standardnotes-config-dir
 
