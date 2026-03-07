@@ -310,13 +310,6 @@ standardnotes-servicedef-external:
             - file: consul-service-dir
 
 
-standardnotes-servicedef-external-legacy-absent:
-    file.absent:
-        - name: /etc/consul/services.d/standardnotes-external.json
-        - require:
-            - file: consul-service-dir
-
-
 standardnotes-webapp-servicedef-external:
     file.managed:
         - name: /etc/consul/services.d/standardnotes-web-external.json
