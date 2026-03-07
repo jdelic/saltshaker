@@ -47,28 +47,23 @@ NOW_UTC="$(date -u '+%Y-%m-%d %H:%M:%S')"
 
 hash_password() {
     local password="$1"
+    SN_PASSWORD="$password" python3 - <<'PY'
+import os
+import sys
 
-    if docker exec \
-        -e SN_PASSWORD="$password" \
-        standardnotes_server \
-        sh -lc 'cd /opt/server && node -r ./.pnp.cjs -e "const bcrypt = require(\"bcryptjs\"); process.stdout.write(bcrypt.hashSync(process.env.SN_PASSWORD, 11));"' \
-        2>/dev/null; then
-        return 0
-    fi
+try:
+    import bcrypt
+except ModuleNotFoundError:
+    sys.exit(2)
 
-    if docker exec \
-        -e SN_PASSWORD="$password" \
-        standardnotes_server \
-        node -e 'const bcrypt = require("bcryptjs"); process.stdout.write(bcrypt.hashSync(process.env.SN_PASSWORD, 11));' \
-        2>/dev/null; then
-        return 0
-    fi
-
-    return 1
+password = os.environ["SN_PASSWORD"].encode("utf-8")
+hashed = bcrypt.hashpw(password, bcrypt.gensalt(rounds=11))
+sys.stdout.write(hashed.decode("utf-8"))
+PY
 }
 
 if ! PASSWORD_HASH="$(hash_password "$PASSWORD")"; then
-    echo "could not create password hash inside standardnotes_server (bcryptjs unavailable)" >&2
+    echo "could not create password hash with python3-bcrypt" >&2
     exit 1
 fi
 
