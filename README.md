@@ -20,7 +20,7 @@ deploying them. Personally, I'm deploying this configuration on my laptop
 using Vagrant, on Digital Ocean and my own server on Hetzner which I configure
 with a XEN Hypervisor running VMs for all my development needs.
 
-Everything in here is based around **Debian 12.0 Bookworm** (i.e. requires
+Everything in here is based around **Debian 13.0 Trixie** (i.e. requires
 systemd, nftables, and uses Debian package naming).
 
 Using these salt formulae you can bring up:
@@ -49,8 +49,10 @@ Using these salt formulae you can bring up:
 It also contains configuration for
 
   * a fully fledged PIM+Mail server with encrypted storage (based on
-    [Radicale](http://radicale.org/), [Dovecot](http://dovecot.org) and
-    [OpenSMTPD](https://www.opensmtpd.org/))
+    [Radicale](http://radicale.org/), [Dovecot](http://dovecot.org), 
+    [OpenSMTPD](https://www.opensmtpd.org/)),
+    [Vaultwarden](https://github.com/dani-garcia/vaultwarden), and
+    [StandardNotes](https://standardnotes.com/)
 
   * single-sign-on for Radicale, Dovecot and OpenSMTPD, other web applications
     and even PAM using a single database for authentication and providing
@@ -262,19 +264,26 @@ are therefor only rendered to assigned minions from the master.
             roles:
                 authserver:
                     - approle-auth-token
+                    - concourse-hostkey:
+                        secret-key-access: True
         hostmapping:
             '*':
                 - consul-acl-token
 ```
 
 For `type: password` the Pillar will simply contain the random password string.
-For `type: uuid` the Pilar will return a UUID4 built from a secure random 
+For `type: uuid` the Pillar will return a UUID4 built from a secure random 
 source (as long as the OS provides one).
-For `type: rsa` the Pillar will return a `dict` that has the following
-properties:
+For `type: hex` the Pillar will return a hex string of the specified length
+*in bytes* built from a secure random source.
+For `type: rsa` and `type: ecc`  the Pillar will return a `dict` that has the
+following properties:
  * `public_pem` the public key in PEM encoding
  * `public` the public key in `ssh-rsa` format
  * `key` the private key in PEM encoding
+`secret-key-access` is a flag that can be set to `True` for RSA and ECC keys in
+the grain, pillar or hostmappings. Only if set, will the private key be included
+in the pillar rendered to the minion.
 
 The dynamicsecrets pillar has been extracted [into it's own project at 
 jdelic/dynamicsecrets/](https://github.com/jdelic/dynamicsecrets).
@@ -319,31 +328,15 @@ enough to accommodate all of these options.
 ## Deploying packaged services from .debs (GoPythonGo applications, for example)
 
 ## Deploying containerized services
-Using servers with the `nomadserver` and `apps` roles, you have two options:
-
-  1. Use Docker Swarm, which is built into Docker
-  2. Use Hashicorp Nomad
-
-They have different pros and cons, but Nomad supports scheduling jobs what are
-not containerized (as in plain binaries and Java applications). Nomad also
-directly integrates with Consul clusters *outside* of the Nomad cluster. So it
-makes service discovery between applications living inside and outside of the
-cluster painless. Using the smartstack implementation built into this
-repository, you can just add `smartstack:*` tags to the `service {}` stanza in
-your [Nomad job configuration](https://www.nomadproject.io/docs/job-specification/service.html)
+Using servers with the `nomadserver` and `apps` roles, Nomad supports 
+scheduling jobs that are not containerized (as in plain binaries and Java
+applications). Nomad also directly integrates with Consul clusters *outside*
+of the Nomad cluster. So it makes service discovery between applications
+living inside and outside of the cluster painless. Using the smartstack\
+implementation built into this repository, you can just add `smartstack:*`
+tags to the `service {}` stanza in your [Nomad job configuration](https://www.nomadproject.io/docs/job-specification/service.html)
 and service discovery as well as linking services to the loadbalancer will be
 taken care of.
-
-For plain Docker or Docker Swarm, you will have to run a
-[docker registrator](https://github.com/gliderlabs/registrator) instance on
-each cluster node, which does the same job as including consul service
-definitions in Nomad jobs. It registers services run from a docker container
-with consul, discovering metadata from environment variables in the container.
-Docker Swarm however, at least until Nomad 0.6 arrives, will have the benefit
-of supporting VXLAN Overlay networks that can easily be configured to use
-IPSEC encryption. This gives you a whole new primitive for separating logical
-networks between your conainerized applications and is something to think
-about.
 
 Regardless of how the services get registered in Consul, it will in turn
 propagate the service information through `consul-template` to `haproxy` making
