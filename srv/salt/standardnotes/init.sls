@@ -201,7 +201,7 @@ standardnotes-servicedef-external:
         - context:
             ip: {{ip}}
             port: {{port}}
-            hostname: {{standardnotes['hostname']}}}}
+            hostname: {{standardnotes['hostname']}}
         - require:
             - file: consul-service-dir
 
