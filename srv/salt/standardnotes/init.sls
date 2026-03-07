@@ -10,7 +10,8 @@ include:
         ]
     )
 %}
-{% set port = 31300 %}
+
+{% set port = pillar.get('standardnotes', {}).get('bind-port', 31300) %}
 
 
 standardnotes-docker-compose-plugin:
