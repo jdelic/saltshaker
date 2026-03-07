@@ -140,7 +140,7 @@ standardnotes-localstack-bootstrap:
         - source: salt://standardnotes/localstack_bootstrap.sh
         - user: root
         - group: root
-        - mode: '0750'
+        - mode: '0755'
         - require:
             - file: standardnotes-config-dir
 
