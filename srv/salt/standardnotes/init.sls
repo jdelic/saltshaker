@@ -1,8 +1,6 @@
 include:
     - standardnotes.sync
 
-{% from "config.sls" import external_tld %}
-
 {% set standardnotes = pillar.get('standardnotes', {}) %}
 {% set ip = standardnotes.get(
         'bind-ip',
@@ -14,7 +12,6 @@ include:
 
 {% set port = pillar.get('standardnotes', {}).get('bind-port', 31300) %}
 {% set webapp_port = pillar.get('standardnotes', {}).get('webapp-bind-port', 31301) %}
-{% set cookie_domain = pillar.get('standardnotes', {}).get('cookie-domain', external_tld) %}
 
 
 standardnotes-docker-compose-plugin:
@@ -120,7 +117,7 @@ standardnotes-envfile-base:
             VALET_TOKEN_SECRET={{pillar['dynamicsecrets']['standardnotes-valet-token-secret']}}
             AUTH_SERVER_DISABLE_USER_REGISTRATION=true
             DISABLE_USER_REGISTRATION=true
-            COOKIE_DOMAIN={{cookie_domain}}
+            COOKIE_DOMAIN={{standardnotes['cookie-domain']}}
             COOKIE_SAME_SITE={{standardnotes.get('cookie-same-site', 'None')}}
             COOKIE_SECURE={{'false' if not standardnotes.get('cookie-secure', True) else 'true'}}
             COOKIE_PARTITIONED={{'true' if standardnotes.get('cookie-partitioned', False) else 'false'}}
