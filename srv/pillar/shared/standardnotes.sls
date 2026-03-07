@@ -1,3 +1,4 @@
+{% from "config.sls" import external_tld %}
+
 standardnotes:
-    enabled: True
-    hostname: notes.maurus.net
+    hostname: notes.{{external_tld}}
