@@ -86,6 +86,8 @@ delete_user() {
         mysql -u"$DB_USER" "$DB_NAME" <<SQL
 START TRANSACTION;
 DELETE FROM sessions WHERE user_uuid='${user_uuid_sql}';
+DELETE FROM user_subscriptions WHERE user_uuid='${user_uuid_sql}';
+DELETE FROM user_roles WHERE user_uuid='${user_uuid_sql}';
 DELETE FROM users WHERE uuid='${user_uuid_sql}';
 COMMIT;
 SQL
@@ -113,9 +115,12 @@ while [ "${#PASSWORD}" -lt 24 ]; do
 done
 
 USER_UUID="$(cat /proc/sys/kernel/random/uuid)"
+SUBSCRIPTION_UUID="$(cat /proc/sys/kernel/random/uuid)"
 PW_NONCE="$(openssl rand -hex 32)"
 KP_CREATED="$(date +%s%3N)"
 NOW_UTC="$(date -u '+%Y-%m-%d %H:%M:%S')"
+NOW_US="$(date +%s%6N)"
+SUBSCRIPTION_ENDS_AT="8640000000000000"
 
 derive_server_password() {
     local identifier="$1"
@@ -199,25 +204,39 @@ if ! PASSWORD_HASH="$(hash_password "$SERVER_PASSWORD")"; then
     exit 1
 fi
 
-ROLE_UUID="$(mysql_scalar "SELECT uuid FROM roles WHERE name='CORE_USER' LIMIT 1" | tr -d '[:space:]')"
+ROLE_UUID="$(mysql_scalar "SELECT uuid FROM roles WHERE name='CORE_USER' ORDER BY version DESC LIMIT 1" | tr -d '[:space:]')"
+PRO_ROLE_UUID="$(mysql_scalar "SELECT uuid FROM roles WHERE name='PRO_USER' ORDER BY version DESC LIMIT 1" | tr -d '[:space:]')"
 
 if [ -z "$ROLE_UUID" ]; then
     echo "could not find CORE_USER role in database" >&2
     exit 1
 fi
 
+if [ -z "$PRO_ROLE_UUID" ]; then
+    echo "could not find PRO_USER role in database" >&2
+    exit 1
+fi
+
 EMAIL_SQL="$(sql_escape "$EMAIL")"
 USER_UUID_SQL="$(sql_escape "$USER_UUID")"
+SUBSCRIPTION_UUID_SQL="$(sql_escape "$SUBSCRIPTION_UUID")"
 PW_NONCE_SQL="$(sql_escape "$PW_NONCE")"
 KP_CREATED_SQL="$(sql_escape "$KP_CREATED")"
 NOW_UTC_SQL="$(sql_escape "$NOW_UTC")"
 PASSWORD_HASH_SQL="$(sql_escape "$PASSWORD_HASH")"
 ROLE_UUID_SQL="$(sql_escape "$ROLE_UUID")"
+PRO_ROLE_UUID_SQL="$(sql_escape "$PRO_ROLE_UUID")"
 
 EXISTING_COUNT="$(mysql_scalar "SELECT COUNT(*) FROM users WHERE email='${EMAIL_SQL}'" | tr -d '[:space:]')"
 
 if [ "$EXISTING_COUNT" != "0" ]; then
     echo "user already exists: $EMAIL (use --recreate to replace)" >&2
+    exit 1
+fi
+
+SUBSCRIPTION_ID="$(mysql_scalar "SELECT COALESCE(MAX(subscription_id), 0) + 1 FROM user_subscriptions" | tr -d '[:space:]')"
+if [ -z "$SUBSCRIPTION_ID" ]; then
+    echo "could not determine next subscription id" >&2
     exit 1
 fi
 
@@ -237,7 +256,15 @@ INSERT INTO users (
     '${NOW_UTC_SQL}', '${NOW_UTC_SQL}', NULL, 0
 );
 INSERT INTO user_roles (user_uuid, role_uuid) VALUES ('${USER_UUID_SQL}', '${ROLE_UUID_SQL}');
+INSERT INTO user_roles (user_uuid, role_uuid) VALUES ('${USER_UUID_SQL}', '${PRO_ROLE_UUID_SQL}');
+INSERT INTO user_subscriptions (
+    uuid, plan_name, ends_at, created_at, updated_at, renewed_at,
+    cancelled, subscription_id, subscription_type, user_uuid
+) VALUES (
+    '${SUBSCRIPTION_UUID_SQL}', 'PRO_PLAN', ${SUBSCRIPTION_ENDS_AT}, ${NOW_US}, ${NOW_US}, NULL,
+    0, ${SUBSCRIPTION_ID}, 'regular', '${USER_UUID_SQL}'
+);
 COMMIT;
 SQL
 
-printf 'username: %s\npassword: %s\n' "$EMAIL" "$PASSWORD"
+printf 'username: %s\npassword: %s\nserver_subscription: %s\n' "$EMAIL" "$PASSWORD" "PRO_PLAN"
