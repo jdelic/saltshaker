@@ -97,6 +97,10 @@ base:
         - match: grain
         - shared.vaultwarden
 
+    'roles:standardnotes':
+        - match: grain
+        - shared.standardnotes
+
     'not *.test and G@roles:vault':
         - match: compound
         - hetzner.vault
@@ -118,6 +122,7 @@ base:
         - hetzner.nomad
         - hetzner.postgresql
         - hetzner.ssl
+        - hetzner.standardnotes
         - hetzner.vaultwarden
         - shared.urls
         - shared.live-users
@@ -140,6 +145,7 @@ base:
         - local.nomad
         - local.postgresql
         - local.ssl
+        - local.standardnotes
         - local.vault
         - local.vaultwarden
         # - local.url_overrides

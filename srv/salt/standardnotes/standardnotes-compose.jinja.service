@@ -1,0 +1,18 @@
+[Unit]
+Description=Standard Notes v2 docker compose stack
+After=docker.service network-online.target secure.mount
+Requires=docker.service
+{% if pillar['secure-is-a-mount'] %}
+ConditionPathIsMountPoint=/secure
+{% endif %}
+
+[Service]
+Type=oneshot
+RemainAfterExit=yes
+WorkingDirectory=/etc/standardnotes
+ExecStart=/usr/bin/docker compose -f /etc/standardnotes/docker-compose.yml up -d --remove-orphans
+ExecStop=/usr/bin/docker compose -f /etc/standardnotes/docker-compose.yml down
+TimeoutStartSec=0
+
+[Install]
+WantedBy=multi-user.target

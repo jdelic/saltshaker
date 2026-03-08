@@ -290,7 +290,8 @@ SCRIPT
                 #touch /etc/salt/roles.d/buildserver
                 #touch /etc/salt/roles.d/buildworker
                 #touch /etc/salt/roles.d/apps
-                touch /etc/salt/roles.d/vaultwarden
+                #touch /etc/salt/roles.d/vaultwarden
+                touch /etc/salt/roles.d/standardnotes
                 touch /etc/salt/roles.d/loadbalancer
 SCRIPT
         end
