@@ -190,8 +190,8 @@ class DynamicSecretsPillar(DynamicSecretsStore):
         length = 20
         if "encode" in secret_config:
             encode = secret_config["encode"]
-            if encode not in ["base64", "alpha"]:
-                raise ValueError("Not a valid encoding (must be 'base64' or 'alpha'): %s", encode)
+            if encode not in ["base64", "alpha", "hex"]:
+                raise ValueError("Not a valid encoding (must be 'base64', 'alpha' or 'hex'): %s", encode)
         if "length" in secret_config:
             try:
                 length = int(secret_config["length"])
@@ -202,6 +202,8 @@ class DynamicSecretsPillar(DynamicSecretsStore):
         if secret_type == "password":
             if encode == "base64":
                 self.save(secret_name, secret_type, base64.b64encode(os.urandom(length)).decode("utf-8"), host)
+            elif encode == "hex":
+                self.save(secret_name, secret_type, os.urandom(length).hex(), host)
             else:
                 self.save(secret_name, secret_type, self._alphaencoding(os.urandom(length))[:length], host)
         elif secret_type == "rsa":
