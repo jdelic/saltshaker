@@ -27,8 +27,8 @@ write_files:
 runcmd:
     - dd if=/dev/zero of=/swapfile bs=1M count=4096
     - chmod 600 /swapfile
-    - echo "cryptswap /swapfile /dev/urandom swap,cipher=aes-xts-plain64,size=256" >> /etc/crypttab
-    - echo "/dev/mapper/cryptswap none swap sw 0 0" >> /etc/fstab
+    - echo "cryptswap /swapfile /dev/urandom plain,swap,cipher=aes-xts-plain64,size=256,noauto" >> /etc/crypttab
+    - echo "/dev/mapper/cryptswap none swap sw,x-systemd.requires=systemd-cryptsetup@cryptswap.service,x-systemd.after=systemd-remount-fs.service 0 0" >> /etc/fstab
     - cryptsetup open --type plain -d /dev/urandom --cipher aes-xts-plain64 --key-size 256 /swapfile cryptswap
     - mkswap /dev/mapper/cryptswap
     - swapon /dev/mapper/cryptswap
