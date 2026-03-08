@@ -20,7 +20,8 @@ services:
             - "{{ip}}:{{standardnotes.get('webapp-bind-port', 31301)}}:80"
         environment:
             - DEFAULT_SYNC_SERVER={{standardnotes.get('default-sync-server', 'https://' + standardnotes.get('hostname'))}}
-            - DISABLE_USER_REGISTRATION=true
+        volumes:
+            - /etc/standardnotes/webapp_default_sync_server.sh:/docker-entrypoint.d/99-default-sync-server.sh:ro
         networks:
             - standardnotes_self_hosted
 

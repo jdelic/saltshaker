@@ -152,6 +152,17 @@ standardnotes-localstack-bootstrap:
             - file: standardnotes-config-dir
 
 
+standardnotes-webapp-default-sync-script:
+    file.managed:
+        - name: /etc/standardnotes/webapp_default_sync_server.sh
+        - source: salt://standardnotes/webapp_default_sync_server.sh
+        - user: root
+        - group: root
+        - mode: '0755'
+        - require:
+            - file: standardnotes-config-dir
+
+
 standardnotes-add-user-script:
     file.managed:
         - name: /usr/local/bin/standardnotes-add-user
@@ -185,12 +196,14 @@ standardnotes-systemd:
             - file: standardnotes-envfile-base
             - file: standardnotes-compose-file
             - file: standardnotes-localstack-bootstrap
+            - file: standardnotes-webapp-default-sync-script
             - file: standardnotes-add-user-script
             - cmd: standardnotes-sync
         - watch:
             - file: standardnotes-envfile-base
             - file: standardnotes-compose-file
             - file: standardnotes-localstack-bootstrap
+            - file: standardnotes-webapp-default-sync-script
             - systemdunit: standardnotes-systemd
 
 
