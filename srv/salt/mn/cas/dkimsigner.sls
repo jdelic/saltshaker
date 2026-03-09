@@ -30,10 +30,7 @@ dkimsigner-rsyslog:
 {% set config = {
     "VAULT_CA": pillar['ssl']['service-rootca-cert'] if pillar['vault'].get('pinned-ca-cert', 'default') == 'default'
         else pillar['vault']['pinned-ca-cert'],
-    "BINDIP": '127.0.0.1',
-    "BINDPORT": pillar.get('dkimsigner', {}).get('bind-port', 10036),
-    "RELAYIP": '127.0.0.1',
-    "RELAYPORT": pillar.get('dkimsigner', {}).get('relay-port', 10035),
+    "DKIMSIGNER_NETWORK_MAPPING": "127.0.0.1:10036:127.0.0.1:10035,127.0.0.1:10038:127.0.0.1:10037",
     "DATABASE_NAME": pillar['authserver']['dbname'],
     "DATABASE_PARENTROLE": pillar['dkimsigner']['dbuser'],
     "POSTGRESQL_CA": pillar['ssl']['service-rootca-cert'] if
