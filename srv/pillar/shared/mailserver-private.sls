@@ -38,7 +38,7 @@ smtp:
     #relay-via:
     #    url: smtps://ses@host/
     #    auth: ses=user:password
-    #enable-transactional-relay: true
+    #enable-transactional-relay: True
     #transactional-relay-via:
     #    url: smtps://ses-transactional@host/
     #    auth: ses-transactional=user:password

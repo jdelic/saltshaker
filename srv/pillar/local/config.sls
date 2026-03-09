@@ -3,5 +3,5 @@
 # services and can be reasonably expected to remain constant across an environment.
 
 sudoers-allow-nopasswd: True
-local-development-environment-dns: true
+local-development-environment-dns: True
 secure-is-a-mount: False
