@@ -43,5 +43,8 @@ smtp:
     #    url: smtps://ses-transactional@host/
     #    auth: ses-transactional=user:password
 
+mailforwarder:
+    transactional-relay-port: 10047
+
 # vim: syntax=yaml
 

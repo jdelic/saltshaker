@@ -37,7 +37,8 @@ mailforwarder-rsyslog:
     "MAILFORWARDER_REMOTERELAY_IP": '127.0.0.1',
     "MAILFORWARDER_REMOTERELAY_PORT": pillar.get('mailforwarder', {}).get('relay-port', 10045),
     "MAILFORWARDER_TRANSACTIONALRELAY_IP": "127.0.0.1",
-    "MAILFORWARDER_TRANSACTIONALRELAY_PORT": pillar.get('mailforwarder', {}).get('transactional-relay-port', 10047),
+    "MAILFORWARDER_TRANSACTIONALRELAY_PORT": pillar.get('mailforwarder', {}).get('transactional-relay-port', 10045) if 
+        pillar['mailforwarder'].get('enable-transactional-relay', False) else 10045,
     "DATABASE_NAME": pillar['authserver']['dbname'],
     "DATABASE_PARENTROLE": pillar['mailforwarder']['dbuser'],
     "POSTGRESQL_CA": pillar['ssl']['service-rootca-cert'] if

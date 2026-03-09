@@ -291,6 +291,15 @@ opensmtpd-config:
             {% if pillar['smtp'].get('relay-via', {}).get('auth', False) %}
             relay_via_auth: {{pillar['smtp']['relay-via']['auth']}}
             {% endif %}
+            enable_transactional_relay: {{pillar['smtp'].get('enable-transactional-relay', False)}}
+            {% if pillar['smtp'].get('enable-transactional-relay', False) %}
+                {% if pillar['smtp'].get('transactional-relay-via', {}).get('url', False) %}
+            txrelay_via_url: {{pillar['smtp']['transactional-relay-via']['url']}}
+                {% endif %}
+                {% if pillar['smtp'].get('transactional-relay-via', {}).get('auth', False) %}
+            txrelay_via_auth: {{pillar['smtp']['transactional-relay-via']['auth']}}
+                {% endif %}
+            {% endif %}
         - require:
             - pkg: opensmtpd
             - file: opensmtpd-authserver-config
