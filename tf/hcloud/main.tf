@@ -235,6 +235,12 @@ resource "hcloud_storage_box" "backup-box" {
         prevent_destroy = true
     }
 
+    snapshot_plan = {
+        hour = 05
+        minute = 07
+        max_snapshots = 10
+    }
+
     depends_on = [hcloud_ssh_key.jm_hades, hcloud_ssh_key.jm_parasite]
 }
 
