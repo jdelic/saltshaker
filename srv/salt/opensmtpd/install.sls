@@ -242,6 +242,7 @@ opensmtpd-config:
         - name: /etc/smtpd.conf
         - source: salt://opensmtpd/smtpd.jinja.conf
         - template: jinja
+        - mode: '0640'
         - context:
             receiver_hostname: {{pillar['smtp-incoming']['hostname']}}
             relay_hostname: {{pillar['smtp-outgoing']['hostname']}}
