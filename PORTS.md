@@ -1,7 +1,7 @@
 # PORT ASSIGNMENTS
 
 PORT     | SMARTSTACK | ASSIGNED SERVICE
---------:|:----------:|:-----------------------------------------
+--------:|:----------:|:---------------------------------------------
     25   |      X*    | SMTP
    143   |            | IMAP
    993   |            | IMAP
@@ -19,6 +19,15 @@ PORT     | SMARTSTACK | ASSIGNED SERVICE
   8600   |            | consul dns
   8990   |            | caldav
   8999   |      X     | authserver
+ 10025   |            | Amavisd -> OpenSMTPD
+ 10026   |            | OpenSMTPD -> Amavisd
+ 10035   |            | dkimsigner -> OpenSMTPD
+ 10036   |            | OpenSMTPD -> dkimsigner
+ 10037   |            | dkimsigner -> OpenSMTPD (transactional)
+ 10038   |            | OpenSMTPD -> dkimsigner (transactional)
+ 10045   |            | mailforwarder -> OpenSMTPD
+ 10046   |            | OpenSMTPD -> mailforwarder
+ 10047   |            | mailforwarder -> OpenSMTPD (transactional)
  31080   |      X     | vaultwarden API
  31300   |      X     | standardnotes API
  31301   |      X     | standardnotes web app

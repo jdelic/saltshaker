@@ -30,9 +30,21 @@ smtp:
         sslcert-content: ssl:smtp-local:combined
         sslkey-content: ssl:smtp-local:key
 
+    # `relay-via` relays all email from OpenSMTPD via a third party smarthost with optional authentication.
+    # `transactional-relay-via` relays only "transactional" email which is non-forwarded email on domains
+    # that have the can_use_transactional_relay flag set in authserver and are routed via mailforwarder.
+    # Setting `enable-transactional-relay` will add configuration for a second relay in OpenSMTPD.
+
     #relay-via:
     #    url: smtps://ses@host/
-    #    auth: { ses=user:password }
+    #    auth: ses=user:password
+    #enable-transactional-relay: True
+    #transactional-relay-via:
+    #    url: smtps://ses-transactional@host/
+    #    auth: ses-transactional=user:password
+
+mailforwarder:
+    transactional-relay-port: 10047
 
 # vim: syntax=yaml
 

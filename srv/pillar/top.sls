@@ -75,6 +75,7 @@ base:
     'roles:mail':
         - match: grain
         - shared.secrets.smtp
+        - shared.secrets.smtp-relay
         - shared.mailserver-private
 
     'not *.text and G@roles:mail':
