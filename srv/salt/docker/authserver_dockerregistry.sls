@@ -3,7 +3,6 @@
 #
 
 {% if pillar.get('docker', {}).get('registry', {}).get('enabled', False) %}
-#FIXME: support new authserver commands and create JWT key correctly
 
 {% set registry_hostname = pillar['docker']['registry']['hostname'] %}
 docker-registry-domain:
