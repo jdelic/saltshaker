@@ -20,12 +20,13 @@ docker:
 
 # we install a modified docker.service to
 #     1. fix the docker0 bridge IP in place
-#     2.
 dockerd-systemd:
-    systemdunit.managed:
-        - name: /lib/systemd/system/docker.service
-        - source: salt://docker/docker.jinja.service
+    file.managed:
+        - name: /etc/systemd/system/docker.service.d/override.conf
+        - source: salt://docker/systemd-override.jinja.conf
+        - mode: '0644'
         - template: jinja
+        - makedirs: True
         - context:
             bridge_cidr: {{pillar['docker']['bridge-cidr']}}
             container_cidr: {{pillar['docker']['container-cidr']}}
@@ -40,7 +41,7 @@ dockerd-service:
         - require:
             - pkg: docker
         - watch:
-            - systemdunit: dockerd-systemd
+            - file: dockerd-systemd
 
 
 # TODO: add a DROP rule to the FORWARD chain so not every container gets hooked up
