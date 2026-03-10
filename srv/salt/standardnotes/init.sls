@@ -53,8 +53,8 @@ standardnotes-db-import-dir:
 standardnotes-db-dir:
     file.directory:
         - name: /secure/standardnotes/db
-        - user: root
-        - group: root
+        - user: 999
+        - group: 999
         - mode: '0750'
         - makedirs: True
         - require:
@@ -86,8 +86,8 @@ standardnotes-uploads-dir:
 standardnotes-redis-dir:
     file.directory:
         - name: /secure/standardnotes/redis
-        - user: root
-        - group: root
+        - user: 999
+        - group: 999
         - mode: '0750'
         - makedirs: True
         - require:
