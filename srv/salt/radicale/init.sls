@@ -129,7 +129,7 @@ radicale-backup-symlink:
         - name: /etc/duplicity.d/daily/folderlinks/radicale
         - target: {{pillar['calendar']['storagepath']}}
         - require:
-            - file: radicale-base-dir
+            - file: radicale-secure-storage
 {% else %}
 radicale-backup-symlink-absent:
     file.absent:
