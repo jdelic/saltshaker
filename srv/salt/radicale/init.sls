@@ -96,7 +96,7 @@ radicale-servicedef-external:
                 )|int()]
             )}}
             port: {{pillar.get('calendar', {}).get('bind-port', 8990)}}
-            hostname: imap.service.consul
+            hostname: {{pillar['calendar']['hostname']}}
         - require:
             - service: radicale
             - file: consul-service-dir
