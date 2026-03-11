@@ -62,6 +62,7 @@ for PRESCRIPT in /etc/duplicity.d/$1/prescripts/*; do
     fi
 done
 
+BACKUP_TARGET_URL="{{backup_target_url}}"
 for LINK in /etc/duplicity.d/$1/folderlinks/*; do
     [ -e "$LINK" ] || continue
     FOLDER=""
@@ -86,16 +87,17 @@ for LINK in /etc/duplicity.d/$1/folderlinks/*; do
         done
     fi
 
+    THIS_TARGET="${BACKUP_TARGET_URL%%/}/$BL"
     echo "Running duplicity {% if additional_options %}{{additional_options|replace('"', '\"')}}{% endif %}" \
          "{% for key_id in gpg_keys %}--encrypt-key={{key_id|replace('"', '\"')}} {% endfor %}" \
-         "{% if gpg_options %}--gpg-options='{{gpg_options|replace('"', '\"')}}'{% endif %} " \
+         "{% if gpg_options %}--gpg-options='{{gpg_options|replace('"', '\"')}}'{% endif %} " \  # fix idea parsing'"\
          "{% if sign_key %}--sign-key={{sign_key}}{% endif %} backup " \
-         "$FOLDER {{backup_target_url}}"
+         "$FOLDER $THIS_TARGET"
 
     /usr/bin/duplicity {% if additional_options %}{{additional_options}}{% endif %} \
         {% for key_id in gpg_keys %}--encrypt-key={{key_id}} {% endfor %} \
         {% if gpg_options %}--gpg-options='{{gpg_options}}'{% endif %} \
-        {% if sign_key %}--sign-key={{sign_key}}{% endif %} backup $FOLDER {{backup_target_url}}
+        {% if sign_key %}--sign-key={{sign_key}}{% endif %} backup $FOLDER $THIS_TARGET
 
     if [ -d "/etc/duplicity.d/$1/postscripts/$BL" ]; then
         for POSTSCRIPT in /etc/duplicity.d/$1/postscripts/$BL/*; do
