@@ -5,10 +5,17 @@ emailstore:
 
 
 imap:
-    sslcert: default  # special value "default" means: "use maincert from ssl.init"
-    sslkey: default
-    sslcert-content: ''  # contents_pillar reference if imap should use a different cert
-    sslkey-content: ''
+    external:
+        sslcert: default  # special value "default" means: "use maincert from ssl.init"
+        sslkey: default
+        sslcert-content: ''  # contents_pillar reference if imap should use a different cert
+        sslkey-content: ''
+
+    internal:
+        sslcert: {{salt['file.join'](certificate_location, "imap.local-combined.crt")}}
+        sslkey: {{salt['file.join'](secret_key_location, "imap.local.key")}}
+        sslcert-content: ssl:imap-local:combined
+        sslkey-content: ssl:imap-local:key
 
 
 smtp:
