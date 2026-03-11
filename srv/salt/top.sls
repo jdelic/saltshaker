@@ -112,7 +112,7 @@ base:
         - mn.cas.mailforwarder
         - msmtp.not
 
-    'roles:pim':
+    'roles:calendar':
         - match: grain
         - fstab.secure
         - radicale

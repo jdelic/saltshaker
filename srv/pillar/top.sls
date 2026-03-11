@@ -64,7 +64,7 @@ base:
         - shared.secrets.smtp-relay
         - shared.mailserver-private
 
-    'roles:pim':
+    'roles:calendar':
         - match: grain
         - shared.calendar
 
