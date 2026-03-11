@@ -90,7 +90,7 @@ for LINK in /etc/duplicity.d/$1/folderlinks/*; do
     THIS_TARGET="${BACKUP_TARGET_URL%%/}/$BL"
     echo "Running duplicity {% if additional_options %}{{additional_options|replace('"', '\"')}}{% endif %}" \
          "{% for key_id in gpg_keys %}--encrypt-key={{key_id|replace('"', '\"')}} {% endfor %}" \
-         "{% if gpg_options %}--gpg-options='{{gpg_options|replace('"', '\"')}}'{% endif %} " \  # fix idea parsing'"\
+         "{% if gpg_options %}--gpg-options='{{gpg_options|replace('"', '\"')}}'{% endif %} " \
          "{% if sign_key %}--sign-key={{sign_key}}{% endif %} backup " \
          "$FOLDER $THIS_TARGET"
 
