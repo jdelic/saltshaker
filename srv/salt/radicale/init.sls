@@ -45,7 +45,7 @@ radicale-config:
             )}}
             bindport: {{pillar.get('calendar', {}).get('bind-port', 8990)}}
             storage_path: {{pillar['calendar']['storagepath']}}
-            imap_host: imap.service.consul
+            imap_host: {{pillar['imap-incoming']['hostname']}}
         - require:
             - file: radicale-secure-storage
 
