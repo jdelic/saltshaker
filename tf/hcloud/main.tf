@@ -72,7 +72,7 @@ locals {
             desired_count_of_additional_ipv6_ips = 0
             ptr = "mail.maurus.net"
             additional_ip_ptr = "smtp.maurus.net"
-            roles = ["mail", "vaultwarden"]
+            roles = ["mail", "vaultwarden", "standardnotes", "calendar"]
             firewall_ids = [hcloud_firewall.mail.id, hcloud_firewall.ping.id]
             volumes = {
                 "maildata" = {
