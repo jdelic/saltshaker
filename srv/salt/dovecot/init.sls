@@ -80,6 +80,12 @@ sa-learn-pipe-script:
 
 
 {% set dovecot_ips = {
+    "internal":
+        pillar.get('imap-incoming', {}).get(
+                'override-internal', grains['ip4_interfaces'][pillar['ifassign']['internal']][
+                    pillar['ifassign'].get('internal-ip-index', 0)|int()
+                ]
+            ),
     "ipv4":
         pillar.get('imap-incoming', {}).get(
                 'override-ipv4', grains['ip4_interfaces'].get(pillar['ifassign']['external'])[
@@ -115,7 +121,7 @@ dovecot-config-{{file}}:
                 {%- else %}
                     {{pillar['imap']['sslkey']}}
                 {%- endif %}
-            bindips: ["{{dovecot_ips['ipv4']}}", "{{dovecot_ips['ipv6']}}"]
+            bindips: ["{{dovecot_ips['internal']}}", "{{dovecot_ips['ipv4']}}", "{{dovecot_ips['ipv6']}}"]
             bindport: 143
             ssl_bindport: 993
         - watch_in:
@@ -148,12 +154,27 @@ dovecot-consul-servicedef:
         - mode: '0644'
         - template: jinja
         - context:
-            ip: {{dovecot_ips['ipv4']}}
-            port: 143
-            sslip: {{dovecot_ips['ipv4']}}
-            sslport: 993
+            ip: {{dovecot_ips['internal']}}
+            port: 993
         - require:
             - file: consul-service-dir
+
+
+dovecot-in993-recv-internal:
+    nftables.append:
+        - table: filter
+        - chain: input
+        - family: ip4
+        - jump: accept
+        - source: '0/0'
+        - destination: {{dovecot_ips['internal']}}
+        - dport: 993
+        - match: state
+        - connstate: new
+        - proto: tcp
+        - save: True
+        - require:
+            - sls: basics.nftables.setup
 
 
 # allow others to contact us on ports (imap, imaps, managesieve)
