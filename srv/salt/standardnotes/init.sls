@@ -121,6 +121,7 @@ standardnotes-envfile-base:
             COOKIE_SAME_SITE={{standardnotes.get('cookie-same-site', 'None')}}
             COOKIE_SECURE={{'false' if not standardnotes.get('cookie-secure', True) else 'true'}}
             COOKIE_PARTITIONED={{'true' if standardnotes.get('cookie-partitioned', False) else 'false'}}
+            CORS_ORIGINS={{standardnotes['webapp-hostname']}}
         - require:
             - file: standardnotes-config-dir
 
