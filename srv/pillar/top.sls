@@ -82,7 +82,7 @@ base:
         - match: compound
         - shared.secrets.smtp-relay
 
-    'roles:pim':
+    'roles:calendar':
         - match: grain
         - shared.calendar
 

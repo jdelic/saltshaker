@@ -284,7 +284,7 @@ SCRIPT
                 mkdir -p /etc/salt/roles.d
                 touch /etc/salt/roles.d/vagrant
                 #touch /etc/salt/roles.d/mail
-                #touch /etc/salt/roles.d/pim
+                #touch /etc/salt/roles.d/calendar
                 #touch /etc/salt/roles.d/dev
                 #touch /etc/salt/roles.d/buildserver
                 #touch /etc/salt/roles.d/buildworker

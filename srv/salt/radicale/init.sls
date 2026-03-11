@@ -1,13 +1,3 @@
-
-#maurusnet-radicale:
-#    pkgrepo.managed:
-#        - humanname: repo.maurus.net-radicale
-#        - name: {{pillar['repos']['maurusnet-radicale']}}
-#        - file: /etc/apt/sources.list.d/mn-radicale.list
-#        - key_url: salt://mn/packaging_authority_A78049AF.pgp.key
-#        - aptkey: False
-
-
 radicale:
     pkg.installed:
         - name: radicale
@@ -22,6 +12,7 @@ radicale:
             - file: radicale-config
             - file: radicale-rights
             - file: radicale-defaults
+            - file: radicale-systemd-override
         - require:
             - pkg: radicale
 
@@ -78,6 +69,17 @@ radicale-defaults:
         - mode: '0644'
 
 
+radicale-systemd-override:
+    file.managed:
+        - name: /etc/systemd/system/radicale.service.d/override.conf
+        - source: salt://radicale/systemd-override.jinja.conf
+        - user: root
+        - group: root
+        - mode: '0644'
+        - template: jinja
+        - makedirs: True
+
+
 radicale-servicedef-external:
     file.managed:
         - name: /etc/consul/services.d/radicale-external.json
@@ -119,3 +121,17 @@ radicale-tcp-in{{pillar.get('radicale', {}).get('bind-port', 8990)}}-recv-ipv4:
         - save: True
         - require:
             - sls: basics.nftables.setup
+
+
+{% if pillar.get('duplicity-backup', {}).get('enabled', False) %}
+radicale-backup-symlink:
+    file.symlink:
+        - name: /etc/duplicity.d/daily/folderlinks/radicale
+        - target: {{pillar['calendar']['storagepath']}}
+        - require:
+            - file: radicale-base-dir
+{% else %}
+radicale-backup-symlink-absent:
+    file.absent:
+        - name: /etc/duplicity.d/daily/folderlinks/radicale
+{% endif %}
