@@ -20,6 +20,7 @@ PKI Layout
 Recommended SAN sets (mirroring current repo)
 ---------------------------------------------
 - SMTP: ``smtp.local``, ``smtp.internal``, ``smtp.service.consul``.
+- IMAP: ``imap.local``, ``mail.maurusnet.internal``, ``imap.service.consul``.
 - PostgreSQL: ``postgresql.local``, ``postgresql.internal``, ``postgresql.service.consul``.
 - Vault: ``vault.local``, ``vault.internal``, ``vault.service.consul``, ``vault.{dev_domain}``, ``vault.{prod_domain}``.
 - Dev wildcard: ``*.{dev_domain}`` and ``{dev_domain}``.
