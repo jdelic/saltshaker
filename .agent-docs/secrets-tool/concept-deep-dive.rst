@@ -19,13 +19,13 @@ PKI Layout
 
 Recommended SAN sets (mirroring current repo)
 ---------------------------------------------
-- SMTP: ``smtp.local``, ``smtp.internal``, ``smtp.service.consul``.
-- IMAP: ``imap.local``, ``mail.maurusnet.internal``, ``imap.service.consul``.
-- PostgreSQL: ``postgresql.local``, ``postgresql.internal``, ``postgresql.service.consul``.
-- Vault: ``vault.local``, ``vault.internal``, ``vault.service.consul``, ``vault.{dev_domain}``, ``vault.{prod_domain}``.
+- SMTP: ``smtp.local``, ``smtp.{internal_domain}``, ``smtp.service.consul``.
+- IMAP: ``imap.local``, ``mail.{internal_domain}``, ``imap.service.consul``.
+- PostgreSQL: ``postgresql.local``, ``postgresql.{internal_domain}``, ``postgresql.service.consul``.
+- Vault: ``vault.local``, ``vault.{internal_domain}``, ``vault.service.consul``, ``vault.{dev_domain}``, ``vault.{prod_domain}``.
 - Dev wildcard: ``*.{dev_domain}`` and ``{dev_domain}``.
 
-The tool will allow overrides but default to the current layout.
+The tool will allow overrides, and ``internal_domain`` defaults to a sanitized form of the first production domain with ``.internal`` appended.
 
 ACME DNS Flow
 -------------

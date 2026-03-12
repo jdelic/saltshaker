@@ -27,6 +27,7 @@ CLI Shape
 
   - ``--dev-domain`` (single dev/test domain, e.g. ``maurusnet.test``)
   - ``--prod-domains`` (comma list, e.g. ``maurus.net``)
+  - ``--internal-domain`` (internal service suffix, defaults to a sanitized form of the first prod domain such as ``maurusnet.internal``)
   - ``--secrets-dir`` (defaults to secrets submodule)
   - ``--crypto-dir`` (defaults to basics/crypto)
   - ``--force`` (overwrite)
