@@ -511,6 +511,12 @@ def build_cert_specs(dev_domain: str, prod_domains: List[str]) -> List[CertSpec]
             sls_key="smtp-local",
         ),
         CertSpec(
+            name="imap",
+            common_name="imap.local",
+            san=["imap.local", "mail.maurusnet.internal", "imap.service.consul"],
+            sls_key="imap-local",
+        ),
+        CertSpec(
             name="vault",
             common_name="vault.local",
             san=vault_san,
