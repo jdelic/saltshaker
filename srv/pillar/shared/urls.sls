@@ -27,9 +27,9 @@ urls:
     concourse-fly: https://github.com/concourse/concourse/releases/download/v8.1.0/fly-8.1.0-linux-amd64.tgz
     consul: https://releases.hashicorp.com/consul/1.22.5/consul_1.22.5_linux_amd64.zip
     consul-template: https://releases.hashicorp.com/consul-template/0.41.4/consul-template_0.41.4_linux_amd64.zip
-    nomad: https://releases.hashicorp.com/nomad/1.11.2/nomad_1.11.2_linux_amd64.zip
+    nomad: https://releases.hashicorp.com/nomad/1.11.3/nomad_1.11.3_linux_amd64.zip
     nomad-autoscaler: https://releases.hashicorp.com/nomad-autoscaler/0.4.9/nomad-autoscaler_0.4.9_linux_amd64.zip
-    vault: https://releases.hashicorp.com/vault/1.21.3/vault_1.21.3_linux_amd64.zip
+    vault: https://releases.hashicorp.com/vault/1.21.4/vault_1.21.4_linux_amd64.zip
     vault-gpg-plugin: https://github.com/LeSuisse/vault-gpg-plugin/releases/download/v0.6.3/linux_amd64.zip
     vault-ssh-helper: https://releases.hashicorp.com/vault-ssh-helper/0.2.1/vault-ssh-helper_0.2.1_linux_amd64.zip
 
@@ -40,10 +40,8 @@ hashes:
     concourse-fly: sha256=e8ef5afa9789e149a7bcf76921a063a5414bf8239ac3ae62cb880f03f40b862c
     consul: sha256=58603b87fd085282f882fcd02b5165c93b321692514b2ab822dec8dd4cd028a3
     consul-template: sha256=9e999cfbfdc47e67d3d91e6e4edbecaa3d7c3b026307b18c0485b64d15e5083a
-    nomad: sha256=e042b0f6f6648b149be7cfddac832214cf8ca17725e5f0e420b5b0547532bdcd
+    nomad: sha256=19dac5642a2ba5305e6ff8efee06a708d760ebe4d1cd7936bc3dc526f477dc12
     nomad-autoscaler: sha256=4b89c4d266663c9795b32930199c489a67606ac13f03e7fca8da15a0513a6ca7
-    nomad-driver-podman: sha256=5b9ac89585d7359f941a2504b11d50866f67c2887cb3716fba2bbaa0749a14a8
-    nomad-pack: sha256=08e213dfe76152b512da9fd8c57c24365812a43c96deda6f88cde26aab03310b
-    vault: sha256=c945e90979a7b6e4b4846285587c35b25f8191f9f70cb879132bc118ae42c368
+    vault: sha256=889b681990fe221b884b7932fa9c9dd0ee9811b9349554f1aa287ab63c9f3dae
     vault-gpg-plugin: sha256=975115ef6e870cd5429efe99cffc8ce1f8c17350d9fbab02527e4de9ff436e62
     vault-ssh-helper: sha256=fe26f62e5822bdf66ea4bf874d1a535ffca19af07a27ff3bcd7e344bc1af39fe
