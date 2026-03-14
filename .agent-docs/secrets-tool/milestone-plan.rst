@@ -14,6 +14,7 @@ M2: CA and Certificate Generation Workflow
 - Generate leaf certs for:
 
   - ``smtp.local``
+  - ``imap.local``
   - ``vault.local``
   - ``postgresql.local``
   - ``*.{dev_domain}``

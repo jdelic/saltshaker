@@ -6,7 +6,7 @@ Goal
 Build a Python CLI tool that initializes the SaltShaker secrets pillar set from scratch. The tool generates:
 
 - Root CA and intermediate (sub) CA using OpenSSL (ECC keys).
-- Internal service certificates for ``smtp.local``, ``vault.local``, ``postgresql.local``.
+- Internal service certificates for ``smtp.local``, ``imap.local``, ``vault.local``, ``postgresql.local``.
 - Development wildcard certificate for ``*.{dev_domain}`` signed by the intermediate CA.
 - Production wildcard certificate for ``*.{prod_domain}`` via ACME DNS challenge (Certbot or compatible client).
 - GPG signing key (public + secret) for Debian repo signing.
@@ -27,6 +27,7 @@ CLI Shape
 
   - ``--dev-domain`` (single dev/test domain, e.g. ``maurusnet.test``)
   - ``--prod-domains`` (comma list, e.g. ``maurus.net``)
+  - ``--internal-domain`` (internal service suffix, defaults to a sanitized form of the first prod domain such as ``maurusnet.internal``)
   - ``--secrets-dir`` (defaults to secrets submodule)
   - ``--crypto-dir`` (defaults to basics/crypto)
   - ``--force`` (overwrite)
@@ -38,7 +39,7 @@ Core Outputs
 - ``srv/pillar/shared/secrets/common.sls``: intermediate CA cert (for chains).
 - ``dev-ssl.sls``: wildcard dev cert + key + chain.
 - ``live-ssl.sls``: wildcard prod cert + key + chain (ACME). If ACME not run, create a placeholder with instructions.
-- ``smtp.sls`` / ``vault-ssl.sls`` / ``postgresql.sls``: leaf certs signed by intermediate CA.
+- ``smtp.sls`` / ``imap.sls`` / ``vault-ssl.sls`` / ``postgresql.sls``: leaf certs signed by intermediate CA.
 - ``gpg-package-signing.sls``: public + private key blocks.
 - ``srv/salt/basics/crypto/maurusnet-rootca.crt``: root CA cert.
 - ``srv/salt/basics/crypto/dev/dev-ca.crt``: intermediate CA cert (dev/infra CA).

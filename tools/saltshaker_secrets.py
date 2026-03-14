@@ -110,6 +110,14 @@ def root_ca_filename(domain: str) -> str:
     return f"{compact}-rootca.crt"
 
 
+def default_internal_domain(dev_domain: str, prod_domains: List[str]) -> str:
+    base_domain = prod_domains[0] if prod_domains else dev_domain
+    compact = re.sub(r"[^A-Za-z0-9]+", "", base_domain).lower()
+    if not compact:
+        compact = "local"
+    return f"{compact}.internal"
+
+
 def write_file(path: Path, content: str, *, force: bool) -> None:
     if path.exists() and not force:
         raise FileExistsError(f"Refusing to overwrite {path}. Use --force to replace.")
@@ -498,8 +506,13 @@ def generate_gpg_key(work_dir: Path, uid: str, key_type: str, key_length: int, e
     return public.strip() + "\n" + secret.strip() + "\n"
 
 
-def build_cert_specs(dev_domain: str, prod_domains: List[str]) -> List[CertSpec]:
-    vault_san = ["vault.local", "vault.internal", "vault.service.consul", f"vault.{dev_domain}"]
+def build_cert_specs(dev_domain: str, prod_domains: List[str], internal_domain: str) -> List[CertSpec]:
+    vault_san = [
+        "vault.local",
+        f"vault.{internal_domain}",
+        "vault.service.consul",
+        f"vault.{dev_domain}",
+    ]
     for domain in prod_domains:
         vault_san.append(f"vault.{domain}")
 
@@ -507,8 +520,14 @@ def build_cert_specs(dev_domain: str, prod_domains: List[str]) -> List[CertSpec]
         CertSpec(
             name="smtp",
             common_name="smtp.local",
-            san=["smtp.local", "smtp.internal", "smtp.service.consul"],
+            san=["smtp.local", f"smtp.{internal_domain}", "smtp.service.consul"],
             sls_key="smtp-local",
+        ),
+        CertSpec(
+            name="imap",
+            common_name="imap.local",
+            san=["imap.local", f"mail.{internal_domain}", "imap.service.consul"],
+            sls_key="imap-local",
         ),
         CertSpec(
             name="vault",
@@ -519,7 +538,7 @@ def build_cert_specs(dev_domain: str, prod_domains: List[str]) -> List[CertSpec]
         CertSpec(
             name="postgresql",
             common_name="postgresql.local",
-            san=["postgresql.local", "postgresql.internal", "postgresql.service.consul"],
+            san=["postgresql.local", f"postgresql.{internal_domain}", "postgresql.service.consul"],
             sls_key="postgresql",
         ),
         CertSpec(
@@ -546,11 +565,16 @@ def init(args: argparse.Namespace) -> None:
     print(
         "Provide a development domain (used for local VMs and /etc/hosts) and\n"
         "a production domain (used for internet-facing services). You'll also\n"
-        "enter CA certificate metadata used when issuing certs.\n"
+        "configure the internal service domain and CA metadata used when\n"
+        "issuing certs.\n"
     )
 
     dev_domain = args.dev_domain or prompt("Development domain (for wildcard)")
     prod_domains = sanitize_domains(args.prod_domains or prompt("Production domains (comma-separated)", ""))
+    internal_domain = args.internal_domain or prompt(
+        "Internal service domain",
+        default_internal_domain(dev_domain, prod_domains),
+    )
 
     if not prod_domains:
         warn("No production domains supplied; live-ssl.sls will be stubbed.", enabled=color_enabled)
@@ -579,7 +603,7 @@ def init(args: argparse.Namespace) -> None:
         root_cert=root_cert,
     )
 
-    specs = build_cert_specs(dev_domain, prod_domains)
+    specs = build_cert_specs(dev_domain, prod_domains, internal_domain)
     leaf_material = {}
     for spec in specs:
         info(f"Generating leaf cert {spec.name}...", enabled=color_enabled)
@@ -665,7 +689,7 @@ def init(args: argparse.Namespace) -> None:
     print(
         f"- Add `salt://basics/crypto/{root_ca_name}` to install-ca-certs in `srv/pillar/shared/ssl.sls`"
     )
-    print(f"- Verify TLDs in `srv/pillar/shared/network.sls` match {dev_domain} and your internal TLDs")
+    print(f"- Verify TLDs in `srv/pillar/shared/network.sls` match {dev_domain} and {internal_domain}")
     print(f"- Verify external_tld in `srv/pillar/local/wellknown.sls` is {dev_domain}")
     if prod_domains:
         print(f"- Verify external_tld in `srv/pillar/hetzner/wellknown.sls` (env/hcloud) matches {prod_domains[0]}")
@@ -677,6 +701,7 @@ def init(args: argparse.Namespace) -> None:
         "init",
         f"--dev-domain={dev_domain}",
         f"--prod-domains={','.join(prod_domains)}" if prod_domains else "--prod-domains=",
+        f"--internal-domain={internal_domain}",
         f"--org={org}",
         f"--country={country}",
         f"--state={state}",
@@ -695,6 +720,7 @@ def build_parser() -> argparse.ArgumentParser:
     init_parser = sub.add_parser("init", help="Initialize secrets pillars")
     init_parser.add_argument("--dev-domain")
     init_parser.add_argument("--prod-domains")
+    init_parser.add_argument("--internal-domain")
     init_parser.add_argument("--secrets-dir")
     init_parser.add_argument("--crypto-dir")
     init_parser.add_argument("--work-dir")
