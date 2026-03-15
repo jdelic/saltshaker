@@ -36,6 +36,8 @@ openssh-config:
         - name: /etc/ssh/sshd_config.d/00-sshd_config.conf
         - source: salt://basics/crypto/sshd_config.jinja.conf
         - template: jinja
+        - context:
+            localaddresses: {{grains['ip4_interfaces'].get(pillar['ifassign']['internal'], [])}}
         - require:
             - file: openssh-config-folder
         - watch_in:
