@@ -136,3 +136,5 @@ fi
 if [ "x$TMUX" != "x" ]; then
     export MN_TMUX=1
 fi
+
+export PATH="$PATH:$HOME/.local/bin"
