@@ -10,7 +10,7 @@ duplicity-backup:
     # enable-cleanup will run an additional cron job at the first of every month
     # removing backups older than a certain time (unless newer backups depend on them)
     enable-cleanup-cron: True
-    cleanup-cron-schedule: 0 10 1 * *
+    cleanup-cron-schedule: 25 10 1 * *
     cleanup-mode: remove-older-than
     cleanup-selector: 6M
     # backup-target is set in shared.secrets.live-backup
