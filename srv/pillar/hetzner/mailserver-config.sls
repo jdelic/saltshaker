@@ -18,4 +18,9 @@ imap-incoming:
     bind-ipv4: True
     bind-ipv6: True
 
+
+duplicity-backuo:
+    daily-cron-schedule: 30 4 * * *
+
+
 # vim: syntax=yaml
