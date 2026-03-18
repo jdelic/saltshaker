@@ -19,7 +19,7 @@ imap-incoming:
     bind-ipv6: True
 
 
-duplicity-backuo:
+duplicity-backup:
     daily-cron-schedule: 30 4 * * *
 
 
