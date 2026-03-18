@@ -106,7 +106,9 @@ duplicity-crontab:
         - context:
             duplicity_enabled: {{pillar.get('duplicity-backup', {}).get('enabled', False)}}
             cleanup_enabled: {{pillar.get('duplicity-backup', {}).get('enable-cleanup-cron', False)}}
-            cleanup_schedule: {{pillar.get('duplicity-backup', {}).get('cleanup-cron-schedule', '0 10 1 * *')}}
+            cleanup_schedule: {{pillar.get('duplicity-backup', {}).get('cleanup-cron-schedule', '25 10 1 * *')}}
+            daily_backup_schedule: {{pillar.get('duplicity-backup', {}).get('daily-cron-schedule', '0  5  * * *')}}
+            hourly_backup_schedule: {{pillar.get('duplicity-backup', {}).get('hourly-cron-schedule', '45  * * * *')}}
             mailto: {{pillar.get('duplicity-backup', {}).get('cron-mailto', '')}}
             mailfrom: {{pillar.get('duplicity-backup', {}).get('cron-mailfrom', '')}}
 {% else %}

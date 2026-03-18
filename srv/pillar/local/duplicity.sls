@@ -4,6 +4,9 @@
 duplicity-backup:
     enabled: False
 
+    #daily-cron-schedule: 0  5  * * *
+    #hourly-cron-schedule: 25 10 1 * *
+
     # if vault-create-perhost-key is True then duplicity can use the
     # host's key to encrypt and for management purposes. Since all the
     # data is already on the host, this should be fine in terms of
@@ -28,7 +31,7 @@ duplicity-backup:
     # removing backups older than a certain time (unless newer backups depend on them)
     enable-cleanup-cron: False
     # example: run on the first of every month
-    cleanup-cron-schedule: 0 10 1 * *
+    cleanup-cron-schedule: 25 10 1 * *
     # example: remove backups older than a certain time. See duplicity man page for others (like remove-all-but-n-full)
     cleanup-mode: remove-older-than
     # example: delete all backups older than a year

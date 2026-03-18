@@ -4,8 +4,8 @@ MAILTO={{mailto}}
 MAILFROM={{mailfrom}}
 
 {% if duplicity_enabled %}
-0  * * * *    root    /etc/duplicity.d/backup.sh hourly
-0  5 * * *    root    /etc/duplicity.d/backup.sh daily
+{{hourly_backup_schedule}}    root    /etc/duplicity.d/backup.sh hourly
+{{daily_backup_schedule}}    root    /etc/duplicity.d/backup.sh daily
 {% endif %}
 {% if cleanup_enabled -%}
 {{cleanup_schedule}}    root    /etc/duplicity.d/cleanup.sh run
