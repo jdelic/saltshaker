@@ -8,6 +8,7 @@ base:
         - shared.saltmine
         - shared.ssl
         - shared.gpg
+        - shared.secrets.gpg-installed-keys
         - shared.network
         - shared.vault
 

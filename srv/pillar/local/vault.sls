@@ -25,7 +25,7 @@ vault:
     #
     # PROVIDE A HEX ID! AND YOU MUST AT LEAST PROVIDE THE KEY'S LONG ID (last 16
     # characters).
-    # encrypt-vault-keys-with-gpg: 23FC12D75291ED448C0728C877C339AB7CDC4589
+    # encrypt-vault-keys-with-gpg: 0123456789ABCDEF
     # On local test machines, do not encrypt Vault keys
     encrypt-vault-keys-with-gpg: False
 
