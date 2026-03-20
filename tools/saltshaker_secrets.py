@@ -505,13 +505,13 @@ def show_backup_gpg_disclaimer(*, generated: bool, enabled: bool) -> None:
     banner("SAVE THE BACKUP GPG KEY LOCALLY", enabled=enabled)
     if generated:
         print(
-            "This key can be used to encrypt duplicity backups from your server if you enable them.\n"
+            "This key is used to encrypt duplicity backups from your server (if you enable them).\n"
             "Keep it in a safe place. It will be generated in your local keyring or a separate\n"
             "GnuPG home and can then be exported to a PEM file for offline storage.\n"
         )
     else:
         print(
-            "This key can be used to encrypt duplicity backups from your server if you enable them.\n"
+            "This key is used to encrypt duplicity backups from your server (if you enable them).\n"
             "Make sure you control the matching secret key and keep that secret key in a safe place,\n"
             "because you will need it to decrypt backups later.\n"
         )
