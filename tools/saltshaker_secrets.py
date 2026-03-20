@@ -1006,7 +1006,10 @@ def init(args: argparse.Namespace) -> None:
             default_home = str(Path.home() / ".gnupg")
             use_default_keyring = True if backup_gpg_use_default_keyring is None else backup_gpg_use_default_keyring
             if backup_gpg_home is None and backup_gpg_use_default_keyring is None:
-                use_default_keyring = prompt_yes_no("Use the default GnuPG home for the backup admin key?", default=True)
+                use_default_keyring = prompt_yes_no(
+                    f"Use the default GnuPG home for the backup admin key ({default_home})?",
+                    default=True,
+                )
             resolved_backup_gpg_home = None
             if backup_gpg_home:
                 resolved_backup_gpg_home = Path(backup_gpg_home)
