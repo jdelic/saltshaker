@@ -23,7 +23,8 @@ ROOT = Path(__file__).resolve().parents[1]
 DEFAULT_SECRETS_DIR = ROOT / "srv" / "pillar" / "shared" / "secrets"
 DEFAULT_CRYPTO_DIR = ROOT / "srv" / "salt" / "basics" / "crypto"
 DEFAULT_WORK_DIR = ROOT / ".saltshaker-secrets"
-DEFAULT_EC_CURVE = "prime256v1"
+DEFAULT_EC_CURVE = "ed25519"
+DEFAULT_GPG_KEY_TYPE = "ed25519"
 
 RESET = "\033[0m"
 BOLD = "\033[1m"
@@ -249,6 +250,34 @@ def write_openssl_conf(path: Path, content: str) -> None:
     path.write_text(content, encoding="utf-8")
 
 
+def generate_openssl_private_key(key_path: Path, curve_or_algorithm: str) -> None:
+    curve_or_algorithm = curve_or_algorithm.lower()
+    if curve_or_algorithm == "ed25519":
+        run(
+            [
+                "openssl",
+                "genpkey",
+                "-algorithm",
+                "Ed25519",
+                "-out",
+                str(key_path),
+            ]
+        )
+        return
+    run(
+        [
+            "openssl",
+            "genpkey",
+            "-algorithm",
+            "EC",
+            "-pkeyopt",
+            f"ec_paramgen_curve:{curve_or_algorithm}",
+            "-out",
+            str(key_path),
+        ]
+    )
+
+
 def generate_root_ca(
     work_dir: Path,
     subject: str,
@@ -259,18 +288,7 @@ def generate_root_ca(
     cert_path = work_dir / "root-ca.crt"
     conf_path = work_dir / "root-ca.cnf"
     write_openssl_conf(conf_path, build_ca_openssl_conf(subject))
-    run(
-        [
-            "openssl",
-            "genpkey",
-            "-algorithm",
-            "EC",
-            "-pkeyopt",
-            f"ec_paramgen_curve:{ec_curve}",
-            "-out",
-            str(key_path),
-        ]
-    )
+    generate_openssl_private_key(key_path, ec_curve)
     run(
         [
             "openssl",
@@ -306,18 +324,7 @@ def generate_intermediate_ca(
     csr_path = work_dir / "intermediate-ca.csr"
     cert_path = work_dir / "intermediate-ca.crt"
     ext_path = work_dir / "intermediate-ca.ext"
-    run(
-        [
-            "openssl",
-            "genpkey",
-            "-algorithm",
-            "EC",
-            "-pkeyopt",
-            f"ec_paramgen_curve:{ec_curve}",
-            "-out",
-            str(key_path),
-        ]
-    )
+    generate_openssl_private_key(key_path, ec_curve)
     run(
         [
             "openssl",
@@ -372,18 +379,7 @@ def generate_leaf_cert(
     csr_path = work_dir / f"{name}.csr"
     cert_path = work_dir / f"{name}.crt"
     ext_path = work_dir / f"{name}.ext"
-    run(
-        [
-            "openssl",
-            "genpkey",
-            "-algorithm",
-            "EC",
-            "-pkeyopt",
-            f"ec_paramgen_curve:{ec_curve}",
-            "-out",
-            str(key_path),
-        ]
-    )
+    generate_openssl_private_key(key_path, ec_curve)
     run(
         [
             "openssl",
@@ -698,6 +694,15 @@ def download_text(url: str) -> str:
         return response.read().decode("utf-8")
 
 
+def gpg_algorithm_spec(key_type: str, key_length: Optional[int]) -> str:
+    key_type = key_type.lower()
+    if key_type == "rsa":
+        return f"rsa{key_length or 4096}"
+    if key_type == "ed25519":
+        return "ed25519"
+    raise ValueError(f"Unsupported GPG key type: {key_type}")
+
+
 def generate_gpg_key(
     *,
     homedir: Optional[Path],
@@ -708,6 +713,12 @@ def generate_gpg_key(
     passphrase: str,
     usage: str,
 ) -> tuple[str, str, str]:
+    algo = gpg_algorithm_spec(key_type, key_length)
+    if key_type.lower() == "ed25519":
+        primary_usage = "cert,sign"
+    else:
+        primary_usage = usage
+
     run(
         gpg_base_cmd(homedir=homedir, loopback=True)
         + [
@@ -715,12 +726,25 @@ def generate_gpg_key(
             passphrase,
             "--quick-gen-key",
             uid,
-            f"{key_type}{key_length}",
-            usage,
+            algo,
+            primary_usage,
             expire,
         ]
     )
     fingerprint = first_key_fingerprint(homedir=homedir, search=uid)
+    if key_type.lower() == "ed25519" and usage == "encrypt":
+        run(
+            gpg_base_cmd(homedir=homedir, loopback=True)
+            + [
+                "--passphrase",
+                passphrase,
+                "--quick-add-key",
+                fingerprint,
+                "cv25519",
+                "encr",
+                expire,
+            ]
+        )
     public = export_public_key(homedir=homedir, identifier=fingerprint)
     secret = export_secret_key(homedir=homedir, identifier=fingerprint, passphrase=passphrase)
     return fingerprint, public, secret
@@ -926,8 +950,11 @@ def init(args: argparse.Namespace) -> None:
             "GPG UID",
             f"{org} package signing key <packaging@{prod_domains[0] if prod_domains else dev_domain}>",
         )
-        gpg_key_type = gpg_key_type or prompt("GPG key type (rsa)", "rsa")
-        gpg_key_length = gpg_key_length or prompt("GPG key length", "4096")
+        gpg_key_type = gpg_key_type or prompt(f"GPG key type ({DEFAULT_GPG_KEY_TYPE})", DEFAULT_GPG_KEY_TYPE)
+        if gpg_key_type.lower() == "rsa":
+            gpg_key_length = gpg_key_length or prompt("GPG key length", "4096")
+        else:
+            gpg_key_length = gpg_key_length or "0"
         gpg_expire = gpg_expire or prompt("GPG expiration", "3y")
         while not gpg_passphrase:
             gpg_passphrase = prompt("GPG passphrase (required)", "").strip()
@@ -993,8 +1020,14 @@ def init(args: argparse.Namespace) -> None:
                 "Backup admin GPG UID",
                 f"{org} backup admin key <admin@{prod_domains[0] if prod_domains else dev_domain}>",
             )
-            backup_gpg_key_type = backup_gpg_key_type or prompt("Backup admin GPG key type (rsa)", "rsa")
-            backup_gpg_key_length = backup_gpg_key_length or prompt("Backup admin GPG key length", "4096")
+            backup_gpg_key_type = backup_gpg_key_type or prompt(
+                f"Backup admin GPG key type ({DEFAULT_GPG_KEY_TYPE})",
+                DEFAULT_GPG_KEY_TYPE,
+            )
+            if backup_gpg_key_type.lower() == "rsa":
+                backup_gpg_key_length = backup_gpg_key_length or prompt("Backup admin GPG key length", "4096")
+            else:
+                backup_gpg_key_length = backup_gpg_key_length or "0"
             backup_gpg_expire = backup_gpg_expire or prompt("Backup admin GPG expiration", "3y")
             while not backup_gpg_passphrase:
                 backup_gpg_passphrase = prompt("Backup admin GPG passphrase (required)", "").strip()
@@ -1096,7 +1129,11 @@ def init(args: argparse.Namespace) -> None:
     append_bool_option(rerun, "--generate-gpg-signing", generate_signing_key)
     append_option(rerun, "--gpg-uid", gpg_uid if generate_signing_key else args.gpg_uid)
     append_option(rerun, "--gpg-key-type", gpg_key_type if generate_signing_key else args.gpg_key_type)
-    append_option(rerun, "--gpg-key-length", gpg_key_length if generate_signing_key else args.gpg_key_length)
+    append_option(
+        rerun,
+        "--gpg-key-length",
+        (gpg_key_length if str(gpg_key_type).lower() == "rsa" else None) if generate_signing_key else args.gpg_key_length,
+    )
     append_option(rerun, "--gpg-expire", gpg_expire if generate_signing_key else args.gpg_expire)
     append_option(rerun, "--gpg-passphrase", gpg_passphrase if generate_signing_key else args.gpg_passphrase)
     append_bool_option(rerun, "--configure-backup-gpg", configure_backup_key)
@@ -1105,7 +1142,11 @@ def init(args: argparse.Namespace) -> None:
     append_option(rerun, "--backup-gpg-home", backup_gpg_home)
     append_option(rerun, "--backup-gpg-uid", backup_gpg_uid)
     append_option(rerun, "--backup-gpg-key-type", backup_gpg_key_type)
-    append_option(rerun, "--backup-gpg-key-length", backup_gpg_key_length)
+    append_option(
+        rerun,
+        "--backup-gpg-key-length",
+        backup_gpg_key_length if str(backup_gpg_key_type).lower() == "rsa" else None,
+    )
     append_option(rerun, "--backup-gpg-expire", backup_gpg_expire)
     append_option(rerun, "--backup-gpg-key-id", backup_gpg_key_id)
     append_option(rerun, "--backup-gpg-key-url", backup_gpg_key_url)
