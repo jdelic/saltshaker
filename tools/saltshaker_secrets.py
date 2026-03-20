@@ -31,6 +31,9 @@ GREEN = "\033[32m"
 YELLOW = "\033[33m"
 RED = "\033[31m"
 BLUE = "\033[34m"
+CYAN = "\033[36m"
+
+COLOR_ENABLED = False
 
 
 def style(text: str, color: str, *, enabled: bool) -> str:
@@ -69,10 +72,25 @@ class CertSpec:
     sls_key: str
 
 
+def set_color_enabled(enabled: bool) -> None:
+    global COLOR_ENABLED
+    COLOR_ENABLED = enabled
+
+
+def prompt_label(text: str) -> str:
+    return style(text, BOLD + YELLOW, enabled=COLOR_ENABLED)
+
+
+def command_label(text: str) -> str:
+    return style(text, BOLD + CYAN, enabled=COLOR_ENABLED)
+
+
 def run(cmd: List[str], *, cwd: Optional[Path] = None) -> None:
     display = " ".join(shlex.quote(part) for part in cmd)
-    print(f"[cmd] {display}")
+    print()
+    print(command_label(f"[cmd] {display}"))
     subprocess.run(cmd, cwd=str(cwd) if cwd else None, check=True)
+    print()
 
 
 def ensure_dir(path: Path) -> None:
@@ -89,7 +107,7 @@ def prepare_gpg_homedir(path: Path) -> None:
 def prompt(text: str, default: Optional[str] = None) -> str:
     suffix = f" [{default}]" if default else ""
     while True:
-        value = input(f"{text}{suffix}: ").strip()
+        value = input(f"{prompt_label('[input]')} {text}{suffix}: ").strip()
         if value:
             return value
         if default is not None:
@@ -99,7 +117,7 @@ def prompt(text: str, default: Optional[str] = None) -> str:
 def prompt_yes_no(text: str, default: bool = False) -> bool:
     hint = "Y/n" if default else "y/N"
     while True:
-        value = input(f"{text} ({hint}): ").strip().lower()
+        value = input(f"{prompt_label('[input]')} {text} ({hint}): ").strip().lower()
         if not value:
             return default
         if value in {"y", "yes"}:
@@ -108,17 +126,29 @@ def prompt_yes_no(text: str, default: bool = False) -> bool:
             return False
 
 
-def prompt_choice(text: str, choices: List[str], default: Optional[str] = None) -> str:
-    choice_text = "/".join(
-        choice.upper() if choice == default else choice
-        for choice in choices
-    )
+def prompt_choice(
+    text: str,
+    choices: List[tuple[str, str]],
+    default: Optional[str] = None,
+) -> str:
+    print()
+    print(prompt_label(text))
+    for index, (value, label) in enumerate(choices, start=1):
+        default_suffix = " (default)" if value == default else ""
+        print(f"  {index}. {label}{default_suffix}")
     while True:
-        value = input(f"{text} ({choice_text}): ").strip().lower()
+        prompt_suffix = f" [{default}]" if default is not None else ""
+        value = input(f"{prompt_label('[input]')} Enter choice number{prompt_suffix}: ").strip().lower()
         if not value and default is not None:
             return default
-        if value in choices:
-            return value
+        if value.isdigit():
+            choice_index = int(value) - 1
+            if 0 <= choice_index < len(choices):
+                return choices[choice_index][0]
+        for choice_value, _choice_label in choices:
+            if value == choice_value:
+                return choice_value
+        warn("Please enter one of the listed numbers or choice names.", enabled=COLOR_ENABLED)
 
 
 def sanitize_domains(domains: str) -> List[str]:
@@ -538,8 +568,11 @@ def gpg_base_cmd(
 
 def run_capture(cmd: List[str]) -> str:
     display = " ".join(shlex.quote(part) for part in cmd)
-    print(f"[cmd] {display}")
-    return subprocess.check_output(cmd, text=True)
+    print()
+    print(command_label(f"[cmd] {display}"))
+    output = subprocess.check_output(cmd, text=True)
+    print()
+    return output
 
 
 def first_key_fingerprint(*, homedir: Optional[Path], search: Optional[str] = None) -> str:
@@ -579,11 +612,23 @@ def import_public_key(*, homedir: Path, key_data: str) -> tuple[str, str]:
 
 
 def fetch_key_from_keyserver(*, homedir: Path, key_id: str) -> tuple[str, str]:
-    run(
-        gpg_base_cmd(homedir=homedir)
-        + ["--keyserver", "hkps://keys.openpgp.org", "--recv-keys", key_id]
-    )
-    fingerprint = first_key_fingerprint(homedir=homedir, search=key_id)
+    prepare_gpg_homedir(homedir)
+    if "@" in key_id:
+        print()
+        info(
+            f"Searching keys.openpgp.org for {key_id}. Select the desired key when prompted by GnuPG.",
+            enabled=COLOR_ENABLED,
+        )
+        run(
+            ["gpg", "--homedir", str(homedir), "--keyserver", "hkps://keys.openpgp.org", "--search-keys", key_id]
+        )
+        fingerprint = first_key_fingerprint(homedir=homedir)
+    else:
+        run(
+            gpg_base_cmd(homedir=homedir)
+            + ["--keyserver", "hkps://keys.openpgp.org", "--recv-keys", key_id]
+        )
+        fingerprint = first_key_fingerprint(homedir=homedir, search=key_id)
     return fingerprint, export_public_key(homedir=homedir, identifier=fingerprint)
 
 
@@ -666,6 +711,7 @@ def build_cert_specs(dev_domain: str, prod_domains: List[str], internal_domain: 
 
 def init(args: argparse.Namespace) -> None:
     color_enabled = bool(args.color) if args.color is not None else sys.stdout.isatty()
+    set_color_enabled(color_enabled)
     secrets_dir = Path(args.secrets_dir or DEFAULT_SECRETS_DIR)
     crypto_dir = Path(args.crypto_dir or DEFAULT_CRYPTO_DIR)
     work_dir = Path(args.work_dir or DEFAULT_WORK_DIR)
@@ -812,7 +858,12 @@ def init(args: argparse.Namespace) -> None:
     if prompt_yes_no("Configure backup admin GPG key now?", default=True):
         source = args.backup_gpg_source or prompt_choice(
             "Backup admin GPG key source",
-            ["generate", "keyserver", "url", "file"],
+            [
+                ("generate", "Generate a new backup admin key"),
+                ("keyserver", "Fetch an existing key from keys.openpgp.org"),
+                ("url", "Download an armored public key from a URL"),
+                ("file", "Read an armored public key from a local file"),
+            ],
             "generate",
         )
         if source == "generate":
