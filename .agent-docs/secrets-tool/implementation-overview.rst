@@ -10,6 +10,7 @@ Build a Python CLI tool that initializes the SaltShaker secrets pillar set from 
 - Development wildcard certificate for ``*.{dev_domain}`` signed by the intermediate CA.
 - Production wildcard certificate for ``*.{prod_domain}`` via ACME DNS challenge (Certbot or compatible client).
 - GPG signing key (public + secret) for Debian repo signing.
+- Managed backup/admin GPG public key material for the shared Salt keyring.
 - Pillar files in ``srv/pillar/shared/secrets/`` plus CA certs in ``srv/salt/basics/crypto/``.
 
 Scope
@@ -41,6 +42,7 @@ Core Outputs
 - ``live-ssl.sls``: wildcard prod cert + key + chain (ACME). If ACME not run, create a placeholder with instructions.
 - ``smtp.sls`` / ``imap.sls`` / ``vault-ssl.sls`` / ``postgresql.sls``: leaf certs signed by intermediate CA.
 - ``gpg-package-signing.sls``: public + private key blocks.
+- ``gpg-installed-keys.sls``: public keys imported into the managed shared keyring.
 - ``srv/salt/basics/crypto/maurusnet-rootca.crt``: root CA cert.
 - ``srv/salt/basics/crypto/dev/dev-ca.crt``: intermediate CA cert (dev/infra CA).
 
@@ -62,3 +64,4 @@ Risks
 - Incorrect pillar file structure could break Salt file/contents_pillar references.
 - ACME DNS manual challenge requires manual DNS changes and operator time.
 - GPG key generation parameters (algo, expiration, UID) may need to match existing CI expectations.
+- Backup/admin GPG key import may require network access if fetched from keys.openpgp.org or a URL.
