@@ -29,13 +29,14 @@ DEFAULT_GPG_KEY_TYPE = "ed25519"
 RESET = "\033[0m"
 BOLD = "\033[1m"
 DIM = "\033[2m"
-GREEN = "\033[32m"
-YELLOW = "\033[33m"
-RED = "\033[31m"
-BLUE = "\033[34m"
-CYAN = "\033[36m"
+GREEN = ""
+YELLOW = ""
+RED = ""
+BLUE = ""
+CYAN = ""
 
 COLOR_ENABLED = False
+VERBOSE = False
 
 
 def style(text: str, color: str, *, enabled: bool) -> str:
@@ -51,19 +52,19 @@ def banner(title: str, *, enabled: bool) -> None:
 
 
 def info(message: str, *, enabled: bool) -> None:
-    print(style(f"[info] {message}", BLUE, enabled=enabled))
+    print(style(f"ℹ️  {message}", BLUE, enabled=enabled))
 
 
 def warn(message: str, *, enabled: bool) -> None:
-    print(style(f"[warn] {message}", YELLOW, enabled=enabled))
+    print(style(f"⚠️  {message}", YELLOW, enabled=enabled))
 
 
 def ok(message: str, *, enabled: bool) -> None:
-    print(style(f"[ok] {message}", GREEN, enabled=enabled))
+    print(style(f"✅ {message}", GREEN, enabled=enabled))
 
 
 def err(message: str, *, enabled: bool) -> None:
-    print(style(f"[error] {message}", RED, enabled=enabled))
+    print(style(f"❌ {message}", RED, enabled=enabled))
 
 
 @dataclass
@@ -77,21 +78,88 @@ class CertSpec:
 def set_color_enabled(enabled: bool) -> None:
     global COLOR_ENABLED
     COLOR_ENABLED = enabled
+    theme = detect_terminal_theme()
+    set_palette(theme)
+
+
+def set_verbose(enabled: bool) -> None:
+    global VERBOSE
+    VERBOSE = enabled
+
+
+def detect_terminal_theme() -> str:
+    explicit = os.environ.get("SALTSHAKER_TERM_THEME") or os.environ.get("CODEX_TERM_THEME")
+    if explicit in {"dark", "light"}:
+        return explicit
+    colorfgbg = os.environ.get("COLORFGBG")
+    if colorfgbg:
+        try:
+            background = int(colorfgbg.split(";")[-1])
+            return "dark" if background <= 6 or background == 8 else "light"
+        except ValueError:
+            pass
+    return "dark"
+
+
+def set_palette(theme: str) -> None:
+    global GREEN, YELLOW, RED, BLUE, CYAN
+    if theme == "light":
+        GREEN = "\033[32m"
+        YELLOW = "\033[33m"
+        RED = "\033[31m"
+        BLUE = "\033[34m"
+        CYAN = "\033[36m"
+    else:
+        GREEN = "\033[92m"
+        YELLOW = "\033[93m"
+        RED = "\033[91m"
+        BLUE = "\033[94m"
+        CYAN = "\033[96m"
 
 
 def prompt_label(text: str) -> str:
-    return style(text, BOLD + YELLOW, enabled=COLOR_ENABLED)
+    return style(f"💬 {text}", BOLD + YELLOW, enabled=COLOR_ENABLED)
 
 
 def command_label(text: str) -> str:
-    return style(text, BOLD + CYAN, enabled=COLOR_ENABLED)
+    return style(f"🛠️  {text}", BOLD + CYAN, enabled=COLOR_ENABLED)
+
+
+def print_captured_output(stdout: str, stderr: str) -> None:
+    if stdout:
+        sys.stdout.write(stdout)
+        if not stdout.endswith("\n"):
+            sys.stdout.write("\n")
+    if stderr:
+        sys.stderr.write(stderr)
+        if not stderr.endswith("\n"):
+            sys.stderr.write("\n")
 
 
 def run(cmd: List[str], *, cwd: Optional[Path] = None) -> None:
     display = " ".join(shlex.quote(part) for part in cmd)
     print()
     print(command_label(f"[cmd] {display}"))
-    subprocess.run(cmd, cwd=str(cwd) if cwd else None, check=True)
+    result = subprocess.run(
+        cmd,
+        cwd=str(cwd) if cwd else None,
+        check=False,
+        text=True,
+        capture_output=not VERBOSE,
+    )
+    if VERBOSE:
+        if result.returncode != 0:
+            raise subprocess.CalledProcessError(result.returncode, cmd)
+        print()
+        return
+    if result.returncode != 0:
+        print_captured_output(result.stdout, result.stderr)
+        raise subprocess.CalledProcessError(
+            result.returncode,
+            cmd,
+            output=result.stdout,
+            stderr=result.stderr,
+        )
     print()
 
 
@@ -596,6 +664,7 @@ def write_live_ssl_placeholder(secrets_dir: Path, *, force: bool) -> None:
 def update_acme(args: argparse.Namespace) -> None:
     color_enabled = bool(args.color) if args.color is not None else sys.stdout.isatty()
     set_color_enabled(color_enabled)
+    set_verbose(bool(args.verbose))
     secrets_dir = Path(args.secrets_dir or DEFAULT_SECRETS_DIR)
     work_dir = Path(args.work_dir or DEFAULT_WORK_DIR)
 
@@ -644,7 +713,18 @@ def run_capture(cmd: List[str]) -> str:
     display = " ".join(shlex.quote(part) for part in cmd)
     print()
     print(command_label(f"[cmd] {display}"))
-    output = subprocess.check_output(cmd, text=True)
+    result = subprocess.run(cmd, check=False, text=True, capture_output=True)
+    if VERBOSE:
+        print_captured_output(result.stdout, result.stderr)
+    if result.returncode != 0:
+        print_captured_output(result.stdout, result.stderr)
+        raise subprocess.CalledProcessError(
+            result.returncode,
+            cmd,
+            output=result.stdout,
+            stderr=result.stderr,
+        )
+    output = result.stdout
     print()
     return output
 
@@ -814,6 +894,7 @@ def build_cert_specs(dev_domain: str, prod_domains: List[str], internal_domain: 
 def clean(args: argparse.Namespace) -> None:
     color_enabled = bool(args.color) if args.color is not None else sys.stdout.isatty()
     set_color_enabled(color_enabled)
+    set_verbose(bool(args.verbose))
     work_dir = Path(args.work_dir or DEFAULT_WORK_DIR)
 
     banner("SaltShaker Secrets Clean", enabled=color_enabled)
@@ -831,11 +912,13 @@ def clean(args: argparse.Namespace) -> None:
 def init(args: argparse.Namespace) -> None:
     color_enabled = bool(args.color) if args.color is not None else sys.stdout.isatty()
     set_color_enabled(color_enabled)
+    set_verbose(bool(args.verbose))
     secrets_dir = Path(args.secrets_dir or DEFAULT_SECRETS_DIR)
     crypto_dir = Path(args.crypto_dir or DEFAULT_CRYPTO_DIR)
     work_dir = Path(args.work_dir or DEFAULT_WORK_DIR)
     ensure_dir(work_dir)
     backup_key_fingerprint: Optional[str] = None
+    backup_key_reminder_mode: Optional[str] = None
     fetch_acme_now: Optional[bool] = args.fetch_acme
     generate_signing_key: Optional[bool] = args.generate_gpg_signing
     configure_backup_key: Optional[bool] = args.configure_backup_gpg
@@ -1020,7 +1103,7 @@ def init(args: argparse.Namespace) -> None:
         )
         backup_gpg_source = source
         if source == "generate":
-            show_backup_gpg_disclaimer(generated=True, enabled=color_enabled)
+            backup_key_reminder_mode = "generated"
             default_home = str(Path.home() / ".gnupg")
             use_default_keyring = True if backup_gpg_use_default_keyring is None else backup_gpg_use_default_keyring
             if backup_gpg_home is None and backup_gpg_use_default_keyring is None:
@@ -1077,7 +1160,7 @@ def init(args: argparse.Namespace) -> None:
                 backup_gpg_secret_export_path = str(export_path)
                 write_file(export_path, backup_secret_key, force=args.force)
         else:
-            show_backup_gpg_disclaimer(generated=False, enabled=color_enabled)
+            backup_key_reminder_mode = "supplied"
             with tempfile.TemporaryDirectory(prefix="saltshaker-gpg-import-", dir=work_dir) as temp_dir:
                 import_home = Path(temp_dir)
                 if source == "keyserver":
@@ -1180,6 +1263,11 @@ def init(args: argparse.Namespace) -> None:
         rerun.append("--force")
     print("\nRepeat without prompts:")
     print("  " + " ".join(shlex.quote(part) for part in rerun))
+    if backup_key_reminder_mode is not None:
+        show_backup_gpg_disclaimer(
+            generated=backup_key_reminder_mode == "generated",
+            enabled=color_enabled,
+        )
 
 
 def build_parser() -> argparse.ArgumentParser:
@@ -1194,6 +1282,7 @@ def build_parser() -> argparse.ArgumentParser:
     init_parser.add_argument("--crypto-dir")
     init_parser.add_argument("--work-dir")
     init_parser.add_argument("--force", action="store_true")
+    init_parser.add_argument("--verbose", action="store_true")
     init_parser.add_argument("--color", action=argparse.BooleanOptionalAction, default=None)
     init_parser.add_argument("--org")
     init_parser.add_argument("--country")
@@ -1234,11 +1323,13 @@ def build_parser() -> argparse.ArgumentParser:
     acme_parser.add_argument("--secrets-dir")
     acme_parser.add_argument("--work-dir")
     acme_parser.add_argument("--force", action="store_true")
+    acme_parser.add_argument("--verbose", action="store_true")
     acme_parser.add_argument("--color", action=argparse.BooleanOptionalAction, default=None)
     acme_parser.set_defaults(func=update_acme)
 
     clean_parser = sub.add_parser("clean", help="Remove generated working artifacts")
     clean_parser.add_argument("--work-dir")
+    clean_parser.add_argument("--verbose", action="store_true")
     clean_parser.add_argument("--color", action=argparse.BooleanOptionalAction, default=None)
     clean_parser.set_defaults(func=clean)
 
