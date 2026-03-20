@@ -432,6 +432,23 @@ def build_empty_init_sls() -> str:
     return "# vim: syntax=yaml\n"
 
 
+def show_backup_gpg_disclaimer(*, generated: bool, enabled: bool) -> None:
+    print()
+    banner("SAVE THE BACKUP GPG KEY LOCALLY", enabled=enabled)
+    if generated:
+        print(
+            "This key can be used to encrypt duplicity backups from your server if you enable them.\n"
+            "Keep it in a safe place. It will be generated in your local keyring or a separate\n"
+            "GnuPG home and can then be exported to a PEM file for offline storage.\n"
+        )
+    else:
+        print(
+            "This key can be used to encrypt duplicity backups from your server if you enable them.\n"
+            "Make sure you control the matching secret key and keep that secret key in a safe place,\n"
+            "because you will need it to decrypt backups later.\n"
+        )
+
+
 def build_ssl_sls(
     cert_name: str,
     cert: str,
@@ -1003,6 +1020,7 @@ def init(args: argparse.Namespace) -> None:
         )
         backup_gpg_source = source
         if source == "generate":
+            show_backup_gpg_disclaimer(generated=True, enabled=color_enabled)
             default_home = str(Path.home() / ".gnupg")
             use_default_keyring = True if backup_gpg_use_default_keyring is None else backup_gpg_use_default_keyring
             if backup_gpg_home is None and backup_gpg_use_default_keyring is None:
@@ -1059,6 +1077,7 @@ def init(args: argparse.Namespace) -> None:
                 backup_gpg_secret_export_path = str(export_path)
                 write_file(export_path, backup_secret_key, force=args.force)
         else:
+            show_backup_gpg_disclaimer(generated=False, enabled=color_enabled)
             with tempfile.TemporaryDirectory(prefix="saltshaker-gpg-import-", dir=work_dir) as temp_dir:
                 import_home = Path(temp_dir)
                 if source == "keyserver":
