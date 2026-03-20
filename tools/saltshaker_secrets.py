@@ -6,6 +6,7 @@ from __future__ import annotations
 import argparse
 import os
 import shlex
+import shutil
 import subprocess
 import sys
 import textwrap
@@ -709,6 +710,23 @@ def build_cert_specs(dev_domain: str, prod_domains: List[str], internal_domain: 
     ]
 
 
+def clean(args: argparse.Namespace) -> None:
+    color_enabled = bool(args.color) if args.color is not None else sys.stdout.isatty()
+    set_color_enabled(color_enabled)
+    work_dir = Path(args.work_dir or DEFAULT_WORK_DIR)
+
+    banner("SaltShaker Secrets Clean", enabled=color_enabled)
+    print("This removes the tool working directory used for generated temporary artifacts.\n")
+
+    if not work_dir.exists():
+        warn(f"Nothing to clean. Working directory does not exist: {work_dir}", enabled=color_enabled)
+        return
+
+    info(f"Removing working directory {work_dir}...", enabled=color_enabled)
+    shutil.rmtree(work_dir)
+    ok(f"Removed {work_dir}", enabled=color_enabled)
+
+
 def init(args: argparse.Namespace) -> None:
     color_enabled = bool(args.color) if args.color is not None else sys.stdout.isatty()
     set_color_enabled(color_enabled)
@@ -1007,8 +1025,13 @@ def build_parser() -> argparse.ArgumentParser:
     init_parser.add_argument("--backup-gpg-key-file")
     init_parser.add_argument("--backup-gpg-secret-export", action=argparse.BooleanOptionalAction, default=None)
     init_parser.add_argument("--backup-gpg-secret-export-path")
-
     init_parser.set_defaults(func=init)
+
+    clean_parser = sub.add_parser("clean", help="Remove generated working artifacts")
+    clean_parser.add_argument("--work-dir")
+    clean_parser.add_argument("--color", action=argparse.BooleanOptionalAction, default=None)
+    clean_parser.set_defaults(func=clean)
+
     return parser
 
 
