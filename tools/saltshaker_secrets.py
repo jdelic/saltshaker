@@ -420,6 +420,10 @@ def build_common_sls(intermediate_cert: str) -> str:
     )
 
 
+def build_empty_init_sls() -> str:
+    return "# vim: syntax=yaml\n"
+
+
 def build_ssl_sls(
     cert_name: str,
     cert: str,
@@ -849,6 +853,7 @@ def init(args: argparse.Namespace) -> None:
     write_file(crypto_dir / "dev" / "dev-ca.crt", load_pem(int_cert), force=args.force)
 
     info("Rendering pillar files...", enabled=color_enabled)
+    write_file(secrets_dir / "init.sls", build_empty_init_sls(), force=args.force)
     common_sls = build_common_sls(load_pem(int_cert))
     write_file(secrets_dir / "common.sls", common_sls, force=args.force)
 
