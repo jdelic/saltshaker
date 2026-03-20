@@ -550,6 +550,50 @@ def run_certbot(
     return cert_path, chain_path, privkey_path
 
 
+def write_live_ssl_placeholder(secrets_dir: Path, *, force: bool) -> None:
+    placeholder_cert = "# TODO: replace with ACME certificate\n"
+    placeholder_key = "# TODO: replace with ACME private key\n"
+    placeholder_chain = "# TODO: replace with ACME chain\n"
+    live_sls = build_ssl_sls(
+        "wildcard",
+        placeholder_cert,
+        placeholder_key,
+        placeholder_chain,
+        "maincert",
+    )
+    write_file(secrets_dir / "live-ssl.sls", live_sls, force=force)
+
+
+def update_acme(args: argparse.Namespace) -> None:
+    color_enabled = bool(args.color) if args.color is not None else sys.stdout.isatty()
+    set_color_enabled(color_enabled)
+    secrets_dir = Path(args.secrets_dir or DEFAULT_SECRETS_DIR)
+    work_dir = Path(args.work_dir or DEFAULT_WORK_DIR)
+
+    if which("certbot") is None:
+        raise FileNotFoundError("certbot not found in PATH; install it before running update-acme")
+
+    banner("SaltShaker Secrets ACME Update", enabled=color_enabled)
+    print("Fetch or renew the production wildcard certificate and update live-ssl.sls.\n")
+
+    prod_domains = sanitize_domains(args.prod_domains or prompt("Production domains (comma-separated)", ""))
+    if not prod_domains:
+        raise FileNotFoundError("At least one production domain is required for update-acme")
+
+    acme_email = args.acme_email or prompt("ACME email", f"admin@{prod_domains[0]}")
+    info("Requesting ACME wildcard certificate...", enabled=color_enabled)
+    cert_path, chain_path, key_path = run_certbot(work_dir, prod_domains, acme_email)
+    live_sls = build_ssl_sls(
+        "wildcard",
+        load_pem(cert_path),
+        load_pem(key_path),
+        load_pem(chain_path),
+        "maincert",
+    )
+    write_file(secrets_dir / "live-ssl.sls", live_sls, force=args.force)
+    ok(f"Updated {secrets_dir / 'live-ssl.sls'}", enabled=color_enabled)
+
+
 def gpg_base_cmd(
     *,
     homedir: Optional[Path] = None,
@@ -822,31 +866,22 @@ def init(args: argparse.Namespace) -> None:
         sls = build_ssl_sls(spec.name.replace("-", "_"), cert, key, certchain, spec.sls_key)
         write_file(secrets_dir / sls_name, sls, force=args.force)
 
+    acme_created = False
     if prod_domains and prompt_yes_no("Fetch production wildcard via ACME now?", default=False):
         if which("certbot") is None:
             raise FileNotFoundError("certbot not found in PATH; install it or skip ACME for now")
-        acme_email = args.acme_email or prompt("ACME email", email)
-        cert_path, chain_path, key_path = run_certbot(work_dir, prod_domains, acme_email)
-        live_sls = build_ssl_sls(
-            "wildcard",
-            load_pem(cert_path),
-            load_pem(key_path),
-            load_pem(chain_path),
-            "maincert",
+        acme_args = argparse.Namespace(
+            acme_email=args.acme_email or email,
+            color=args.color,
+            force=args.force,
+            prod_domains=",".join(prod_domains),
+            secrets_dir=str(secrets_dir),
+            work_dir=str(work_dir),
         )
-        write_file(secrets_dir / "live-ssl.sls", live_sls, force=args.force)
+        update_acme(acme_args)
+        acme_created = True
     else:
-        placeholder_cert = "# TODO: replace with ACME certificate\n"
-        placeholder_key = "# TODO: replace with ACME private key\n"
-        placeholder_chain = "# TODO: replace with ACME chain\n"
-        live_sls = build_ssl_sls(
-            "wildcard",
-            placeholder_cert,
-            placeholder_key,
-            placeholder_chain,
-            "maincert",
-        )
-        write_file(secrets_dir / "live-ssl.sls", live_sls, force=args.force)
+        write_live_ssl_placeholder(secrets_dir, force=args.force)
 
     if prompt_yes_no("Generate GPG signing key now?", default=True):
         gpg_uid = args.gpg_uid or prompt(
@@ -963,6 +998,10 @@ def init(args: argparse.Namespace) -> None:
     print(f"- Verify external_tld in `srv/pillar/local/wellknown.sls` is {dev_domain}")
     if prod_domains:
         print(f"- Verify external_tld in `srv/pillar/hetzner/wellknown.sls` (env/hcloud) matches {prod_domains[0]}")
+        if acme_created:
+            print("- Use `python3 tools/saltshaker_secrets.py update-acme ...` later to renew the production wildcard certificate")
+        else:
+            print("- Run `python3 tools/saltshaker_secrets.py update-acme ...` to create or renew `shared/secrets/live-ssl.sls`")
     print("- Review SSH public keys in `srv/pillar/shared/ssh.sls` and update as needed")
     if backup_key_fingerprint:
         print(
@@ -1026,6 +1065,15 @@ def build_parser() -> argparse.ArgumentParser:
     init_parser.add_argument("--backup-gpg-secret-export", action=argparse.BooleanOptionalAction, default=None)
     init_parser.add_argument("--backup-gpg-secret-export-path")
     init_parser.set_defaults(func=init)
+
+    acme_parser = sub.add_parser("update-acme", help="Fetch or renew production wildcard ACME certificate")
+    acme_parser.add_argument("--prod-domains")
+    acme_parser.add_argument("--acme-email")
+    acme_parser.add_argument("--secrets-dir")
+    acme_parser.add_argument("--work-dir")
+    acme_parser.add_argument("--force", action="store_true")
+    acme_parser.add_argument("--color", action=argparse.BooleanOptionalAction, default=None)
+    acme_parser.set_defaults(func=update_acme)
 
     clean_parser = sub.add_parser("clean", help="Remove generated working artifacts")
     clean_parser.add_argument("--work-dir")
