@@ -57,6 +57,16 @@ def ip6(d)
     end
 end
 
+$testing_domain = 'maurusnet.test'
+$fileserver_host = "fileserver.#{$testing_domain}"
+$saltmaster_host = "saltmaster.#{$testing_domain}"
+$test_host = "test.#{$testing_domain}"
+$preseed_key_dir = 'saltshaker/vagrant/preseed-keys'
+
+def preseed_key_path(hostname, ext)
+    "#{$preseed_key_dir}/#{hostname}.#{ext}"
+end
+
 # When I'm on a train or plane I like to use a local Debian mirror that I run off a Micro SD Card.
 # The shell script below sets a Debian VM to load everything from there when you set $local_provision
 # to true.
@@ -76,10 +86,10 @@ $remote_provision_script = <<SCRIPT
         apt update
 SCRIPT
 $local_provision_script = <<SCRIPT
-        sh -c 'echo 192.168.56.10 fileserver.maurusnet.test httpredir.debian.org >> /etc/hosts'
-        sh -c 'echo deb http://fileserver.maurusnet.test/debian/ bullseye main > /etc/apt/sources.list'
-        sh -c 'echo deb http://fileserver.maurusnet.test/apt/debian/11/amd64/latest bullseye main > /etc/apt/sources.list.d/saltstack.list'
-        wget -q -O - http://fileserver.maurusnet.test/dev_apt_signing.public.pgp | apt-key add -
+        sh -c 'echo 192.168.56.10 #{$fileserver_host} httpredir.debian.org >> /etc/hosts'
+        sh -c 'echo deb http://#{$fileserver_host}/debian/ bullseye main > /etc/apt/sources.list'
+        sh -c 'echo deb http://#{$fileserver_host}/apt/debian/11/amd64/latest bullseye main > /etc/apt/sources.list.d/saltstack.list'
+        wget -q -O - http://#{$fileserver_host}/dev_apt_signing.public.pgp | apt-key add -
         apt-get update
         sh -c 'apt-get install ca-certificates'
         sh -c 'mkdir -p /usr/share/ca-certificates/local'
@@ -159,7 +169,7 @@ Vagrant.configure('2') do |config|
                           :libvirt__netmask => '255.255.255.0',
                           :libvirt__network_name => 'mnet_vagrant',
                           :libvirt__forward_mode => 'route'
-        master.vm.hostname = 'saltmaster.maurusnet.test'
+        master.vm.hostname = $saltmaster_host
 
         master.vm.provision :shell do |s|
             if $local_provision
@@ -182,15 +192,15 @@ Vagrant.configure('2') do |config|
             salt.bootstrap_options = '-r'
             if $local_provision
                 # -l uses http instead of https
-                salt.bootstrap_options += " -l -R fileserver.maurusnet.test"
+                salt.bootstrap_options += " -l -R #{$fileserver_host}"
             end
-            salt.master_pub = 'saltshaker/vagrant/preseed-keys/saltmaster.maurusnet.test.pub'
-            salt.master_key = 'saltshaker/vagrant/preseed-keys/saltmaster.maurusnet.test.pem'
-            salt.minion_pub = 'saltshaker/vagrant/preseed-keys/saltmaster.maurusnet.test.pub'
-            salt.minion_key = 'saltshaker/vagrant/preseed-keys/saltmaster.maurusnet.test.pem'
+            salt.master_pub = preseed_key_path($saltmaster_host, 'pub')
+            salt.master_key = preseed_key_path($saltmaster_host, 'pem')
+            salt.minion_pub = preseed_key_path($saltmaster_host, 'pub')
+            salt.minion_key = preseed_key_path($saltmaster_host, 'pem')
             salt.seed_master = {
-              'saltmaster.maurusnet.test' => salt.minion_pub,
-              'test.maurusnet.test' => 'saltshaker/vagrant/preseed-keys/test.maurusnet.test.pub'
+              $saltmaster_host => salt.minion_pub,
+              $test_host => preseed_key_path($test_host, 'pub')
             }
         end
 
@@ -229,10 +239,10 @@ SCRIPT
             salt.bootstrap_options = '-r'
             if $local_provision
                 # -l uses http instead of https
-                salt.bootstrap_options = " -l -R fileserver.maurusnet.test"
+                salt.bootstrap_options = " -l -R #{$fileserver_host}"
             end
-            salt.minion_pub = 'saltshaker/vagrant/preseed-keys/saltmaster.maurusnet.test.pub'
-            salt.minion_key = 'saltshaker/vagrant/preseed-keys/saltmaster.maurusnet.test.pem'
+            salt.minion_pub = preseed_key_path($saltmaster_host, 'pub')
+            salt.minion_key = preseed_key_path($saltmaster_host, 'pem')
         end
 
         # We have to restart salt-minion because the master's hostname is set in minion.d
@@ -265,7 +275,7 @@ SCRIPT
         test.vm.network :private_network, ip: ip('162')
         test.vm.network :private_network, ip: ip('163')
         test.vm.network :private_network, ip: ip('164')
-        test.vm.hostname = 'test.maurusnet.test'
+        test.vm.hostname = $test_host
 
         test.vm.provision :shell do |s|
             if $local_provision
@@ -279,7 +289,7 @@ SCRIPT
         sync_folder(test, 'saltshaker/etc/salt-minion/minion.d', '/etc/salt/minion.d', mounttype: 'rsync')
 
         test.vm.provision :shell do |s|
-            s.inline = "sh -c 'if ! grep -q " + ip('88') + " /etc/hosts; then echo \"" + ip('88') + "        saltmaster.maurusnet.test saltmaster\" >> /etc/hosts; fi'\n"
+            s.inline = "sh -c 'if ! grep -q " + ip('88') + " /etc/hosts; then echo \"" + ip('88') + "        #{$saltmaster_host} saltmaster\" >> /etc/hosts; fi'\n"
             s.inline +=<<SCRIPT
                 mkdir -p /etc/salt/roles.d
                 touch /etc/salt/roles.d/vagrant
@@ -307,10 +317,10 @@ SCRIPT
             salt.bootstrap_options = '-r'
             if $local_provision
                 # -l uses http instead of https
-                salt.bootstrap_options += " -l -R fileserver.maurusnet.test"
+                salt.bootstrap_options += " -l -R #{$fileserver_host}"
             end
-            salt.minion_key = 'saltshaker/vagrant/preseed-keys/test.maurusnet.test.pem'
-            salt.minion_pub = 'saltshaker/vagrant/preseed-keys/test.maurusnet.test.pub'
+            salt.minion_key = preseed_key_path($test_host, 'pem')
+            salt.minion_pub = preseed_key_path($test_host, 'pub')
         end
     end
 end

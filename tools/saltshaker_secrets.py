@@ -23,6 +23,8 @@ ROOT = Path(__file__).resolve().parents[1]
 DEFAULT_SECRETS_DIR = ROOT / "srv" / "pillar" / "shared" / "secrets"
 DEFAULT_CRYPTO_DIR = ROOT / "srv" / "salt" / "basics" / "crypto"
 DEFAULT_WORK_DIR = ROOT / ".saltshaker-secrets"
+DEFAULT_VAGRANTFILE = ROOT / "vagrant" / "Vagrantfile"
+DEFAULT_PRESEED_KEYS_DIR = ROOT / "vagrant" / "preseed-keys"
 DEFAULT_EC_CURVE = "ed25519"
 DEFAULT_GPG_KEY_TYPE = "ed25519"
 
@@ -344,6 +346,47 @@ def generate_openssl_private_key(key_path: Path, curve_or_algorithm: str) -> Non
             str(key_path),
         ]
     )
+
+
+def generate_vagrant_preseed_keypair(
+    preseed_dir: Path,
+    hostname: str,
+    *,
+    force: bool,
+) -> tuple[Path, Path]:
+    ensure_dir(preseed_dir)
+    private_key = preseed_dir / f"{hostname}.pem"
+    public_key = preseed_dir / f"{hostname}.pub"
+    if not force and (private_key.exists() or public_key.exists()):
+        raise FileExistsError(
+            f"Refusing to overwrite {private_key if private_key.exists() else public_key}. Use --force to replace."
+        )
+    run(["openssl", "genrsa", "-out", str(private_key), "2048"])
+    run(["openssl", "rsa", "-in", str(private_key), "-pubout", "-out", str(public_key)])
+    return private_key, public_key
+
+
+def vagrant_machine_hostnames(dev_domain: str) -> List[str]:
+    return [
+        f"saltmaster.{dev_domain}",
+        f"test.{dev_domain}",
+    ]
+
+
+def update_vagrantfile_testing_domain(vagrantfile: Path, dev_domain: str) -> None:
+    if not vagrantfile.exists():
+        raise FileNotFoundError(f"Vagrantfile not found: {vagrantfile}")
+    content = vagrantfile.read_text(encoding="utf-8")
+    updated, count = re.subn(
+        r"^\$testing_domain = '[^']*'$",
+        f"$testing_domain = '{dev_domain}'",
+        content,
+        count=1,
+        flags=re.MULTILINE,
+    )
+    if count != 1:
+        raise RuntimeError(f"Unable to update {vagrantfile}: missing $testing_domain assignment")
+    vagrantfile.write_text(updated, encoding="utf-8")
 
 
 def generate_root_ca(
@@ -916,6 +959,8 @@ def init(args: argparse.Namespace) -> None:
     secrets_dir = Path(args.secrets_dir or DEFAULT_SECRETS_DIR)
     crypto_dir = Path(args.crypto_dir or DEFAULT_CRYPTO_DIR)
     work_dir = Path(args.work_dir or DEFAULT_WORK_DIR)
+    vagrantfile = Path(args.vagrantfile or DEFAULT_VAGRANTFILE)
+    preseed_keys_dir = Path(args.preseed_keys_dir or DEFAULT_PRESEED_KEYS_DIR)
     ensure_dir(work_dir)
     backup_key_fingerprint: Optional[str] = None
     backup_key_reminder_mode: Optional[str] = None
@@ -1014,6 +1059,13 @@ def init(args: argparse.Namespace) -> None:
 
         sls = build_ssl_sls(spec.name.replace("-", "_"), cert, key, certchain, spec.sls_key)
         write_file(secrets_dir / sls_name, sls, force=args.force)
+
+    info("Generating Vagrant preseed keys...", enabled=color_enabled)
+    for hostname in vagrant_machine_hostnames(dev_domain):
+        generate_vagrant_preseed_keypair(preseed_keys_dir, hostname, force=args.force)
+
+    info("Updating Vagrantfile testing domain...", enabled=color_enabled)
+    update_vagrantfile_testing_domain(vagrantfile, dev_domain)
 
     acme_created = False
     if fetch_acme_now is None:
@@ -1197,6 +1249,7 @@ def init(args: argparse.Namespace) -> None:
     )
     print(f"- Verify TLDs in `srv/pillar/shared/network.sls` match {dev_domain} and {internal_domain}")
     print(f"- Verify external_tld in `srv/pillar/local/wellknown.sls` is {dev_domain}")
+    print(f"- `vagrant/Vagrantfile` has been updated for {dev_domain} and is ready for use")
     if prod_domains:
         print(f"- Verify external_tld in `srv/pillar/hetzner/wellknown.sls` (env/hcloud) matches {prod_domains[0]}")
         if acme_created:
@@ -1226,6 +1279,8 @@ def init(args: argparse.Namespace) -> None:
     append_option(rerun, "--secrets-dir", args.secrets_dir)
     append_option(rerun, "--crypto-dir", args.crypto_dir)
     append_option(rerun, "--work-dir", args.work_dir)
+    append_option(rerun, "--vagrantfile", args.vagrantfile)
+    append_option(rerun, "--preseed-keys-dir", args.preseed_keys_dir)
     append_option(rerun, "--root-days", args.root_days)
     append_option(rerun, "--intermediate-days", args.intermediate_days)
     append_option(rerun, "--leaf-days", args.leaf_days)
@@ -1281,6 +1336,8 @@ def build_parser() -> argparse.ArgumentParser:
     init_parser.add_argument("--secrets-dir")
     init_parser.add_argument("--crypto-dir")
     init_parser.add_argument("--work-dir")
+    init_parser.add_argument("--vagrantfile")
+    init_parser.add_argument("--preseed-keys-dir")
     init_parser.add_argument("--force", action="store_true")
     init_parser.add_argument("--verbose", action="store_true")
     init_parser.add_argument("--color", action=argparse.BooleanOptionalAction, default=None)
@@ -1345,6 +1402,9 @@ def main() -> int:
         err(str(exc), enabled=sys.stdout.isatty())
         return 2
     except FileNotFoundError as exc:
+        err(str(exc), enabled=sys.stdout.isatty())
+        return 2
+    except RuntimeError as exc:
         err(str(exc), enabled=sys.stdout.isatty())
         return 2
     except subprocess.CalledProcessError as exc:

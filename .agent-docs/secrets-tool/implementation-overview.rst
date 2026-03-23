@@ -11,6 +11,7 @@ Build a Python CLI tool that initializes the SaltShaker secrets pillar set from 
 - Production wildcard certificate for ``*.{prod_domain}`` via ACME DNS challenge (Certbot or compatible client).
 - GPG signing key (public + secret) for Debian repo signing.
 - Managed backup/admin GPG public key material for the shared Salt keyring.
+- Vagrant preseed minion/master keys for the local test machines plus a testing-domain update in ``vagrant/Vagrantfile``.
 - Pillar files in ``srv/pillar/shared/secrets/`` plus CA certs in ``srv/salt/basics/crypto/``.
 
 Scope
@@ -43,6 +44,8 @@ Core Outputs
 - ``smtp.sls`` / ``imap.sls`` / ``vault-ssl.sls`` / ``postgresql.sls``: leaf certs signed by intermediate CA.
 - ``gpg-package-signing.sls``: public + private key blocks.
 - ``gpg-installed-keys.sls``: public keys imported into the managed shared keyring.
+- ``vagrant/preseed-keys/*.pem`` / ``*.pub``: generated RSA keypairs for ``saltmaster.{dev_domain}`` and ``test.{dev_domain}``.
+- ``vagrant/Vagrantfile``: rewritten so the managed testing-domain constant matches ``--dev-domain``.
 - ``srv/salt/basics/crypto/maurusnet-rootca.crt``: root CA cert.
 - ``srv/salt/basics/crypto/dev/dev-ca.crt``: intermediate CA cert (dev/infra CA).
 
