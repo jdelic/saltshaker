@@ -1,0 +1,61 @@
+{#-
+        Envoy UDP proxy config for Smartstack external services.
+-#}
+
+{% set quic_services = services.group_by_tagvalue("smartstack:mode:")["quic"] if "quic" in services.group_by_tagvalue("smartstack:mode:") else services.empty() %}
+{% set udp_services = quic_services + services.group_by_tagvalue("smartstack:mode:")["udp"] if "udp" in services.group_by_tagvalue("smartstack:mode:") else services.empty() %}
+
+
+admin:
+    address:
+        socket_address:
+            address: 127.0.0.1
+            port_value: 9901
+
+static_resources:
+    listeners:
+{% for bind_ip in localips %}
+    {% for svc in udp_services %}
+        {% for extport in svc.tagvalue_set("smartstack:extport:") %}
+        - name: listener_{{ svc.name | replace("-", "_") }}_{{ bind_ip | replace(".", "_") | replace(":", "_") }}_{{ extport | replace("-", "_") }}
+          address:
+              socket_address:
+                  address: "{{ bind_ip }}"
+                  port_value: {{ extport }}
+                  protocol: UDP
+          udp_listener_config:
+              downstream_socket_config:
+                  max_rx_datagram_size: 65535
+          listener_filters:
+              - name: envoy.filters.udp_listener.udp_proxy
+                typed_config:
+                    "@type": type.googleapis.com/envoy.extensions.filters.udp.udp_proxy.v3.UdpProxyConfig
+                    stat_prefix: {{ svc.name | replace("-", "_") }}_{{ extport | replace("-", "_") }}
+                    matcher:
+                        on_no_match:
+                            action:
+                                name: route
+                                typed_config:
+                                    "@type": type.googleapis.com/envoy.extensions.filters.udp.udp_proxy.v3.Route
+                                    cluster: cluster_{{ svc.name | replace("-", "_") }}
+                    idle_timeout: 300s
+        {% endfor %}
+    {% endfor %}
+{% endfor %}
+
+    clusters:
+{% for svc in udp_services %}
+        - name: cluster_{{svc.name|replace("-", "_")}}
+          type: STATIC
+          lb_policy: ROUND_ROBIN
+          load_assignment:
+              cluster_name: cluster_{{svc.name|replace("-", "_")}}
+              endpoints:
+                  - lb_endpoints:
+                          - endpoint:
+                                  address:
+                                      socket_address:
+                                          address: {{svc.ip}}
+                                          port_value: {{svc.port}}
+                                          protocol: UDP
+{% endfor %}
