@@ -1,0 +1,46 @@
+{
+    "services": [
+        {
+            "name": "anytype-syncnode1-udp",
+            "tags": ["smartstack:external", "smartstack:mode:udp", "smartstack:routing:port",
+                     "smartstack:extport:1011", "smartstack:protocol:quic"],
+            "address": "{{ip}}",
+            "port": 10011
+        },
+        {
+            "name": "anytype-syncnode2-udp",
+            "tags": ["smartstack:external", "smartstack:mode:udp", "smartstack:routing:port",
+                     "smartstack:extport:1012", "smartstack:protocol:quic"],
+            "address": "{{ip}}",
+            "port": 10012
+        },
+        {
+            "name": "anytype-syncnode3-udp",
+            "tags": ["smartstack:external", "smartstack:mode:udp", "smartstack:routing:port",
+                     "smartstack:extport:1013", "smartstack:protocol:quic"],
+            "address": "{{ip}}",
+            "port": 10013
+        },
+        {
+            "name": "anytype-coordinator-udp",
+            "tags": ["smartstack:external", "smartstack:mode:udp", "smartstack:routing:port",
+                     "smartstack:extport:1014", "smartstack:protocol:quic"],
+            "address": "{{ip}}",
+            "port": 10014
+        },
+        {
+            "name": "anytype-filenode-udp",
+            "tags": ["smartstack:external", "smartstack:mode:udp", "smartstack:routing:port",
+                     "smartstack:extport:1015", "smartstack:protocol:quic"],
+            "address": "{{ip}}",
+            "port": 10015
+        },
+        {
+            "name": "anytype-consensus-udp",
+            "tags": ["smartstack:external", "smartstack:mode:udp", "smartstack:routing:port",
+                     "smartstack:extport:1016", "smartstack:protocol:quic"],
+            "address": "{{ip}}",
+            "port": 10016
+        }
+    ]
+}

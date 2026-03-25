@@ -129,6 +129,7 @@ base:
     'roles:loadbalancer':
         - match: grain
         - haproxy.external
+        - envoy.external
 
     'roles:natgateway':
         - match: grain
@@ -150,6 +151,12 @@ base:
         - docker.install
         - fstab.secure
         - standardnotes
+
+    'roles:anytype':
+        - match: grain
+        - docker.install
+        - fstab.secure
+        - anytype
 
     '*.test':
         # put vagrant user config on .test machines

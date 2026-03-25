@@ -1,0 +1,20 @@
+include:
+    - docker-compose.yml
+
+services:
+    any-sync-consensusnode:
+        # work around https://github.com/anyproto/any-sync-consensusnode/issues/91
+        entrypoint: ["/bin/any-sync-consensusnode", "-c", "/etc/any-sync-consensusnode/config.yml"]
+    netcheck:
+        pull_policy: daily
+
+networks:
+    default:
+        driver: bridge
+        driver_opts:
+            com.docker.network.bridge.name: anytype0
+        ipam:
+            driver: default
+            config:
+                - subnet: {{bridge_cidr}}
+                  ip_range: {{container_cidr}}
