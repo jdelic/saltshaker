@@ -53,9 +53,9 @@ static_resources:
               endpoints:
                   - lb_endpoints:
                       - endpoint:
-                        address:
-                            socket_address:
-                                address: {{svc.ip}}
-                                port_value: {{svc.port}}
-                                protocol: UDP
+                            address:
+                                socket_address:
+                                    address: {{svc.ip}}
+                                    port_value: {{svc.port}}
+                                    protocol: UDP
 {% endfor %}
