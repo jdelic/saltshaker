@@ -8,8 +8,8 @@
 %}
 
 {% set hostname = pillar['anytype']['hostname'] %}
-{% bridge_cidr = {{pillar.get('anytype', {}).get('bridge-cidr', '192.168.57.0/24')}} %}
-{% container_cidr = {{pillar.get('anytype', {}).get('container-cidr', '192.168.57.0/25') %}
+{% bridge_cidr = pillar.get('anytype', {}).get('bridge-cidr', '192.168.57.0/24') %}
+{% container_cidr = pillar.get('anytype', {}).get('container-cidr', '192.168.57.0/25') %}
 
 anytype-base-dir:
     file.directory:
