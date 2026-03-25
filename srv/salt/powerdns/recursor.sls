@@ -136,6 +136,7 @@ pdns-recursor-external-zone:
             calendar    IN  A   192.168.123.163
             ci          IN  A   192.168.123.163
             smtp        IN  A   192.168.123.164
+            notes       IN  A   192.168.123.163
         - user: root
         - group: root
         - mode: '0644'
