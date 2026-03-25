@@ -85,7 +85,7 @@ base:
         - match: grain
         - shared.standardnotes
 
-    'roes:anytype':
+    'roles:anytype':
         - match: grain
         - shared.anytype
 
