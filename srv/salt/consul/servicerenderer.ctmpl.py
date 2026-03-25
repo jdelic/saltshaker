@@ -411,23 +411,35 @@ def _setup_nftables(services: List[SmartstackService], ips: List[str], mode: str
     for svc in services:
         _extports = set()
         for port in svc.tagvalue_set("smartstack:extport:"):
-            try:
-                _extports.add(int(port))
-            except ValueError:
-                print("Port number for 'smartstack:extport:' must be an integer not %s" %
-                      svc.tagvalue("smartstack:extport:"), file=sys.stderr)
+            if port.count("-") > 1 or not re.match(r"^[0-9\\-]+$", port):
+                print("%s: 'smartstack:extport:' must be a single port or a single range not '%s'. Repeat the tag if you "
+                      "need to." % (svc.name, port), file=sys.stderr)
                 continue
+            else:
+                _extports.add(port)
 
         _protocol = svc.tagvalue("smartstack:protocol:")
-        if _protocol == "udp":
+        if _protocol == "udp" or _protocol == "quic":
             prot = "udp"
-            mode = "plain"  # udp can't be used with -m state
+            mode = "plain"  # udp can't be used with -m state, right?
+
+            for p in _extports:
+                if "-" in p:
+                    print("%s: modes quic and udp do not support port ranges because Envoy doesn't "
+                          "[illegal value: %s]" % (svc.name, p), file=sys.stderr)
+                    continue
         elif _protocol == "http":
             prot = "tcp"
-            _extports.add(80)
+            if len(_extports) == 0:
+                _extports.add("80")
         elif _protocol == "https":
             prot = "tcp"
-            _extports.add(443)
+            if len(_extports) == 0:
+                _extports.add("443")
+        elif _protocol == "http3":
+            prot = "udp"
+            if len(_extports) == 0:
+                _extports.add("443")
         else:
             prot = "tcp"
 
@@ -436,7 +448,7 @@ def _setup_nftables(services: List[SmartstackService], ips: List[str], mode: str
 
         if not _extports:
             print("no external port (smartstack:extport:) for service %s, or no well-known protocol in "
-                  "'smartstack:protocol:' so not creating iptables rule" % svc.name,
+                  "'smartstack:protocol:' so not creating nftables rule" % svc.name,
                   file=sys.stderr)
             continue
 
