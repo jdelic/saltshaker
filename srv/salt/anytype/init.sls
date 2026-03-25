@@ -60,7 +60,7 @@ anytype-env-file:
         - user: root
         - group: root
         - mode: '0644'
-        - content: |
+        - contents: |
               EXTERNAL_LISTEN_HOSTS="{{hostname}} {{ip}}"
               REDIS_PORT=6380
               ANY_SYNC_NODE_1_PORT=10001
