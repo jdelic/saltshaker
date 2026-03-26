@@ -566,6 +566,24 @@ resource "hcloud_firewall" "mail" {
     }
 }
 
+resource "hcloud_firewall" "anytype" {
+    name = "anytype"
+
+    rule {
+        direction = "in"
+        protocol  = "tcp"
+        port      = "1001-1006"
+        source_ips = ["0.0.0.0/0", "::/0"]
+    }
+
+    rule {
+        direction = "in"
+        protocol  = "udp"
+        port      = "1011-1016"
+        source_ips = ["0.0.0.0/0", "::/0"]
+    }
+}
+
 resource "hcloud_firewall" "web" {
     name = "web"
 
