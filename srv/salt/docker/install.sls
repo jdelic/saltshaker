@@ -15,6 +15,7 @@ docker:
         - pkgs:
             - docker-ce
             - docker-ce-cli
+            - docker-buildx-plugin
             - containerd.io
 
 
