@@ -103,6 +103,10 @@ base:
         - match: grain
         - shared.standardnotes
 
+    'roles:anytype':
+        - match: grain
+        - shared.anytype
+
     'not *.test and G@roles:vault':
         - match: compound
         - hetzner.vault
@@ -134,6 +138,7 @@ base:
     # just assign everything to these nodes.
     '*.test':
         - local.authserver
+        - local.anytype
         - local.buildserver
         - local.calendar
         - local.config
