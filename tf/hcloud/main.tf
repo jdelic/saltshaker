@@ -149,7 +149,7 @@ locals {
             desired_count_of_additional_ipv6_ips = 0
             ptr = "lb1.maurus.net"
             roles = ["loadbalancer"]
-            firewall_ids = [hcloud_firewall.web.id, hcloud_firewall.ping.id]
+            firewall_ids = [hcloud_firewall.web.id, hcloud_firewall.ping.id, hcloud_firewall.anytype.id]
             volumes = {}
         }
     }
