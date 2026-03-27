@@ -13,7 +13,7 @@ WorkingDirectory=/etc/anytype/any-sync-dockercompose
 ExecStartPre=docker buildx build --load --tag generateconfig-env --file Dockerfile-generateconfig-env .
 ExecStartPre=docker run --rm --volume /etc/anytype/any-sync-dockercompose/:/code/:Z generateconfig-env
 ExecStart=/usr/bin/docker compose -f /etc/anytype/any-sync-dockercompose/saltshaker-anytype-compose.yml up -d --remove-orphans --quiet-pull
-ExecStop=/usr/bin/docker compose -f /etc/anytype/docker-compose.yml down --remove-orphans
+ExecStop=/usr/bin/docker compose -f /etc/anytype/any-sync-dockercompose/saltshaker-anytype-compose.yml down --remove-orphans
 TimeoutStartSec=0
 
 [Install]
