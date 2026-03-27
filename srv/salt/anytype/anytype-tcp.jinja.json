@@ -3,42 +3,42 @@
         {
             "name": "anytype-syncnode1-tcp",
             "tags": ["smartstack:external", "smartstack:mode:tcp", "smartstack:routing:port",
-                     "smartstack:extport:1001", "smartstack:protocol:sni", "smartstack:hostname:{{hostname}}"],
+                     "smartstack:extport:1001", "smartstack:protocol:tcp", "smartstack:hostname:{{hostname}}"],
             "address": "{{ip}}",
             "port": 10001
         },
         {
             "name": "anytype-syncnode2-tcp",
             "tags": ["smartstack:external", "smartstack:mode:tcp", "smartstack:routing:port",
-                     "smartstack:extport:1002", "smartstack:protocol:sni", "smartstack:hostname:{{hostname}}"],
+                     "smartstack:extport:1002", "smartstack:protocol:tcp", "smartstack:hostname:{{hostname}}"],
             "address": "{{ip}}",
             "port": 10002
         },
         {
             "name": "anytype-syncnode3-tcp",
             "tags": ["smartstack:external", "smartstack:mode:tcp", "smartstack:routing:port",
-                     "smartstack:extport:1003", "smartstack:protocol:sni", "smartstack:hostname:{{hostname}}"],
+                     "smartstack:extport:1003", "smartstack:protocol:tcp", "smartstack:hostname:{{hostname}}"],
             "address": "{{ip}}",
             "port": 10003
         },
         {
             "name": "anytype-coordinator-tcp",
             "tags": ["smartstack:external", "smartstack:mode:tcp", "smartstack:routing:port",
-                     "smartstack:extport:1004", "smartstack:protocol:sni", "smartstack:hostname:{{hostname}}"],
+                     "smartstack:extport:1004", "smartstack:protocol:tcp", "smartstack:hostname:{{hostname}}"],
             "address": "{{ip}}",
             "port": 10004
         },
         {
             "name": "anytype-filenode-tcp",
             "tags": ["smartstack:external", "smartstack:mode:tcp", "smartstack:routing:port",
-                     "smartstack:extport:1005", "smartstack:protocol:sni", "smartstack:hostname:{{hostname}}"],
+                     "smartstack:extport:1005", "smartstack:protocol:tcp", "smartstack:hostname:{{hostname}}"],
             "address": "{{ip}}",
             "port": 10005
         },
         {
             "name": "anytype-consensus-tcp",
             "tags": ["smartstack:external", "smartstack:mode:tcp", "smartstack:routing:port",
-                     "smartstack:extport:1006", "smartstack:protocol:sni", "smartstack:hostname:{{hostname}}"],
+                     "smartstack:extport:1006", "smartstack:protocol:tcp", "smartstack:hostname:{{hostname}}"],
             "address": "{{ip}}",
             "port": 10006
         }
