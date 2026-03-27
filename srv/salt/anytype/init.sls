@@ -146,6 +146,20 @@ anytype-bridge-forward-ipv4:
             - sls: basics.nftables.setup
 
 
+anytype-bridge-forward-ipv6:
+    nftables.append:
+        - table: filter
+        - chain: forward
+        - family: ip6
+        - jump: accept
+        - if: {{pillar['ifassign']['internal']}}
+        - of: anytype0
+        - save: True
+        - require:
+              - sls: basics.nftables.setup
+
+
+
 anytype-bridge-forward-ipv4-reverse:
     nftables.append:
         - table: filter
@@ -153,10 +167,21 @@ anytype-bridge-forward-ipv4-reverse:
         - family: ip4
         - jump: accept
         - if: anytype0
-        - of: {{pillar['ifassign']['internal']}}
         - save: True
         - require:
             - sls: basics.nftables.setup
+
+
+anytype-bridge-forward-ipv4-reverse:
+    nftables.append:
+        - table: filter
+        - chain: forward
+        - family: ip6
+        - jump: accept
+        - if: anytype0
+        - save: True
+        - require:
+              - sls: basics.nftables.setup
 
 
 anytype-pdns-recursor-cidr:
