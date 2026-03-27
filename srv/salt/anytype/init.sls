@@ -172,7 +172,7 @@ anytype-bridge-forward-ipv4-reverse:
             - sls: basics.nftables.setup
 
 
-anytype-bridge-forward-ipv4-reverse:
+anytype-bridge-forward-ipv6-reverse:
     nftables.append:
         - table: filter
         - chain: forward
