@@ -515,7 +515,7 @@ opensmtpd-relay-out25-send-ipv6:
         - chain: output
         - family: ip6
         - jump: accept
-        - source: '{{salt['network.ip_addrs6'](salt['network.default_route']('inet6')[0]['interface'], False)[0]}}'
+        - source: '{{salt['network.ip_addrs6'](salt['network.default_route']('inet6')[0]['interface'], False)[0]}}/64'
         - destination: '::/0'
         - dport: 25
         - match: state
@@ -532,7 +532,7 @@ opensmtpd-relay-out465-send-ipv6:
         - chain: output
         - family: ip6
         - jump: accept
-        - source: '{{salt['network.ip_addrs6'](salt['network.default_route']('inet6')[0]['interface'], False)[0]}}'
+        - source: '{{salt['network.ip_addrs6'](salt['network.default_route']('inet6')[0]['interface'], False)[0]}}/64'
         - destination: '::/0'
         - dport: 465
         - match: state
