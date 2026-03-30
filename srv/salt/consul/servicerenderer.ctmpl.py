@@ -403,7 +403,7 @@ def _check_nftables_rule_exists(family: str, table: str, chain: str, rule: List[
     return False
 
 
-def _setup_nftables(services: List[SmartstackService], ips: List[str], mode: str, input_chainname: str,
+def _setup_nftables(services: List[SmartstackService], ips: List[str], nftable_mode: str, input_chainname: str,
                     output_chainname: str, debug: bool = False, verbose: bool = False) -> None:
     if debug:
         print("========= NFTABLES RULES DEBUG =========")
@@ -418,6 +418,7 @@ def _setup_nftables(services: List[SmartstackService], ips: List[str], mode: str
             else:
                 _extports.add(port)
 
+        mode = nftable_mode
         _protocol = svc.tagvalue("smartstack:protocol:")
         if _protocol == "udp" or _protocol == "quic":
             prot = "udp"
