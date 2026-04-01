@@ -2,7 +2,7 @@
     "service": {
         "name": "radicale-ext",
         "tags": ["smartstack:{{routing}}", "smartstack:port:{{port}}", "smartstack:mode:{{mode}}",
-                 "smartstack:https-redirect", "haproxy:backend-server-extra:maxconn=10 maxqueue=500",
+                 "smartstack:https-redirect", "haproxy:backend-server-extra:maxconn=10 maxqueue=500"
                 {% if hostname is defined %}, "smartstack:hostname:{{hostname}}"{% endif %}
                 {% if protocol is defined %}, "smartstack:protocol:{{protocol}}"{% endif %}],
         "address": "{{ip}}",
