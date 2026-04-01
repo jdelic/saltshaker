@@ -6,6 +6,11 @@
 export {{envvar}}='{{value}}'
 {% endfor %}
 
+if [ "$PASSPHRASE" = "" ]; then
+    export PASSPHRASE=""
+fi
+
+
 if [ $# -ne 1 ]; then
     echo "usage: duplicity-cleanup.sh run"
     echo ""
