@@ -11,6 +11,7 @@ client {
     #
     # TODO: fix this when nomad 0.6 comes out with better network management
     network_interface = "{{internal_interface}}"
+    preferred_address_family = "ipv4"
 }
 
 consul {
