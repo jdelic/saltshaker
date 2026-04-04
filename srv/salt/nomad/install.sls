@@ -160,6 +160,23 @@ nomad-udp-in4648-send-ipv4:
             - sls: basics.nftables.setup
 
 
+# open the Nomad dynamic port range for client ephemeral ports
+nomad-tcp-in20000-30000-recv-ipv4:
+    nftables.append:
+        - table: filter
+        - chain: input
+        - family: ip4
+        - jump: accept
+        - if: {{pillar['ifassign']['internal']}}
+        - dport: 20000-30000
+        - match: state
+        - connstate: new
+        - proto: tcp
+        - save: True
+        - require:
+            - sls: basics.nftables.setup
+
+
 nomad-envvar-config:
     file.managed:
         - name: /etc/profile.d/nomadclient.sh
