@@ -161,7 +161,7 @@ nomad-udp-in4648-send-ipv4:
 
 
 # open the Nomad dynamic port range for client ephemeral ports
-nomad-tcp-in20000-30000-recv-ipv4:
+nomad-tcp-in20000-32000-recv-ipv4:
     nftables.append:
         - table: filter
         - chain: input
