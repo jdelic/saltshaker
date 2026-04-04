@@ -64,7 +64,7 @@ authserver-rsyslog:
     "POSTGRESQL_CA": pillar['ssl']['service-rootca-cert'] if
         pillar['postgresql'].get('pinned-ca-cert', 'default') == 'default'
         else pillar['postgresql']['pinned-ca-cert'],
-    "ALLOWED_HOSTS": "%s,%s"|format(pillar['authserver']['hostname'], pillar['smartstack-services']['authserver']['smartstack-hostname']),
+    "ALLOWED_HOSTS": "%s,%s,authserver-int.service.consul"|format(pillar['authserver']['hostname'], pillar['smartstack-services']['authserver']['smartstack-hostname']),
     "CORS_ORIGIN_REGEX_WHITELIST": "^https://(\w+\.)?(maurusnet\.test|maurus\.net)$",
     "USE_X_FORWARDED_HOST": "true",
     "APPLICATION_LOGLEVEL": "INFO",
