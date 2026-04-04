@@ -168,7 +168,7 @@ nomad-tcp-in20000-30000-recv-ipv4:
         - family: ip4
         - jump: accept
         - if: {{pillar['ifassign']['internal']}}
-        - dport: 20000-30000
+        - dport: 20000-32000
         - match: state
         - connstate: new
         - proto: tcp
