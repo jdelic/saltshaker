@@ -77,7 +77,7 @@ docker-bridge-udp-ipv4-accept:
         - require:
             - sls: basics.nftables.setup
 
-\
+
 # docker-proxy needs to take an incoming connection and open a new connection to the container
 docker-bridge-tcp-ipv4-output-accept:
     nftables.append:
