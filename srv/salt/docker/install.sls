@@ -54,8 +54,6 @@ docker-bridge-tcp-ipv4-accept:
         - chain: input
         - family: ip4
         - jump: accept
-        - source: {{pillar['docker']['bridge-cidr']}}
-        - destination: {{pillar['docker']['bridge-cidr']}}
         - if: docker0
         - match: state
         - connstate: new
@@ -71,9 +69,40 @@ docker-bridge-udp-ipv4-accept:
         - chain: input
         - family: ip4
         - jump: accept
-        - source: {{pillar['docker']['bridge-cidr']}}
-        - destination: {{pillar['docker']['bridge-cidr']}}
         - if: docker0
+        - match: state
+        - connstate: new
+        - proto: udp
+        - save: True
+        - require:
+            - sls: basics.nftables.setup
+
+\
+# docker-proxy needs to take an incoming connection and open a new connection to the container
+docker-bridge-tcp-ipv4-output-accept:
+    nftables.append:
+        - table: filter
+        - chain: output
+        - family: ip4
+        - jump: accept
+        - of: docker0
+        - match: state
+        - connstate: new
+        - proto: tcp
+        - save: True
+        - require:
+            - sls: basics.nftables.setup
+
+
+docker-bridge-udp-ipv4-output-accept:
+    nftables.append:
+        - table: filter
+        - chain: output
+        - family: ip4
+        - jump: accept
+        - of: docker0
+        - match: state
+        - connstate: new
         - proto: udp
         - save: True
         - require:
