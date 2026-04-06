@@ -139,7 +139,6 @@ anytype-bridge-forward-ipv4:
         - chain: forward
         - family: ip4
         - jump: accept
-        - if: {{pillar['ifassign']['internal']}}
         - of: anytype0
         - save: True
         - require:
@@ -152,12 +151,10 @@ anytype-bridge-forward-ipv6:
         - chain: forward
         - family: ip6
         - jump: accept
-        - if: {{pillar['ifassign']['internal']}}
         - of: anytype0
         - save: True
         - require:
               - sls: basics.nftables.setup
-
 
 
 anytype-bridge-forward-ipv4-reverse:
@@ -182,6 +179,126 @@ anytype-bridge-forward-ipv6-reverse:
         - save: True
         - require:
               - sls: basics.nftables.setup
+
+
+anytype-bridge-input-tcp-ipv4-accept:
+    nftables.append:
+        - table: filter
+        - chain: input
+        - family: ip4
+        - jump: accept
+        - if: anytype0
+        - proto: tcp
+        - match: state
+        - connstate: new
+        - save: True
+        - require:
+            - sls: basics.nftables.setup
+
+
+anytype-bridge-input-udp-ipv4-accept:
+    nftables.append:
+        - table: filter
+        - chain: input
+        - family: ip4
+        - jump: accept
+        - if: anytype0
+        - proto: udp
+        - match: state
+        - connstate: new
+        - save: True
+        - require:
+            - sls: basics.nftables.setup
+
+
+anytype-bridge-input-tcp-ipv6-accept:
+    nftables.append:
+        - table: filter
+        - chain: input
+        - family: ip6
+        - jump: accept
+        - if: anytype0
+        - proto: tcp
+        - match: state
+        - connstate: new
+        - save: True
+        - require:
+            - sls: basics.nftables.setup
+
+
+anytype-bridge-input-udp-ipv6-accept:
+    nftables.append:
+        - table: filter
+        - chain: input
+        - family: ip6
+        - jump: accept
+        - if: anytype0
+        - proto: udp
+        - match: state
+        - connstate: new
+        - save: True
+        - require:
+            - sls: basics.nftables.setup
+
+
+anytype-bridge-output-tcp-ipv4-accept:
+    nftables.append:
+        - table: filter
+        - chain: output
+        - family: ip4
+        - jump: accept
+        - of: anytype0
+        - proto: tcp
+        - match: state
+        - connstate: new
+        - save: True
+        - require:
+            - sls: basics.nftables.setup
+
+
+anytype-bridge-output-udp-ipv4-accept:
+    nftables.append:
+        - table: filter
+        - chain: output
+        - family: ip4
+        - jump: accept
+        - of: anytype0
+        - proto: udp
+        - match: state
+        - connstate: new
+        - save: True
+        - require:
+            - sls: basics.nftables.setup
+
+
+anytype-bridge-output-tcp-ipv6-accept:
+    nftables.append:
+        - table: filter
+        - chain: output
+        - family: ip6
+        - jump: accept
+        - of: anytype0
+        - proto: tcp
+        - match: state
+        - connstate: new
+        - save: True
+        - require:
+            - sls: basics.nftables.setup
+
+
+anytype-bridge-output-udp-ipv6-accept:
+    nftables.append:
+        - table: filter
+        - chain: output
+        - family: ip6
+        - jump: accept
+        - of: anytype0
+        - proto: udp
+        - match: state
+        - connstate: new
+        - save: True
+        - require:
+            - sls: basics.nftables.setup
 
 
 anytype-pdns-recursor-cidr:
