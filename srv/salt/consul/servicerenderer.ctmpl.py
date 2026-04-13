@@ -45,6 +45,7 @@ import re
 import sys
 from typing import Dict, Union, List, Optional, Set, Self, Iterator, Tuple, TextIO, Iterable
 
+import json
 import jinja2
 import argparse
 import subprocess
@@ -53,23 +54,21 @@ import contextlib
 
 t_servicedict = Dict[str, Union[str, int, List[str]]]
 
-# The Go template is in the comments (yes, this works and therefor keeps
-# IntelliJ's Python plugin from freaking out)
-_services: List[t_servicedict] = [
-    # {{ range services }}
-    #    {{ range service .Name }}
-    {
-        "name": "{{.Name}}",
-        "ip": "{{.Address}}",
-        "port": int("{{.Port}}"),
-        "tags": [  # {{ range .Tags}}
-            "{{.}}",  # {{ end }}
-        ]
-    },
-    #    {{ end }}
-    # {{ end }}
+_services: List[t_servicedict] = json.loads("""\
+[
+{{ range services }}
+    {{ range service .Name }}
+        {
+            "name": {{ .Name | toJSON }},
+            "ip": {{ .Address | toJSON }},
+            "port": {{ .Port }},
+            "tags": {{ .Tags | toJSON }},
+            "meta": {{ .Meta | toJSON }}
+        },
+    {{ end }}
+{{ end }}
 ]
-
+""")
 
 _args = None
 
@@ -102,6 +101,16 @@ class SmartstackService:
     @property
     def tags(self) -> List[str]:
         return self.svc["tags"]
+
+    @property
+    def meta(self) -> Dict[str, Union[str, int, List[str]]]:
+        return self.svc["meta"]
+
+    def metavalue(self, metafield: str) -> Union[str, int, List[str], None]:
+        if metafield in self.svc["meta"]:
+            return self.svc["meta"][metafield]
+        else:
+            return None
 
     def tagvalue(self, tagpart: str) -> Union[str, None]:
         for tag in self.svc["tags"]:
@@ -242,11 +251,11 @@ class SmartstackServiceContainer:
                                           grouped_by=self.grouped_by + [tagpart],
                                           group_by_type=self.group_by_type + ["tag"])
 
-    def value_set(self, field: str) -> Set[Union[str, int, List[str]]]:
-        res = set()
+    def value_set(self, field: str) -> List[Union[str, int, List[str]]]:
+        res = []
         for ss in self.iter_services():
-            if field in ss.svc:
-                res.add(ss.svc[field])
+            if field in ss.svc and ss.svc[field] not in res:
+                res.append(ss.svc[field])
         return res
 
     def tagvalue_set(self, tagpart: str) -> Set[str]:
@@ -255,6 +264,13 @@ class SmartstackServiceContainer:
             for tag in ss.svc["tags"]:
                 if tag.startswith(tagpart):
                     res.add(tag[len(tagpart):])
+        return res
+
+    def metavalue_set(self, metafield: str) -> List[Union[str, int, List[str]]]:
+        res = []
+        for ss in self.iter_services():
+            if metafield in ss.svc["meta"] and ss.svc[metafield] not in res:
+                res.append(ss.svc[metafield])
         return res
 
     def empty(self):
