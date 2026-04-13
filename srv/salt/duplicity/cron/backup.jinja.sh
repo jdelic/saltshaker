@@ -87,6 +87,11 @@ for LINK in /etc/duplicity.d/$1/folderlinks/*; do
         done
     fi
 
+    PAD="=========================================================================================="
+    echo ""
+    printf "$LINK ${PAD:${#LINK}}"
+    echo ""
+
     THIS_TARGET="${BACKUP_TARGET_URL%%/}/$BL"
     echo "Running duplicity {% if additional_options %}{{additional_options|replace('"', '\"')}}{% endif %}" \
          "{% for key_id in gpg_keys %}--encrypt-key={{key_id|replace('"', '\"')}} {% endfor %}" \
