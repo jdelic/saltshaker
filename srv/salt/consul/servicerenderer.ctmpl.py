@@ -206,7 +206,11 @@ class SmartstackServiceContainer:
     def items(self) -> Iterable[Union[Tuple[int, SmartstackService],
                                       Tuple[str, SmartstackService],
                                       Tuple[str, Self]]]:
-        return self.services.items()
+        res = tuple()
+        for sk in self.keys():
+            for sv in self.services[sk]:
+                res += (sk, sv)
+        return res
 
     def count(self) -> int:
         if isinstance(self.services, dict):
