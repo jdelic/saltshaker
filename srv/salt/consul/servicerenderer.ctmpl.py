@@ -67,7 +67,7 @@ _services: List[t_servicedict] = ast.literal_eval("""\
     {{ end }}
 {{ end }}
 ]
-""")
+""".replace(": null", ": None").replace(": true", ": True").replace(": false", ": False"))
 
 _args = None
 
