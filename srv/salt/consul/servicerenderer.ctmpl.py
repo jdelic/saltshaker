@@ -63,7 +63,7 @@ _services: List[t_servicedict] = json.loads("""\
             "ip": {{ .Address | toJSON }},
             "port": {{ .Port }},
             "tags": {{ .Tags | toJSON }},
-            "meta": {{ .Meta | toJSON }}
+            "meta": {{ .ServiceMeta | toJSON }}
         },
     {{ end }}
 {{ end }}
