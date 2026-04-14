@@ -103,3 +103,34 @@ nomad:
             - file: nomad-pidfile-dir
             - file: nomad-data-dir
             - archive: nomad
+
+
+nomad-cni-configdir:
+    file.directory:
+        - name: /etc/nomad/cni
+        - makedirs: True
+        - user: root
+        - group: root
+        - mode: '0755'
+
+
+nomad-cni-installdir:
+    file.directory:
+        - name: /usr/local/lib/nomad
+        - makedirs: True
+        - mode: '0755'
+
+
+nomad-cni:
+    archive.extracted:
+        - name: /usr/local/lib/nomad
+        - source: {{pillar["urls"]["nomad-cni"]}}
+        - source_hash: {{pillar["hashes"]["nomad-cni"]}}
+        - archive_format: tar
+        - unless: test -f /usr/local/lib/nomad/bridge  # workaround for https://github.com/saltstack/salt/issues/42681
+        - enforce_toplevel: False
+        - require:
+            - file: nomad-cni-installdir
+            - file: nomad-cni-configdir
+        - require_in:
+            - file: nomad
