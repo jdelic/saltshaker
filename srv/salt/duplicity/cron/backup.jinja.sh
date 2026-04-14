@@ -89,7 +89,7 @@ for LINK in /etc/duplicity.d/$1/folderlinks/*; do
 
     PAD="=========================================================================================="
     echo ""
-    printf "$LINK ${PAD:${#LINK}}"
+    printf "$LINK ${PAD:${{'{#'}}LINK{{'}}'}}"
     echo ""
 
     THIS_TARGET="${BACKUP_TARGET_URL%%/}/$BL"
