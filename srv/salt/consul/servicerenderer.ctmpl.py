@@ -1,5 +1,4 @@
 #!/usr/bin/env python
-
 # This script template takes a list of dicts describing services in Consul,
 # rendered directly into this script by consul-template and then
 # filters them and executes a Jinja2 template to write a haproxy
@@ -42,10 +41,10 @@
 import ipaddress
 import os
 import re
+import ast
 import sys
 from typing import Dict, Union, List, Optional, Set, Self, Iterator, Tuple, TextIO, Iterable
 
-import json
 import jinja2
 import argparse
 import subprocess
@@ -54,7 +53,7 @@ import contextlib
 
 t_servicedict = Dict[str, Union[str, int, List[str]]]
 
-_services: List[t_servicedict] = json.loads("""\
+_services: List[t_servicedict] = ast.literal_eval("""\
 [
 {{ range services }}
     {{ range service .Name }}
