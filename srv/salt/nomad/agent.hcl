@@ -11,6 +11,9 @@ client {
     #
     network_interface = "{{internal_interface}}"
     preferred_address_family = "ipv4"
+
+    cni_path = "opt/cni/bin"
+    cni_config_dir = "/etc/nomad/cni/"
 }
 
 consul {

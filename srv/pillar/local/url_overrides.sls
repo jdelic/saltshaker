@@ -28,6 +28,7 @@ urls:
     envoy: http://fileserver.maurusnet.test/downloads/envoy/envoy-1.37.1-linux-x86_64
     nomad: http://fileserver.maurusnet.test/downloads/nomad/nomad_1.11.3_linux_amd64.zip
     nomad-autoscaler: http://fileserver.maurusnet.test/downloads/nomad-autoscaler/nomad-autoscaler_0.4.9_linux_amd64.zip
+    nomad-cni: http://fileserver.maurusnet.test/downloads/nomad-cni/cni-plugins-linux-amd64-v1.9.1.tgz
     vault: http://fileserver.maurusnet.test/downloads/vault/vault_1.21.4_linux_amd64.zip
     vault-gpg-plugin: http://fileserver.maurusnet.test/downloads/vault-gpg-plugin/linux_amd64.zip
     vault-ssh-helper: http://fileserver.maurusnet.test/downloads/vault/vault-ssh-helper_0.2.1_linux_amd64.zip
@@ -43,6 +44,7 @@ hashes:
     envoy: sha256=8db90ee0aa085ae6873dbf21212816d29f6c455d4760c4aecf4d6593763db18c
     nomad: sha256=19dac5642a2ba5305e6ff8efee06a708d760ebe4d1cd7936bc3dc526f477dc12
     nomad-autoscaler: sha256=4b89c4d266663c9795b32930199c489a67606ac13f03e7fca8da15a0513a6ca7
+    nomad-cni: sha256=b98f74a0f8522f0a83867178729c1aa70f2158f90c45a2ca8fa791db1c76b303
     vault: sha256=889b681990fe221b884b7932fa9c9dd0ee9811b9349554f1aa287ab63c9f3dae
     vault-gpg-plugin: sha256=975115ef6e870cd5429efe99cffc8ce1f8c17350d9fbab02527e4de9ff436e62
     vault-ssh-helper: sha256=fe26f62e5822bdf66ea4bf874d1a535ffca19af07a27ff3bcd7e344bc1af39fe
