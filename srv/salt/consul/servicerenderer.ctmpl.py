@@ -67,7 +67,9 @@ _services: List[t_servicedict] = ast.literal_eval("""\
     {{ end }}
 {{ end }}
 ]
-""".replace(": null", ": None").replace(": true", ": True").replace(": false", ": False"))
+""" \
+    .replace(": null", ": None").replace(": true", ": True").replace(": false", ": False") \
+    .replace(":null", ":None").replace(":true", ":True").replace(":false", ":False"))
 
 _args = None
 
@@ -208,7 +210,7 @@ class SmartstackServiceContainer:
         res = tuple()
         for sk in self.keys():
             for sv in self.services[sk]:
-                res += (sk, sv)
+                res += ((sk, sv),)
         return res
 
     def count(self) -> int:
