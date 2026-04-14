@@ -209,8 +209,7 @@ class SmartstackServiceContainer:
                                       Tuple[str, Self]]]:
         res = tuple()
         for sk in self.keys():
-            for sv in self.services[sk]:
-                res += ((sk, sv),)
+            res += ((sk, self.services[sk]),)
         return res
 
     def count(self) -> int:
