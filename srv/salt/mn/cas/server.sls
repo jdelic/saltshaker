@@ -165,6 +165,20 @@ authserver-create-auth-domain:
             - service: authserver
 
 
+authserver-create-internal-auth-domain:
+    cmd.run:
+        - name: >-
+            /usr/local/authserver/bin/envdir /etc/appconfig/authserver/env/ \
+                /usr/local/authserver/bin/django-admin domain --settings=authserver.settings create \
+                    --create-key jwt authserver-int.service.consul
+        - unless: >-
+            /usr/local/authserver/bin/envdir /etc/appconfig/authserver/env/ \
+                /usr/local/authserver/bin/django-admin domain --settings=authserver.settings list \
+                    authserver-int.service.consul
+        - require:
+            - service: authserver
+
+
 authserver-servicedef-external:
     file.managed:
         - name: /etc/consul/services.d/authserver-external.json
