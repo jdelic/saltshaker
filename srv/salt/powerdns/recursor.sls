@@ -131,14 +131,17 @@ pdns-recursor-external-zone:
             
             ; /etc/hosts mappings
             saltmaster  IN  A   192.168.123.88
+            anytype     IN  A   192.168.123.163
             auth        IN  A   192.168.123.163
-            beads       IN  A   192.168.123.163
-            mail        IN  A   192.168.123.163
             calendar    IN  A   192.168.123.163
             ci          IN  A   192.168.123.163
-            smtp        IN  A   192.168.123.164
-            anytype     IN  A   192.168.123.163
+            mail        IN  A   192.168.123.163
             notes       IN  A   192.168.123.163
+            registry    IN  A   192.168.123.163
+            smtp        IN  A   192.168.123.164
+
+            beads       IN  A   192.168.123.163
+            mcp-mail    IN  A   192.168.123.163
         - user: root
         - group: root
         - mode: '0644'
