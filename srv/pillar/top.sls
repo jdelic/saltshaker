@@ -111,6 +111,9 @@ base:
         - match: compound
         - hetzner.vault
 
+    'not *.test and G@roles:mail':
+        - hetzner.mailserver-duplicity
+
     # every minion ID not ending in "test" is at Hetzner right now
     'not *.test':
         - match: compound
