@@ -194,6 +194,18 @@ pdns-dhcpcd-remove-nameservers-option:
             - service: pdns-recursor-service
         - require_in:
             - cmd: powerdns-sync
+
+pdns-dhcpcd-update:
+    cmd.run:
+        - name: dhcpcd -n
+        - require:
+            - file: pdns-dhcpcd-enforce-nameservers
+            - file: pdns-dhcpcd-remove-nameservers-option
+        - require_in:
+            - cmd: powerdns-sync
+        - watch:
+            - file: pdns-dhcpcd-enforce-nameservers
+            - file: pdns-dhcpcd-remove-nameservers-option
 {% endif %}
 
 
