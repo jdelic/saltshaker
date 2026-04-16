@@ -27,9 +27,9 @@ authserver-vaultwarden-create-domain:
                 --create-key jwt \
                 {{pillar['vaultwarden']['hostname']}}
         - unless: >
-              /usr/local/authserver/bin/envdir /etc/appconfig/authserver/env/
-              /usr/local/authserver/bin/django-admin domain list |
-                  grep -q "{{pillar['vaultwarden']['hostname']}}"
+            /usr/local/authserver/bin/envdir /etc/appconfig/authserver/env/
+            /usr/local/authserver/bin/django-admin domain search \
+                --include-parent-domain --require-subdomain-signing "{{pillar['vaultwarden']['hostname']}}"
         - require:
             - cmd: authserver-sync
         - require_in:
