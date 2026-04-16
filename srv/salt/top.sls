@@ -57,6 +57,10 @@ base:
         - compilers
         - basics.python.dev
         - docker.install
+        - nomad.client
+
+    'roles:gitminiserver':
+        - match: grain'
         - dev.git.miniserver
 
     'roles:buildserver':
