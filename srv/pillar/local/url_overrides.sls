@@ -24,7 +24,7 @@ urls:
     concourse: http://fileserver.maurusnet.test/downloads/concourse/concourse-8.1.1-linux-amd64.tgz
     concourse-fly: http://fileserver.maurusnet.test/downloads/concourse/fly-8.1.1-linux-amd64.tgz
     consul: http://fileserver.maurusnet.test/downloads/consul/consul_1.22.6_linux_amd64.zip
-    consul-template: http://fileserver.maurusnet.test/downloads/consul-template/consul-template_0.41.4_linux_amd64.zip
+    consul-template: http://fileserver.maurusnet.test/downloads/consul-template/consul-template_0.42.0_linux_amd64.zip
     envoy: http://fileserver.maurusnet.test/downloads/envoy/envoy-1.37.2-linux-x86_64
     nomad: http://fileserver.maurusnet.test/downloads/nomad/nomad_1.11.3_linux_amd64.zip
     nomad-autoscaler: http://fileserver.maurusnet.test/downloads/nomad-autoscaler/nomad-autoscaler_0.4.9_linux_amd64.zip
@@ -40,7 +40,7 @@ hashes:
     concourse: sha256=6497d7861d595ca4988d9807b389b573df01dc430992b69b36532d18cfe3a0bf
     concourse-fly: sha256=b978e2673570b8f0d1d38b6054c60a449541219defa8979e3efa2fb58e50fb5c
     consul: sha256=5c2d67c6a364512b3dd0646eaf8bb58fa2fd6b9c890e2f374475deab2a6ec648
-    consul-template: sha256=9e999cfbfdc47e67d3d91e6e4edbecaa3d7c3b026307b18c0485b64d15e5083a
+    consul-template: sha256=94d5044b822c5219bb116916b8d4d2545630e6ce0e1639ddd25309a26cf62ff2
     envoy: sha256=32d3cc203b8abdce8c2ed916a298124364e0c48e83b7196f551e769b6a489bf8
     nomad: sha256=19dac5642a2ba5305e6ff8efee06a708d760ebe4d1cd7936bc3dc526f477dc12
     nomad-autoscaler: sha256=4b89c4d266663c9795b32930199c489a67606ac13f03e7fca8da15a0513a6ca7
