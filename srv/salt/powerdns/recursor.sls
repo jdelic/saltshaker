@@ -131,14 +131,17 @@ pdns-recursor-external-zone:
             
             ; /etc/hosts mappings
             saltmaster  IN  A   192.168.123.88
+            anytype     IN  A   192.168.123.163
             auth        IN  A   192.168.123.163
-            beads       IN  A   192.168.123.163
-            mail        IN  A   192.168.123.163
             calendar    IN  A   192.168.123.163
             ci          IN  A   192.168.123.163
-            smtp        IN  A   192.168.123.164
-            anytype     IN  A   192.168.123.163
+            mail        IN  A   192.168.123.163
             notes       IN  A   192.168.123.163
+            registry    IN  A   192.168.123.163
+            smtp        IN  A   192.168.123.164
+
+            beads       IN  A   192.168.123.163
+            mcp-mail    IN  A   192.168.123.163
         - user: root
         - group: root
         - mode: '0644'
@@ -179,6 +182,7 @@ pdns-dhcpcd-enforce-nameservers:
         - name: /etc/dhcpcd.conf
         - text: |
             static domain_name_servers=169.254.1.1 ::1
+            nooption domain_name_servers
         - require:
             - service: pdns-recursor-service
         - require_in:
@@ -189,11 +193,22 @@ pdns-dhcpcd-remove-nameservers-option:
         - name: /etc/dhcpcd.conf
         - pattern: '^option domain_name_servers,(.*)$'
         - repl: 'option \1'
-        - backup: True
         - require:
             - service: pdns-recursor-service
         - require_in:
             - cmd: powerdns-sync
+
+pdns-dhcpcd-update:
+    cmd.run:
+        - name: dhcpcd -n
+        - require:
+            - file: pdns-dhcpcd-enforce-nameservers
+            - file: pdns-dhcpcd-remove-nameservers-option
+        - require_in:
+            - cmd: powerdns-sync
+        - watch:
+            - file: pdns-dhcpcd-enforce-nameservers
+            - file: pdns-dhcpcd-remove-nameservers-option
 {% endif %}
 
 
