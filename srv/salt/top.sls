@@ -60,7 +60,7 @@ base:
         - nomad.client
 
     'roles:gitminiserver':
-        - match: grain'
+        - match: grain
         - dev.git.miniserver
 
     'roles:buildserver':
