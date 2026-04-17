@@ -177,6 +177,35 @@ nomad-tcp-in20000-32000-recv-ipv4:
             - sls: basics.nftables.setup
 
 
+nomad-bridge-ipv4-forward-accept:
+    nftables.append:
+        - table: filter
+        - chain: forward
+        - family: ip4
+        - jump: accept
+        - if: {{pillar['ifassign']['internal']}}
+        - of: nomad
+        - match: state
+        - connstate: new
+        - save: True
+        - require:
+              - sls: basics.nftables.setup
+
+
+nomad-bridge-ipv4-forward-reverse:
+    nftables.append:
+        - table: filter
+        - chain: forward
+        - family: ip4
+        - jump: accept
+        - if: nomad
+        - match: state
+        - connstate: new
+        - save: True
+        - require:
+              - sls: basics.nftables.setup
+
+
 nomad-envvar-config:
     file.managed:
         - name: /etc/profile.d/nomadclient.sh
