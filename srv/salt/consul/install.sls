@@ -179,6 +179,27 @@ consul-rsyslog:
         - mode: '0644'
 
 
+{% if salt['file.file_exists']('/etc/dhcpcd.conf') %}
+consul-dhcpcd-stop-ip4ll-assignment:
+    file.append:
+        - name: /etc/dhcpcd.conf
+        - text: |
+            denyinterfaces consul0
+        - require:
+            - cmd: consul-network-interface
+        - require_in:
+            - cmd: consul-sync-network
+
+consul-dhcpcd-update:
+    cmd.run:
+        - name: dhcpcd -n
+        - require_in:
+            - cmd: consul-sync-network
+        - watch:
+            - file: consul-dhcpcd-stop-ip4ll-assignment
+{% endif %}
+
+
 # open consul interface
 consul-all-in-recv-ipv4:
     nftables.append:
