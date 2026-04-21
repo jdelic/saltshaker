@@ -37,8 +37,6 @@ smartstack-envoy-external:
             # don't use "grep -q" since it will lead to a "broken pipe" error when called through Python
             # subprocess. Instead, redirect unnecessary output into /dev/null.
             command: >
-                ps awwfux | grep -v grep | grep 'envoy -c /etc/envoy/envoy-external.yaml' >/dev/null &&
-                systemctl reload envoy@external ||
                 systemctl restart envoy@external
             parameters: >
                 --include tags=smartstack:external
