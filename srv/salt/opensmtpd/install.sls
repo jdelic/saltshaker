@@ -17,8 +17,9 @@ opensmtpd:
 opensmtpd-filters:
     pkg.installed:
         - pkgs:
-            - opensmtpd-filter-greylistd
             - opensmtpd-filter-dnsbl
+            - opensmtpd-filter-fail2banlog
+            - opensmtpd-filter-greylistd
         - fromrepo: mn-release
         - install_recommends: False
         - require:
