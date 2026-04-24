@@ -78,6 +78,15 @@ anytype-env-file:
               STORAGE_DIR=/secure/anytype/data
         - require:
             - git: anytype-dockercompose-repo
+    cmd.run:
+        - name: >
+            cp /etc/anytype/any-sync-dockercompose/.env.example /etc/anytype/any-sync-dockercompose/.env;
+            IFS=$'\n'; for line in $(cat /etc/anytype/any-sync-dockercompose/.env.override); do
+                var="$(echo "$line" | cut -d= -f1)"
+                sed -i -e "s|^$var=.*|$line|" /etc/anytype/any-sync-dockercompose/.env
+            done;
+        - require:
+            - file: anytype-env-file
 
 
 anytype-systemdunit:
@@ -96,7 +105,7 @@ anytype-systemdunit:
         - enable: True
         - require:
             - systemdunit: anytype-systemdunit
-            - file: anytype-env-file
+            - cmd: anytype-env-file
 
 
 anytype-tcp-in10001-10006-ipv4:
