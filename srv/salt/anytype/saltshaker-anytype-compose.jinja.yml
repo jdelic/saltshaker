@@ -2,7 +2,7 @@ include:
     - docker-compose.yml
 
 services:
-    any-sync-node-1:
+{#  any-sync-node-1:
         entrypoint: ["/bin/any-sync-node", "-c", "/etc/any-sync-node/config.yml"]
     any-sync-node-2:
         entrypoint: ["/bin/any-sync-node", "-c", "/etc/any-sync-node/config.yml"]
@@ -14,7 +14,7 @@ services:
         entrypoint: ["/bin/any-sync-coordinator", "-c", "/etc/any-sync-coordinator/config.yml"]
     any-sync-consensusnode:
         # work around https://github.com/anyproto/any-sync-consensusnode/issues/91
-        entrypoint: ["/bin/any-sync-consensusnode", "-c", "/etc/any-sync-consensusnode/config.yml"]
+        entrypoint: ["/bin/any-sync-consensusnode", "-c", "/etc/any-sync-consensusnode/config.yml"] #}
     netcheck:
         pull_policy: daily
 networks:
