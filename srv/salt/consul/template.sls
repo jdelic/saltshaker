@@ -118,6 +118,7 @@ consul-template-service-reload:
             - file: consul-template
             - file: consul-template-config
             - file: consul-template-dir
+            - service: consul-template-service
         - watch:
             # this does NOT have to watch consul-template-acl-config as the reload is done via the
             # orchestrator in consul-node-setup
