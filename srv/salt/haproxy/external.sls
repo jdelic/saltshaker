@@ -75,6 +75,10 @@ smartstack-external:
 smartstack-ensure-nftables-rules:
     cmd.run:
         - name: >
+            for i in $(seq 1 10); do
+                test -x /etc/consul/renders/smartstack-external.py && break;
+                sleep 1;
+            done;
             /etc/consul/renders/smartstack-external.py
             --include tags=smartstack:external
             --open-nftables=conntrack
