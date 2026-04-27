@@ -127,6 +127,7 @@ vault-config:
         - require:
             - file: vault-config-dir
 
+{% set pgver = pillar.get('postgresql', {}).get('version', False) %}
 
 vault-service:
     systemdunit.managed:
@@ -136,7 +137,7 @@ vault-service:
         - context:
             user: {{vault_user}}
             group: {{vault_group}}
-            after: {% if pillar['vault'].get('backend') == 'postgresql' %}postgresql.service{% endif %}}
+            after: {% if pillar['vault'].get('backend') == 'postgresql' %}postgresql{% if pgver %}@{{pgver}}-main{% endif %}.service{% endif %}}
             connection_host: {{connection_host}}
         - require:
             - file: vault
