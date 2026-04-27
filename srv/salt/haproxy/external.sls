@@ -2,6 +2,7 @@
 include:
     - haproxy.install
     - haproxy.sync
+    - consul.sync
 
 
 haproxy-config-template-external:
@@ -86,8 +87,9 @@ smartstack-ensure-nftables-rules:
             --only-nftables
         - require:
             - file: smartstack-external
+            - cmd: consul-template-sync
         - require_in:
-              - cmd: smartstack-external-sync
+            - cmd: smartstack-external-sync
 
 
 # vim: syntax=yaml
