@@ -229,6 +229,18 @@ pdns-recursor-service:
             - cmd: consul-sync
         - require_in:
             - cmd: powerdns-sync
+    cmd.run:
+        - name: >
+            until test ${count} -gt 30; do
+                rec_control ping && host consul.service.consul && break;
+                sleep 1; count=$((count+1));
+            done; test ${count} -lt 30
+        - env:
+            count: 0
+        - onchanges:
+            - service: pdns-recursor-service
+        - require_in:
+            - cmd: powerdns-sync
 
 
 pdns-consul-cache-wipe:
