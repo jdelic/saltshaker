@@ -353,6 +353,7 @@ opensmtpd-authserver-config:
             # this is difficult to dedupe since pillars can't easily reference other pillars
             dbuser: opensmtpd-authserver
             dbpass: {{pillar['dynamicsecrets']['opensmtpd-authserver']}}
+            required_permission: {{pillar['smtp']['require-permission']}}
         - require:
             - pkg: opensmtpd
 
