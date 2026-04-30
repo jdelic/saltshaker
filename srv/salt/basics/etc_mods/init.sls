@@ -45,3 +45,14 @@ ensure-interfaces.d-works:
         - name: /etc/network/interfaces
         - text: source-directory /etc/network/interfaces.d
         - order: 2
+
+
+blacklist-cve-2026-31431-copyfail:
+    file.managed:
+        - name: /etc/modprobe.d/blacklist-cve-2026-31431.conf
+        - source: salt://basics/etc_mods/blacklist-cve-2026-31431.conf
+    cmd.run:
+        - name: update-initramfs -u
+        - unless: grep -q "blacklist-cve-2026-31431.conf" /boot/initrd.img-$(uname -r)
+        - require:
+            - file: blacklist-cve-2026-31431-copyfail
