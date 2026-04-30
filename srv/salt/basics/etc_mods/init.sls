@@ -53,6 +53,6 @@ blacklist-cve-2026-31431-copyfail:
         - source: salt://basics/etc_mods/blacklist-cve-2026-31431.conf
     cmd.run:
         - name: update-initramfs -u
-        - unless: grep -q "blacklist-cve-2026-31431.conf" /boot/initrd.img-$(uname -r)
+        - unless: lsinitramfs /boot/initrd.img-$(uname -r) | grep "blacklist-cve-2026-31431.conf" 2>&1 >/dev/null
         - require:
             - file: blacklist-cve-2026-31431-copyfail
