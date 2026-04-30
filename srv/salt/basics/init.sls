@@ -100,6 +100,7 @@ trixie:
     pkgrepo.managed:
         - name: {{pillar['repos']['trixie']}}
         - file: /etc/apt/sources.list.d/trixie.list
+        - clean_file: True
         {% if pillar['repos'].get('pgpkey', None) %}
         - key_url: {{pillar['repos']['pgpkey']}}
         - aptkey: False
@@ -111,6 +112,7 @@ updates-trixie:
     pkgrepo.managed:
         - name: {{pillar['repos']['trixie-updates']}}
         - file: /etc/apt/sources.list.d/trixie-updates.list
+        - clean_file: True
         - order: 1  # execute this state early!
 
 
@@ -118,6 +120,7 @@ security-updates-trixie:
     pkgrepo.managed:
         - name: {{pillar['repos']['trixie-security']}}
         - file: /etc/apt/sources.list.d/trixie-security.list
+        - clean_file: True
         - order: 1  # execute this state early!
 
 
@@ -125,6 +128,7 @@ backports-org-trixie:
     pkgrepo.managed:
         - name: {{pillar['repos']['trixie-backports']}}
         - file: /etc/apt/sources.list.d/trixie-backports.list
+        - clean_file: True
         - order: 1  # execute this state early!
     file.managed:
         - name: /etc/apt/preferences.d/trixie-backports
