@@ -18,5 +18,12 @@ imap-incoming:
     bind-ipv4: True
     bind-ipv6: True
 
+imap:
+    require-permission: imap
+
+
+smtp:
+    require-permission: smtp
+
 
 # vim: syntax=yaml
