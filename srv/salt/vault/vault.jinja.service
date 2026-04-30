@@ -13,7 +13,14 @@ Environment=GOMAXPROCS=2
 ExecStartPre=/bin/sh -ec '\
     if systemctl --quiet list-unit-files postgresql.service; then \
         command -v pg_isready >/dev/null 2>&1 || exit 1; \
-        pg_isready -q -h {{connection_host}} -p 5432 || exit 1; \
+        deadline=$$(( $$(date +%%s) + 10 )); \
+        while ! pg_isready -q -h {{connection_host}} -p 5432; do \
+            if [ $$(date +%%s) -ge $$deadline ]; then \
+                echo "PostgreSQL was not ready after 10 seconds" >&2; \
+                exit 1; \
+            fi; \
+            sleep 1; \
+        done; \
     fi'
 {% endif %}
 ExecStart=/usr/local/bin/vault server -config=/etc/vault/vault.conf

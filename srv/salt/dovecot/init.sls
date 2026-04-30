@@ -183,6 +183,7 @@ dovecot-sql-config:
             sslrootcert: {{pillar['ssl']['service-rootca-cert']}}
             dbuser: dovecot-authserver
             dbpassword: {{pillar['dynamicsecrets']['dovecot-authserver']}}
+            required_permission: {{pillar['imap']['require-permission']}}
         - require:
             - pkg: dovecot
             - file: {{pillar['ssl']['service-rootca-cert']}}

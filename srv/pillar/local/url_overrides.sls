@@ -26,7 +26,7 @@ urls:
     consul: http://fileserver.maurusnet.test/downloads/consul/consul_1.22.6_linux_amd64.zip
     consul-template: http://fileserver.maurusnet.test/downloads/consul-template/consul-template_0.42.0_linux_amd64.zip
     envoy: http://fileserver.maurusnet.test/downloads/envoy/envoy-1.37.2-linux-x86_64
-    nomad: http://fileserver.maurusnet.test/downloads/nomad/nomad_1.11.3_linux_amd64.zip
+    nomad: http://fileserver.maurusnet.test/downloads/nomad/nomad_2.0.0_linux_amd64.zip
     nomad-autoscaler: http://fileserver.maurusnet.test/downloads/nomad-autoscaler/nomad-autoscaler_0.4.9_linux_amd64.zip
     nomad-cni: http://fileserver.maurusnet.test/downloads/nomad-cni/cni-plugins-linux-amd64-v1.9.1.tgz
     vault: http://fileserver.maurusnet.test/downloads/vault/vault_2.0.0_linux_amd64.zip
@@ -42,7 +42,7 @@ hashes:
     consul: sha256=5c2d67c6a364512b3dd0646eaf8bb58fa2fd6b9c890e2f374475deab2a6ec648
     consul-template: sha256=94d5044b822c5219bb116916b8d4d2545630e6ce0e1639ddd25309a26cf62ff2
     envoy: sha256=32d3cc203b8abdce8c2ed916a298124364e0c48e83b7196f551e769b6a489bf8
-    nomad: sha256=19dac5642a2ba5305e6ff8efee06a708d760ebe4d1cd7936bc3dc526f477dc12
+    nomad: sha256=01d175b8467c2d694ab65755da4bb4d6d771bf8e38d411bf80e17a03f9b83419
     nomad-autoscaler: sha256=4b89c4d266663c9795b32930199c489a67606ac13f03e7fca8da15a0513a6ca7
     nomad-cni: sha256=b98f74a0f8522f0a83867178729c1aa70f2158f90c45a2ca8fa791db1c76b303
     vault: sha256=0367bdd46dd1fff1ff19fc44e60df48866515bb519c80527236b3808ea879ac2

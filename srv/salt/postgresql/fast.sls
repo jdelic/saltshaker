@@ -4,7 +4,7 @@
 include:
     - postgresql.sync
 
-{% set postgres_version = pillar.get('postgresql', {}).get('version', '16') %}
+{% set postgres_version = pillar.get('postgresql', {}).get('version', '18') %}
 {% set port = pillar.get('postgresql', {}).get('bind-port', '5432') %}
 {% set ip = pillar.get('postgresql', {}).get(
               'bind-ip', grains['ip_interfaces'][pillar['ifassign']['internal']][pillar['ifassign'].get(
@@ -121,6 +121,7 @@ postgresql-ssl-cert:
         - contents_pillar: ssl:postgresql:combined
         - require:
             - file: ssl-cert-location
+            - pkg: postgresql-step2
 
 
 postgresql-ssl-key:
@@ -132,6 +133,7 @@ postgresql-ssl-key:
         - contents_pillar: ssl:postgresql:key
         - require:
             - file: ssl-key-location
+            - pkg: postgresql-step2
 {% endif %}
 
 {% if "sslcert" in pillar["postgresql"] %}
@@ -145,6 +147,8 @@ data-cluster-config-sslcert:
         - backup: False
         - require_in:
             - file: postgresql-hba-config
+        - require:
+            - file: data-cluster-config-base
 
 
 data-cluster-config-sslkey:
@@ -157,6 +161,8 @@ data-cluster-config-sslkey:
         - backup: False
         - require_in:
             - file: postgresql-hba-config
+        - require:
+              - file: data-cluster-config-base
 
 data-cluster-config-sslciphers:
     file.replace:
@@ -173,6 +179,8 @@ data-cluster-config-sslciphers:
         - backup: False
         - require_in:
             - file: postgresql-hba-config
+        - require:
+              - file: data-cluster-config-base
 {% endif %}
 
 {% if pillar.get("ssl", {}).get("environment-rootca-cert", None) %}
@@ -193,6 +201,7 @@ data-cluster-config-ssl_client_ca:
     {% endif %}
         - require:
             - require-ssl-certificates
+            - file: data-cluster-config-base
 {% endif %}
 
 {% if pillar.get('postgresql', {}).get('start-cluster', True) %}

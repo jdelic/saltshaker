@@ -2,6 +2,7 @@
 include:
     - haproxy.install
     - haproxy.sync
+    - consul.sync
 
 
 haproxy-config-template-external:
@@ -75,6 +76,10 @@ smartstack-external:
 smartstack-ensure-nftables-rules:
     cmd.run:
         - name: >
+            for i in $(seq 1 10); do
+                test -x /etc/consul/renders/smartstack-external.py && break;
+                sleep 1;
+            done;
             /etc/consul/renders/smartstack-external.py
             --include tags=smartstack:external
             --open-nftables=conntrack
@@ -82,8 +87,9 @@ smartstack-ensure-nftables-rules:
             --only-nftables
         - require:
             - file: smartstack-external
+            - cmd: consul-template-sync
         - require_in:
-              - cmd: smartstack-external-sync
+            - cmd: smartstack-external-sync
 
 
 # vim: syntax=yaml

@@ -129,6 +129,8 @@ base:
         - apache.webdav_permissions_py
         - dev.concourse.authserver_oauth2
         - vaultwarden.authserver_permissions
+        - dovecot.authserver_permissions
+        - opensmtpd.authserver_permissions
 
     'roles:loadbalancer':
         - match: grain
