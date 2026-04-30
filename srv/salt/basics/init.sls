@@ -139,6 +139,7 @@ saltstack-repo:
     pkgrepo.managed:
         - name: {{pillar['repos']['saltstack']}}
         - file: /etc/apt/sources.list.d/salt.list
+        - clean_file: True
         - key_url: salt://saltstack_64CBBC8173D76B3F.pgp.key
         #- key_url: salt://mn/packaging_authority_A78049AF.pgp.key
         - aptkey: False
@@ -150,6 +151,7 @@ maurusnet-apps:
         - humanname: repo.maurus.net-apps
         - name: {{pillar['repos']['maurusnet']}}
         - file: /etc/apt/sources.list.d/maurusnet.list
+        - clean_file: True
         - key_url: salt://mn/packaging_authority_A78049AF.pgp.key
         - aptkey: False
         - order: 10
