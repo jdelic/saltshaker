@@ -17,9 +17,6 @@ imap:
         sslcert-content: ssl:imap-local:combined
         sslkey-content: ssl:imap-local:key
 
-    # the permission a user must have in authserver to have access to imap. Set to None or empty string to
-    # allow all authenticated users to use imap.
-    require-permission: imap
 
 smtp:
     receiver:
@@ -39,10 +36,6 @@ smtp:
         sslkey: {{salt['file.join'](secret_key_location, "smtp.local.key")}}
         sslcert-content: ssl:smtp-local:combined
         sslkey-content: ssl:smtp-local:key
-
-    # the permission a user must have in authserver to have access to smtp. Set to None or empty string to
-    # allow all authenticated users to use smtp.
-    require-permission: smtp
 
     # `relay-via` relays all email from OpenSMTPD via a third party smarthost with optional authentication.
     # `transactional-relay-via` relays only "transactional" email which is non-forwarded email on domains
