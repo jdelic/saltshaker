@@ -85,7 +85,7 @@ passdb sql {
     query = \
         SELECT creds.primary_alias AS user, creds.password AS password FROM \
             authserver_resolve_alias('%{user}', FALSE) AS res, \
-            authserver_get_credentials(res.alias{% if required_permission %}, {{required_permission}}{% endif %}) AS creds;
+            authserver_get_credentials(res.alias{% if required_permission %}, '{{required_permission}}'{% endif %}) AS creds;
 }
 
 userdb static {
