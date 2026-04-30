@@ -10,7 +10,7 @@ opensmtpd-smtp-permission:
                 /usr/local/authserver/bin/django-admin permissions --settings=authserver.settings \
                     create --name "Send email via SMTP" "{{pillar['smtp']['require-permission']}}"
         - unless: >-
-            test $(/usr/local/authserver/bin/envdir /etc/appconfig/authserver/env/ \
-                       /usr/local/authserver/bin/django-admin permissions --settings=authserver.settings \
-                           list --format=json | jq -r '.[].name' | grep -c "^{{pillar['smtp']['require-permission']}}$") -gt 0
+            /usr/local/authserver/bin/envdir /etc/appconfig/authserver/env/ \
+                /usr/local/authserver/bin/django-admin permissions --settings=authserver.settings \
+                    list --format=json | jq -r '.[].permission_name' | grep -q "^{{pillar['smtp']['require-permission']}}$"
 {% endif %}
