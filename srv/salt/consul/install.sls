@@ -231,6 +231,8 @@ consul-tcp-in{{port}}-recv-ipv4:
         - match: state
         - connstate: new
         - save: True
+        - unless: >
+            nft list ruleset | grep "tcp dport {{port}} accept" 2>&1 >/dev/null
         - require:
             - sls: basics.nftables.setup
         - require_in:
@@ -250,6 +252,8 @@ consul-udp-in{{port}}-recv:
         - dport: {{port}}
         - proto: udp
         - save: True
+        - unless: >
+              nft list ruleset | grep "udp dport {{port}} accept" 2>&1 >/dev/null
         - require:
             - sls: basics.nftables.setup
         - require_in:
