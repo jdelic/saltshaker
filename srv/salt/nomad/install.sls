@@ -13,6 +13,17 @@ include:
                         pillar['ifassign'].get('internal-ip-index', 0)|int()] %}
 
 
+load-br-netfilter:
+    file.managed:
+        - name: /etc/modules-load.d/br-netfilter.conf
+        - contents: |
+            br_netfilter
+    kmod.present:
+        - name: br_netfilter
+        - require:
+            - file: load-br-netfilter
+
+
 nomad-docker-group-membership:
     user.present:
         - name: {{nomad_user}}
@@ -93,6 +104,7 @@ nomad-service:
             - file: nomad-server-config
             - file: nomad-agent-config
             - file: nomad-common-config
+            - kmod: load-br-netfilter
 
 
 # open nomad ports TCP https://www.nomadproject.io/docs/cluster/requirements.html
