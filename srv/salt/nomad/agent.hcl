@@ -19,6 +19,12 @@ client {
         bridge_network_subnet_ipv6 = "{{pillar['nomad']['bridge-cidr-ipv6']}}"
     {% endif %}
 
+    # this allows access to the cluster's root CA on every host (for .local services, for example)
+    host_volume "host-ca-bundle" {
+        path      = "/etc/ssl/certs/ca-certificates.crt"
+        read_only = true
+    }
+
     cni_path = "/usr/local/lib/nomad/"
     cni_config_dir = "/etc/nomad/cni/"
 }
