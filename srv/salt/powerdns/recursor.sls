@@ -125,6 +125,8 @@ pdns-recursor-external-zone:
             60         ; minimum
             )
             IN  NS  ns1.{{pillar['config']['domains']['external']}}.
+
+            @           IN  A   192.168.123.163
             
             ; nameserver glue (pick an IP that makes sense for your environment)
             ns1         IN  A   127.0.0.1
