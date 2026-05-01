@@ -206,6 +206,26 @@ nomad-bridge-ipv4-forward-reverse:
               - sls: basics.nftables.setup
 
 
+nomad-pdns-recursor-cidr:
+  file.accumulated:
+      - name: powerdns-recursor-additional-cidrs
+      - filename: /etc/powerdns/recursor.d/saltshaker.yml
+      - text: {{pillar.get('nomad', {}).get('bridge-cidr', '172.26.64.0/20')}}
+      - require_in:
+          - file: pdns-recursor-config
+
+
+{% if pillar.get('nomad', {}).get('bridge-cidr-ipv6', None) %}
+nomad-pdns-recursor-cidr-ipv6:
+    file.accumulated:
+        - name: powerdns-recursor-additional-cidrs
+        - filename: /etc/powerdns/recursor.d/saltshaker.yml
+        - text: {{pillar['nomad']['bridge-cidr-ipv6']}}
+        - require_in:
+              - file: pdns-recursor-config
+{% endif %}
+
+
 nomad-envvar-config:
     file.managed:
         - name: /etc/profile.d/nomadclient.sh
