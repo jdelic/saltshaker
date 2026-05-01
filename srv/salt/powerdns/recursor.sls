@@ -142,6 +142,11 @@ pdns-recursor-external-zone:
 
             beads       IN  A   192.168.123.163
             mcp-mail    IN  A   192.168.123.163
+
+            element     IN  A   192.168.123.163
+            matrix      IN  A   192.168.123.163
+            matrix-rtc  IN  A   192.168.123.163
+
         - user: root
         - group: root
         - mode: '0644'
