@@ -17,6 +17,7 @@ opensmtpd:
 opensmtpd-filters:
     pkg.installed:
         - pkgs:
+            - opensmtpd-filter-denyrelay
             - opensmtpd-filter-dnsbl
             - opensmtpd-filter-fail2banlog
             - opensmtpd-filter-greylistd
@@ -357,6 +358,26 @@ opensmtpd-authserver-config:
         - require:
             - pkg: opensmtpd
 
+
+opensmtpd-filter-denyrelay-config:
+    file.managed:
+        - name: /etc/smtpd/denyrelay.conf
+        - contents: |
+            # This config limits mail users to either no email relay or relay only to whitelisted
+            # recipients.
+            #
+            # Example config:
+            #    norelay@example.com
+            #    relayonlyto@example.com=other@example.com
+            #    relayoptions@example.com=one@example.com
+            #    relayoptions@example.com=two@example.com
+        - create: True
+        - replace: False
+        - mode: '0640'
+        - user: opensmtpd
+        - group: opensmtpd
+        - require:
+            - pkg: opensmtpd-filters
 
 # ('/var/spool/smtpd/offline', ('root', 'root', '1777')),       <-- this is correct for opensmtpd 5.7.x
 # ('/var/spool/smtpd/offline', ('root', 'opensmtpq', '0770')),  <-- this is correct for opensmtpd 5.9.x
