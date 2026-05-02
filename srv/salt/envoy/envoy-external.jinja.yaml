@@ -1,4 +1,4 @@
-#-
+{#-
         Envoy UDP proxy config for Smartstack external services.
 
         Expands smartstack:extport:50100-50109 into:
