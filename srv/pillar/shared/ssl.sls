@@ -1,6 +1,7 @@
 # importable variables
 {% set certificate_location = '/etc/ssl/local' %}
 {% set secret_key_location = '/etc/ssl/private' %}
+{% set combined_location = '/etc/ssl/combined' %}
 {% set localca_links_location = '/etc/ssl/certs' %}
 {% set localca_location = '/usr/share/ca-certificates/local' %}
 
@@ -9,16 +10,18 @@
 ssl:
     certificate-location: {{certificate_location}}
     secret-key-location: {{secret_key_location}}
+    combined-location: {{combined_location}}
     localca-links-location: {{localca_links_location}}
     localca-location: {{localca_location}}
 
     # the following defaults should be used by each service which doesn't
     # require or is configured with its own cert.
     filenames:
-        default-cert: {{salt['file.join'](certificate_location, 'wildcard.crt')}}
-        default-cert-combined: {{salt['file.join'](certificate_location, 'wildcard-combined.crt')}}
-        default-cert-key: {{salt['file.join'](secret_key_location, 'wildcard.key')}}
-        default-cert-full: {{salt['file.join'](secret_key_location, 'wildcard-combined-key.crt')}}
+        default:
+            cert: {{salt['file.join'](certificate_location, 'wildcard.crt')}}
+            chain: {{salt['file.join'](combined_location, 'wildcard-combined.crt')}}
+            key: {{salt['file.join'](secret_key_location, 'wildcard.key')}}
+            full: {{salt['file.join'](secret_key_location, '00-wildcard-combined-key.crt')}}
 
     # The root CA certificate of the PKI issuing service/SSL server certificates in this environment and where
     # it's stored on the nodes (i.e. where other software can find it). You probably want to issue the actual

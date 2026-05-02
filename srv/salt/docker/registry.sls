@@ -40,8 +40,8 @@ docker-registry:
         - binds:
             - /srv/registry:/var/lib/registry
             - {{pillar['ssl']['service-rootca-cert']}}:{{pillar['ssl']['service-rootca-cert']}}
-            - {{pillar['ssl']['filenames']['default-cert']}}:{{pillar['ssl']['filenames']['default-cert']}}
-            - {{pillar['ssl']['filenames']['default-cert-key']}}:{{pillar['ssl']['filenames']['default-cert-key']}}
+            - {{pillar['ssl']['filenames']['default']['cert']}}:{{pillar['ssl']['filenames']['default']['cert']}}
+            - {{pillar['ssl']['filenames']['default']['key']}}:{{pillar['ssl']['filenames']['default']['key']}}
         - port_bindings:
             - {{registry_ip}}:{{registry_port}}:5000
         - dns:
