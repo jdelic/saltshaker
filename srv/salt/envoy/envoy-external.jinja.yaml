@@ -1,10 +1,16 @@
-{#-
+#-
         Envoy UDP proxy config for Smartstack external services.
+
+        Expands smartstack:extport:50100-50109 into:
+          listener 50100 -> cluster svc_50100 -> upstream svc.ip:50100
+          listener 50101 -> cluster svc_50101 -> upstream svc.ip:50101
+          ...
 -#}
 
-{% set quic_services = services.group_by_tagvalue("smartstack:mode:")["quic"] if "quic" in services.group_by_tagvalue("smartstack:mode:") else services.empty() %}
-{% set udp_services = quic_services + services.group_by_tagvalue("smartstack:mode:")["udp"] if "udp" in services.group_by_tagvalue("smartstack:mode:") else services.empty() %}
-
+{% set mode_groups = services.group_by_tagvalue("smartstack:mode:") %}
+{% set quic_services = mode_groups["quic"] if "quic" in mode_groups else services.empty() %}
+{% set plain_udp_services = mode_groups["udp"] if "udp" in mode_groups else services.empty() %}
+{% set udp_services = quic_services + plain_udp_services %}
 
 admin:
     address:
@@ -17,11 +23,21 @@ static_resources:
 {% for bind_ip in localips %}
     {% for svc in udp_services %}
         {% for extport in svc.tagvalue_set("smartstack:extport:") %}
-        - name: listener_{{ svc.name | replace("-", "_") }}_{{ bind_ip | replace(".", "_") | replace(":", "_") }}_{{ extport | replace("-", "_") }}
+            {% set extport_s = extport|string %}
+            {% if "-" in extport_s %}
+                {% set ext_start = extport_s.split("-")[0]|int %}
+                {% set ext_end = extport_s.split("-")[1]|int %}
+            {% else %}
+                {% set ext_start = extport_s|int %}
+                {% set ext_end = extport_s|int %}
+            {% endif %}
+            {% for ext_port in range(ext_start, ext_end + 1) %}
+                {% set upstream_port = (svc.port|int) + (ext_port - ext_start) %}
+        - name: listener_{{ svc.name | replace("-", "_") }}_{{ bind_ip | replace(".", "_") | replace(":", "_") }}_{{ ext_port }}
           address:
               socket_address:
                   address: "{{ bind_ip }}"
-                  port_value: {{ extport }}
+                  port_value: {{ ext_port }}
                   protocol: UDP
           udp_listener_config:
               downstream_socket_config:
@@ -30,32 +46,46 @@ static_resources:
               - name: envoy.filters.udp_listener.udp_proxy
                 typed_config:
                     "@type": type.googleapis.com/envoy.extensions.filters.udp.udp_proxy.v3.UdpProxyConfig
-                    stat_prefix: {{ svc.name | replace("-", "_") }}_{{ extport | replace("-", "_") }}
+                    stat_prefix: {{ svc.name | replace("-", "_") }}_{{ ext_port }}
                     matcher:
                         on_no_match:
                             action:
                                 name: route
                                 typed_config:
                                     "@type": type.googleapis.com/envoy.extensions.filters.udp.udp_proxy.v3.Route
-                                    cluster: cluster_{{ svc.name | replace("-", "_") }}
+                                    cluster: cluster_{{ svc.name | replace("-", "_") }}_{{ ext_port }}
                     idle_timeout: 300s
+            {% endfor %}
         {% endfor %}
     {% endfor %}
 {% endfor %}
 
     clusters:
 {% for svc in udp_services %}
-        - name: cluster_{{svc.name|replace("-", "_")}}
+    {% for extport in svc.tagvalue_set("smartstack:extport:") %}
+        {% set extport_s = extport|string %}
+        {% if "-" in extport_s %}
+            {% set ext_start = extport_s.split("-")[0]|int %}
+            {% set ext_end = extport_s.split("-")[1]|int %}
+        {% else %}
+            {% set ext_start = extport_s|int %}
+            {% set ext_end = extport_s|int %}
+        {% endif %}
+        {% for ext_port in range(ext_start, ext_end + 1) %}
+            {% set upstream_port = (svc.port|int) + (ext_port - ext_start) %}
+        - name: cluster_{{ svc.name | replace("-", "_") }}_{{ ext_port }}
           type: STATIC
           lb_policy: ROUND_ROBIN
           load_assignment:
-              cluster_name: cluster_{{svc.name|replace("-", "_")}}
+              cluster_name: cluster_{{ svc.name | replace("-", "_") }}_{{ ext_port }}
               endpoints:
                   - lb_endpoints:
                       - endpoint:
                             address:
                                 socket_address:
-                                    address: {{svc.ip}}
-                                    port_value: {{svc.port}}
+                                    address: {{ svc.ip }}
+                                    port_value: {{ upstream_port }}
                                     protocol: UDP
+        {% endfor %}
+    {% endfor %}
 {% endfor %}
