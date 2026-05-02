@@ -12,11 +12,14 @@ docker-registry-volume:
         - group: root
         - mode: '0640'
 
-{% set registry_ip = pillar.get('docker', {}).get('registry', {}).get(
-                         'bind-ip', grains['ip_interfaces'][pillar['ifassign']['internal']][pillar['ifassign'].get(
-                         'internal-ip-index', 0)|int()]
-                     ) %}
-{% set registry_port = pillar.get('docker', {}).get('registry', {}).get('bind-port', 5000) %}
+{% set registry_config = pillar.get('docker', {}).get('registry', {}) %}
+{% if 'bind-ip' in registry_config %}
+{% set registry_ip = registry_config['bind-ip'] %}
+{% else %}
+{% set registry_ip = grains['ip_interfaces'][pillar['ifassign']['internal']][pillar['ifassign'].get(
+                     'internal-ip-index', 0)|int()] %}
+{% endif %}
+{% set registry_port = registry_config.get('bind-port', 5000) %}
 {% set registry_hostname = pillar['docker']['registry']['hostname'] %}
 
 
