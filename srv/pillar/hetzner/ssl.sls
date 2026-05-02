@@ -3,10 +3,11 @@
 
 ssl:
     sources:
-        default-cert: ssl:maincert:cert
-        default-cert-combined: ssl:maincert:combined
-        default-cert-key: ssl:maincert:key
-        default-cert-full: ssl:maincert:combined-key
+        default:
+            cert: ssl:maincert:cert
+            chain: ssl:maincert:combined
+            key: ssl:maincert:key
+            full: ssl:maincert:combined-key
 
 
     environment-rootca-cert: {{salt['file.join'](localca_location, 'live-ca.crt')}}
