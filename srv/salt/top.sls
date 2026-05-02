@@ -78,6 +78,7 @@ base:
         - match: grain
         - docker.install
         - nomad.install
+        - basics.etc_mods.udp-buffer-increase
         - mn.appconfig
 
     'roles:photosync':
@@ -136,6 +137,7 @@ base:
         - match: grain
         - haproxy.external
         - envoy.external
+        - basics.etc_mods.udp-buffer-increase
 
     'roles:natgateway':
         - match: grain
@@ -163,6 +165,7 @@ base:
         - docker.install
         - fstab.secure
         - anytype
+        - basics.etc_mods.udp-buffer-increase
 
     '*.test':
         # put vagrant user config on .test machines
