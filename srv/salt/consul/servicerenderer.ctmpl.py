@@ -551,12 +551,6 @@ def _setup_nftables(services: List[SmartstackService], ips: List[str], nftable_m
         if _protocol == "udp" or _protocol == "quic":
             prot = "udp"
             mode = "plain"  # udp can't be used with -m state, right?
-
-            for p in _extports:
-                if "-" in p:
-                    print("%s: modes quic and udp do not support port ranges because Envoy doesn't "
-                          "[illegal value: %s]" % (svc.name, p), file=sys.stderr)
-                    continue
         elif _protocol == "http":
             prot = "tcp"
             if len(_extports) == 0:
