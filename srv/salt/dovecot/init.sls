@@ -15,9 +15,9 @@
                              else pillar['imap']['internal'].get('sslkey', imap_internal_ssl) %}
 {% set imap_ssl_refs = [] %}
 {% for ssl_ref in [imap_external_ssl, imap_internal_ssl] %}
-{% if ssl_ref in ssl_filenames and ssl_ref not in imap_ssl_refs %}
-{% set x = imap_ssl_refs.append(ssl_ref) %}
-{% endif %}
+    {% if ssl_ref in ssl_filenames and ssl_ref not in imap_ssl_refs %}
+        {% set x = imap_ssl_refs.append(ssl_ref) %}
+    {% endif %}
 {% endfor %}
 
 # http://wiki2.dovecot.org/Plugins/Antispam
@@ -35,12 +35,12 @@ dovecot:
         - enable: True
         - watch:
 {% for ssl_ref in imap_ssl_refs %}
-{% set ssl_id = ssl_ref|replace('.', '-')|replace('_', '-')|replace(':', '-')|replace('/', '-') %}
-{% for material in ['chain', 'key'] %}
-{% if ssl_sources.get(ssl_ref, {}).get(material) and salt['pillar.fetch'](ssl_sources[ssl_ref][material], None) %}
+    {% set ssl_id = ssl_ref|replace('.', '-')|replace('_', '-')|replace(':', '-')|replace('/', '-') %}
+    {% for material in ['chain', 'key'] %}
+        {% if ssl_sources.get(ssl_ref, {}).get(material) and salt['pillar.fetch'](ssl_sources[ssl_ref][material], None) %}
             - file: ssl-certificate-{{ssl_id}}-{{material}}
-{% endif %}
-{% endfor %}
+        {% endif %}
+    {% endfor %}
 {% endfor %}
             - file: dovecot-sql-config
         - require:

@@ -26,9 +26,9 @@ include:
                                     else pillar['smtp']['internal-relay'].get('sslkey', smtp_internal_relay_ssl) %}
 {% set smtp_ssl_refs = [] %}
 {% for ssl_ref in [smtp_receiver_ssl, smtp_relay_ssl, smtp_internal_relay_ssl] %}
-{% if ssl_ref in ssl_filenames and ssl_ref not in smtp_ssl_refs %}
-{% set x = smtp_ssl_refs.append(ssl_ref) %}
-{% endif %}
+    {% if ssl_ref in ssl_filenames and ssl_ref not in smtp_ssl_refs %}
+        {% set x = smtp_ssl_refs.append(ssl_ref) %}
+    {% endif %}
 {% endfor %}
 
 
@@ -241,12 +241,12 @@ opensmtpd-config:
             - pkg: opensmtpd
             - file: opensmtpd-authserver-config
 {% for ssl_ref in smtp_ssl_refs %}
-{% set ssl_id = ssl_ref|replace('.', '-')|replace('_', '-')|replace(':', '-')|replace('/', '-') %}
-{% for material in ['chain', 'key'] %}
-{% if ssl_sources.get(ssl_ref, {}).get(material) and salt['pillar.fetch'](ssl_sources[ssl_ref][material], None) %}
+    {% set ssl_id = ssl_ref|replace('.', '-')|replace('_', '-')|replace(':', '-')|replace('/', '-') %}
+    {% for material in ['chain', 'key'] %}
+        {% if ssl_sources.get(ssl_ref, {}).get(material) and salt['pillar.fetch'](ssl_sources[ssl_ref][material], None) %}
             - file: ssl-certificate-{{ssl_id}}-{{material}}
-{% endif %}
-{% endfor %}
+        {% endif %}
+    {% endfor %}
 {% endfor %}
 
 
@@ -260,12 +260,12 @@ opensmtpd-service:
         - watch:
             - file: opensmtpd-config
 {% for ssl_ref in smtp_ssl_refs %}
-{% set ssl_id = ssl_ref|replace('.', '-')|replace('_', '-')|replace(':', '-')|replace('/', '-') %}
-{% for material in ['chain', 'key'] %}
-{% if ssl_sources.get(ssl_ref, {}).get(material) and salt['pillar.fetch'](ssl_sources[ssl_ref][material], None) %}
+    {% set ssl_id = ssl_ref|replace('.', '-')|replace('_', '-')|replace(':', '-')|replace('/', '-') %}
+    {% for material in ['chain', 'key'] %}
+        {% if ssl_sources.get(ssl_ref, {}).get(material) and salt['pillar.fetch'](ssl_sources[ssl_ref][material], None) %}
             - file: ssl-certificate-{{ssl_id}}-{{material}}
-{% endif %}
-{% endfor %}
+        {% endif %}
+    {% endfor %}
 {% endfor %}
 
 

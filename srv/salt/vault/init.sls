@@ -154,9 +154,9 @@ vault-service:
             - cmd: vault-setcap
             - file: vault-config
 {% for material in ['chain', 'key'] %}
-{% if ssl_sources.get(vault_ssl, {}).get(material) and salt['pillar.fetch'](ssl_sources[vault_ssl][material], None) %}
+    {% if ssl_sources.get(vault_ssl, {}).get(material) and salt['pillar.fetch'](ssl_sources[vault_ssl][material], None) %}
             - file: ssl-certificate-{{vault_ssl_id}}-{{material}}
-{% endif %}
+    {% endif %}
 {% endfor %}
     service.running:
         - name: vault
@@ -177,9 +177,9 @@ vault-service:
             - systemdunit: vault-service
             - file: vault  # restart on a change of the binary
 {% for material in ['chain', 'key'] %}
-{% if ssl_sources.get(vault_ssl, {}).get(material) and salt['pillar.fetch'](ssl_sources[vault_ssl][material], None) %}
+    {% if ssl_sources.get(vault_ssl, {}).get(material) and salt['pillar.fetch'](ssl_sources[vault_ssl][material], None) %}
             - file: ssl-certificate-{{vault_ssl_id}}-{{material}}
-{% endif %}
+    {% endif %}
 {% endfor %}
             - service: smartstack-internal
     cmd.run:

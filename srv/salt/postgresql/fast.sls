@@ -195,16 +195,16 @@ data-cluster-service:
         - watch:
             - file: postgresql-hba-config
             - file: data-cluster-config-base
-{% if postgresql_ssl_configured %}
-{% for material in ['chain', 'key'] %}
-{% if ssl_sources.get(postgresql_ssl, {}).get(material) and salt['pillar.fetch'](ssl_sources[postgresql_ssl][material], None) %}
+    {% if postgresql_ssl_configured %}
+        {% for material in ['chain', 'key'] %}
+            {% if ssl_sources.get(postgresql_ssl, {}).get(material) and salt['pillar.fetch'](ssl_sources[postgresql_ssl][material], None) %}
             - file: ssl-certificate-{{postgresql_ssl_id}}-{{material}}
-{% endif %}
-{% endfor %}
+            {% endif %}
+        {% endfor %}
             - file: data-cluster-config-sslcert
             - file: data-cluster-config-sslkey
             - file: data-cluster-config-sslciphers
-{% endif %}
+    {% endif %}
         - require_in:
             - cmd: postgresql-sync
 {% endif %}
