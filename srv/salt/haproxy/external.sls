@@ -49,9 +49,9 @@ smartstack-external:
                 {%- for ip in haproxy_ips -%}
                     {{' '}}--smartstack-localip {{ip}}
                 {%- endfor %}
-                {%- if pillar.get('ssl', {}).get('sources', {}).get('default-cert', None) and
-                      salt['pillar.fetch'](pillar['ssl']['sources']['default-cert'], None) -%}
-                    {{' '}}-D maincert={{pillar['ssl']['filenames']['default-cert-full']}}
+                {%- if pillar.get('ssl', {}).get('sources', {}).get('default', {}).get('full', None) and
+                      salt['pillar.fetch'](pillar['ssl']['sources']['default']['full'], None) -%}
+                    {{' '}}-D certfolder={{pillar['ssl']['secret-key-location']}}
                 {%- endif %}
                 {%- if pillar.get("crypto", {}).get("generate-secure-dhparams", True) -%}
                     {{' '}}-D load_dhparams=True
@@ -65,8 +65,9 @@ smartstack-external:
         - name: haproxy@external
         - require:
             - file: smartstack-external
-            {% if 'ssl' in pillar and 'maincert' in pillar['ssl'] %}
-            - file: ssl-maincert
+            {% if pillar.get('ssl', {}).get('sources', {}).get('default', {}).get('full', None) and
+                  salt['pillar.fetch'](pillar['ssl']['sources']['default']['full'], None) %}
+            - file: ssl-certificate-default-full
             {% endif %}
         - require_in:
             - cmd: smartstack-external-sync

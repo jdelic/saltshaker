@@ -25,54 +25,44 @@ ssl-key-location:
         - makedirs: True
 
 
+ssl-combined-location:
+    file.directory:
+        - name: {{pillar['ssl']['combined-location']}}
+        - user: root
+        - group: root
+        - mode: '0755'
+        - makedirs: True
+
+
+{% set ssl_material = {
+    'cert': {'directory_state': 'ssl-cert-location', 'user': 'root', 'group': 'root', 'mode': '0444'},
+    'chain': {'directory_state': 'ssl-combined-location', 'user': 'root', 'group': 'root', 'mode': '0444'},
+    'key': {'directory_state': 'ssl-key-location', 'user': 'root', 'group': 'ssl-cert', 'mode': '0440'},
+    'full': {'directory_state': 'ssl-key-location', 'user': 'root', 'group': 'ssl-cert', 'mode': '0440'},
+} %}
+
 # install private certificates if they have been assigned to this node in the pillars
-{% if pillar.get('ssl', {}).get('sources', {}).get('default-cert', None) and
-      salt['pillar.fetch'](pillar['ssl']['sources']['default-cert'], None) %}
-ssl-maincert-combined-certificate:
+{% for cert_name, cert_sources in pillar.get('ssl', {}).get('sources', {}).items() %}
+{% set cert_filenames = pillar.get('ssl', {}).get('filenames', {}).get(cert_name, {}) %}
+{% set cert_id = cert_name|replace('.', '-')|replace('_', '-')|replace(':', '-')|replace('/', '-') %}
+{% for material, material_config in ssl_material.items() %}
+{% set source_pillar = cert_sources.get(material) %}
+{% set target_file = cert_filenames.get(material) %}
+{% if source_pillar and target_file and salt['pillar.fetch'](source_pillar, None) %}
+ssl-certificate-{{cert_id}}-{{material}}:
     file.managed:
-        - name: {{pillar['ssl']['filenames']['default-cert-combined']}}
-        - contents_pillar: {{pillar['ssl']['sources']['default-cert-combined']}}
-        - user: root
-        - group: root
-        - mode: '0444'
+        - name: {{target_file}}
+        - contents_pillar: {{source_pillar}}
+        - user: {{material_config['user']}}
+        - group: {{material_config['group']}}
+        - mode: '{{material_config['mode']}}'
         - require:
-            - file: ssl-cert-location
+            - file: {{material_config['directory_state']}}
 
 
-ssl-maincert-key:
-    file.managed:
-        - name: {{pillar['ssl']['filenames']['default-cert-key']}}
-        - contents_pillar: {{pillar['ssl']['sources']['default-cert-key']}}
-        - user: root
-        - group: ssl-cert
-        - mode: '0440'
-        - require:
-            - file: ssl-key-location
-
-
-ssl-maincert-combined-key:
-    file.managed:
-        - name: {{pillar['ssl']['filenames']['default-cert-full']}}
-        - contents_pillar: {{pillar['ssl']['sources']['default-cert-full']}}
-        - user: root
-        - group: ssl-cert
-        - mode: '0440'
-        - require:
-            - file: ssl-key-location
-
-
-ssl-maincert:
-    file.managed:
-        - name: {{pillar['ssl']['filenames']['default-cert']}}
-        - contents_pillar: {{pillar['ssl']['sources']['default-cert']}}
-        - user: root
-        - group: root
-        - mode: '0444'
-        - require:
-            - file: ssl-maincert-combined-certificate
-            - file: ssl-maincert-key
-            - file: ssl-maincert-combined-key
 {% endif %}
+{% endfor %}
+{% endfor %}
 
 
 localca-location:
