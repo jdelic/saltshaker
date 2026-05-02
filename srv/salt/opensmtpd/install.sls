@@ -3,6 +3,35 @@ include:
     - basics.noexim
 
 
+{% set ssl_filenames = pillar.get('ssl', {}).get('filenames', {}) %}
+{% set ssl_sources = pillar.get('ssl', {}).get('sources', {}) %}
+{% set smtp_receiver_ssl = pillar['smtp']['receiver'].get('ssl', pillar['smtp']['receiver'].get('sslcert', 'default')) %}
+{% set smtp_relay_ssl = pillar['smtp']['relay'].get('ssl', pillar['smtp']['relay'].get('sslcert', 'default')) %}
+{% set smtp_internal_relay_ssl = pillar['smtp']['internal-relay'].get(
+                                    'ssl', pillar['smtp']['internal-relay'].get('sslcert', 'default')
+                                ) %}
+{% set smtp_receiver_sslcert = ssl_filenames[smtp_receiver_ssl]['chain'] if smtp_receiver_ssl in ssl_filenames
+                              else pillar['smtp']['receiver'].get('sslcert', smtp_receiver_ssl) %}
+{% set smtp_receiver_sslkey = ssl_filenames[smtp_receiver_ssl]['key'] if smtp_receiver_ssl in ssl_filenames
+                             else pillar['smtp']['receiver'].get('sslkey', smtp_receiver_ssl) %}
+{% set smtp_relay_sslcert = ssl_filenames[smtp_relay_ssl]['chain'] if smtp_relay_ssl in ssl_filenames
+                           else pillar['smtp']['relay'].get('sslcert', smtp_relay_ssl) %}
+{% set smtp_relay_sslkey = ssl_filenames[smtp_relay_ssl]['key'] if smtp_relay_ssl in ssl_filenames
+                          else pillar['smtp']['relay'].get('sslkey', smtp_relay_ssl) %}
+{% set smtp_internal_relay_sslcert = ssl_filenames[smtp_internal_relay_ssl]['chain']
+                                     if smtp_internal_relay_ssl in ssl_filenames
+                                     else pillar['smtp']['internal-relay'].get('sslcert', smtp_internal_relay_ssl) %}
+{% set smtp_internal_relay_sslkey = ssl_filenames[smtp_internal_relay_ssl]['key']
+                                    if smtp_internal_relay_ssl in ssl_filenames
+                                    else pillar['smtp']['internal-relay'].get('sslkey', smtp_internal_relay_ssl) %}
+{% set smtp_ssl_refs = [] %}
+{% for ssl_ref in [smtp_receiver_ssl, smtp_relay_ssl, smtp_internal_relay_ssl] %}
+{% if ssl_ref in ssl_filenames and ssl_ref not in smtp_ssl_refs %}
+{% set x = smtp_ssl_refs.append(ssl_ref) %}
+{% endif %}
+{% endfor %}
+
+
 opensmtpd:
     pkg.installed:
         - pkgs:
@@ -123,77 +152,6 @@ amavisd:
             - file: /etc/amavis/conf.d*
 
 
-{% if pillar['smtp']['receiver']['sslcert'] != 'default' %}
-opensmtpd-receiver-sslcert:
-    file.managed:
-        - name: {{pillar['smtp']['receiver']['sslcert']}}
-        - contents_pillar: {{pillar['smtp']['receiver']['sslcert-content']}}
-        - mode: '0440'
-        - user: root
-        - group: root
-        - require:
-            - file: ssl-cert-location
-
-
-opensmtpd-receiver-sslkey:
-    file.managed:
-        - name: {{pillar['smtp']['receiver']['sslkey']}}
-        - contents_pillar: {{pillar['smtp']['receiver']['sslkey-content']}}
-        - mode: '0400'
-        - user: root
-        - group: root
-        - require:
-            - file: ssl-key-location
-{% endif %}
-
-{% if pillar['smtp']['relay']['sslcert'] != 'default' %}
-opensmtpd-relay-sslcert:
-    file.managed:
-        - name: {{pillar['smtp']['relay']['sslcert']}}
-        - contents_pillar: {{pillar['smtp']['relay']['sslcert-content']}}
-        - mode: '0440'
-        - user: root
-        - group: root
-        - require:
-            - file: ssl-cert-location
-
-
-opensmtpd-relay-sslkey:
-    file.managed:
-        - name: {{pillar['smtp']['relay']['sslkey']}}
-        - contents_pillar: {{pillar['smtp']['relay']['sslkey-content']}}
-        - mode: '0400'
-        - user: root
-        - group: root
-        - require:
-            - file: ssl-key-location
-{% endif %}
-
-
-{% if pillar['smtp']['internal-relay']['sslcert'] != 'default' %}
-opensmtpd-internal-relay-sslcert:
-    file.managed:
-        - name: {{pillar['smtp']['internal-relay']['sslcert']}}
-        - contents_pillar: {{pillar['smtp']['internal-relay']['sslcert-content']}}
-        - mode: '0440'
-        - user: root
-        - group: root
-        - require:
-            - file: ssl-cert-location
-
-
-opensmtpd-internal-relay-sslkey:
-    file.managed:
-        - name: {{pillar['smtp']['internal-relay']['sslkey']}}
-        - contents_pillar: {{pillar['smtp']['internal-relay']['sslkey-content']}}
-        - mode: '0400'
-        - user: root
-        - group: root
-        - require:
-            - file: ssl-key-location
-{% endif %}
-
-
 {% set opensmtpd_ips = {
     "ipv4": {
         "relay":
@@ -253,41 +211,17 @@ opensmtpd-config:
             relay_ips: ["{{opensmtpd_ips['ipv4']['relay']}}", "{{opensmtpd_ips['ipv6']['relay']}}"]
             internal_relay_ips: ["{{opensmtpd_ips['ipv4']['internal_relay']}}", "{{opensmtpd_ips['ipv6']['internal_relay']}}"]
             receiver_certfile: >
-                {% if pillar['smtp']['receiver']['sslcert'] == 'default' -%}
-                    {{pillar['ssl']['filenames']['default-cert-combined']}}
-                {%- else -%}
-                    {{pillar['smtp']['receiver']['sslcert']}}
-                {%- endif %}
+                {{smtp_receiver_sslcert}}
             receiver_keyfile: >
-                {% if pillar['smtp']['receiver']['sslkey'] == 'default' -%}
-                    {{pillar['ssl']['filenames']['default-cert-key']}}
-                {%- else -%}
-                    {{pillar['smtp']['receiver']['sslkey']}}
-                {%- endif %}
+                {{smtp_receiver_sslkey}}
             relay_certfile: >
-                {% if pillar['smtp']['relay']['sslcert'] == 'default' -%}
-                    {{pillar['ssl']['filenames']['default-cert-combined']}}
-                {%- else -%}
-                    {{pillar['smtp']['relay']['sslcert']}}
-                {%- endif %}
+                {{smtp_relay_sslcert}}
             relay_keyfile: >
-                {% if pillar['smtp']['relay']['sslkey'] == 'default' -%}
-                    {{pillar['ssl']['filenames']['default-cert-key']}}
-                {%- else -%}
-                    {{pillar['smtp']['relay']['sslkey']}}
-                {%- endif %}
+                {{smtp_relay_sslkey}}
             internal_relay_certificate: >
-                {% if pillar['smtp']['internal-relay']['sslcert'] == 'default' -%}
-                    {{pillar['ssl']['filenames']['default-cert-combined']}}
-                {%- else -%}
-                    {{pillar['smtp']['internal-relay']['sslcert']}}
-                {%- endif %}
+                {{smtp_internal_relay_sslcert}}
             internal_relay_keyfile: >
-                {% if pillar['smtp']['internal-relay']['sslkey'] == 'default' -%}
-                    {{pillar['ssl']['filenames']['default-cert-key']}}
-                {%- else -%}
-                    {{pillar['smtp']['internal-relay']['sslkey']}}
-                {%- endif %}
+                {{smtp_internal_relay_sslkey}}
             {% if pillar['smtp'].get('relay-via', {}).get('url', False) %}
             relay_via_url: {{pillar['smtp']['relay-via']['url']}}
             {% endif %}
@@ -306,14 +240,14 @@ opensmtpd-config:
         - require:
             - pkg: opensmtpd
             - file: opensmtpd-authserver-config
-            {% if pillar['smtp']['receiver']['sslcert'] != 'default' %}
-            - file: opensmtpd-receiver-sslcert
-            - file: opensmtpd-receiver-sslkey
-            {% endif %}
-            {% if pillar['smtp']['relay']['sslcert'] != 'default' %}
-            - file: opensmtpd-relay-sslcert
-            - file: opensmtpd-relay-sslkey
-            {% endif %}
+{% for ssl_ref in smtp_ssl_refs %}
+{% set ssl_id = ssl_ref|replace('.', '-')|replace('_', '-')|replace(':', '-')|replace('/', '-') %}
+{% for material in ['chain', 'key'] %}
+{% if ssl_sources.get(ssl_ref, {}).get(material) and salt['pillar.fetch'](ssl_sources[ssl_ref][material], None) %}
+            - file: ssl-certificate-{{ssl_id}}-{{material}}
+{% endif %}
+{% endfor %}
+{% endfor %}
 
 
 opensmtpd-service:
@@ -325,19 +259,14 @@ opensmtpd-service:
             - email-storage
         - watch:
             - file: opensmtpd-config
-            {% if pillar['smtp']['receiver']['sslcert'] != 'default' %}
-            - file: opensmtpd-receiver-sslcert
-            - file: opensmtpd-receiver-sslkey
-            {% endif %}
-            {% if pillar['smtp']['relay']['sslcert'] != 'default' %}
-            - file: opensmtpd-relay-sslcert
-            - file: opensmtpd-relay-sslkey
-            {% endif %}
-            {% if pillar['smtp']['relay']['sslcert'] == 'default' or
-                pillar['smtp']['receiver']['sslcert'] == 'default' %}
-            - file: ssl-maincert-combined-certificate
-            - file: ssl-maincert-key
-            {% endif %}
+{% for ssl_ref in smtp_ssl_refs %}
+{% set ssl_id = ssl_ref|replace('.', '-')|replace('_', '-')|replace(':', '-')|replace('/', '-') %}
+{% for material in ['chain', 'key'] %}
+{% if ssl_sources.get(ssl_ref, {}).get(material) and salt['pillar.fetch'](ssl_sources[ssl_ref][material], None) %}
+            - file: ssl-certificate-{{ssl_id}}-{{material}}
+{% endif %}
+{% endfor %}
+{% endfor %}
 
 
 opensmtpd-authserver-config:

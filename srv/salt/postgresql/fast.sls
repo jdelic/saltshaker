@@ -11,6 +11,15 @@ include:
                   'internal-ip-index', 0
               )|int()]
             ) %}
+{% set ssl_filenames = pillar.get('ssl', {}).get('filenames', {}) %}
+{% set ssl_sources = pillar.get('ssl', {}).get('sources', {}) %}
+{% set postgresql_ssl_configured = 'ssl' in pillar['postgresql'] or 'sslcert' in pillar['postgresql'] %}
+{% set postgresql_ssl = pillar['postgresql'].get('ssl', pillar['postgresql'].get('sslcert', 'default')) %}
+{% set postgresql_ssl_id = postgresql_ssl|replace('.', '-')|replace('_', '-')|replace(':', '-')|replace('/', '-') %}
+{% set postgresql_sslcert = ssl_filenames[postgresql_ssl]['chain'] if postgresql_ssl in ssl_filenames
+                            else pillar['postgresql'].get('sslcert', postgresql_ssl) %}
+{% set postgresql_sslkey = ssl_filenames[postgresql_ssl]['key'] if postgresql_ssl in ssl_filenames
+                           else pillar['postgresql'].get('sslkey', postgresql_ssl) %}
 
 
 postgresql-apt-pin:
@@ -112,39 +121,12 @@ data-cluster-config-base:
             - file: postgresql-hba-config
 
 
-{% if pillar.get("ssl", {}).get("postgresql") %}
-postgresql-ssl-cert:
-    file.managed:
-        - name: {{pillar['postgresql']['sslcert']}}
-        - user: postgres
-        - group: root
-        - mode: 400
-        - contents_pillar: ssl:postgresql:combined
-        - require:
-            - file: ssl-cert-location
-            - pkg: postgresql-step2
-
-
-postgresql-ssl-key:
-    file.managed:
-        - name: {{pillar['postgresql']['sslkey']}}
-        - user: postgres
-        - group: root
-        - mode: 400
-        - contents_pillar: ssl:postgresql:key
-        - require:
-            - file: ssl-key-location
-            - pkg: postgresql-step2
-{% endif %}
-
-{% if "sslcert" in pillar["postgresql"] %}
+{% if postgresql_ssl_configured %}
 data-cluster-config-sslcert:
     file.replace:
         - name: /etc/postgresql/{{postgres_version}}/main/postgresql.conf
         - pattern: ssl_cert_file = '/etc/ssl/certs/ssl-cert-snakeoil.pem'[^\n]*$
-        - repl: ssl_cert_file = '{{pillar['postgresql']['sslcert']
-            if pillar['postgresql'].get('sslcert', 'default') != 'default'
-            else pillar['ssl']['filenames']['default-cert-combined']}}'
+        - repl: ssl_cert_file = '{{postgresql_sslcert}}'
         - backup: False
         - require_in:
             - file: postgresql-hba-config
@@ -156,9 +138,7 @@ data-cluster-config-sslkey:
     file.replace:
         - name: /etc/postgresql/{{postgres_version}}/main/postgresql.conf
         - pattern: ssl_key_file = '/etc/ssl/private/ssl-cert-snakeoil.key'[^\n]*$
-        - repl: ssl_key_file = '{{pillar['postgresql']['sslkey']
-            if pillar['postgresql'].get('sslcert', 'default') != 'default'
-            else pillar['ssl']['filenames']['default-cert-key']}}'
+        - repl: ssl_key_file = '{{postgresql_sslkey}}'
         - backup: False
         - require_in:
             - file: postgresql-hba-config
@@ -215,9 +195,12 @@ data-cluster-service:
         - watch:
             - file: postgresql-hba-config
             - file: data-cluster-config-base
-{% if pillar.get("ssl", {}).get("postgresql") %}
-            - file: postgresql-ssl-cert
-            - file: postgresql-ssl-key
+{% if postgresql_ssl_configured %}
+{% for material in ['chain', 'key'] %}
+{% if ssl_sources.get(postgresql_ssl, {}).get(material) and salt['pillar.fetch'](ssl_sources[postgresql_ssl][material], None) %}
+            - file: ssl-certificate-{{postgresql_ssl_id}}-{{material}}
+{% endif %}
+{% endfor %}
             - file: data-cluster-config-sslcert
             - file: data-cluster-config-sslkey
             - file: data-cluster-config-sslciphers

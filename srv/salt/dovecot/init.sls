@@ -1,6 +1,24 @@
 
 {% set conffiles = ['10-auth.conf', '10-ssl.conf', '10-master.conf', '10-mail.conf', '15-lda.conf',
                     '20-managesieve.conf', '90-sieve.conf'] %}
+{% set ssl_filenames = pillar.get('ssl', {}).get('filenames', {}) %}
+{% set ssl_sources = pillar.get('ssl', {}).get('sources', {}) %}
+{% set imap_external_ssl = pillar['imap']['external'].get('ssl', pillar['imap']['external'].get('sslcert', 'default')) %}
+{% set imap_internal_ssl = pillar['imap']['internal'].get('ssl', pillar['imap']['internal'].get('sslcert', 'default')) %}
+{% set imap_external_sslcert = ssl_filenames[imap_external_ssl]['chain'] if imap_external_ssl in ssl_filenames
+                              else pillar['imap']['external'].get('sslcert', imap_external_ssl) %}
+{% set imap_external_sslkey = ssl_filenames[imap_external_ssl]['key'] if imap_external_ssl in ssl_filenames
+                             else pillar['imap']['external'].get('sslkey', imap_external_ssl) %}
+{% set imap_internal_sslcert = ssl_filenames[imap_internal_ssl]['chain'] if imap_internal_ssl in ssl_filenames
+                              else pillar['imap']['internal'].get('sslcert', imap_internal_ssl) %}
+{% set imap_internal_sslkey = ssl_filenames[imap_internal_ssl]['key'] if imap_internal_ssl in ssl_filenames
+                             else pillar['imap']['internal'].get('sslkey', imap_internal_ssl) %}
+{% set imap_ssl_refs = [] %}
+{% for ssl_ref in [imap_external_ssl, imap_internal_ssl] %}
+{% if ssl_ref in ssl_filenames and ssl_ref not in imap_ssl_refs %}
+{% set x = imap_ssl_refs.append(ssl_ref) %}
+{% endif %}
+{% endfor %}
 
 # http://wiki2.dovecot.org/Plugins/Antispam
 dovecot:
@@ -16,10 +34,14 @@ dovecot:
         - running
         - enable: True
         - watch:
-{% if pillar['imap']['external']['sslcert'] == 'default' %}
-            - file: ssl-maincert-combined-certificate
-            - file: ssl-maincert-key
+{% for ssl_ref in imap_ssl_refs %}
+{% set ssl_id = ssl_ref|replace('.', '-')|replace('_', '-')|replace(':', '-')|replace('/', '-') %}
+{% for material in ['chain', 'key'] %}
+{% if ssl_sources.get(ssl_ref, {}).get(material) and salt['pillar.fetch'](ssl_sources[ssl_ref][material], None) %}
+            - file: ssl-certificate-{{ssl_id}}-{{material}}
 {% endif %}
+{% endfor %}
+{% endfor %}
             - file: dovecot-sql-config
         - require:
             - file: sa-learn-pipe-script
@@ -36,62 +58,6 @@ dovecot-systemd-secure-override:
             - service: dovecot
         - require:
             - file: email-storage
-
-
-{% if pillar['imap']['external']['sslcert'] != 'default' %}
-dovecot-ssl-cert:
-    file.managed:
-        - name: {{pillar['imap']['external']['sslcert']}}
-        - contents_pillar: {{pillar['imap']['external']['sslcert-content']}}
-        - mode: 440
-        - user: root
-        - group: root
-        - require:
-            - file: ssl-cert-location
-        - require_in:
-            - service: dovecot
-
-
-dovecot-ssl-key:
-    file.managed:
-        - name: {{pillar['imap']['external']['sslkey']}}
-        - contents_pillar: {{pillar['imap']['external']['sslkey-content']}}
-        - mode: 400
-        - user: root
-        - group: root
-        - require:
-            - file: ssl-key-location
-        - require_in:
-            - service: dovecot
-{% endif %}
-
-
-{% if pillar['imap']['internal']['sslcert'] != 'default' %}
-dovecot-ssl-internal-cert:
-    file.managed:
-        - name: {{pillar['imap']['internal']['sslcert']}}
-        - contents_pillar: {{pillar['imap']['internal']['sslcert-content']}}
-        - mode: 440
-        - user: root
-        - group: root
-        - require:
-            - file: ssl-cert-location
-        - require_in:
-            - service: dovecot
-
-
-dovecot-ssl-internal-key:
-    file.managed:
-        - name: {{pillar['imap']['internal']['sslkey']}}
-        - contents_pillar: {{pillar['imap']['internal']['sslkey-content']}}
-        - mode: 400
-        - user: root
-        - group: root
-        - require:
-            - file: ssl-key-location
-        - require_in:
-            - service: dovecot
-{% endif %}
 
 
 sa-learn-pipe-script:
@@ -138,29 +104,13 @@ dovecot-config-{{file}}:
         - template: jinja
         - context:
             sslcert: >
-                {%- if pillar['imap']['external']['sslcert'] == 'default' %}
-                    {{pillar['ssl']['filenames']['default-cert-combined']}}
-                {%- else %}
-                    {{pillar['imap']['external']['sslcert']}}
-                {%- endif %}
+                {{imap_external_sslcert}}
             sslkey: >
-                {%- if pillar['imap']['external']['sslcert'] == 'default' %}
-                    {{pillar['ssl']['filenames']['default-cert-key']}}
-                {%- else %}
-                    {{pillar['imap']['external']['sslkey']}}
-                {%- endif %}
+                {{imap_external_sslkey}}
             internal_sslcert: >
-                {%- if pillar['imap']['internal']['sslcert'] == 'default' %}
-                    {{pillar['ssl']['filenames']['default-cert-combined']}}
-                {%- else %}
-                    {{pillar['imap']['internal']['sslcert']}}
-                {%- endif %}
+                {{imap_internal_sslcert}}
             internal_sslkey: >
-                {%- if pillar['imap']['internal']['sslcert'] == 'default' %}
-                    {{pillar['ssl']['filenames']['default-cert-key']}}
-                {%- else %}
-                    {{pillar['imap']['internal']['sslkey']}}
-                {%- endif %}
+                {{imap_internal_sslkey}}
             internalip: {{dovecot_ips['internal']}}
             bindips: ["{{dovecot_ips['internal']}}", "{{dovecot_ips['ipv4']}}", "{{dovecot_ips['ipv6']}}"]
             bindport: 143
