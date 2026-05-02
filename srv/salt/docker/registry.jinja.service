@@ -1,0 +1,26 @@
+[Unit]
+Description=Docker registry container
+After=docker.service network-online.target
+Requires=docker.service
+
+[Service]
+Type=simple
+Restart=always
+RestartSec=60
+ExecStartPre=-/usr/bin/docker rm -f registry
+ExecStartPre=/usr/bin/docker pull registry:latest
+ExecStart=/usr/bin/docker run --name registry --rm \
+    --env-file /etc/appconfig/docker-registry/env/envvars \
+    -v /srv/registry:/var/lib/registry \
+    -v {{pillar['ssl']['service-rootca-cert']}}:{{pillar['ssl']['service-rootca-cert']}}:ro \
+    -v {{pillar['ssl']['filenames']['default-cert']}}:{{pillar['ssl']['filenames']['default-cert']}}:ro \
+    -v {{pillar['ssl']['filenames']['default-cert-key']}}:{{pillar['ssl']['filenames']['default-cert-key']}}:ro \
+    -p {{registry_ip}}:{{registry_port}}:5000/tcp \
+    --dns 169.254.1.1 \
+    --add-host={{registry_hostname}}:{{registry_ip}} \
+    registry:latest
+ExecStop=/usr/bin/docker stop -t 30 registry
+
+[Install]
+WantedBy=multi-user.target
+

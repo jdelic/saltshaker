@@ -12,12 +12,42 @@ docker-registry-volume:
         - group: root
         - mode: '0640'
 
-{% set registry_ip = pillar.get('docker', {}).get('registry', {}).get(
-                         'bind-ip', grains['ip_interfaces'][pillar['ifassign']['internal']][pillar['ifassign'].get(
-                         'internal-ip-index', 0)|int()]
-                     ) %}
-{% set registry_port = pillar.get('docker', {}).get('registry', {}).get('bind-port', 5000) %}
+{% set registry_config = pillar.get('docker', {}).get('registry', {}) %}
+{% if 'bind-ip' in registry_config %}
+{% set registry_ip = registry_config['bind-ip'] %}
+{% else %}
+{% set registry_ip = grains['ip_interfaces'][pillar['ifassign']['internal']][pillar['ifassign'].get(
+                     'internal-ip-index', 0)|int()] %}
+{% endif %}
+{% set registry_port = registry_config.get('bind-port', 5000) %}
 {% set registry_hostname = pillar['docker']['registry']['hostname'] %}
+
+
+docker-registry-envdir:
+    file.directory:
+        - name: /etc/appconfig/docker-registry/env
+        - user: root
+        - group: root
+        - mode: '0750'
+        - makedirs: True
+
+
+docker-registry-envfile:
+    file.managed:
+        - name: /etc/appconfig/docker-registry/env/envvars
+        - user: root
+        - group: root
+        - mode: '0640'
+        - contents: |
+            # Managed by Salt
+            REGISTRY_AUTH_TOKEN_REALM=https://{{pillar['authserver']['hostname']}}/docker/token/
+            REGISTRY_AUTH_TOKEN_SERVICE={{registry_hostname}}
+            REGISTRY_AUTH_TOKEN_ISSUER={{pillar['authserver']['hostname']}}
+            REGISTRY_AUTH_TOKEN_ROOTCERTBUNDLE=/var/lib/registry/docker_jwt.crt
+            REGISTRY_HTTP_HOST=https://{{registry_hostname}}/
+            OTEL_TRACES_EXPORTER=none
+        - require:
+            - file: docker-registry-envdir
 
 
 docker-jwt-certificate:
@@ -34,32 +64,29 @@ docker-jwt-certificate:
 
 
 docker-registry:
-    docker_container.running:
-        - name: registry
-        - image: registry:latest
-        - binds:
-            - /srv/registry:/var/lib/registry
-            - {{pillar['ssl']['service-rootca-cert']}}:{{pillar['ssl']['service-rootca-cert']}}
-            - {{pillar['ssl']['filenames']['default-cert']}}:{{pillar['ssl']['filenames']['default-cert']}}
-            - {{pillar['ssl']['filenames']['default-cert-key']}}:{{pillar['ssl']['filenames']['default-cert-key']}}
-        - port_bindings:
-            - {{registry_ip}}:{{registry_port}}:5000
-        - dns:
-            - 169.254.1.1
-        - restart_policy: always
-        - environment:
-            - REGISTRY_AUTH_TOKEN_REALM: >
-                https://{{pillar['authserver']['hostname']}}/docker/token/
-            - REGISTRY_AUTH_TOKEN_SERVICE: {{registry_hostname}}
-            - REGISTRY_AUTH_TOKEN_ISSUER: {{pillar['authserver']['hostname']}}
-            - REGISTRY_AUTH_TOKEN_ROOTCERTBUNDLE: /var/lib/registry/docker_jwt.crt
-            - REGISTRY_HTTP_HOST: https://{{registry_hostname}}/
-            - OTEL_TRACES_EXPORTER: none
-        - extra_hosts: {{registry_hostname}}:{{registry_ip}}
+    systemdunit.managed:
+        - name: /etc/systemd/system/docker-registry.service
+        - source: salt://docker/registry.jinja.service
+        - template: jinja
+        - user: root
+        - group: root
+        - mode: '0644'
+        - context:
+            registry_ip: {{registry_ip}}
+            registry_port: {{registry_port}}
+            registry_hostname: {{registry_hostname}}
+    service.running:
+        - name: docker-registry
+        - enable: True
         - require:
             - file: docker-registry-volume
+            - file: docker-registry-envfile
             - cmd: docker-jwt-certificate
             - service: dockerd-service
+        - watch:
+            - file: docker-registry-envfile
+            - cmd: docker-jwt-certificate
+            - systemdunit: docker-registry
 
 
 docker-registry-servicedef:
