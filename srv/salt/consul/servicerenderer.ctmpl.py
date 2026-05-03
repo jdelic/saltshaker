@@ -45,6 +45,7 @@ import ipaddress
 import os
 import re
 import ast
+import fcntl
 import sys
 from typing import Dict, Union, List, Optional, Set, Self, Iterator, Tuple, TextIO, Iterable
 
@@ -536,6 +537,21 @@ def _check_nftables_rule_exists(family: str, table: str, chain: str, rule: t_nft
     return False
 
 
+@contextlib.contextmanager
+def _nftables_lock() -> Iterator[None]:
+    try:
+        lockfile = open("/run/lock/smartstack-servicerenderer-nftables.lock", "w")
+    except OSError:
+        lockfile = open("/tmp/smartstack-servicerenderer-nftables.lock", "w")
+
+    with lockfile:
+        fcntl.flock(lockfile, fcntl.LOCK_EX)
+        try:
+            yield
+        finally:
+            fcntl.flock(lockfile, fcntl.LOCK_UN)
+
+
 def _nft_family_for_ip(ipaddr: ipaddress.IPv4Address | ipaddress.IPv6Address) -> str:
     return "ip6" if isinstance(ipaddr, ipaddress.IPv6Address) else "ip"
 
@@ -678,15 +694,17 @@ def _setup_nftables(services: List[SmartstackService], ips: List[str], nftable_m
                                                              input_cmd)))
                     else:
                         # check if the rule exists first...
-                        if not _check_nftables_rule_exists(family, "filter", input_chainname, input_rule, verbose):
-                            subprocess.call(["/usr/sbin/nft", "add"] + input_cmd)
+                        with _nftables_lock():
+                            if not _check_nftables_rule_exists(family, "filter", input_chainname, input_rule, verbose):
+                                subprocess.call(["/usr/sbin/nft", "add"] + input_cmd)
                 if output_rule:
                     output_cmd = _nft_add_rule_cmd(family, output_chainname, output_rule)
                     if debug:
                         print("%s: %s" % (svc.name, " ".join(["/usr/sbin/nft", "add"] + output_cmd)))
                     else:
-                        if not _check_nftables_rule_exists(family, "filter", output_chainname, output_rule, verbose):
-                            subprocess.call(["/usr/sbin/nft", "add"] + output_cmd)
+                        with _nftables_lock():
+                            if not _check_nftables_rule_exists(family, "filter", output_chainname, output_rule, verbose):
+                                subprocess.call(["/usr/sbin/nft", "add"] + output_cmd)
 
         if open_output_rules:
             for family in families:
@@ -699,8 +717,9 @@ def _setup_nftables(services: List[SmartstackService], ips: List[str], nftable_m
                     if debug:
                         print("%s: %s" % (svc.name, " ".join(["/usr/sbin/nft", "add"] + output_cmd)))
                     else:
-                        if not _check_nftables_rule_exists(family, "filter", output_chainname, output_rule, verbose):
-                            subprocess.call(["/usr/sbin/nft", "add"] + output_cmd)
+                        with _nftables_lock():
+                            if not _check_nftables_rule_exists(family, "filter", output_chainname, output_rule, verbose):
+                                subprocess.call(["/usr/sbin/nft", "add"] + output_cmd)
 
 
 def main() -> None:
