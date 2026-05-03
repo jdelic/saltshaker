@@ -185,36 +185,6 @@ nftables-baseconfig-chain-ipv6-forward-flush:
             - nftables: nftables-temp-forward-allow-ipv6
 
 
-nftables-baseconfig-chain-inet-input-flush:
-    nftables.flush:
-        - table: filter
-        - chain: input
-        - family: inet
-        - order: 2
-        - require:
-            - nftables: nftables-baseconfig-chain-inet-input
-
-
-nftables-baseconfig-chain-inet-output-flush:
-    nftables.flush:
-        - table: filter
-        - chain: output
-        - family: inet
-        - order: 2
-        - require:
-            - nftables: nftables-baseconfig-chain-inet-output
-
-
-nftables-baseconfig-chain-inet-forward-flush:
-    nftables.flush:
-        - table: filter
-        - chain: forward
-        - family: inet
-        - order: 2
-        - require:
-            - nftables: nftables-baseconfig-chain-inet-forward
-
-
 nftables-baseconfig-chain-ipv4-prerouting-flush:
     nftables.flush:
         - table: nat
