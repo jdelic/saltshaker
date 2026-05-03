@@ -363,11 +363,13 @@ smartstack:outport:tcp:443
 smartstack:outport:udp:50000-60000
 ```
 
-The renderer adds these as `dport` accept rules to the nftables output chain
-for each configured smartstack local IP family. Callers can choose which rule
-groups are managed with `--nftables-rules=input`, `--nftables-rules=output`, or
-`--nftables-rules=both`; the default is `both` so existing
-`--open-nftables` invocations keep their current behavior.
+The renderer adds these as destination-only `dport` accept rules to the
+nftables output chain for each configured smartstack local IP family. With
+`--open-nftables=conntrack`, the output rules are limited to `ct state new`.
+Callers can choose which rule groups are managed with
+`--nftables-rules=input`, `--nftables-rules=output`, or `--nftables-rules=both`;
+the default is `both` so existing `--open-nftables` invocations keep their
+current behavior.
 
 ### Integrating external services (not implemented yet)
 **Question: But I run my service X on Heroku/Amazon Elastic Beanstalk with

@@ -691,8 +691,10 @@ def _setup_nftables(services: List[SmartstackService], ips: List[str], nftable_m
         if open_output_rules:
             for family in families:
                 for protocol, ruleport in sorted(_outports):
-                    output_rule = [family, ("daddr", "{", _nft_any_address_for_family(family), "}"),
+                    output_rule = [family, ("daddr", _nft_any_address_for_family(family)),
                                    (protocol, "dport", str(ruleport)), ("accept",)]
+                    if nftable_mode == "conntrack":
+                        output_rule = [("ct", "state", "new")] + output_rule
                     output_cmd = _nft_add_rule_cmd(family, output_chainname, output_rule)
                     if debug:
                         print("%s: %s" % (svc.name, " ".join(["/usr/sbin/nft", "add"] + output_cmd)))
