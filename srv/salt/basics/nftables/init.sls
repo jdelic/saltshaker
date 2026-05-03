@@ -26,11 +26,25 @@ include:
 nftables:
     pkg.installed:
         - order: 2
+    service.enabled:
+        - name: nftables
+        - require:
+            - pkg: nftables
 
 
 netfilter-persistent:
     pkg.installed:
         - order: 2
+
+
+/etc/nftables.conf:
+    file.symlink:
+        - target: /etc/nftables
+        - force: true
+        - unless:
+            - test -L /etc/nftables.conf
+        - require:
+            - pkg: nftables
 
 
 nftables-temp-input-allow-ipv4:
