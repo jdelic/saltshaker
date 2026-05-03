@@ -350,6 +350,25 @@ services.
 
 See [consul-smartstack](https://github.com/jdelic/consul-smartstack).
 
+### SmartStack firewall tags
+
+When smartstack renderers are run with `--open-nftables`, external listener
+ports are opened from `smartstack:protocol:` and `smartstack:extport:` tags.
+Services can also request outbound firewall openings with
+`smartstack:outport:<protocol>:<port-or-range>` tags. For example, a service
+that must dial out to TCP 443 and UDP 50000 through 60000 can register:
+
+```
+smartstack:outport:tcp:443
+smartstack:outport:udp:50000-60000
+```
+
+The renderer adds these as `dport` accept rules to the nftables output chain
+for each configured smartstack local IP family. Callers can choose which rule
+groups are managed with `--nftables-rules=input`, `--nftables-rules=output`, or
+`--nftables-rules=both`; the default is `both` so existing
+`--open-nftables` invocations keep their current behavior.
+
 ### Integrating external services (not implemented yet)
 **Question: But I run my service X on Heroku/Amazon Elastic Beanstalk with
 autoscaling/Amazon Container Service/Microsoft Azure/Google Compute Engine/
