@@ -1,0 +1,6 @@
+[Unit]
+Description=Persist HAProxy ACME certificates
+
+[Service]
+Type=oneshot
+ExecStart=/usr/local/sbin/haproxy-dump-acme-certs --quiet --ignore-missing-socket --socket {{socket_path}} --cert-dir {{cert_dir}}

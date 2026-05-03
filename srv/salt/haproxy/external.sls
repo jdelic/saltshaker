@@ -15,6 +15,42 @@ haproxy-config-template-external:
             - cmd: consul-template-servicerenderer
 
 
+haproxy-acme-dump-script:
+    file.managed:
+        - name: /usr/local/sbin/haproxy-dump-acme-certs
+        - source: salt://haproxy/haproxy-dump-acme-certs.py
+        - user: root
+        - group: root
+        - mode: '0755'
+
+
+haproxy-acme-dump-service:
+    systemdunit.managed:
+        - name: /etc/systemd/system/haproxy-acme-dump.service
+        - source: salt://haproxy/haproxy-acme-dump.service
+        - template: jinja
+        - context:
+            socket_path: {{pillar.get('haproxy', {}).get('acme-dump-socket', '/run/haproxy/admin-external.sock')}}
+            cert_dir: {{pillar.get('haproxy', {}).get('acme-cert-dir', '/etc/haproxy/acme/certs')}}
+        - require:
+            - file: haproxy-acme-dump-script
+
+
+haproxy-acme-dump-timer-unit:
+    file.managed:
+        - name: /etc/systemd/system/haproxy-acme-dump.timer
+        - source: salt://haproxy/haproxy-acme-dump.timer
+
+
+haproxy-acme-dump-timer:
+    service.running:
+        - name: haproxy-acme-dump.timer
+        - enable: True
+        - require:
+            - file: haproxy-acme-dump-timer-unit
+            - systemdunit: haproxy-acme-dump-service
+
+
 {% set haproxy_ips = [] %}
 {% set x = haproxy_ips.append(
                pillar.get('haproxy', {}).get('override-ipv4',
@@ -40,15 +76,26 @@ smartstack-external:
             # don't use "grep -q" since it will lead to a "broken pipe" error when called through Python
             # subprocess. Instead redirect unnecessary output into /dev/null.
             command: >
+                /usr/local/sbin/haproxy-dump-acme-certs --quiet
+                --ignore-missing-socket
+                --socket {{pillar.get('haproxy', {}).get('acme-dump-socket', '/run/haproxy/admin-external.sock')}}
+                --cert-dir {{pillar.get('haproxy', {}).get('acme-cert-dir', '/etc/haproxy/acme/certs')}} || true;
                 ps awwfux | grep -v grep | grep 'haproxy -f /etc/haproxy/haproxy-external.cfg' >/dev/null &&
                 systemctl reload haproxy@external ||
                 systemctl restart haproxy@external
             parameters: >
                 --include tags=smartstack:external
                 --open-nftables=conntrack
+                --ensure-acme-placeholder-certs
+                --acme-cert-dir {{pillar.get('haproxy', {}).get('acme-cert-dir', '/etc/haproxy/acme/certs')}}
                 {%- for ip in haproxy_ips -%}
                     {{' '}}--smartstack-localip {{ip}}
                 {%- endfor %}
+                {{' '}}-D acme_directory={{pillar.get('haproxy', {}).get('acme-directory', 'https://acme-v02.api.letsencrypt.org/directory')}}
+                {{' '}}-D acme_account_key={{pillar.get('haproxy', {}).get('acme-account-key', '/etc/haproxy/acme/letsencrypt.account.key')}}
+                {%- if pillar.get('haproxy', {}).get('acme-contact', None) -%}
+                    {{' '}}-D acme_contact={{pillar['haproxy']['acme-contact']}}
+                {%- endif %}
                 {%- if pillar.get('ssl', {}).get('sources', {}).get('default', {}).get('full', None) and
                       salt['pillar.fetch'](pillar['ssl']['sources']['default']['full'], None) -%}
                     {{' '}}-D certfolder={{pillar['ssl']['secret-key-location']}}
@@ -59,6 +106,7 @@ smartstack-external:
             template: /etc/haproxy/haproxy-external.jinja.cfg
         - require:
             - systemdunit: haproxy-multi
+            - systemdunit: haproxy-acme-dump-service
             - file: haproxy-config-template-external
             - file: consul-template-dir
     service.enabled:  # haproxy will be started by the smartstack script rendered by consul-template (see command above)
