@@ -43,6 +43,7 @@ import os
 import re
 import ast
 import sys
+import tempfile
 from typing import Dict, Union, List, Optional, Set, Self, Iterator, Tuple, TextIO, Iterable
 
 import jinja2
@@ -496,6 +497,100 @@ def validate_proxypaths(services: List[SmartstackService]) -> None:
             )
 
 
+def acme_certificate_name(hostname: str) -> str:
+    name = re.sub(r"[^A-Za-z0-9.-]+", "_", hostname.lower()).strip("._-")
+    if not name:
+        raise ValueError(f"cannot build ACME certificate filename for hostname {hostname!r}")
+    return f"{name}.pem"
+
+
+def acme_certificate_path(hostname: str, cert_dir: str = "/etc/haproxy/acme/certs") -> str:
+    return os.path.join(cert_dir, acme_certificate_name(hostname))
+
+
+def acme_hostnames(services: Iterable[SmartstackService]) -> List[str]:
+    hostnames = set()
+    for svc in services:
+        if "acme" not in svc.tagvalue_set("smartstack:"):
+            continue
+        hostnames.update(svc.tagvalue_set("smartstack:hostname:"))
+    return sorted(hostnames)
+
+
+def validate_acme(services: List[SmartstackService]) -> None:
+    for svc in services:
+        if "acme" not in svc.tagvalue_set("smartstack:"):
+            continue
+
+        protocol = svc.tagvalue("smartstack:protocol:")
+        hostnames = svc.tagvalue_set("smartstack:hostname:")
+        if not hostnames:
+            print(f"{svc.name}: smartstack:acme requires at least one smartstack:hostname: tag", file=sys.stderr)
+            sys.exit(1)
+
+        if protocol not in {"https", "http3"} and not (
+            protocol == "sni" and "ssl-terminate" in svc.tagvalue_set("smartstack:")
+        ):
+            print(
+                f"{svc.name}: smartstack:acme requires HAProxy to terminate TLS; use "
+                f"smartstack:protocol:https, smartstack:protocol:http3, or "
+                f"smartstack:protocol:sni with smartstack:ssl-terminate",
+                file=sys.stderr,
+            )
+            sys.exit(1)
+
+        for hostname in hostnames:
+            if hostname.startswith("*."):
+                print(
+                    f"{svc.name}: smartstack:acme uses the http-01 challenge and cannot issue wildcard "
+                    f"hostname {hostname!r}",
+                    file=sys.stderr,
+                )
+                sys.exit(1)
+
+
+def ensure_acme_certificate_placeholders(services: List[SmartstackService], cert_dir: str) -> None:
+    os.makedirs(cert_dir, mode=0o750, exist_ok=True)
+
+    for hostname in acme_hostnames(services):
+        cert_path = acme_certificate_path(hostname, cert_dir)
+        if os.path.exists(cert_path):
+            continue
+
+        with tempfile.TemporaryDirectory(prefix=".acme-", dir=cert_dir) as tmpdir:
+            key_path = os.path.join(tmpdir, "key.pem")
+            crt_path = os.path.join(tmpdir, "crt.pem")
+            combined_path = os.path.join(tmpdir, "combined.pem")
+            subprocess.check_call(
+                [
+                    "openssl",
+                    "req",
+                    "-x509",
+                    "-newkey",
+                    "rsa:2048",
+                    "-keyout",
+                    key_path,
+                    "-out",
+                    crt_path,
+                    "-days",
+                    "1",
+                    "-nodes",
+                    "-subj",
+                    f"/CN={hostname}",
+                    "-addext",
+                    f"subjectAltName=DNS:{hostname}",
+                ],
+                stdout=subprocess.DEVNULL,
+                stderr=subprocess.DEVNULL,
+            )
+            with open(combined_path, "wb") as combined:
+                for source_path in (crt_path, key_path):
+                    with open(source_path, "rb") as source:
+                        combined.write(source.read())
+            os.chmod(combined_path, 0o640)
+            os.replace(combined_path, cert_path)
+
+
 def _check_nftables_rule_exists(family: str, table: str, chain: str, rule: List[str | Tuple[str, ...]],
                                 verbose: bool = False) -> bool:
     try:
@@ -566,7 +661,7 @@ def _setup_nftables(services: List[SmartstackService], ips: List[str], nftable_m
         else:
             prot = "tcp"
 
-        if "https-redirect" in svc.tagvalue_set("smartstack:"):
+        if "https-redirect" in svc.tagvalue_set("smartstack:") or "acme" in svc.tagvalue_set("smartstack:"):
             _extports.add(80)
 
         if not _extports:
@@ -686,6 +781,11 @@ def main() -> None:
                              "will be rendered and no commands executed.")
     parser.add_argument("--debug-nftables", dest="debug_nftables", default=False, action="store_true",
                         help="Like --only-iptables, but output the rules to stdout instead of executing them.")
+    parser.add_argument("--ensure-acme-placeholder-certs", dest="ensure_acme_placeholder_certs", default=False,
+                        action="store_true", help="Create one-day self-signed placeholder certificates for "
+                        "smartstack:acme services before rendering.")
+    parser.add_argument("--acme-cert-dir", dest="acme_cert_dir", default="/etc/haproxy/acme/certs",
+                        help="Directory for smartstack:acme certificate files.")
     parser.add_argument("-D", "--define", dest="defines", action="append", default=[],
                         help="Define a template variable for the rendering in the form 'varname=value'. 'varname' will "
                              "be added directly to the Jinja rendering context. Setting 'varname' multiple times will "
@@ -735,10 +835,15 @@ def main() -> None:
         parsed.append(parse_smartstack_tags(sv))
 
     validate_proxypaths(parsed)
+    validate_acme(parsed)
+
+    if _args.ensure_acme_placeholder_certs:
+        ensure_acme_certificate_placeholders(parsed, _args.acme_cert_dir)
 
     context = {
         "services": SmartstackServiceContainer(all_services=parsed),
         "localips": _args.localips,
+        "acme_cert_dir": _args.acme_cert_dir,
     }
 
     context.update(add_params)
@@ -759,6 +864,8 @@ def main() -> None:
     env.globals["proxypath_domains"] = proxypath_domains
     env.globals["proxypath_routes"] = proxypath_routes
     env.globals["sorted_proxypaths"] = sorted_proxypaths
+    env.globals["acme_certificate_path"] = acme_certificate_path
+    env.globals["acme_hostnames"] = acme_hostnames
 
     with open(_args.template) as inf, file_or_stdout(_args.output) as outf:
         tplstr = inf.read()
