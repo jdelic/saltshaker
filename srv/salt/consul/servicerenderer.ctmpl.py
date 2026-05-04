@@ -40,6 +40,8 @@
 # declare outgoing connection permissions with
 # smartstack:outport:<protocol>:<port-or-range> tags, for example
 # smartstack:outport:tcp:443 or smartstack:outport:udp:50000-60000.
+# HTTP services can set CORS response headers with tags like
+# smartstack:cors:allow-origin:* or smartstack:cors:allow-methods:GET,POST,OPTIONS.
 #
 import ipaddress
 import os
@@ -442,6 +444,37 @@ def proxypath_routes(services: Iterable[SmartstackService]) -> List[Dict[str, Un
     return sorted(routes, key=lambda route: (route["domain"], -len(route["path"]), route["path"], route["order"]))
 
 
+CORS_HEADER_ALIASES = {
+    "allow-origin": "Access-Control-Allow-Origin",
+    "allow-methods": "Access-Control-Allow-Methods",
+    "allow-headers": "Access-Control-Allow-Headers",
+    "allow-credentials": "Access-Control-Allow-Credentials",
+    "expose-headers": "Access-Control-Expose-Headers",
+    "max-age": "Access-Control-Max-Age",
+}
+
+
+def cors_response_headers(services: SmartstackServiceContainer) -> List[Dict[str, str]]:
+    headers: Dict[str, str] = {}
+
+    for tagvalue in sorted(services.tagvalue_set("smartstack:cors:")):
+        if ":" not in tagvalue:
+            raise ValueError("cors tag value must be in the form header:value")
+
+        name, value = tagvalue.split(":", 1)
+        name = CORS_HEADER_ALIASES.get(name, name)
+        if not re.match(r"^[A-Za-z0-9-]+$", name):
+            raise ValueError(f"invalid CORS response header name: {name}")
+        headers[name] = value
+
+    return [{"name": name, "value": value} for name, value in sorted(headers.items())]
+
+
+def haproxy_quote(value: object) -> str:
+    text = str(value)
+    return '"' + text.replace("\\", "\\\\").replace('"', '\\"') + '"'
+
+
 def validate_proxypaths(services: List[SmartstackService]) -> None:
     claimed_paths: Dict[Tuple[str, str, str], List[str]] = {}
 
@@ -458,10 +491,10 @@ def validate_proxypaths(services: List[SmartstackService]) -> None:
                 )
             continue
 
-        if protocol not in {"http", "https"}:
+        if protocol not in {"http", "https", "http3"}:
             print(
                 f"{svc.name}: smartstack:proxypath: may only be used together with "
-                f"smartstack:protocol:http or smartstack:protocol:https",
+                f"smartstack:protocol:http, smartstack:protocol:https, or smartstack:protocol:http3",
                 file=sys.stderr,
             )
             sys.exit(1)
@@ -861,6 +894,8 @@ def main() -> None:
         sys.exit(0)
 
     env = jinja2.Environment(extensions=['jinja2.ext.do'])
+    env.filters["haproxy_quote"] = haproxy_quote
+    env.globals["cors_response_headers"] = cors_response_headers
     env.globals["proxypath_domains"] = proxypath_domains
     env.globals["proxypath_routes"] = proxypath_routes
     env.globals["sorted_proxypaths"] = sorted_proxypaths
