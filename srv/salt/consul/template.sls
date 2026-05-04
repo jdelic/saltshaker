@@ -46,6 +46,17 @@ consul-renders-dir:
             - file: consul-basedir
 
 
+consul-helpers-dir:
+    file.directory:
+        - name: /etc/consul/helpers
+        - makedirs: True
+        - user: root
+        - group: root
+        - mode: '0755'
+        - require:
+            - file: consul-basedir
+
+
 consul-template-config:
     file.managed:
         - name: /etc/consul/consul-template.conf
