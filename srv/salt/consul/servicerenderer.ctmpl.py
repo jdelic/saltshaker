@@ -34,7 +34,7 @@
 # {% endfor %}
 # */}}
 #
-# If run as root, it can also call /sbin/iptables or /sbin/nftables and create
+# If run as root, it can also call /usr/sbin/nft and create
 # all necessary INPUT and OUTPUT rules for incoming connections based on the
 # smartstack:protocol and smartstack:extport tags. Services can additionally
 # declare outgoing connection permissions with
@@ -587,26 +587,26 @@ def _validate_smartstack_portrange(service_name: str, tagname: str, portrange: s
     return portrange
 
 
-def _get_service_outports(svc: SmartstackService) -> Set[Tuple[str, str]]:
-    outports = set()
+def _get_service_tagports(svc: SmartstackService, tagprefix: str) -> Set[Tuple[str, str]]:
+    ports = set()
 
-    for tagvalue in svc.tagvalue_set("smartstack:outport:"):
+    for tagvalue in svc.tagvalue_set(tagprefix):
         if ":" not in tagvalue:
-            print("%s: 'smartstack:outport:' must be in the form protocol:port-or-range not '%s'." %
-                  (svc.name, tagvalue), file=sys.stderr)
+            print("%s: '%s' must be in the form protocol:port-or-range not '%s'." %
+                  (svc.name, tagprefix, tagvalue), file=sys.stderr)
             continue
 
         protocol, portrange = tagvalue.split(":", 1)
         if protocol not in {"tcp", "udp"}:
-            print("%s: 'smartstack:outport:' protocol must be one of tcp or udp not '%s'." %
-                  (svc.name, protocol), file=sys.stderr)
+            print("%s: '%s' protocol must be one of tcp or udp not '%s'." %
+                  (svc.name, tagprefix, protocol), file=sys.stderr)
             continue
 
-        parsed_portrange = _validate_smartstack_portrange(svc.name, "smartstack:outport:", portrange)
+        parsed_portrange = _validate_smartstack_portrange(svc.name, tagprefix, portrange)
         if parsed_portrange is not None:
-            outports.add((protocol, parsed_portrange))
+            ports.add((protocol, parsed_portrange))
 
-    return outports
+    return ports
 
 
 def _setup_nftables(services: List[SmartstackService], ips: List[str], nftable_mode: str, nftable_rules: str,
@@ -625,7 +625,8 @@ def _setup_nftables(services: List[SmartstackService], ips: List[str], nftable_m
             if parsed_port is not None:
                 _extports.add(parsed_port)
 
-        _outports = _get_service_outports(svc)
+        _outports = _get_service_tagports(svc, "smartstack:outport:")
+        _hostports = _get_service_tagports(svc, "smartstack:hostport:")
 
         mode = nftable_mode
         _protocol = svc.tagvalue("smartstack:protocol:")
@@ -650,7 +651,12 @@ def _setup_nftables(services: List[SmartstackService], ips: List[str], nftable_m
         if "https-redirect" in svc.tagvalue_set("smartstack:"):
             _extports.add("80")
 
-        if open_input_rules and not _extports and not _outports:
+        # create a list of tuples that's compatible with _get_service_tagports
+        _protextports = set()
+        for p in _extports:
+            _protextports.add((prot, p,))
+
+        if open_input_rules and not _extports and not _outports and not _hostports:
             print("no external port (smartstack:extport:) for service %s, or no well-known protocol in "
                   "'smartstack:protocol:' so not creating nftables rule" % svc.name,
                   file=sys.stderr)
@@ -660,7 +666,7 @@ def _setup_nftables(services: List[SmartstackService], ips: List[str], nftable_m
             ipaddr = ipaddress.ip_address(ip)
             family = _nft_family_for_ip(ipaddr)
 
-            for ruleport in sorted(_extports):
+            for ruleprot, ruleport in sorted(_protextports) + sorted(_hostports):
                 input_rule = None
                 output_rule = None
 
@@ -671,20 +677,20 @@ def _setup_nftables(services: List[SmartstackService], ips: List[str], nftable_m
                                       ("saddr", "{", _nft_any_address_for_family(family), "}"),
                                       family,
                                       ("daddr", "{", f"{ip}" if isinstance(ipaddr, ipaddress.IPv6Address) else f"{ip}", "}"),
-                                      (prot, "dport", str(ruleport)), ("accept",)]
+                                      (ruleprot, "dport", str(ruleport)), ("counter",), ("accept",)]
                     if open_output_rules:
                         output_rule = [family,
                                        ("saddr", "{", f"{ip}" if isinstance(ipaddr, ipaddress.IPv6Address) else f"{ip}", "}"),
                                        family,
                                        ("daddr", "{", _nft_any_address_for_family(family), "}"),
-                                       (prot, "sport", str(ruleport)), ("accept",)]
+                                       (ruleprot, "sport", str(ruleport)), ("counter",), ("accept",)]
                 elif mode == "conntrack":
                     if open_input_rules:
                         input_rule = [family,
                                       ("saddr", "{", _nft_any_address_for_family(family), "}"),
                                       family,
                                       ("daddr", "{", f"{ip}" if isinstance(ipaddr, ipaddress.IPv6Address) else f"{ip}", "}"),
-                                      (prot, "dport", str(ruleport)), ("ct", "state", "new"), ("accept",)]
+                                      (ruleprot, "dport", str(ruleport)), ("ct", "state", "new"), ("counter",), ("accept",)]
                     output_rule = None
 
                 if input_rule:
@@ -710,7 +716,7 @@ def _setup_nftables(services: List[SmartstackService], ips: List[str], nftable_m
             for family in families:
                 for protocol, ruleport in sorted(_outports):
                     output_rule = [family, ("daddr", _nft_any_address_for_family(family)),
-                                   (protocol, "dport", str(ruleport)), ("accept",)]
+                                   (protocol, "dport", str(ruleport)), ("counter",), ("accept",)]
                     if nftable_mode == "conntrack":
                         output_rule = [("ct", "state", "new")] + output_rule
                     output_cmd = _nft_add_rule_cmd(family, output_chainname, output_rule)
@@ -789,7 +795,7 @@ def main() -> None:
                         help="Use this parameter to only set up iptables rules, and not do anything else. No templates "
                              "will be rendered and no commands executed.")
     parser.add_argument("--debug-nftables", dest="debug_nftables", default=False, action="store_true",
-                        help="Like --only-iptables, but output the rules to stdout instead of executing them.")
+                        help="Like --only-nftables, but output the rules to stdout instead of executing them.")
     parser.add_argument("-D", "--define", dest="defines", action="append", default=[],
                         help="Define a template variable for the rendering in the form 'varname=value'. 'varname' will "
                              "be added directly to the Jinja rendering context. Setting 'varname' multiple times will "

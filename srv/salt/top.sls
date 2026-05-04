@@ -78,6 +78,7 @@ base:
         - match: grain
         - docker.install
         - nomad.install
+        - nomad.hostport-manager
         - basics.etc_mods.udp-buffer-increase
         - mn.appconfig
 
