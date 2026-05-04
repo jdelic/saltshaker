@@ -394,15 +394,11 @@ def parse_smartstack_tags(service: t_servicedict) -> SmartstackService:
     return sv
 
 
-def parse_proxypath_tag(tagvalue: str) -> Tuple[str, str]:
-    if ":" not in tagvalue:
-        raise ValueError("proxypath tag value must be in the form domain:path")
-    return tagvalue.split(":", 1)
-
-
 def sorted_proxypaths(tagvalues: Iterable[str]) -> List[str]:
     def _sort_key(tagvalue: str) -> Tuple[str, int, str]:
-        domain, path = parse_proxypath_tag(tagvalue)
+        if ":" not in tagvalue:
+            raise ValueError("proxypath tag value must be in the form domain:path")
+        domain, path = tagvalue.split(":", 1)
         return domain, -len(path), path
 
     return sorted(set(tagvalues), key=_sort_key)
@@ -412,7 +408,7 @@ def proxypath_domains(tagvalues: Iterable[str]) -> List[str]:
     domains = []
     seen = set()
     for tagvalue in sorted_proxypaths(tagvalues):
-        domain, _ = parse_proxypath_tag(tagvalue)
+        domain, _ = tagvalue.split(":", 1)
         if domain not in seen:
             domains.append(domain)
             seen.add(domain)
@@ -427,7 +423,7 @@ def proxypath_routes(services: Iterable[SmartstackService]) -> List[Dict[str, Un
         protocol = svc.tagvalue("smartstack:protocol:")
         strip_prefixes = svc.tagvalue_set("smartstack:proxypath-strip-prefix:")
         for tagvalue in svc.tagvalue_set("smartstack:proxypath:"):
-            domain, path = parse_proxypath_tag(tagvalue)
+            domain, path = tagvalue.split(":", 1)
             strip_prefix = path if path in strip_prefixes else None
             key = (protocol, domain, path)
             if key in seen:
@@ -472,7 +468,7 @@ def validate_proxypaths(services: List[SmartstackService]) -> None:
 
         for proxypath in proxypaths:
             try:
-                domain, path = parse_proxypath_tag(proxypath)
+                domain, path = proxypath.split(":", 1)
             except ValueError as exc:
                 print(f"{svc.name}: {exc} [{proxypath}]", file=sys.stderr)
                 sys.exit(1)
@@ -483,7 +479,7 @@ def validate_proxypaths(services: List[SmartstackService]) -> None:
             if svc.name not in claimed_paths[key]:
                 claimed_paths[key].append(svc.name)
 
-        unknown_strip_prefixes = strip_prefixes - {parse_proxypath_tag(proxypath)[1] for proxypath in proxypaths}
+        unknown_strip_prefixes = strip_prefixes - {proxypath.split(":", 1)[1] for proxypath in proxypaths}
         for strip_prefix in sorted(unknown_strip_prefixes):
             print(
                 f"WARNING: {svc.name}: smartstack:proxypath-strip-prefix:{strip_prefix} does not match "
@@ -865,7 +861,6 @@ def main() -> None:
         sys.exit(0)
 
     env = jinja2.Environment(extensions=['jinja2.ext.do'])
-    env.globals["parse_proxypath_tag"] = parse_proxypath_tag
     env.globals["proxypath_domains"] = proxypath_domains
     env.globals["proxypath_routes"] = proxypath_routes
     env.globals["sorted_proxypaths"] = sorted_proxypaths
