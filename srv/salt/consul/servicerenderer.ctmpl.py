@@ -433,7 +433,7 @@ def proxypath_routes(services: Iterable[SmartstackService]) -> List[Dict[str, Un
                 "domain": domain,
                 "path": path,
                 "path_len": len(path),
-                "service_name": svc.name,
+                "service": svc,
                 "order": index,
                 "strip_prefix": strip_prefix,
                 "strip_prefix_len": len(strip_prefix) if strip_prefix else 0,
