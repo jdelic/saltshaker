@@ -46,11 +46,11 @@ smartstack-envoy-external:
             parameters: >
                 --include tags=smartstack:external
                 --open-nftables=conntrack
+                -D internal_ip={{internal_ip}}
                 {%- for ip in envoy_ips -%}
                     {{' '}}--smartstack-localip {{ip}}
                 {%- endfor %}
             template: /etc/envoy/envoy-external.jinja.yaml
-            internal_ip: {{internal_ip}}
         - require:
             - systemdunit: envoy-multi
             - file: envoy-config-template-external
