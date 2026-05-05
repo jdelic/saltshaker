@@ -25,6 +25,11 @@ envoy-config-template-external:
                    )
                ) if pillar.get('envoy', {}).get('bind-ipv6', False) %}
 {% endif %}
+
+{% set internal_ip = pillar.get('envoy', {}).get('override-ipv4',
+    grains['ip4_interfaces'].get(pillar['ifassign']['internal'], {})[pillar['ifassign'].get('internal-ip-index', 0)|int()]) %}
+
+
 smartstack-envoy-external:
     file.managed:
         - name: /etc/consul/template.d/smartstack-external-envoy.conf
@@ -45,6 +50,7 @@ smartstack-envoy-external:
                     {{' '}}--smartstack-localip {{ip}}
                 {%- endfor %}
             template: /etc/envoy/envoy-external.jinja.yaml
+            internal_ip: {{internal_ip}}
         - require:
             - systemdunit: envoy-multi
             - file: envoy-config-template-external
