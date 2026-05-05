@@ -605,10 +605,58 @@ resource "hcloud_firewall" "web" {
 resource "hcloud_firewall" "lb-free-range" {
     name = "lb-free-range"
 
+    # Nomad assigment range
     rule {
         direction = "in"
         protocol  = "tcp"
         port      = "32000-34000"
+        source_ips = ["0.0.0.0/0", "::/0"]
+    }
+
+    rule {
+        direction = "in"
+        protocol  = "udp"
+        port      = "32000-34000"
+        source_ips = ["0.0.0.0/0", "::/0"]
+    }
+
+    # TURN ports for voip calls
+    rule {
+        direction = "in"
+        protocol  = "udp"
+        port      = "55000-60000"
+        source_ips = ["0.0.0.0/0", "::/0"]
+    }
+
+    # TURN TLS port
+    rule {
+        direction = "in"
+        protocol  = "tcp"
+        port      = 5349
+        source_ips = ["0.0.0.0/0", "::/0"]
+    }
+
+    # TURN UDP port
+    rule {
+        direction = "in"
+        protocol  = "udp"
+        port      = 3478
+        source_ips = ["0.0.0.0/0", "::/0"]
+    }
+
+    # Livekit RTC TCP port
+    rule {
+        direction = "in"
+        protocol  = "tcp"
+        port      = 7881
+        source_ips = ["0.0.0.0/0", "::/0"]
+    }
+
+    # Livekit RTC UDP ports
+    rule {
+        direction = "in"
+        protocol  = "udp"
+        port      = "50100-50109"
         source_ips = ["0.0.0.0/0", "::/0"]
     }
 }
