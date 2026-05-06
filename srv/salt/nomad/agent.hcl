@@ -27,6 +27,10 @@ client {
 
     cni_path = "/usr/local/lib/nomad/"
     cni_config_dir = "/etc/nomad/cni/"
+
+    {% if pillar.get('nomad', {}).get('node_pool', False) %}
+    node_pool = "{{pillar['nomad']['node_pool']}}"
+    {% endif %}
 }
 
 consul {
