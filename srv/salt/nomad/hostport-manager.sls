@@ -13,8 +13,8 @@ hostport-manager-runner:
             /usr/bin/python3 /etc/consul/renders/smartstack-hostport-manager.py \
                 --only-nftables \
                 --include 'tags=smartstack:external,tags=regex=smartstack:hostport:(.*)' \
-                --include 'tags=smartstack:external,tags=regex=smartstack:outport:(.*)' \
                 --open-nftables=conntrack \
+                --nftables-rules=input \
                 --smartstack-localip {{internal_ip}}
         - mode: 750
         - require:
