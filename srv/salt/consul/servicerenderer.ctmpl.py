@@ -545,18 +545,21 @@ def _check_nftables_rule_exists(family: str, table: str, chain: str, rule: t_nft
     components = []
     for part in rule:
         if isinstance(part, tuple):
-            tstr = ""
-            for subpart in part:
-                if subpart not in ["{", "}"]:
-                    tstr = f"{tstr} {subpart}"
-            components.append(tstr)
+            components.append(" ".join(subpart for subpart in part if subpart not in ["{", "}"]))
         else:
             components.append(part)
+
+    component_patterns = [
+        re.compile(r"(?<!\S)%s(?!\S)" % re.escape(" ".join(component.split())))
+        for component in components
+    ]
+
     nft_output_lines = nft_output.split("\n")
     for line in nft_output_lines:
+        normalized_line = " ".join(line.split())
         match = True
-        for component in components:
-            if component not in line:
+        for pattern in component_patterns:
+            if not pattern.search(normalized_line):
                 match = False
                 break
         if match:
