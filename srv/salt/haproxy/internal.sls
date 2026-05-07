@@ -26,7 +26,7 @@ smartstack-internal-runner:
             set -e
             /usr/bin/python3 /etc/consul/renders/smartstack-internal.py \
                 --include tags=smartstack:internal \
-                {% if pillar.get("crypto", {}).get("generate-secure-dhparams", True) -%}
+                {%- if pillar.get("crypto", {}).get("generate-secure-dhparams", True) %}
                       -D load_dhparams=True \
                 {%- endif %}
                 -o  /etc/haproxy/haproxy-internal.cfg \

@@ -38,14 +38,14 @@ smartstack-external-runner:
                 --include 'tags=smartstack:external,tags=regex=smartstack:routing:(.*)' \
                 --include 'tags=smartstack:external,tags=regex=smartstack:proxypath:(.*)' \
                 --open-nftables=conntrack \
-                {%- for ip in haproxy_ips -%}
+                {%- for ip in haproxy_ips %}
                     {{' '}}--smartstack-localip {{ip}} \
                 {%- endfor %}
                 {%- if pillar.get('ssl', {}).get('sources', {}).get('default', {}).get('full', None) and
-                        salt['pillar.fetch'](pillar['ssl']['sources']['default']['full'], None) -%}
+                        salt['pillar.fetch'](pillar['ssl']['sources']['default']['full'], None) %}
                     {{' '}}-D certfolder={{pillar['ssl']['secret-key-location']}} \
                 {%- endif %}
-                {%- if pillar.get("crypto", {}).get("generate-secure-dhparams", True) -%}
+                {%- if pillar.get("crypto", {}).get("generate-secure-dhparams", True) %}
                     {{' '}}-D load_dhparams=True \
                 {%- endif %}
                 -o  /etc/haproxy/haproxy-external.cfg \

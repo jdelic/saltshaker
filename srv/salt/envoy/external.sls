@@ -39,7 +39,7 @@ smartstack-envoy-runner:
                 --include tags=smartstack:external \
                 --open-nftables=conntrack \
                 -D internal_ip={{internal_ip}} \
-                {%- for ip in envoy_ips -%}
+                {%- for ip in envoy_ips %}
                     {{' '}}--smartstack-localip {{ip}} \
                 {%- endfor %}
                 -o  /etc/envoy/envoy-external.yaml \
