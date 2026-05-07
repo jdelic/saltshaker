@@ -29,6 +29,27 @@ envoy-config-template-external:
 {% set internal_ip = pillar.get('envoy', {}).get('override-ipv4',
     grains['ip4_interfaces'].get(pillar['ifassign']['internal'], {})[pillar['ifassign'].get('internal-ip-index', 0)|int()]) %}
 
+smartstack-envoy-runner:
+    file.managed:
+        - name: /etc/consul/helpers/smartstack-external-envoy-runner.sh
+        - contents: |
+            #!/bin/bash
+            set -e
+            /usr/bin/python3 /etc/consul/renders/smartstack-external-envoy.py \
+                --include tags=smartstack:external \
+                --open-nftables=conntrack \
+                -D internal_ip={{internal_ip}} \
+                {%- for ip in envoy_ips -%}
+                    {{' '}}--smartstack-localip {{ip}} \
+                {%- endfor %}
+                -o  /etc/envoy/envoy-external.yaml \
+                -c  "ps awwfux | grep -v grep | grep 'envoy -c /etc/envoy/envoy-external.yaml' >/dev/null && systemctl reload envoy@external || systemctl restart envoy@external"
+                /etc/envoy/envoy-external.jinja.yaml
+        - mode: 750
+        - require:
+            - file: consul-helpers-dir
+            - file: envoy-config-template-external
+            - file: envoy-config-template-external
 
 smartstack-envoy-external:
     file.managed:
@@ -37,23 +58,10 @@ smartstack-envoy-external:
         - template: jinja
         - context:
             servicescript: /etc/consul/renders/smartstack-external-envoy.py
-            target: /etc/envoy/envoy-external.yaml
-            # this (yaml folded) command-line will reload envoy if it is running and restart it otherwise
-            # don't use "grep -q" since it will lead to a "broken pipe" error when called through Python
-            # subprocess. Instead, redirect unnecessary output into /dev/null.
-            command: >
-                systemctl restart envoy@external
-            parameters: >
-                --include tags=smartstack:external
-                --open-nftables=conntrack
-                -D internal_ip={{internal_ip}}
-                {%- for ip in envoy_ips -%}
-                    {{' '}}--smartstack-localip {{ip}}
-                {%- endfor %}
-            template: /etc/envoy/envoy-external.jinja.yaml
+            command: /etc/consul/helpers/smartstack-external-envoy-runner.sh
         - require:
             - systemdunit: envoy-multi
-            - file: envoy-config-template-external
+            - file: smartstack-envoy-runner
             - file: consul-template-dir
     service.enabled:  # envoy will be started by the smartstack script rendered by consul-template (see command above)
         - name: envoy@external

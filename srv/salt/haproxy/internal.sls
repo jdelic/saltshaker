@@ -48,6 +48,7 @@ smartstack-internal:
             command: /etc/consul/helpers/smartstack-internal-runner.sh
         - require:
             - systemdunit: haproxy-multi
+            - file: smartstack-internal-runner
             - file: consul-template-dir
     service.enabled:  # haproxy will be started by the smartstack script rendered by consul-template (see command above)
         - name: haproxy@internal
