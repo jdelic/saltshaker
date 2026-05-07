@@ -19,7 +19,7 @@ outport-manager-runner:
                 --include 'tags=smartstack:external,tags=regex=smartstack:outport:(.*)' \
                 --open-nftables=conntrack \
                 --nftables-rules=input \
-                --smartstack-localip {{external_ip}}
+                --smartstack-localip {{external_ip}} \
                 --smartstack-localip {{external_ipv6}}
         - mode: 750
         - require:
