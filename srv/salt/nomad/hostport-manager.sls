@@ -24,7 +24,7 @@ hostport-manager-runner:
 smartstack-hostport-manager:
     file.managed:
         - name: /etc/consul/template.d/smartstack-hostport-manager.conf
-        - source: salt://nomad/consul-template-config.jinja.conf
+        - source: salt://consul/template-config.jinja.conf
         - template: jinja
         - context:
             servicescript: /etc/consul/renders/smartstack-hostport-manager.py
