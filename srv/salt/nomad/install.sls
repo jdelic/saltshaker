@@ -41,8 +41,10 @@ nomad-agent-config:
         - template: jinja
         - context:
             datacenter: {{pillar['consul-cluster'].get('datacenter', 'default')}}
-            # TODO: fix this when nomad 1.0 comes out with better network management
             internal_interface: {{pillar['ifassign']['internal']}}
+            {% if pillar.get('ifassign', {}).get('external', None) and pillar['ifassign']['external'] in salt['network.interfaces']() %}
+            external_interface: {{pillar['ifassign']['external']}}
+            {% endif %}
             consul_acl_token: {{pillar['dynamicsecrets']['consul-acl-token']['secret_id']}}
         - require:
             - file: nomad-service-dir
