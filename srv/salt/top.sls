@@ -137,6 +137,7 @@ base:
     'roles:loadbalancer':
         - match: grain
         - haproxy.external
+        - nomad.outport-manager
         - envoy.external
         - basics.etc_mods.udp-buffer-increase
 
