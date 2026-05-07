@@ -18,7 +18,7 @@ outport-manager-runner:
                 --only-nftables \
                 --include 'tags=smartstack:external,tags=regex=smartstack:outport:(.*)' \
                 --open-nftables=conntrack \
-                --nftables-rules=input \
+                --nftables-rules=both \
                 --smartstack-localip {{external_ip}} \
                 --smartstack-localip {{external_ipv6}}
         - mode: 750
