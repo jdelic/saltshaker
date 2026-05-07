@@ -43,7 +43,7 @@ smartstack-envoy-runner:
                     {{' '}}--smartstack-localip {{ip}} \
                 {%- endfor %}
                 -o  /etc/envoy/envoy-external.yaml \
-                -c  "ps awwfux | grep -v grep | grep 'envoy -c /etc/envoy/envoy-external.yaml' >/dev/null && systemctl reload envoy@external || systemctl restart envoy@external"
+                -c  "ps awwfux | grep -v grep | grep 'envoy -c /etc/envoy/envoy-external.yaml' >/dev/null && systemctl reload envoy@external || systemctl restart envoy@external" \
                 /etc/envoy/envoy-external.jinja.yaml
         - mode: 750
         - require:
