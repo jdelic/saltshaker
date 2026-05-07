@@ -19,6 +19,12 @@ client {
         bridge_network_subnet_ipv6 = "{{pillar['nomad']['bridge-cidr-ipv6']}}"
     {% endif %}
 
+    {% if external_interface is defined %}
+    host_network "external" {
+        interface = "{{external_interface}}"
+    }
+    {% endif %}
+
     # this allows access to the cluster's root CA on every host (for .local services, for example)
     host_volume "host-ca-bundle" {
         path      = "/etc/ssl/certs/ca-certificates.crt"
