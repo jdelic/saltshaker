@@ -44,7 +44,8 @@ smartstack-external:
                 systemctl reload haproxy@external ||
                 systemctl restart haproxy@external
             parameters: >
-                --include tags=smartstack:external
+                --include 'tags=smartstack:external,tags=regex=smartstack:routing:(.*)'
+                --include 'tags=smartstack:external,tags=regex=smartstack:proxypath:(.*)'
                 --open-nftables=conntrack
                 {%- for ip in haproxy_ips -%}
                     {{' '}}--smartstack-localip {{ip}}
