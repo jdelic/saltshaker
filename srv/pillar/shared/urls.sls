@@ -28,7 +28,7 @@ urls:
     consul: https://releases.hashicorp.com/consul/1.22.7/consul_1.22.7_linux_amd64.zip
     consul-template: https://releases.hashicorp.com/consul-template/0.42.0/consul-template_0.42.0_linux_amd64.zip
     envoy: https://github.com/envoyproxy/envoy/releases/download/v1.37.2/envoy-1.37.2-linux-x86_64
-    nomad: https://releases.hashicorp.com/nomad/2.0.1/nomad_2.0.1_linux_amd64.zip
+    nomad: https://releases.hashicorp.com/nomad/1.11.3/nomad_1.11.3_linux_amd64.zip
     nomad-autoscaler: https://releases.hashicorp.com/nomad-autoscaler/0.4.9/nomad-autoscaler_0.4.9_linux_amd64.zip
     nomad-cni: https://github.com/containernetworking/plugins/releases/download/v1.9.1/cni-plugins-linux-amd64-v1.9.1.tgz
     vault: https://releases.hashicorp.com/vault/2.0.0/vault_2.0.0_linux_amd64.zip
@@ -43,7 +43,7 @@ hashes:
     consul: sha256=fe25cecd8dd3552a8e5b0941cde1d79bb6004eac384aa45679dd1398f947201d
     consul-template: sha256=94d5044b822c5219bb116916b8d4d2545630e6ce0e1639ddd25309a26cf62ff2
     envoy: sha256=32d3cc203b8abdce8c2ed916a298124364e0c48e83b7196f551e769b6a489bf8
-    nomad: sha256=cf5d820b5dc3fcd1ceb8baf3afab46e3a52a56fc3016fcdaed0505f531a39540
+    nomad: sha256=19dac5642a2ba5305e6ff8efee06a708d760ebe4d1cd7936bc3dc526f477dc12
     nomad-autoscaler: sha256=4b89c4d266663c9795b32930199c489a67606ac13f03e7fca8da15a0513a6ca7
     nomad-cni: sha256=b98f74a0f8522f0a83867178729c1aa70f2158f90c45a2ca8fa791db1c76b303
     vault: sha256=0367bdd46dd1fff1ff19fc44e60df48866515bb519c80527236b3808ea879ac2
