@@ -72,7 +72,12 @@ localca-location:
         - makedirs: True
 
 
-{% for cert in pillar['ssl'].get('install-ca-certs', []) + pillar['ssl'].get('install-perenv-ca-certs', []) %}
+{% set ca_certs = (
+    pillar['ssl'].get('install-ca-certs', []) +
+    pillar['ssl'].get('install-generated-ca-certs', []) +
+    pillar['ssl'].get('install-perenv-ca-certs', [])
+) %}
+{% for cert in ca_certs %}
 install-certificates-{{salt['file.basename'](cert)}}:
     file.managed:
         - name: {{salt['file.join'](pillar['ssl']['localca-location'], salt['file.basename'](cert))}}
