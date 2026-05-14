@@ -623,7 +623,7 @@ def init(args: argparse.Namespace) -> None:
     base_domain = prod_domains[0] if prod_domains else dev_domain
     root_ca_name = root_ca_filename(base_domain)
     write_file(crypto_dir / root_ca_name, load_pem(root_cert), force=args.force)
-    write_file(crypto_dir / "dev" / "dev-ca.crt", load_pem(int_cert), force=args.force)
+    write_file(crypto_dir / "dev" / "dev-ca.crt", load_pem(int_cert), force=True)
 
     info("Rendering pillar files...", enabled=color_enabled)
     common_sls = build_common_sls(load_pem(int_cert))
