@@ -132,6 +132,7 @@ data-cluster-config-sslcert:
             - file: postgresql-hba-config
         - require:
             - file: data-cluster-config-base
+            - cmd: require-ssl-certificates
 
 
 data-cluster-config-sslkey:
