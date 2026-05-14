@@ -30,7 +30,7 @@ ssl:
 
     # certificates listed here will be installed and symlinked in the locations configured above
     install-ca-certs:
-        - salt://basics/crypto/maurusnet-rootca.crt
+        - salt://basics/crypto/maurusnet-rootca.crt  # maurusnet-rootca is always needed for access to APT repos
 
     # Set the following list in a per-environment state
     # environment-rootca-cert: /usr/share/ca-certificates/local/dev-ca.crt
