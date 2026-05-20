@@ -6,6 +6,8 @@
 {% set internal_domain = "internal" %}
 {% set local_domain = "local" %}
 {% set external_tld = "maurus.net" %}
+{% set service_rootca_cert = "/usr/share/ca-certificates/local/maurusnet-rootca.crt" %}
+{% set install_generated_ca_certs = [] %}
 
 config:
     domains:
