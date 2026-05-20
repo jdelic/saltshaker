@@ -3,10 +3,11 @@
 
 ssl:
     sources:
-        default-cert: ssl:testmaincert:cert
-        default-cert-combined: ssl:testmaincert:combined
-        default-cert-key: ssl:testmaincert:key
-        default-cert-full: ssl:testmaincert:combined-key
+        default:
+            cert: ssl:testmaincert:cert
+            chain: ssl:testmaincert:combined
+            key: ssl:testmaincert:key
+            full: ssl:testmaincert:combined-key
 
 
     environment-rootca-cert: {{salt['file.join'](localca_location, 'dev-ca.crt')}}

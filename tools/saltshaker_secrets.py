@@ -580,9 +580,9 @@ def init(args: argparse.Namespace) -> None:
         warn("No production domains supplied; live-ssl.sls will be stubbed.", enabled=color_enabled)
 
     org = args.org or prompt("Organization name", "SaltShaker")
-    country = args.country or prompt("Country code", "US")
-    state = args.state or prompt("State/Province", "CA")
-    locality = args.locality or prompt("City/Locality", "San Francisco")
+    country = args.country or prompt("Country code", "DE")
+    state = args.state or prompt("State/Province", "BY")
+    locality = args.locality or prompt("City/Locality", "Munich")
     email = args.email or prompt("CA email", f"ca@{prod_domains[0] if prod_domains else dev_domain}")
 
     int_subject = f"/C={country}/ST={state}/L={locality}/O={org}/CN={org} Intermediate CA/emailAddress={email}"
@@ -623,7 +623,6 @@ def init(args: argparse.Namespace) -> None:
     base_domain = prod_domains[0] if prod_domains else dev_domain
     root_ca_name = root_ca_filename(base_domain)
     write_file(crypto_dir / root_ca_name, load_pem(root_cert), force=args.force)
-    write_file(crypto_dir / "dev" / "dev-ca.crt", load_pem(int_cert), force=args.force)
 
     info("Rendering pillar files...", enabled=color_enabled)
     common_sls = build_common_sls(load_pem(int_cert))

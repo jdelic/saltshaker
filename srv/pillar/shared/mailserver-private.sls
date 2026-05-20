@@ -1,41 +1,44 @@
-{% from "shared/ssl.sls" import certificate_location, secret_key_location %}
+{% from "shared/ssl.sls" import combined_location, secret_key_location %}
 
 emailstore:
     path: /secure/email
 
 
+ssl:
+    filenames:
+        imap-local:
+            chain: {{salt['file.join'](combined_location, "imap.local-combined.crt")}}
+            key: {{salt['file.join'](secret_key_location, "imap.local.key")}}
+        smtp-local:
+            chain: {{salt['file.join'](combined_location, "smtp.local-combined.crt")}}
+            key: {{salt['file.join'](secret_key_location, "smtp.local.key")}}
+
+    sources:
+        imap-local:
+            chain: ssl:imap-local:combined
+            key: ssl:imap-local:key
+        smtp-local:
+            chain: ssl:smtp-local:combined
+            key: ssl:smtp-local:key
+
+
 imap:
     external:
-        sslcert: default  # special value "default" means: "use maincert from ssl.init"
-        sslkey: default
-        sslcert-content: ''  # contents_pillar reference if imap should use a different cert
-        sslkey-content: ''
+        ssl: default  # special value "default" means: "use ssl:filenames:default"
 
     internal:
-        sslcert: {{salt['file.join'](certificate_location, "imap.local-combined.crt")}}
-        sslkey: {{salt['file.join'](secret_key_location, "imap.local.key")}}
-        sslcert-content: ssl:imap-local:combined
-        sslkey-content: ssl:imap-local:key
+        ssl: imap-local
 
 
 smtp:
     receiver:
-        sslcert: default  # see above
-        sslkey: default
-        sslcert-content: ''
-        sslkey-content: ''
+        ssl: default  # see above
 
     relay:
-        sslcert: default  # see above
-        sslkey: default
-        sslcert-content: ''
-        sslkey-content: ''
+        ssl: default  # see above
 
     internal-relay:
-        sslcert: {{salt['file.join'](certificate_location, "smtp.local-combined.crt")}}
-        sslkey: {{salt['file.join'](secret_key_location, "smtp.local.key")}}
-        sslcert-content: ssl:smtp-local:combined
-        sslkey-content: ssl:smtp-local:key
+        ssl: smtp-local
 
     # `relay-via` relays all email from OpenSMTPD via a third party smarthost with optional authentication.
     # `transactional-relay-via` relays only "transactional" email which is non-forwarded email on domains
@@ -54,4 +57,3 @@ mailforwarder:
     transactional-relay-port: 10047
 
 # vim: syntax=yaml
-

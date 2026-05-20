@@ -18,6 +18,26 @@ haproxy-config-template-internal:
             - cmd: consul-template-servicerenderer
 
 
+smartstack-internal-runner:
+    file.managed:
+        - name: /etc/consul/helpers/smartstack-internal-runner.sh
+        - contents: |
+            #!/bin/bash
+            set -e
+            /usr/bin/python3 /etc/consul/renders/smartstack-internal.py \
+                --include tags=smartstack:internal \
+                {%- if pillar.get("crypto", {}).get("generate-secure-dhparams", True) %}
+                      -D load_dhparams=True \
+                {%- endif %}
+                -o  /etc/haproxy/haproxy-internal.cfg \
+                -c  "ps awwfux | grep -v grep | grep 'haproxy -f /etc/haproxy/haproxy-internal.cfg' >/dev/null && systemctl reload haproxy@internal || systemctl restart haproxy@internal" \
+                /etc/haproxy/haproxy-internal.jinja.cfg
+        - mode: 750
+        - require:
+            - file: consul-helpers-dir
+            - file: haproxy-config-template-internal
+
+
 smartstack-internal:
     file.managed:
         - name: /etc/consul/template.d/smartstack-internal.conf
@@ -25,23 +45,10 @@ smartstack-internal:
         - template: jinja
         - context:
             servicescript: /etc/consul/renders/smartstack-internal.py
-            target: /etc/haproxy/haproxy-internal.cfg
-            # this (yaml folded) command-line will reload haproxy if it is running and restart it otherwise
-            # don't use "grep -q" since it will lead to a "broken pipe" error when called through Python
-            # subprocess. Instead redirect unnecessary output into /dev/null.
-            command: >
-                ps awwfux | grep -v grep | grep 'haproxy -f /etc/haproxy/haproxy-internal.cfg' >/dev/null &&
-                systemctl reload haproxy@internal ||
-                systemctl restart haproxy@internal
-            parameters: >
-                --include tags=smartstack:internal
-                {% if pillar.get("crypto", {}).get("generate-secure-dhparams", True) -%}
-                    -D load_dhparams=True
-                {%- endif %}
-            template: /etc/haproxy/haproxy-internal.jinja.cfg
+            command: /etc/consul/helpers/smartstack-internal-runner.sh
         - require:
             - systemdunit: haproxy-multi
-            - file: haproxy-config-template-internal
+            - file: smartstack-internal-runner
             - file: consul-template-dir
     service.enabled:  # haproxy will be started by the smartstack script rendered by consul-template (see command above)
         - name: haproxy@internal

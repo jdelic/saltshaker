@@ -1,11 +1,21 @@
-{% from 'shared/ssl.sls' import certificate_location, secret_key_location %}
+{% from 'shared/ssl.sls' import combined_location, secret_key_location %}
+
+ssl:
+    filenames:
+        postgresql:
+            chain: {{salt['file.join'](combined_location, 'postgresql.crt')}}
+            key: {{salt['file.join'](secret_key_location, 'postgresql.key')}}
+
+    sources:
+        postgresql:
+            chain: ssl:postgresql:combined
+            key: ssl:postgresql:key
 
 postgresql:
     version: 18
     bind-port: 5432
     start-cluster: True
 
-    sslcert: {{salt['file.join'](certificate_location, 'postgresql.crt')}}
-    sslkey: {{salt['file.join'](secret_key_location, 'postgresql.key')}}
+    ssl: postgresql
 
     hbafile: pg_hba.conf

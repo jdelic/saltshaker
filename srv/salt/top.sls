@@ -78,6 +78,7 @@ base:
         - match: grain
         - docker.install
         - nomad.install
+        - nomad.hostport-manager
         - basics.etc_mods.udp-buffer-increase
         - mn.appconfig
 
@@ -136,6 +137,7 @@ base:
     'roles:loadbalancer':
         - match: grain
         - haproxy.external
+        - nomad.outport-manager
         - envoy.external
         - basics.etc_mods.udp-buffer-increase
 

@@ -28,6 +28,35 @@ haproxy-config-template-external:
                    )
                ) if pillar.get('haproxy', {}).get('bind-ipv6', False) %}
 {% endif %}
+smartstack-external-runner:
+    file.managed:
+        - name: /etc/consul/helpers/smartstack-external-runner.sh
+        - contents: |
+            #!/bin/bash
+            set -e
+            /usr/bin/python3 /etc/consul/renders/smartstack-external.py \
+                --include 'tags=smartstack:external,tags=regex=smartstack:routing:(.*)' \
+                --include 'tags=smartstack:external,tags=regex=smartstack:proxypath:(.*)' \
+                --open-nftables=conntrack \
+                {%- for ip in haproxy_ips %}
+                    {{' '}}--smartstack-localip {{ip}} \
+                {%- endfor %}
+                {%- if pillar.get('ssl', {}).get('sources', {}).get('default', {}).get('full', None) and
+                        salt['pillar.fetch'](pillar['ssl']['sources']['default']['full'], None) %}
+                    {{' '}}-D certfolder={{pillar['ssl']['secret-key-location']}} \
+                {%- endif %}
+                {%- if pillar.get("crypto", {}).get("generate-secure-dhparams", True) %}
+                    {{' '}}-D load_dhparams=True \
+                {%- endif %}
+                -o  /etc/haproxy/haproxy-external.cfg \
+                -c  "ps awwfux | grep -v grep | grep 'haproxy -f /etc/haproxy/haproxy-external.cfg' >/dev/null && systemctl reload haproxy@external || systemctl restart haproxy@external" \
+                /etc/haproxy/haproxy-external.jinja.cfg
+        - mode: 750
+        - require:
+            - file: consul-helpers-dir
+            - file: haproxy-config-template-external
+
+
 smartstack-external:
     file.managed:
         - name: /etc/consul/template.d/smartstack-external.conf
@@ -35,38 +64,18 @@ smartstack-external:
         - template: jinja
         - context:
             servicescript: /etc/consul/renders/smartstack-external.py
-            target: /etc/haproxy/haproxy-external.cfg
-            # this (yaml folded) command-line will reload haproxy if it is running and restart it otherwise
-            # don't use "grep -q" since it will lead to a "broken pipe" error when called through Python
-            # subprocess. Instead redirect unnecessary output into /dev/null.
-            command: >
-                ps awwfux | grep -v grep | grep 'haproxy -f /etc/haproxy/haproxy-external.cfg' >/dev/null &&
-                systemctl reload haproxy@external ||
-                systemctl restart haproxy@external
-            parameters: >
-                --include tags=smartstack:external
-                --open-nftables=conntrack
-                {%- for ip in haproxy_ips -%}
-                    {{' '}}--smartstack-localip {{ip}}
-                {%- endfor %}
-                {%- if pillar.get('ssl', {}).get('sources', {}).get('default-cert', None) and
-                      salt['pillar.fetch'](pillar['ssl']['sources']['default-cert'], None) -%}
-                    {{' '}}-D maincert={{pillar['ssl']['filenames']['default-cert-full']}}
-                {%- endif %}
-                {%- if pillar.get("crypto", {}).get("generate-secure-dhparams", True) -%}
-                    {{' '}}-D load_dhparams=True
-                {%- endif %}
-            template: /etc/haproxy/haproxy-external.jinja.cfg
+            command: /etc/consul/helpers/smartstack-external-runner.sh
         - require:
             - systemdunit: haproxy-multi
-            - file: haproxy-config-template-external
+            - file: smartstack-external-runner
             - file: consul-template-dir
     service.enabled:  # haproxy will be started by the smartstack script rendered by consul-template (see command above)
         - name: haproxy@external
         - require:
             - file: smartstack-external
-            {% if 'ssl' in pillar and 'maincert' in pillar['ssl'] %}
-            - file: ssl-maincert
+            {% if pillar.get('ssl', {}).get('sources', {}).get('default', {}).get('full', None) and
+                  salt['pillar.fetch'](pillar['ssl']['sources']['default']['full'], None) %}
+            - file: ssl-certificate-default-full
             {% endif %}
         - require_in:
             - cmd: smartstack-external-sync

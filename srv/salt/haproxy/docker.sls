@@ -6,6 +6,28 @@ include:
     - haproxy.install
 
 
+smartstack-docker-runner:
+    file.managed:
+        - name: /etc/consul/helpers/smartstack-docker-runner.sh
+        - contents: |
+            #!/bin/bash
+            set -e
+            /usr/bin/python3 /etc/consul/renders/smartstack-docker.py \
+                --include tags=smartstack:internal \
+                --smartstack-localip {{pillar.get('docker', {}).get('bridge-ip', grains['ip_interfaces']['docker0'])}} \
+                -D transparent_bind=1 \
+                -D socketsuffix=docker \
+                {%- if pillar.get("crypto", {}).get("generate-secure-dhparams", True) %}
+                    -D load_dhparams=True \
+                {%- endif %}
+                -o  /etc/haproxy/haproxy-docker.cfg \
+                -c  "ps awwfux | grep -v grep | grep 'haproxy -f /etc/haproxy/haproxy-docker.cfg' >/dev/null && systemctl reload haproxy@docker || systemctl restart haproxy@docker" \
+                /etc/haproxy/haproxy-internal.jinja.cfg
+        - mode: 750
+        - require:
+            - file: consul-helpers-dir
+            - file: haproxy-config-template-internal
+
 smartstack-docker:
     file.managed:
         - name: /etc/consul/template.d/smartstack-docker.conf
@@ -13,27 +35,10 @@ smartstack-docker:
         - template: jinja
         - context:
             servicescript: /etc/consul/renders/smartstack-docker.py
-            target: /etc/haproxy/haproxy-docker.cfg
-            # this (yaml folded) command-line will reload haproxy if it is running and restart it otherwise
-            # don't use "grep -q" since it will lead to a "broken pipe" error when called through Python
-            # subprocess. Instead redirect unnecessary output into /dev/null.
-            command: >
-                ps awwfux | grep -v grep | grep 'haproxy -f /etc/haproxy/haproxy-docker.cfg' >/dev/null &&
-                systemctl reload haproxy@docker ||
-                systemctl restart haproxy@docker
-            # the escaping of localip is necessary for the consul-template command="" stanza
-            parameters: >
-                --include tags=smartstack:internal
-                --smartstack-localip {{pillar.get('docker', {}).get('bridge-ip', grains['ip_interfaces']['docker0'])}}
-                -D transparent_bind=1
-                -D socketsuffix=docker
-                {% if pillar.get("crypto", {}).get("generate-secure-dhparams", True) -%}
-                    -D load_dhparams=True
-                {%- endif %}
-            template: /etc/haproxy/haproxy-internal.jinja.cfg
+            command: /etc/consul/helpers/smartstack-docker-runner.sh
         - require:
             - systemdunit: haproxy-multi
-            - file: haproxy-config-template-internal
+            - file: smartstack-docker-runner
             - file: consul-template-dir
     service.enabled:  # haproxy will be started by the smartstack script rendered by consul-template (see command above)
         - name: haproxy@docker

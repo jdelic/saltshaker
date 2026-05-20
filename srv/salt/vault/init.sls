@@ -14,6 +14,14 @@ include:
 
 
 {% from 'vault/install.sls' import vault_user, vault_group %}
+{% set ssl_filenames = pillar.get('ssl', {}).get('filenames', {}) %}
+{% set ssl_sources = pillar.get('ssl', {}).get('sources', {}) %}
+{% set vault_ssl = pillar['vault'].get('ssl', pillar['vault'].get('sslcert', 'default')) %}
+{% set vault_ssl_id = vault_ssl|replace('.', '-')|replace('_', '-')|replace(':', '-')|replace('/', '-') %}
+{% set vault_sslcert = ssl_filenames[vault_ssl]['chain'] if vault_ssl in ssl_filenames
+                       else pillar['vault'].get('sslcert', vault_ssl) %}
+{% set vault_sslkey = ssl_filenames[vault_ssl]['key'] if vault_ssl in ssl_filenames
+                      else pillar['vault'].get('sslkey', vault_ssl) %}
 
 
 vault-data-dir:
@@ -124,6 +132,8 @@ vault-config:
                 )}}
             port: {{pillar.get('vault', {}).get('bind-port', 8200)}}
             connection_host: {{connection_host}}
+            sslcert: {{vault_sslcert}}
+            sslkey: {{vault_sslkey}}
         - require:
             - file: vault-config-dir
 
@@ -143,8 +153,11 @@ vault-service:
             - file: vault
             - cmd: vault-setcap
             - file: vault-config
-            - file: vault-ssl-cert
-            - file: vault-ssl-key
+{% for material in ['chain', 'key'] %}
+    {% if ssl_sources.get(vault_ssl, {}).get(material) and salt['pillar.fetch'](ssl_sources[vault_ssl][material], None) %}
+            - file: ssl-certificate-{{vault_ssl_id}}-{{material}}
+    {% endif %}
+{% endfor %}
     service.running:
         - name: vault
         - sig: vault
@@ -163,8 +176,11 @@ vault-service:
         - watch:
             - systemdunit: vault-service
             - file: vault  # restart on a change of the binary
-            - file: vault-ssl-cert  # restart when the SSL cert changes
-            - file: vault-ssl-key
+{% for material in ['chain', 'key'] %}
+    {% if ssl_sources.get(vault_ssl, {}).get(material) and salt['pillar.fetch'](ssl_sources[vault_ssl][material], None) %}
+            - file: ssl-certificate-{{vault_ssl_id}}-{{material}}
+    {% endif %}
+{% endfor %}
             - service: smartstack-internal
     cmd.run:
         # any response code is fine, we just need the server to be there to continue with initialization etc.
@@ -548,28 +564,6 @@ vault-external-servicedef:
         - require:
             - file: consul-service-dir
 {% endif %}
-
-
-vault-ssl-cert:
-    file.managed:
-        - name: {{pillar['vault']['sslcert']}}
-        - user: vault
-        - group: root
-        - mode: 400
-        - contents_pillar: ssl:vault:combined
-        - require:
-            - file: ssl-cert-location
-
-
-vault-ssl-key:
-    file.managed:
-        - name: {{pillar['vault']['sslkey']}}
-        - user: vault
-        - group: root
-        - mode: 400
-        - contents_pillar: ssl:vault:key
-        - require:
-            - file: ssl-key-location
 
 
 # This is for contacting Vault. Outgoing connections to port 8200 are covered by basics.sls
