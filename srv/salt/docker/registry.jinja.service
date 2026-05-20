@@ -13,8 +13,8 @@ ExecStart=/usr/bin/docker run --name registry --rm \
     --env-file /etc/appconfig/docker-registry/env/envvars \
     -v /srv/registry:/var/lib/registry \
     -v {{pillar['ssl']['service-rootca-cert']}}:{{pillar['ssl']['service-rootca-cert']}}:ro \
-    -v {{pillar['ssl']['filenames']['default-cert']}}:{{pillar['ssl']['filenames']['default-cert']}}:ro \
-    -v {{pillar['ssl']['filenames']['default-cert-key']}}:{{pillar['ssl']['filenames']['default-cert-key']}}:ro \
+    -v {{pillar['ssl']['filenames']['default']['cert']}}:{{pillar['ssl']['filenames']['default']['cert']}}:ro \
+    -v {{pillar['ssl']['filenames']['default']['key']}}:{{pillar['ssl']['filenames']['default']['key']}}:ro \
     -p {{registry_ip}}:{{registry_port}}:5000/tcp \
     --dns 169.254.1.1 \
     --add-host={{registry_hostname}}:{{registry_ip}} \
