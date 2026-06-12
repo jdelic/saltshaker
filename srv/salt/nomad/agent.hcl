@@ -25,10 +25,6 @@ client {
     }
     {% endif %}
 
-    host_network "internal" {
-        interface = "{{internal_interface}}"
-    }
-
     # this allows access to the cluster's root CA on every host (for .local services, for example)
     host_volume "host-ca-bundle" {
         path      = "/etc/ssl/certs/ca-certificates.crt"
