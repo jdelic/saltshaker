@@ -23,6 +23,11 @@ client {
     host_network "external" {
         interface = "{{external_interface}}"
     }
+
+    host_network "external-ipv6" {
+        interface = "{{external_interface}}"
+        cidr      = "2000::/3"
+    }
     {% endif %}
 
     # this allows access to the cluster's root CA on every host (for .local services, for example)
