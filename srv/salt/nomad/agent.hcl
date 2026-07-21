@@ -37,6 +37,10 @@ client {
     {% if pillar.get('nomad', {}).get('node_pool', False) %}
     node_pool = "{{pillar['nomad']['node_pool']}}"
     {% endif %}
+
+    options = {
+        "fingerprint.network.disallow_link_local" = "true"
+    }
 }
 
 consul {
