@@ -149,7 +149,7 @@ locals {
             desired_count_of_additional_ipv6_ips = 0
             ptr = "lb1.maurus.net"
             roles = ["loadbalancer", "apps"]
-            firewall_ids = [hcloud_firewall.web.id, hcloud_firewall.ping.id, hcloud_firewall.anytype.id, hcloud_firewall.lb-free-range.id]
+            firewall_ids = [hcloud_firewall.web.id, hcloud_firewall.ping.id, hcloud_firewall.anytype.id, hcloud_firewall.lb-free-range.id, hcloud_firewall.dns.id]
             volumes = {}
         }
     }
@@ -598,6 +598,24 @@ resource "hcloud_firewall" "web" {
         direction = "in"
         protocol  = "tcp"
         port      = 443
+        source_ips = ["0.0.0.0/0", "::/0"]
+    }
+}
+
+resource "hcloud_firewall" "dns" {
+    name = "dns"
+
+    rule {
+        direction  = "in"
+        protocol   = "udp"
+        port       = 53
+        source_ips = ["0.0.0.0/0", "::/0"]
+    }
+
+    rule {
+        direction  = "in"
+        protocol   = "tcp"
+        port       = 53
         source_ips = ["0.0.0.0/0", "::/0"]
     }
 }
