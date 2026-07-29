@@ -173,7 +173,7 @@ pnds-recursor-override-resolv.conf:
         - require_in:
             - cmd: powerdns-sync
 
-{% if salt['file.file_exists']('/etc/dhcp/dhclient.conf') %}
+{% if salt['file.file_exists']('/etc/dhcp/dhclient.conf') and salt['cmd.retcode']('pgrep -x dhclient >/dev/null') == 0 %}
 pdns-dhclient-enforce-nameservers:
     file.append:
         - name: /etc/dhcp/dhclient.conf
@@ -184,7 +184,7 @@ pdns-dhclient-enforce-nameservers:
             - service: pdns-recursor-service
         - require_in:
             - cmd: powerdns-sync
-{% elif salt['file.file_exists']('/etc/dhcpcd.conf') %}
+{% elif salt['file.file_exists']('/etc/dhcpcd.conf') and salt['cmd.retcode']('pgrep -x dhcpcd >/dev/null') == 0 %}
 pdns-dhcpcd-enforce-nameservers:
     file.append:
         - name: /etc/dhcpcd.conf
@@ -209,6 +209,7 @@ pdns-dhcpcd-remove-nameservers-option:
 pdns-dhcpcd-update:
     cmd.run:
         - name: dhcpcd -n
+        - onlyif: pgrep -x dhcpcd
         - require:
             - file: pdns-dhcpcd-enforce-nameservers
             - file: pdns-dhcpcd-remove-nameservers-option
