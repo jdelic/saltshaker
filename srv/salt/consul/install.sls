@@ -179,7 +179,7 @@ consul-rsyslog:
         - mode: '0644'
 
 
-{% if salt['file.file_exists']('/etc/dhcpcd.conf') and salt['cmd.retcode']('pgrep -x dhcpcd >/dev/null') == 0 %}
+{% if salt['file.file_exists']('/etc/dhcpcd.conf') and salt['cmd.retcode']('pgrep -x dhcpcd') == 0 %}
 consul-dhcpcd-stop-ip4ll-assignment:
     file.append:
         - name: /etc/dhcpcd.conf
