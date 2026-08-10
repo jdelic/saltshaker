@@ -12,6 +12,18 @@ services:
         networks:
             - standardnotes_self_hosted
 
+    files:
+        image: {{standardnotes.get('files-image', 'standardnotes/files')}}
+        env_file: /etc/standardnotes/.env
+        container_name: standardnotes_files
+        restart: unless-stopped
+        ports:
+            - "{{ip}}:{{standardnotes.get('files-bind-port', 31302)}}:3000"
+        volumes:
+            - /secure/standardnotes/uploads:/opt/server/packages/files/dist/uploads
+        networks:
+            - standardnotes_self_hosted
+
     webapp:
         image: {{standardnotes.get('webapp-image', 'standardnotes/web')}}
         container_name: standardnotes_webapp
