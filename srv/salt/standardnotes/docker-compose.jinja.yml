@@ -18,7 +18,7 @@ services:
         container_name: standardnotes_files
         restart: unless-stopped
         ports:
-            - "{{ip}}:{{standardnotes.get('files-bind-port', 31302)}}:3000"
+            - "{{ip}}:{{files_port}}:3000"
         volumes:
             - /secure/standardnotes/uploads:/opt/server/packages/files/dist/uploads
         networks:

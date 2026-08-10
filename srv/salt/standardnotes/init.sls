@@ -139,6 +139,7 @@ standardnotes-compose-file:
         - context:
             ip: {{ip}}
             port: {{port}}
+            files_port: {{files_port}}
             standardnotes: {{standardnotes}}
         - require:
             - file: standardnotes-config-dir
