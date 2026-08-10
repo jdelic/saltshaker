@@ -5,21 +5,13 @@ services:
         container_name: standardnotes_server
         restart: unless-stopped
         ports:
+            # the api server runs on port 3000 and the files server, which is
+            # part of the server container in the v2 docker setup, on port
+            # 3104 (see the upstream docker-compose.example.yml)
             - "{{ip}}:{{port}}:3000"
+            - "{{ip}}:{{files_port}}:3104"
         volumes:
             - /secure/standardnotes/logs:/var/lib/server/logs
-            - /secure/standardnotes/uploads:/opt/server/packages/files/dist/uploads
-        networks:
-            - standardnotes_self_hosted
-
-    files:
-        image: {{standardnotes.get('files-image', 'standardnotes/files')}}
-        env_file: /etc/standardnotes/.env
-        container_name: standardnotes_files
-        restart: unless-stopped
-        ports:
-            - "{{ip}}:{{files_port}}:3000"
-        volumes:
             - /secure/standardnotes/uploads:/opt/server/packages/files/dist/uploads
         networks:
             - standardnotes_self_hosted
