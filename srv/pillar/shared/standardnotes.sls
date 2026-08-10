@@ -3,7 +3,7 @@
 standardnotes:
     hostname: stdnotesapi.{{external_tld}}
     webapp-hostname: notes.{{external_tld}}
-    files-hostname: notes-files.{{external_tld}}
+    files-hostname: stdnotesfiles.{{external_tld}}
     default-sync-server: https://stdnotesapi.{{external_tld}}
     cookie-domain: {{external_tld}}
     cookie-same-site: None
