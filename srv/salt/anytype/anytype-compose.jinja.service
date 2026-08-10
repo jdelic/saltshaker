@@ -1,0 +1,18 @@
+[Unit]
+Description=AnyType docker compose stack
+After=docker.service network-online.target secure.mount
+Requires=docker.service
+{% if pillar['secure-is-a-mount'] %}
+ConditionPathIsMountPoint=/secure
+{% endif %}
+
+[Service]
+Type=oneshot
+RemainAfterExit=yes
+WorkingDirectory=/etc/anytype/any-sync-dockercompose
+ExecStart=/usr/bin/docker compose -f /etc/anytype/any-sync-dockercompose/saltshaker-anytype-compose.yml up -d --remove-orphans --quiet-pull
+ExecStop=/usr/bin/docker compose -f /etc/anytype/any-sync-dockercompose/saltshaker-anytype-compose.yml down --remove-orphans
+TimeoutStartSec=0
+
+[Install]
+WantedBy=multi-user.target

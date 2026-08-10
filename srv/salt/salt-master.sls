@@ -32,7 +32,7 @@ saltmaster-tcp-in{{port}}-recv-ipv4:
         - match: state
         - connstate: new
         # it's super important these go first so the local minion works
-        - order: 2
+        - order: 3
         - save: True
 {% endfor %}
 

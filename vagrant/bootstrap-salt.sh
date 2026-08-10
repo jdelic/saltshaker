@@ -26,7 +26,7 @@
 #======================================================================================================================
 set -o nounset                              # Treat unset variables as an error
 
-__ScriptVersion="2025.12.05"
+__ScriptVersion="2026.05.01"
 __ScriptName="bootstrap-salt.sh"
 
 __ScriptFullName="$0"
@@ -369,7 +369,7 @@ __usage() {
         also be specified. Salt installation will be ommitted, but some of the
         dependencies could be installed to write configuration with -j or -J.
     -d  Disables checking if Salt services are enabled to start on system boot.
-        You can also do this by touching ${BS_TMP_DIR}/disable_salt_checks on the target
+        You can also do this by touching ${_TMP_DIR}/disable_salt_checks on the target
         host. Default: \${BS_FALSE}
     -D  Show debug output
     -f  Force shallow cloning for git installations.
@@ -515,6 +515,7 @@ fi
 
 # What ever is written to the logpipe gets written to the logfile
 tee < "$LOGPIPE" "$LOGFILE" &
+TEE_PID=$!
 
 # Close STDOUT, reopen it directing it to the logpipe
 exec 1>&-
@@ -571,10 +572,10 @@ __exit_cleanup() {
     fi
 
     # Kill tee when exiting, CentOS, at least requires this
-    # shellcheck disable=SC2009
-    TEE_PID=$(ps ax | grep tee | grep "$LOGFILE" | awk '{print $1}')
-
-    [ "$TEE_PID" = "" ] && exit $EXIT_CODE
+    if [ "$TEE_PID" = "" ]; then
+        exec >/dev/null 2>&1
+        exit "$EXIT_CODE"
+    fi
 
     echodebug "Killing logging pipe tee's with pid(s): $TEE_PID"
 
@@ -587,11 +588,13 @@ __exit_cleanup() {
     }
     trap "__trap_errors" INT ABRT QUIT TERM
 
-    # Now we're "good" to kill tee
+    # Detach stdout/stderr from LOGPIPE before killing tee so shell teardown does
+    # not write to a pipe with no reader (SIGPIPE / exit 141 under docker exec -e).
+    exec >/dev/null 2>&1
     kill -s TERM "$TEE_PID"
 
     # In case the 127 errno is not triggered, exit with the "original" exit code
-    exit $EXIT_CODE
+    exit "$EXIT_CODE"
 }
 trap "__exit_cleanup" EXIT INT
 
@@ -2819,14 +2822,25 @@ __install_salt_from_repo() {
         ${_pip_cmd} install --force-reinstall --break-system-packages "${_arch_dep}"
     fi
 
-    echodebug "Running '${_pip_cmd} install ${_USE_BREAK_SYSTEM_PACKAGES} --no-deps --force-reinstall ${_PIP_INSTALL_ARGS} ${_TMP_DIR}/git/deps/salt*.whl'"
+    _PIP_VERSION_STRING=$(${_pip_cmd} --version)
+    echodebug "Installed pip version: $_PIP_VERSION_STRING"
+    _PIP_MAJOR_VERSION=$(echo "$_PIP_VERSION_STRING" | sed -E 's/^pip ([0-9]+)\..*/\1/')
 
-    echodebug "Running ${_pip_cmd} install ${_USE_BREAK_SYSTEM_PACKAGES} --no-deps --force-reinstall ${_PIP_INSTALL_ARGS} --config-settings=--global-option=--salt-config-dir=$_SALT_ETC_DIR --salt-cache-dir=${_SALT_CACHE_DIR} ${SETUP_PY_INSTALL_ARGS} ${_TMP_DIR}/git/deps/salt*.whl"
-
-    ${_pip_cmd} install ${_USE_BREAK_SYSTEM_PACKAGES} --no-deps --force-reinstall \
-        ${_PIP_INSTALL_ARGS} \
-        --config-settings="--global-option=--salt-config-dir=$_SALT_ETC_DIR --salt-cache-dir=${_SALT_CACHE_DIR} ${SETUP_PY_INSTALL_ARGS}" \
-        ${_TMP_DIR}/git/deps/salt*.whl || return 1
+    # The following branching can be removed once we no longer support distros that still ship with
+    # versions of `pip` earlier than v22.1 such as Debian 11
+    if [ "$_PIP_MAJOR_VERSION" -lt 23 ]; then
+        echodebug "Running ${_pip_cmd} install ${_USE_BREAK_SYSTEM_PACKAGES} --no-deps --force-reinstall ${_PIP_INSTALL_ARGS} --global-option=--salt-config-dir=$_SALT_ETC_DIR --salt-cache-dir=${_SALT_CACHE_DIR} ${SETUP_PY_INSTALL_ARGS} ${_TMP_DIR}/git/deps/salt*.whl"
+        ${_pip_cmd} install ${_USE_BREAK_SYSTEM_PACKAGES} --no-deps --force-reinstall \
+            ${_PIP_INSTALL_ARGS} \
+            --global-option="--salt-config-dir=$_SALT_ETC_DIR --salt-cache-dir=${_SALT_CACHE_DIR} ${SETUP_PY_INSTALL_ARGS}" \
+            ${_TMP_DIR}/git/deps/salt*.whl || return 1
+    else
+        echodebug "Running ${_pip_cmd} install ${_USE_BREAK_SYSTEM_PACKAGES} --no-deps --force-reinstall ${_PIP_INSTALL_ARGS} --config-settings=--global-option=--salt-config-dir=$_SALT_ETC_DIR --salt-cache-dir=${_SALT_CACHE_DIR} ${SETUP_PY_INSTALL_ARGS} ${_TMP_DIR}/git/deps/salt*.whl"
+        ${_pip_cmd} install ${_USE_BREAK_SYSTEM_PACKAGES} --no-deps --force-reinstall \
+            ${_PIP_INSTALL_ARGS} \
+            --config-settings="--global-option=--salt-config-dir=$_SALT_ETC_DIR --salt-cache-dir=${_SALT_CACHE_DIR} ${SETUP_PY_INSTALL_ARGS}" \
+            ${_TMP_DIR}/git/deps/salt*.whl || return 1
+    fi
 
     echoinfo "Checking if Salt can be imported using ${_py_exe}"
     CHECK_SALT_SCRIPT=$(cat << EOM
@@ -6096,7 +6110,14 @@ install_arch_linux_git_deps() {
 }
 
 install_arch_linux_onedir_deps() {
+    echodebug "install_arch_linux_onedir_deps() entry"
+
+    # Basic tooling for download/verify/extract
+    pacman -Sy --noconfirm --needed wget tar gzip gnupg ca-certificates || return 1
+
+    # Reuse stable deps for python-yaml etc. if you want config_salt() parity
     install_arch_linux_stable_deps || return 1
+    return 0
 }
 
 install_arch_linux_stable() {
@@ -6111,7 +6132,73 @@ install_arch_linux_stable() {
     pacman -S --noconfirm --needed bash || return 1
     pacman -Su --noconfirm || return 1
     # We can now resume regular salt update
-    pacman -Syu --noconfirm salt || return 1
+    # Except that this hasn't been in arch repos for years;
+    # so we have to build from AUR
+    # We use "buildgirl" because Eve demanded it.
+    build_user=${build_user:-buildgirl}
+    userdel "$build_user" || true
+    useradd -M -r -s /usr/bin/nologin "$build_user"
+    echo "$build_user ALL=(ALL) NOPASSWD: ALL" > /etc/sudoers.d/"$build_user"
+    rm -rf /tmp/yay-bin || true
+
+    git clone https://aur.archlinux.org/salt.git /tmp/yay-bin
+    chown -R "$build_user":"$build_user" /tmp/yay-bin
+    sudo -u "$build_user" env -i \
+        HOME=/tmp \
+        PATH=/usr/bin:/bin:/usr/sbin:/sbin \
+        MAKEFLAGS="-j$(nproc)" \
+        LANG=en_US.UTF-8 LC_ALL=en_US.UTF-8 \
+        makepkg -CcsiD /tmp/yay-bin \
+        --noconfirm --needed \
+        --noprogressbar || return 1
+
+    rm -f /etc/sudoers.d/"$build_user"
+    rm -rf /tmp/yay-bin
+    userdel "$build_user"
+    return 0
+}
+
+install_arch_linux_onedir() {
+    echodebug "install_arch_linux_onedir() entry"
+
+    version="${ONEDIR_REV:-latest}"
+    arch="x86_64"
+    [ "$(uname -m)" = "aarch64" ] && arch="aarch64"
+
+    # Resolve "latest" to actual version
+    if [ "$version" = "latest" ]; then
+        version=$(wget -qO- https://api.github.com/repos/saltstack/salt/releases/latest \
+                  | grep -Eo '"tag_name": *"v[0-9.]+"' \
+                  | sed 's/"tag_name": *"v//;s/"//') || return 1
+    fi
+
+    tarball="salt-${version}-onedir-linux-${arch}.tar.xz"
+    url="https://github.com/saltstack/salt/releases/download/v${version}/${tarball}"
+    extractdir="/tmp/salt-${version}-onedir-linux-${arch}"
+
+    echoinfo "Downloading Salt onedir: $url"
+    wget -q "$url" -O "/tmp/${tarball}" || return 1
+
+    # Validate tarball
+    if ! tar -tf "/tmp/${tarball}" >/dev/null 2>&1; then
+        echoerror "Invalid or corrupt onedir tarball"
+        return 1
+    fi
+
+    # Prepare extraction
+    rm -rf "$extractdir" || true
+    rm -rf /opt/saltstack/salt || true
+    mkdir -p "$extractdir"
+
+    # Extract and flatten (remove leading 'salt/' directory)
+    # /tmp/salt-${version}-onedir-linux-${arch}
+    tar --strip-components=1 -xf "/tmp/${tarball}" -C "$extractdir"
+
+    # Place into /opt
+    mkdir -p /opt/saltstack/salt
+    mv "$extractdir"/* /opt/saltstack/salt/ || return 1
+    chmod -R 755 /opt/saltstack/salt
+
     return 0
 }
 
@@ -6249,17 +6336,48 @@ install_arch_check_services() {
     return 0
 }
 
-install_arch_linux_onedir() {
-  install_arch_linux_stable || return 1
 
-  return 0
-}
 
 install_arch_linux_onedir_post() {
-  install_arch_linux_post || return 1
+    echodebug "install_arch_linux_onedir_post() entry"
 
-  return 0
+    # Disable any distro/AUR salt units
+    systemctl disable --now salt-minion.service 2>/dev/null || true
+    systemctl disable --now salt-master.service 2>/dev/null || true
+
+    # Drop a clean unit, same pattern as Debian/Ubuntu onedir
+    cat >/etc/systemd/system/salt-minion.service <<'EOF'
+[Unit]
+Description=Salt Minion (onedir)
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+ExecStart=/opt/saltstack/salt/salt-minion -c /etc/salt
+Restart=always
+LimitNOFILE=100000
+
+[Install]
+WantedBy=multi-user.target
+EOF
+
+    systemctl daemon-reload
+
+    # Add onedir paths system-wide
+    cat >/etc/profile.d/saltstack.sh <<'EOF'
+export PATH=/opt/saltstack/salt:/opt/saltstack/salt/bin:$PATH
+EOF
+
+    chmod 644 /etc/profile.d/saltstack.sh
+
+    if [ "$_START_DAEMONS" -eq $BS_TRUE ]; then
+        systemctl enable --now salt-minion.service
+    fi
+
+    return 0
 }
+
 #
 #   Ended Arch Install Functions
 #
@@ -6271,6 +6389,15 @@ install_arch_linux_onedir_post() {
 #
 
 #---  FUNCTION  -------------------------------------------------------------------------------------------------------
+#          NAME:  __salt_onedir_filter_ga_version_dirs
+#   DESCRIPTION:  From stdin: keep only GA CalVer-style directory names (digits and dots;
+#                 prerelease dirs like 3008.0rc1 are excluded).
+#----------------------------------------------------------------------------------------------------------------------
+__salt_onedir_filter_ga_version_dirs() {
+    grep -E '^[0-9]+\.[0-9]+(\.[0-9]+)*$'
+}
+
+#---  FUNCTION  -------------------------------------------------------------------------------------------------------
 #          NAME:  __rpm_get_packagesite_onedir_latest
 #   DESCRIPTION:  Set _GENERIC_PKG_VERSION to the latest for RPM or latest for major version input
 #----------------------------------------------------------------------------------------------------------------------
@@ -6278,26 +6405,35 @@ __get_packagesite_onedir_latest() {
 
     echodebug "Find latest rpm release from repository"
 
-    # get dir listing from url, sort and pick highest
     generic_versions_tmpdir=$(mktemp -d)
     curr_pwd=$(pwd)
-    cd  ${generic_versions_tmpdir} || return 1
+    cd "${generic_versions_tmpdir}" || return 1
 
     # leverage the windows directories since release Windows and Linux
     wget -q -r -np -nH --exclude-directories=onedir,relenv,macos -x -l 1 "https://${_REPO_URL}/saltproject-generic/windows/"
     if [ "$#" -gt 0 ] && [ -n "$1" ]; then
         MAJOR_VER="$1"
         # shellcheck disable=SC2010
-        _GENERIC_PKG_VERSION=$(ls artifactory/saltproject-generic/windows/ | grep -v 'index.html' | sort -V -u | grep -E "$MAJOR_VER" | tail -n 1)
+        _GENERIC_PKG_VERSION=$(ls artifactory/saltproject-generic/windows/ | grep -v 'index.html' | __salt_onedir_filter_ga_version_dirs | grep -E "^${MAJOR_VER}\\." | sort -V -u | tail -n 1)
     else
         # shellcheck disable=SC2010
-        _GENERIC_PKG_VERSION=$(ls artifactory/saltproject-generic/windows/ | grep -v 'index.html' | sort -V -u | tail -n 1)
+        _GENERIC_PKG_VERSION=$(ls artifactory/saltproject-generic/windows/ | grep -v 'index.html' | __salt_onedir_filter_ga_version_dirs | sort -V -u | tail -n 1)
     fi
-    cd ${curr_pwd} || return "${_GENERIC_PKG_VERSION}"
-    rm -fR ${generic_versions_tmpdir}
+    cd "${curr_pwd}" || return 1
+    rm -fR "${generic_versions_tmpdir}"
+
+    if [ -z "${_GENERIC_PKG_VERSION}" ]; then
+        if [ "$#" -gt 0 ] && [ -n "$1" ]; then
+            echoerror "No GA Salt onedir version found for major series $1 (prerelease dirs are ignored for this selection)."
+        else
+            echoerror "No GA Salt onedir version found for latest (prerelease dirs are ignored for this selection)."
+        fi
+        return 1
+    fi
 
     echodebug "latest rpm release from repository found ${_GENERIC_PKG_VERSION}"
 
+    return 0
 }
 
 
@@ -6641,7 +6777,7 @@ install_vmware_photon_os_onedir() {
 
     if [ "$(echo "$STABLE_REV" | grep -E '^(3006|3007)$')" != "" ]; then
         # Major version Salt, config and repo already setup
-        __get_packagesite_onedir_latest "$STABLE_REV"
+        __get_packagesite_onedir_latest "$STABLE_REV" || return 1
         MINOR_VER_STRG="-$_GENERIC_PKG_VERSION"
     elif [ "$(echo "$STABLE_REV" | grep -E '^([3-9][0-5]{2}[6-9](\.[0-9]*)?)')" != "" ]; then
         # Minor version Salt, need to add specific minor version
@@ -6649,7 +6785,7 @@ install_vmware_photon_os_onedir() {
         MINOR_VER_STRG="-$STABLE_REV_DOT"
     else
         # default to latest version Salt, config and repo already setup
-        __get_packagesite_onedir_latest
+        __get_packagesite_onedir_latest || return 1
         MINOR_VER_STRG="-$_GENERIC_PKG_VERSION"
     fi
 
@@ -7723,24 +7859,33 @@ __macosx_get_packagesite_onedir_latest() {
 
     echodebug "Find latest MacOS release from repository"
 
-    # get dir listing from url, sort and pick highest
     macos_versions_tmpdir=$(mktemp -d)
     curr_pwd=$(pwd)
-    cd  ${macos_versions_tmpdir} || return 1
+    cd "${macos_versions_tmpdir}" || return 1
     wget -q -r -np -nH --exclude-directories=onedir,relenv,windows -x -l 1 "$SALT_MACOS_PKGDIR_URL/"
     if [ "$#" -gt 0 ] && [ -n "$1" ]; then
         MAJOR_VER="$1"
         # shellcheck disable=SC2010
-        _PKG_VERSION=$(ls artifactory/saltproject-generic/macos/ | grep -v 'index.html' | sort -V -u | grep -E "$MAJOR_VER" | tail -n 1)
+        _PKG_VERSION=$(ls artifactory/saltproject-generic/macos/ | grep -v 'index.html' | __salt_onedir_filter_ga_version_dirs | grep -E "^${MAJOR_VER}\\." | sort -V -u | tail -n 1)
     else
         # shellcheck disable=SC2010
-        _PKG_VERSION=$(ls artifactory/saltproject-generic/macos/ | grep -v 'index.html' | sort -V -u | tail -n 1)
+        _PKG_VERSION=$(ls artifactory/saltproject-generic/macos/ | grep -v 'index.html' | __salt_onedir_filter_ga_version_dirs | sort -V -u | tail -n 1)
     fi
-    cd ${curr_pwd} || return "${_PKG_VERSION}"
-    rm -fR ${macos_versions_tmpdir}
+    cd "${curr_pwd}" || return 1
+    rm -fR "${macos_versions_tmpdir}"
+
+    if [ -z "${_PKG_VERSION}" ]; then
+        if [ "$#" -gt 0 ] && [ -n "$1" ]; then
+            echoerror "No GA Salt macOS onedir version found for major series $1 (prerelease dirs are ignored for this selection)."
+        else
+            echoerror "No GA Salt macOS onedir version found for latest (prerelease dirs are ignored for this selection)."
+        fi
+        return 1
+    fi
 
     echodebug "latest MacOS release from repository found ${_PKG_VERSION}"
 
+    return 0
 }
 
 
@@ -7759,15 +7904,15 @@ __macosx_get_packagesite_onedir() {
     _ONEDIR_TYPE="saltproject-generic"
     SALT_MACOS_PKGDIR_URL="https://${_REPO_URL}/${_ONEDIR_TYPE}/macos"
     if [ "$(echo "$_ONEDIR_REV" | grep -E '^(latest)$')" != "" ]; then
-        __macosx_get_packagesite_onedir_latest
+        __macosx_get_packagesite_onedir_latest || return 1
     elif [ "$(echo "$_ONEDIR_REV" | grep -E '^(3006|3007)$')" != "" ]; then
         # need to get latest for major version
-        __macosx_get_packagesite_onedir_latest "$_ONEDIR_REV"
+        __macosx_get_packagesite_onedir_latest "$_ONEDIR_REV" || return 1
     elif [ "$(echo "$_ONEDIR_REV" | grep -E '^([3-9][0-9]{3}(\.[0-9]*)?)')" != "" ]; then
         _PKG_VERSION=$_ONEDIR_REV
     else
         # default to getting latest
-        __macosx_get_packagesite_onedir_latest
+        __macosx_get_packagesite_onedir_latest || return 1
     fi
 
     PKG="salt-${_PKG_VERSION}-py3-${DARWIN_ARCH}.pkg"

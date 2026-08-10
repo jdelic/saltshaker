@@ -4,6 +4,7 @@ haproxy-repo:
     pkgrepo.managed:
         - name: {{pillar['repos']['haproxy']}}
         - file: /etc/apt/sources.list.d/haproxy.list
+        - clean_file: True
         - key_url: salt://haproxy/bernat.debian.org.pgp.key
         - aptkey: False
 

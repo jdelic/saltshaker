@@ -1,7 +1,7 @@
 {
     "service": {
         "name": "vault-ui",
-        "tags": ["smartstack:external", "smartstack:port:8200",
+        "tags": ["smartstack:external", "smartstack:routing:hostname",
                  "smartstack:protocol:sni", "smartstack:mode:tcp",
                  "smartstack:hostname:{{hostname}}", "smartstack:https-redirect"],
         "address": "{{ip}}",

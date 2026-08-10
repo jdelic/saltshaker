@@ -1,0 +1,32 @@
+[Unit]
+Description=Envoy Load Balancer
+After=network.target syslog.service consul.service consul-server.service consul-template.service
+Wants=syslog.service
+# StartLimitIntervalSec: try to restart for unlimited times, because this is an essential service!
+StartLimitIntervalSec=0
+
+[Service]
+Environment=CONFIG=/etc/envoy/envoy-%i.yaml
+EnvironmentFile=-/etc/default/envoy
+ExecStartPre=/usr/local/bin/envoy --mode validate -c ${CONFIG}
+# disable hot restart as otherwise we had /dev/shm/envoy_shared_memory_0 stick around sometimes, and this
+# config doesn't really need zero-downtime restarts
+#ExecReload=/bin/kill -HUP $MAINPID
+ExecStart=/usr/local/bin/envoy -c ${CONFIG} --disable-hot-restart
+ExecStop=/bin/kill -TERM $MAINPID
+KillMode=mixed
+Restart=always
+RestartSec=10s
+User=envoy
+Group=envoy
+ReadOnlyPaths=/
+ReadOnlyPaths=-/etc/envoy
+ReadWritePaths=-/var/log/
+ReadWritePaths=-/dev/shm/
+LimitNOFILE=100000
+AmbientCapabilities=CAP_NET_BIND_SERVICE
+CapabilityBoundingSet=CAP_NET_BIND_SERVICE
+
+
+[Install]
+WantedBy=multi-user.target

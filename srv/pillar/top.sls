@@ -13,7 +13,6 @@ base:
         - shared.vault
 
     'saltmaster*.maurusnet.test':
-        - shared.secrets.vault-dev
         - shared.secrets.vault-ssl
 
     'roles:database':
@@ -86,11 +85,16 @@ base:
         - match: grain
         - shared.standardnotes
 
+    'roles:anytype':
+        - match: grain
+        - shared.anytype
+
     # every minion ID ending in ".test" is a local dev environment. We assign all config to these nodes
     # as the list of roles and services changes all the time for testing and development, so it's easier to
     # just assign everything to these nodes.
     '*.test':
         - local.authserver
+        - local.anytype
         - local.buildserver
         - local.calendar
         - local.config

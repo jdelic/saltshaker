@@ -21,19 +21,31 @@ module OS
 end
 
 
-# helper to enure no_root_squash which will otherwise prevent libvirt to host mounting
+# Resolve local source path by precedence:
+# 1) $SALTSHAKER_HOME/[path]
+# 2) saltshaker/[path]
+# 3) [cwd]/[path]
+def resolve_local_path(path)
+    normalized_path = path.sub(%r{\Asaltshaker/}, '')
+    candidates = []
+    saltshaker_home = ENV['SALTSHAKER_HOME']
+
+    candidates << File.expand_path(File.join(saltshaker_home, normalized_path)) if saltshaker_home && !saltshaker_home.empty?
+    candidates << File.expand_path(File.join('saltshaker', normalized_path))
+    candidates << File.expand_path(path)
+
+    candidates.find { |candidate| File.exist?(candidate) } || File.expand_path(path)
+end
+
+# helper to ensure no_root_squash which will otherwise prevent libvirt to host mounting
 def sync_folder(vmref, folder, hostpath, mounttype: nil)
+    resolved_folder = resolve_local_path(folder)
+
     if OS.windows? or OS.mac?
-        vmref.vm.synced_folder folder, hostpath
+        vmref.vm.synced_folder resolved_folder, hostpath
     else
-        $mtype = nil
-        if mounttype == nil
-            $mtype = 'nfs'
-        else
-            $mtype = mounttype
-        end
-        # add no_root_squash to all folders
-        vmref.vm.synced_folder folder, hostpath, type: $mtype,
+        mtype = mounttype.nil? ? 'nfs' : mounttype
+        vmref.vm.synced_folder resolved_folder, hostpath, type: mtype,
                                linux__nfs_options: ['rw','no_subtree_check','all_squash','no_root_squash'],
                                nfs_version: 4,
                                nfs_udp: false
@@ -61,11 +73,54 @@ $testing_domain = 'maurusnet.test'
 $fileserver_host = "fileserver.#{$testing_domain}"
 $saltmaster_host = "saltmaster.#{$testing_domain}"
 $test_host = "test.#{$testing_domain}"
-$preseed_key_dir = 'saltshaker/vagrant/preseed-keys'
+$apps_host = "apps.#{$testing_domain}"
 
 def preseed_key_path(hostname, ext)
-    "#{$preseed_key_dir}/#{hostname}.#{ext}"
+    resolve_local_path("vagrant/preseed-keys/#{hostname}.#{ext}")
 end
+
+def host_memory_mb
+    if OS.mac?
+        (`sysctl -n hw.memsize`.to_i / 1024 / 1024)
+    elsif OS.linux?
+        mem_kb = File.read('/proc/meminfo')[/^MemTotal:\s+(\d+)\s+kB$/, 1].to_i
+        mem_kb / 1024
+    elsif OS.windows?
+        bytes = `powershell -NoProfile -Command "(Get-CimInstance Win32_ComputerSystem).TotalPhysicalMemory"`.to_i
+        bytes / 1024 / 1024
+    else
+        16384
+    end
+end
+
+def vm_memory_mb
+    host_memory_mb >= 65536 ? 8192 : 3072
+end
+
+def host_cpu_threads
+    if OS.mac?
+        `sysctl -n hw.logicalcpu`.to_i
+    elsif OS.linux?
+        `nproc`.to_i
+    elsif OS.windows?
+        `powershell -NoProfile -Command "(Get-CimInstance Win32_Processor | Measure-Object -Property NumberOfLogicalProcessors -Sum).Sum"`.to_i
+    else
+        8
+    end
+end
+
+def vm_cpu_threads
+    host_cpu_threads >= 32 ? 4 : 2
+end
+
+
+bootstrap_script = resolve_local_path('vagrant/bootstrap-salt.sh')
+saltmaster_pub = preseed_key_path($saltmaster_host, 'pub')
+saltmaster_key = preseed_key_path($saltmaster_host, 'pem')
+test_pub = preseed_key_path($test_host, 'pub')
+test_key = preseed_key_path($test_host, 'pem')
+apps_pub = preseed_key_path($apps_host, 'pub')
+apps_key = preseed_key_path($apps_host, 'pem')
 
 # When I'm on a train or plane I like to use a local Debian mirror that I run off a Micro SD Card.
 # The shell script below sets a Debian VM to load everything from there when you set $local_provision
@@ -148,15 +203,15 @@ Vagrant.configure('2') do |config|
     config.vm.define :master do |master|
         if OS.windows? or OS.mac?
             master.vm.provider :virtualbox do |vb|
-                vb.memory = 3072
-                vb.cpus = 3
+                vb.memory = vm_memory_mb
+                vb.cpus = vm_cpu_threads
             end
             master.vm.box = 'debian/trixie64'
         else
             master.vm.provider :libvirt do |lv|
                 #lv.customize ['modifyvm', :id, '--rtcuseutc', 'on']
-                lv.memory = 3072
-                lv.cpus = 4
+                lv.memory = vm_memory_mb
+                lv.cpus = vm_cpu_threads
             end
             master.vm.box = 'debian-13-amd64'
             master.vm.box_url = "https://s3.eu-central-1.amazonaws.com/vagrant.maurus.net/debian-13-amd64-libvirt.box.json"
@@ -188,19 +243,20 @@ Vagrant.configure('2') do |config|
             salt.always_install = true
             salt.install_master = true
             salt.install_syndic = false
-            salt.bootstrap_script = 'saltshaker/vagrant/bootstrap-salt.sh'
-            salt.bootstrap_options = '-r'
+            salt.bootstrap_script = bootstrap_script
+            salt.bootstrap_options = '-r -X'
             if $local_provision
                 # -l uses http instead of https
-                salt.bootstrap_options += " -l -R #{$fileserver_host}"
+                salt.bootstrap_options += " -l -R #{$fileserver_host} -X"
             end
-            salt.master_pub = preseed_key_path($saltmaster_host, 'pub')
-            salt.master_key = preseed_key_path($saltmaster_host, 'pem')
-            salt.minion_pub = preseed_key_path($saltmaster_host, 'pub')
-            salt.minion_key = preseed_key_path($saltmaster_host, 'pem')
+            salt.master_pub = saltmaster_pub
+            salt.master_key = saltmaster_key
+            salt.minion_pub = saltmaster_pub
+            salt.minion_key = saltmaster_key
             salt.seed_master = {
-              $saltmaster_host => salt.minion_pub,
-              $test_host => preseed_key_path($test_host, 'pub')
+                $saltmaster_host => salt.minion_pub,
+                $test_host => test_pub,
+                $apps_host => apps_pub
             }
         end
 
@@ -219,12 +275,12 @@ SCRIPT
         end
 
         sync_folder(master, '.', '/vagrant')
-        sync_folder(master, 'saltshaker/srv/salt', '/srv/salt')
-        sync_folder(master, 'saltshaker/srv/salt-modules', '/srv/salt-modules')
-        sync_folder(master, 'saltshaker/srv/pillar', '/srv/pillar')
-        sync_folder(master, 'saltshaker/srv/reactor', '/srv/reactor')
-        sync_folder(master, 'saltshaker/etc/salt-minion/minion.d', '/etc/salt/minion.d', mounttype: 'rsync')
-        sync_folder(master, 'saltshaker/etc/salt-master/master.d', '/etc/salt/master.d', mounttype: 'rsync')
+        sync_folder(master, 'srv/salt', '/srv/salt')
+        sync_folder(master, 'srv/salt-modules', '/srv/salt-modules')
+        sync_folder(master, 'srv/pillar', '/srv/pillar')
+        sync_folder(master, 'srv/reactor', '/srv/reactor')
+        sync_folder(master, 'etc/salt-minion/minion.d', '/etc/salt/minion.d', mounttype: 'rsync')
+        sync_folder(master, 'etc/salt-master/master.d', '/etc/salt/master.d', mounttype: 'rsync')
 
         master.vm.provision :salt do |salt|
             salt.run_highstate = true
@@ -235,14 +291,14 @@ SCRIPT
             salt.always_install = true
             salt.install_master = false
             salt.install_syndic = false
-            salt.bootstrap_script = 'saltshaker/vagrant/bootstrap-salt.sh'
+            salt.bootstrap_script = bootstrap_script
             salt.bootstrap_options = '-r'
             if $local_provision
                 # -l uses http instead of https
                 salt.bootstrap_options = " -l -R #{$fileserver_host}"
             end
-            salt.minion_pub = preseed_key_path($saltmaster_host, 'pub')
-            salt.minion_key = preseed_key_path($saltmaster_host, 'pem')
+            salt.minion_pub = saltmaster_pub
+            salt.minion_key = saltmaster_key
         end
 
         # We have to restart salt-minion because the master's hostname is set in minion.d
@@ -257,15 +313,15 @@ SCRIPT
     config.vm.define :test do |test|
         if OS.windows? or OS.mac?
             test.vm.provider :virtualbox do |vb|
-                vb.memory = 3072
-                vb.cpus = 3
+                vb.memory = vm_memory_mb
+                vb.cpus = vm_cpu_threads
             end
             test.vm.box = 'debian/trixie64'
         else
             test.vm.provider :libvirt do |lv|
                 #lv.customize ['modifyvm', :id, '--rtcuseutc', 'on']
-                lv.memory = 3072
-                lv.cpus = 3
+                lv.memory = vm_memory_mb
+                lv.cpus = vm_cpu_threads
             end
             test.vm.box = 'debian-13-amd64'
             test.vm.box_url = "https://s3.eu-central-1.amazonaws.com/vagrant.maurus.net/debian-13-amd64-libvirt.box.json"
@@ -286,7 +342,7 @@ SCRIPT
         end
 
         sync_folder(test, '.', '/vagrant')
-        sync_folder(test, 'saltshaker/etc/salt-minion/minion.d', '/etc/salt/minion.d', mounttype: 'rsync')
+        sync_folder(test, 'etc/salt-minion/minion.d', '/etc/salt/minion.d', mounttype: 'rsync')
 
         test.vm.provision :shell do |s|
             s.inline = "sh -c 'if ! grep -q " + ip('88') + " /etc/hosts; then echo \"" + ip('88') + "        #{$saltmaster_host} saltmaster\" >> /etc/hosts; fi'\n"
@@ -299,7 +355,7 @@ SCRIPT
                 #touch /etc/salt/roles.d/buildserver
                 #touch /etc/salt/roles.d/buildworker
                 #touch /etc/salt/roles.d/apps
-                touch /etc/salt/roles.d/vaultwarden
+                #touch /etc/salt/roles.d/vaultwarden
                 touch /etc/salt/roles.d/loadbalancer
 SCRIPT
         end
@@ -313,14 +369,84 @@ SCRIPT
             salt.always_install = false
             salt.install_master = false
             salt.install_syndic = false
-            salt.bootstrap_script = 'saltshaker/vagrant/bootstrap-salt.sh'
+            salt.bootstrap_script = bootstrap_script
             salt.bootstrap_options = '-r'
             if $local_provision
                 # -l uses http instead of https
                 salt.bootstrap_options += " -l -R #{$fileserver_host}"
             end
-            salt.minion_key = preseed_key_path($test_host, 'pem')
-            salt.minion_pub = preseed_key_path($test_host, 'pub')
+            salt.minion_key = test_key
+            salt.minion_pub = test_pub
+        end
+    end
+    
+    config.vm.define :apps do |apps|
+        if OS.windows? or OS.mac?
+            apps.vm.provider :virtualbox do |vb|
+                vb.memory = vm_memory_mb
+                vb.cpus = vm_cpu_threads
+            end
+            apps.vm.box = 'debian/trixie64'
+        else
+            apps.vm.provider :libvirt do |lv|
+                #lv.customize ['modifyvm', :id, '--rtcuseutc', 'on']
+                lv.memory = vm_memory_mb
+                lv.cpus = vm_cpu_threads
+            end
+            apps.vm.box = 'debian-13-amd64'
+            apps.vm.box_url = "https://s3.eu-central-1.amazonaws.com/vagrant.maurus.net/debian-13-amd64-libvirt.box.json"
+        end
+
+        #apps.vm.box_url = $box_url
+        apps.vm.network :private_network, ip: ip('172')
+        apps.vm.hostname = $apps_host
+
+        apps.vm.provision :shell do |s|
+            if $local_provision
+                s.inline = $local_provision_script
+            else
+                s.inline = $remote_provision_script
+            end
+        end
+
+        sync_folder(apps, '.', '/vagrant')
+        sync_folder(apps, 'etc/salt-minion/minion.d', '/etc/salt/minion.d', mounttype: 'rsync')
+
+        apps.vm.provision :shell do |s|
+            s.inline = "sh -c 'if ! grep -q " + ip('88') + " /etc/hosts; then echo \"" + ip('88') + "        #{$saltmaster_host} saltmaster\" >> /etc/hosts; fi'\n"
+            s.inline +=<<SCRIPT
+                mkdir -p /etc/salt/roles.d
+                touch /etc/salt/roles.d/vagrant
+                #touch /etc/salt/roles.d/anytype
+                #touch /etc/salt/roles.d/mail
+                #touch /etc/salt/roles.d/calendar
+                #touch /etc/salt/roles.d/dev
+                #touch /etc/salt/roles.d/buildserver
+                #touch /etc/salt/roles.d/buildworker
+                touch /etc/salt/roles.d/apps
+                touch /etc/salt/roles.d/nomadserver
+                #touch /etc/salt/roles.d/vaultwarden
+                #touch /etc/salt/roles.d/loadbalancer
+SCRIPT
+        end
+
+        apps.vm.provision :salt do |salt|
+            salt.run_highstate = true
+            salt.colorize = true
+            salt.log_level = 'info'
+            salt.verbose = true
+            salt.no_minion = false
+            salt.always_install = false
+            salt.install_master = false
+            salt.install_syndic = false
+            salt.bootstrap_script = bootstrap_script
+            salt.bootstrap_options = '-r'
+            if $local_provision
+                # -l uses http instead of https
+                salt.bootstrap_options += " -l -R #{$fileserver_host}"
+            end
+            salt.minion_key = apps_key
+            salt.minion_pub = apps_pub
         end
     end
 end

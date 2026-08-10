@@ -1,7 +1,7 @@
 {
     "service": {
         "name": "git",
-        "tags": ["smartstack:internal", "smartstack:port:32022"],
+        "tags": ["smartstack:internal", "haproxy:frontend:port:32022"],
         "address": "{{ip}}",
         "port": 22
     }

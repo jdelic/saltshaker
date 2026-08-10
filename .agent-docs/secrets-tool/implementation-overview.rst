@@ -17,7 +17,7 @@ Build a Python CLI tool that initializes the SaltShaker secrets pillar set from 
 Scope
 -----
 - Default target for generated pillars: ``saltshaker/srv/pillar/shared/secrets``.
-- Default target for CA certs: ``saltshaker/srv/salt/basics/crypto`` (root CA) and ``.../dev/dev-ca.crt`` (intermediate/dev CA).
+- Default target for CA certs: ``saltshaker/srv/salt/basics/crypto`` (root CA)
 - No network calls unless ACME is explicitly requested by the user.
 - Does not manage AWS Vault credentials (explicitly ignored).
 
@@ -46,8 +46,7 @@ Core Outputs
 - ``gpg-installed-keys.sls``: public keys imported into the managed shared keyring.
 - ``vagrant/preseed-keys/*.pem`` / ``*.pub``: generated RSA keypairs for ``saltmaster.{dev_domain}`` and ``test.{dev_domain}``.
 - ``vagrant/Vagrantfile``: rewritten so the managed testing-domain constant matches ``--dev-domain``.
-- ``srv/salt/basics/crypto/maurusnet-rootca.crt``: root CA cert.
-- ``srv/salt/basics/crypto/dev/dev-ca.crt``: intermediate CA cert (dev/infra CA).
+- ``srv/salt/basics/crypto/[domain]-rootca.crt``: root CA cert.
 
 Secrets Handling
 ----------------
@@ -58,8 +57,8 @@ Secrets Handling
 Assumptions (to confirm)
 ------------------------
 - The intermediate CA should be the signing CA for all internal + dev wildcard certificates.
-- Root CA should be installed globally across nodes via ``basics/crypto/ssl.sls`` (``maurusnet-rootca.crt``).
-- The dev CA cert should be installed for the local environment via ``srv/pillar/local/ssl.sls`` (already references ``dev-ca.crt``).
+- Maurus.netowrks Root CA should be installed globally across nodes via ``basics/crypto/ssl.sls`` (``maurusnet-rootca.crt``).
+- The new root VA should be installed globally across nodes via ``basics/crypto/ssl.sls`` (``[domain]-rootca.crt``).
 - The production wildcard is only retrieved via ACME DNS challenge.
 
 Risks

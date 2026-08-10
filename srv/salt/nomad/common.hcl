@@ -36,7 +36,11 @@ plugin "docker" {
         }
 
         # allow_privileged is required to run Hetzner CSI drivers, which require privileges to attach volumes.
+        # the cap list is the default + net_raw as that's also required by the Hetzner CSI drivers.
         allow_privileged = true
-        allow_caps       = ["chown", "net_raw"]
+        allow_caps       = [
+            "audit_write", "chown", "dac_override", "fowner", "fsetid", "kill", "mknod",
+            "net_bind_service", "net_raw", "setfcap", "setgid", "setpcap", "setuid", "sys_chroot"
+        ]
     }
 }

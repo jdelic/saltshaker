@@ -100,6 +100,7 @@ trixie:
     pkgrepo.managed:
         - name: {{pillar['repos']['trixie']}}
         - file: /etc/apt/sources.list.d/trixie.list
+        - clean_file: True
         {% if pillar['repos'].get('pgpkey', None) %}
         - key_url: {{pillar['repos']['pgpkey']}}
         - aptkey: False
@@ -111,6 +112,7 @@ updates-trixie:
     pkgrepo.managed:
         - name: {{pillar['repos']['trixie-updates']}}
         - file: /etc/apt/sources.list.d/trixie-updates.list
+        - clean_file: True
         - order: 1  # execute this state early!
 
 
@@ -118,6 +120,7 @@ security-updates-trixie:
     pkgrepo.managed:
         - name: {{pillar['repos']['trixie-security']}}
         - file: /etc/apt/sources.list.d/trixie-security.list
+        - clean_file: True
         - order: 1  # execute this state early!
 
 
@@ -125,6 +128,7 @@ backports-org-trixie:
     pkgrepo.managed:
         - name: {{pillar['repos']['trixie-backports']}}
         - file: /etc/apt/sources.list.d/trixie-backports.list
+        - clean_file: True
         - order: 1  # execute this state early!
     file.managed:
         - name: /etc/apt/preferences.d/trixie-backports
@@ -135,6 +139,7 @@ saltstack-repo:
     pkgrepo.managed:
         - name: {{pillar['repos']['saltstack']}}
         - file: /etc/apt/sources.list.d/salt.list
+        - clean_file: True
         - key_url: salt://saltstack_64CBBC8173D76B3F.pgp.key
         #- key_url: salt://mn/packaging_authority_A78049AF.pgp.key
         - aptkey: False
@@ -146,6 +151,7 @@ maurusnet-apps:
         - humanname: repo.maurus.net-apps
         - name: {{pillar['repos']['maurusnet']}}
         - file: /etc/apt/sources.list.d/maurusnet.list
+        - clean_file: True
         - key_url: salt://mn/packaging_authority_A78049AF.pgp.key
         - aptkey: False
         - order: 10

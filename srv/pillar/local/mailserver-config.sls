@@ -32,4 +32,16 @@ imap-incoming:
     # override-ipv6: 1234:1234::0
 
 
+imap:
+    # the permission a user must have in authserver to have access to imap. Set to None or empty string to
+    # allow all authenticated users to use imap.
+    require-permission: imap
+
+
+smtp:
+    # the permission a user must have in authserver to have access to smtp. Set to None or empty string to
+    # allow all authenticated users to use smtp.
+    require-permission: smtp
+
+
 # vim: syntax=yaml

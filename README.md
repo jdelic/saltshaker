@@ -350,6 +350,27 @@ services.
 
 See [consul-smartstack](https://github.com/jdelic/consul-smartstack).
 
+### SmartStack firewall tags
+
+When smartstack renderers are run with `--open-nftables`, external listener
+ports are opened from `smartstack:protocol:` and `smartstack:extport:` tags.
+Services can also request outbound firewall openings with
+`smartstack:outport:<protocol>:<port-or-range>` tags. For example, a service
+that must dial out to TCP 443 and UDP 50000 through 60000 can register:
+
+```
+smartstack:outport:tcp:443
+smartstack:outport:udp:50000-60000
+```
+
+The renderer adds these as destination-only `dport` accept rules to the
+nftables output chain for each configured smartstack local IP family. With
+`--open-nftables=conntrack`, the output rules are limited to `ct state new`.
+Callers can choose which rule groups are managed with
+`--nftables-rules=input`, `--nftables-rules=output`, or `--nftables-rules=both`;
+the default is `both` so existing `--open-nftables` invocations keep their
+current behavior.
+
 ### Integrating external services (not implemented yet)
 **Question: But I run my service X on Heroku/Amazon Elastic Beanstalk with
 autoscaling/Amazon Container Service/Microsoft Azure/Google Compute Engine/
@@ -398,7 +419,7 @@ can issue such a certificate for any uncompromised host).
 You can configure Vault through the `[hosting environment].vault` pillar to use
 either the *consul*, *mysql*, *S3* or *PostgreSQL* backends.
 
-### Vault database backend
+### Vault backend: Databases (postgresql and mysql))
 Generally, if you run on multiple VMs sharing a physical server, choose the
 `postgresql` backend and choose backup intervals and Vault credential leases
 with a possible outage in mind. Such a persistent backend will not be highly
@@ -429,6 +450,8 @@ down the whole Consul cluster and thereby also erase all of the data.
 
 [More information at the Vault website.](https://vaultproject.io/docs/config/index.html)
 
+
+### Vault backend: S3
 
 # Networking
 
@@ -604,11 +627,19 @@ To sum it all up:
 
 This allows dynamic initialization of ACLs on the Consul cluster.
 
-## PostgreSQL
 
-### Accumulators
+## PowerDNS Recursor
 
-**PostgreSQL**
+This Salt config sets up a PowerDNS recursor on every node that serves as an
+interface to the Consul DNS API. It's usually only available to local clients
+on `127.0.0.1:53` and `169.254.1.1:53` from where it forwards to Consul on
+`169.254.1.1:8600`. However, sometimes it's useful to expose the DNS API to
+other services, for example on a Docker bridge or for other OCI containers.
+
+
+## Accumulators
+
+### PostgreSQL
 
 The PostgreSQL configuration uses two accumulators that record `database user`
 pairs (separated by a single space) for the `pg_hba.conf` file. These
@@ -642,7 +673,7 @@ mydb-remote-user:
             - file: postgresql-hba-config
 ```
 
-**Apache2**
+### Apache2
 
 The Apache2 configuration uses an acuumulator `apache2-listen-ports` to gather
 all listen directives for its `/etc/apache2/ports.conf` file. The filename
@@ -662,23 +693,15 @@ apache2-webdav-port:
             - file: apache2-ports-config
 ```
 
-## PowerDNS Recursor
-
-This Salt config sets up a PowerDNS recursor on every node that serves as an
-interface to the Consul DNS API. It's usually only available to local clients
-on `127.0.0.1:53` and `169.254.1.1:53` from where it forwards to Consul on 
-`169.254.1.1:8600`. However, sometimes it's useful to expose the DNS API to
-other services, for example on a Docker bridge or for other OCI containers.
-
 ### Accumulators
 
 The PowerDNS configuration uses two accumulators to allow the adding of IPs
-that PowerDNS Recursor listens on and allow CIDR ranges that can query the 
+that PowerDNS Recursor listens on and allow CIDR ranges that can query the
 recursing DNS server on those IPs:
 
-  * `powerdns-recursor-additional-listen-ips` and
-  * `powerdns-recursor-additional-cidrs`
-  
+* `powerdns-recursor-additional-listen-ips` and
+* `powerdns-recursor-additional-cidrs`
+
 As above, the `filename` attribute for each `file.accumulated` state that uses
 one such accumulator *must* be set to `/etc/powerdns/recursor.conf` and it must
 have a `require_in` directive tying it to the `pdns-recursor-config` state.
@@ -694,7 +717,6 @@ mynetwork-dns:
           - require_in:
               - file: pdns-recursor-config
 ```
-
 
 # Contributing
 

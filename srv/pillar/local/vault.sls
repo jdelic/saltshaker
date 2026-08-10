@@ -1,5 +1,4 @@
 {% from 'config.sls' import external_tld %}
-{% from 'shared/ssl.sls' import localca_location, certificate_location, secret_key_location %}
 
 #
 # This pillar configures the Vault secret storage system which is installed on servers with the
@@ -39,10 +38,8 @@ vault:
 
     kvpath: 'vault/'  # see https://vaultproject.io/docs/config/index.html
 
-    # 'default' should be interpreted as a reference to the default certificates in ssl.sls
-    # but Vault cannot operate without SSL
-    sslcert: {{salt['file.join'](certificate_location, 'vault.crt')}}
-    sslkey: {{salt['file.join'](secret_key_location, 'vault.key')}}
+    # Vault cannot operate without SSL. The certificate named here is configured in ssl:filenames.
+    ssl: vault
 
     mysql:
         dbname: vault  # only needed for mysql backend

@@ -30,8 +30,8 @@ authserver-concourse-create-domain:
                 {{pillar['ci']['hostname']}}
         - unless: >
               /usr/local/authserver/bin/envdir /etc/appconfig/authserver/env/
-              /usr/local/authserver/bin/django-admin domain list |
-                  grep -q "{{pillar['ci']['hostname']}}"
+              /usr/local/authserver/bin/django-admin domain list \
+                  {{pillar['ci']['hostname']}}
         - require:
             - cmd: authserver-sync
         - require_in:

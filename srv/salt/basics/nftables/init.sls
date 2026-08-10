@@ -26,11 +26,25 @@ include:
 nftables:
     pkg.installed:
         - order: 2
+    service.enabled:
+        - name: nftables
+        - require:
+            - pkg: nftables
 
 
 netfilter-persistent:
     pkg.installed:
         - order: 2
+
+
+/etc/nftables.conf:
+    file.symlink:
+        - target: /etc/nftables
+        - force: true
+        - unless:
+            - test -L /etc/nftables.conf
+        - require:
+            - pkg: nftables
 
 
 nftables-temp-input-allow-ipv4:
@@ -169,36 +183,6 @@ nftables-baseconfig-chain-ipv6-forward-flush:
         - order: 2
         - require:
             - nftables: nftables-temp-forward-allow-ipv6
-
-
-nftables-baseconfig-chain-inet-input-flush:
-    nftables.flush:
-        - table: filter
-        - chain: input
-        - family: inet
-        - order: 2
-        - require:
-            - nftables: nftables-baseconfig-chain-inet-input
-
-
-nftables-baseconfig-chain-inet-output-flush:
-    nftables.flush:
-        - table: filter
-        - chain: output
-        - family: inet
-        - order: 2
-        - require:
-            - nftables: nftables-baseconfig-chain-inet-output
-
-
-nftables-baseconfig-chain-inet-forward-flush:
-    nftables.flush:
-        - table: filter
-        - chain: forward
-        - family: inet
-        - order: 2
-        - require:
-            - nftables: nftables-baseconfig-chain-inet-forward
 
 
 nftables-baseconfig-chain-ipv4-prerouting-flush:

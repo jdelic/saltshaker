@@ -125,17 +125,31 @@ pdns-recursor-external-zone:
             60         ; minimum
             )
             IN  NS  ns1.{{pillar['config']['domains']['external']}}.
+
+            @           IN  A   192.168.123.163
             
             ; nameserver glue (pick an IP that makes sense for your environment)
             ns1         IN  A   127.0.0.1
             
             ; /etc/hosts mappings
             saltmaster  IN  A   192.168.123.88
+            anytype     IN  A   192.168.123.163
             auth        IN  A   192.168.123.163
-            mail        IN  A   192.168.123.163
-            calendar    IN  A   192.168.123.163
+            cal         IN  A   192.168.123.163
             ci          IN  A   192.168.123.163
+            mail        IN  A   192.168.123.163
+            notes       IN  A   192.168.123.163
+            registry    IN  A   192.168.123.163
+            schedule    IN  A   192.168.123.163
             smtp        IN  A   192.168.123.164
+
+            beads       IN  A   192.168.123.163
+            mcp-mail    IN  A   192.168.123.163
+
+            element     IN  A   192.168.123.163
+            matrix      IN  A   192.168.123.163
+            matrix-rtc  IN  A   192.168.123.163
+
         - user: root
         - group: root
         - mode: '0644'
@@ -159,7 +173,7 @@ pnds-recursor-override-resolv.conf:
         - require_in:
             - cmd: powerdns-sync
 
-{% if salt['file.file_exists']('/etc/dhcp/dhclient.conf') %}
+{% if salt['file.file_exists']('/etc/dhcp/dhclient.conf') and salt['cmd.retcode']('pgrep -x dhclient') == 0 %}
 pdns-dhclient-enforce-nameservers:
     file.append:
         - name: /etc/dhcp/dhclient.conf
@@ -170,12 +184,13 @@ pdns-dhclient-enforce-nameservers:
             - service: pdns-recursor-service
         - require_in:
             - cmd: powerdns-sync
-{% elif salt['file.file_exists']('/etc/dhcpcd.conf') %}
+{% elif salt['file.file_exists']('/etc/dhcpcd.conf') and salt['cmd.retcode']('pgrep -x dhcpcd') == 0 %}
 pdns-dhcpcd-enforce-nameservers:
     file.append:
         - name: /etc/dhcpcd.conf
         - text: |
             static domain_name_servers=169.254.1.1 ::1
+            nooption domain_name_servers
         - require:
             - service: pdns-recursor-service
         - require_in:
@@ -186,11 +201,23 @@ pdns-dhcpcd-remove-nameservers-option:
         - name: /etc/dhcpcd.conf
         - pattern: '^option domain_name_servers,(.*)$'
         - repl: 'option \1'
-        - backup: True
         - require:
             - service: pdns-recursor-service
         - require_in:
             - cmd: powerdns-sync
+
+pdns-dhcpcd-update:
+    cmd.run:
+        - name: dhcpcd -n
+        - onlyif: pgrep -x dhcpcd
+        - require:
+            - file: pdns-dhcpcd-enforce-nameservers
+            - file: pdns-dhcpcd-remove-nameservers-option
+        - require_in:
+            - cmd: powerdns-sync
+        - watch:
+            - file: pdns-dhcpcd-enforce-nameservers
+            - file: pdns-dhcpcd-remove-nameservers-option
 {% endif %}
 
 
@@ -209,6 +236,18 @@ pdns-recursor-service:
         - require:
             - pkg: pdns-recursor
             - cmd: consul-sync
+        - require_in:
+            - cmd: powerdns-sync
+    cmd.run:
+        - name: >
+            until test ${count} -gt 30; do
+                rec_control ping && host consul.service.consul && break;
+                sleep 1; count=$((count+1));
+            done; test ${count} -lt 30
+        - env:
+            count: 0
+        - onchanges:
+            - service: pdns-recursor-service
         - require_in:
             - cmd: powerdns-sync
 

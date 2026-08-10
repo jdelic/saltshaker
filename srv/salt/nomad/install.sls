@@ -13,6 +13,17 @@ include:
                         pillar['ifassign'].get('internal-ip-index', 0)|int()] %}
 
 
+load-br-netfilter:
+    file.managed:
+        - name: /etc/modules-load.d/br-netfilter.conf
+        - contents: |
+            br_netfilter
+    kmod.present:
+        - name: br_netfilter
+        - require:
+            - file: load-br-netfilter
+
+
 nomad-docker-group-membership:
     user.present:
         - name: {{nomad_user}}
@@ -30,8 +41,10 @@ nomad-agent-config:
         - template: jinja
         - context:
             datacenter: {{pillar['consul-cluster'].get('datacenter', 'default')}}
-            # TODO: fix this when nomad 1.0 comes out with better network management
             internal_interface: {{pillar['ifassign']['internal']}}
+            {% if pillar.get('ifassign', {}).get('external', None) and pillar['ifassign']['external'] in salt['network.interfaces']() %}
+            external_interface: {{pillar['ifassign']['external']}}
+            {% endif %}
             consul_acl_token: {{pillar['dynamicsecrets']['consul-acl-token']['secret_id']}}
         - require:
             - file: nomad-service-dir
@@ -93,6 +106,7 @@ nomad-service:
             - file: nomad-server-config
             - file: nomad-agent-config
             - file: nomad-common-config
+            - kmod: load-br-netfilter
 
 
 # open nomad ports TCP https://www.nomadproject.io/docs/cluster/requirements.html
@@ -158,6 +172,72 @@ nomad-udp-in4648-send-ipv4:
         - save: True
         - require:
             - sls: basics.nftables.setup
+
+
+# open the Nomad dynamic port range for client ephemeral ports
+nomad-tcp-in20000-32000-recv-ipv4:
+    nftables.append:
+        - table: filter
+        - chain: input
+        - family: ip4
+        - jump: accept
+        - if: {{pillar['ifassign']['internal']}}
+        - dport: 20000-32000
+        - match: state
+        - connstate: new
+        - proto: tcp
+        - save: True
+        - require:
+            - sls: basics.nftables.setup
+
+
+nomad-bridge-ipv4-forward-accept:
+    nftables.append:
+        - table: filter
+        - chain: forward
+        - family: ip4
+        - jump: accept
+        - if: {{pillar['ifassign']['internal']}}
+        - of: nomad
+        - match: state
+        - connstate: new
+        - save: True
+        - require:
+              - sls: basics.nftables.setup
+
+
+nomad-bridge-ipv4-forward-reverse:
+    nftables.append:
+        - table: filter
+        - chain: forward
+        - family: ip4
+        - jump: accept
+        - if: nomad
+        - match: state
+        - connstate: new
+        - save: True
+        - require:
+              - sls: basics.nftables.setup
+
+
+nomad-pdns-recursor-cidr:
+  file.accumulated:
+      - name: powerdns-recursor-additional-cidrs
+      - filename: /etc/powerdns/recursor.d/saltshaker.yml
+      - text: {{pillar.get('nomad', {}).get('bridge-cidr', '172.26.64.0/20')}}
+      - require_in:
+          - file: pdns-recursor-config
+
+
+{% if pillar.get('nomad', {}).get('bridge-cidr-ipv6', None) %}
+nomad-pdns-recursor-cidr-ipv6:
+    file.accumulated:
+        - name: powerdns-recursor-additional-cidrs
+        - filename: /etc/powerdns/recursor.d/saltshaker.yml
+        - text: {{pillar['nomad']['bridge-cidr-ipv6']}}
+        - require_in:
+              - file: pdns-recursor-config
+{% endif %}
 
 
 nomad-envvar-config:

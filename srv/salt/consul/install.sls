@@ -179,6 +179,28 @@ consul-rsyslog:
         - mode: '0644'
 
 
+{% if salt['file.file_exists']('/etc/dhcpcd.conf') and salt['cmd.retcode']('pgrep -x dhcpcd') == 0 %}
+consul-dhcpcd-stop-ip4ll-assignment:
+    file.append:
+        - name: /etc/dhcpcd.conf
+        - text: |
+            denyinterfaces consul0
+        - require:
+            - cmd: consul-network-interface
+        - require_in:
+            - cmd: consul-sync-network
+
+consul-dhcpcd-update:
+    cmd.run:
+        - name: dhcpcd -n
+        - onlyif: pgrep -x dhcpcd
+        - require_in:
+            - cmd: consul-sync-network
+        - watch:
+            - file: consul-dhcpcd-stop-ip4ll-assignment
+{% endif %}
+
+
 # open consul interface
 consul-all-in-recv-ipv4:
     nftables.append:
@@ -210,6 +232,8 @@ consul-tcp-in{{port}}-recv-ipv4:
         - match: state
         - connstate: new
         - save: True
+        - unless: >
+            nft list ruleset | grep "tcp dport {{port}} accept" 2>&1 >/dev/null
         - require:
             - sls: basics.nftables.setup
         - require_in:
@@ -229,6 +253,8 @@ consul-udp-in{{port}}-recv:
         - dport: {{port}}
         - proto: udp
         - save: True
+        - unless: >
+              nft list ruleset | grep "udp dport {{port}} accept" 2>&1 >/dev/null
         - require:
             - sls: basics.nftables.setup
         - require_in:

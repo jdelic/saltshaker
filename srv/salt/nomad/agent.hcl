@@ -9,8 +9,43 @@ client {
     # to the internal network. This is necessary so nomad doesn't instruct
     # docker to just bind any container to eth0's first IP.
     #
-    # TODO: fix this when nomad 0.6 comes out with better network management
     network_interface = "{{internal_interface}}"
+    preferred_address_family = "ipv4"
+
+    {% if pillar.get('nomad', {}).get('bridge-cidr', False) %}
+        bridge_network_subnet = "{{pillar['nomad']['bridge-cidr']}}"
+    {% endif %}
+    {% if pillar.get('nomad', {}).get('bridge-cidr-ipv6', False) %}
+        bridge_network_subnet_ipv6 = "{{pillar['nomad']['bridge-cidr-ipv6']}}"
+    {% endif %}
+
+    {% if external_interface is defined %}
+    host_network "external" {
+        interface = "{{external_interface}}"
+    }
+
+    host_network "external-ipv6" {
+        interface = "{{external_interface}}"
+        cidr      = "2000::/3"
+    }
+    {% endif %}
+
+    # this allows access to the cluster's root CA on every host (for .local services, for example)
+    host_volume "host-ca-bundle" {
+        path      = "/etc/ssl/certs/ca-certificates.crt"
+        read_only = true
+    }
+
+    cni_path = "/usr/local/lib/nomad/"
+    cni_config_dir = "/etc/nomad/cni/"
+
+    {% if pillar.get('nomad', {}).get('node_pool', False) %}
+    node_pool = "{{pillar['nomad']['node_pool']}}"
+    {% endif %}
+
+    options = {
+        "fingerprint.network.disallow_link_local" = "true"
+    }
 }
 
 consul {

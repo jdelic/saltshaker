@@ -57,6 +57,10 @@ base:
         - compilers
         - basics.python.dev
         - docker.install
+        - nomad.client
+
+    'roles:gitminiserver':
+        - match: grain
         - dev.git.miniserver
 
     'roles:buildserver':
@@ -74,6 +78,8 @@ base:
         - match: grain
         - docker.install
         - nomad.install
+        - nomad.hostport-manager
+        - basics.etc_mods.udp-buffer-increase
         - mn.appconfig
 
     'roles:photosync':
@@ -125,10 +131,15 @@ base:
         - apache.webdav_permissions_py
         - dev.concourse.authserver_oauth2
         - vaultwarden.authserver_permissions
+        - dovecot.authserver_permissions
+        - opensmtpd.authserver_permissions
 
     'roles:loadbalancer':
         - match: grain
         - haproxy.external
+        - nomad.outport-manager
+        - envoy.external
+        - basics.etc_mods.udp-buffer-increase
 
     'roles:natgateway':
         - match: grain
@@ -150,6 +161,13 @@ base:
         - docker.install
         - fstab.secure
         - standardnotes
+
+    'roles:anytype':
+        - match: grain
+        - docker.install
+        - fstab.secure
+        - anytype
+        - basics.etc_mods.udp-buffer-increase
 
     '*.test':
         # put vagrant user config on .test machines
