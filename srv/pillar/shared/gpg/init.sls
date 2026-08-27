@@ -4,9 +4,6 @@
 # that only system users who are members of the group "gpg-access" can
 # read.
 
-include:
-    - shared.gpg.7CDC4589
-
 gpg:
     shared-keyring-location: /etc/gpg-managed-keyring
     vault-create-perhost-key: True

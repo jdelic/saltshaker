@@ -6,9 +6,12 @@ from __future__ import annotations
 import argparse
 import os
 import shlex
+import shutil
 import subprocess
 import sys
 import textwrap
+import tempfile
+import urllib.request
 from dataclasses import dataclass
 from pathlib import Path
 from shutil import which
@@ -21,15 +24,22 @@ DEFAULT_SECRETS_DIR = ROOT / "srv" / "pillar" / "shared" / "secrets"
 DEFAULT_CRYPTO_DIR = ROOT / "srv" / "salt" / "basics" / "crypto"
 DEFAULT_CONFIG_PILLAR = ROOT / "srv" / "pillar" / "config.sls"
 DEFAULT_WORK_DIR = ROOT / ".saltshaker-secrets"
-DEFAULT_EC_CURVE = "prime256v1"
+DEFAULT_VAGRANTFILE = ROOT / "vagrant" / "Vagrantfile"
+DEFAULT_PRESEED_KEYS_DIR = ROOT / "vagrant" / "preseed-keys"
+DEFAULT_EC_CURVE = "ed25519"
+DEFAULT_GPG_KEY_TYPE = "ed25519"
 
 RESET = "\033[0m"
 BOLD = "\033[1m"
 DIM = "\033[2m"
-GREEN = "\033[32m"
-YELLOW = "\033[33m"
-RED = "\033[31m"
-BLUE = "\033[34m"
+GREEN = ""
+YELLOW = ""
+RED = ""
+BLUE = ""
+CYAN = ""
+
+COLOR_ENABLED = False
+VERBOSE = False
 
 
 def style(text: str, color: str, *, enabled: bool) -> str:
@@ -45,19 +55,19 @@ def banner(title: str, *, enabled: bool) -> None:
 
 
 def info(message: str, *, enabled: bool) -> None:
-    print(style(f"[info] {message}", BLUE, enabled=enabled))
+    print(style(f"ℹ️  {message}", BLUE, enabled=enabled))
 
 
 def warn(message: str, *, enabled: bool) -> None:
-    print(style(f"[warn] {message}", YELLOW, enabled=enabled))
+    print(style(f"⚠️  {message}", YELLOW, enabled=enabled))
 
 
 def ok(message: str, *, enabled: bool) -> None:
-    print(style(f"[ok] {message}", GREEN, enabled=enabled))
+    print(style(f"✅ {message}", GREEN, enabled=enabled))
 
 
 def err(message: str, *, enabled: bool) -> None:
-    print(style(f"[error] {message}", RED, enabled=enabled))
+    print(style(f"❌ {message}", RED, enabled=enabled))
 
 
 @dataclass
@@ -68,20 +78,109 @@ class CertSpec:
     sls_key: str
 
 
+def set_color_enabled(enabled: bool) -> None:
+    global COLOR_ENABLED
+    COLOR_ENABLED = enabled
+    theme = detect_terminal_theme()
+    set_palette(theme)
+
+
+def set_verbose(enabled: bool) -> None:
+    global VERBOSE
+    VERBOSE = enabled
+
+
+def detect_terminal_theme() -> str:
+    explicit = os.environ.get("SALTSHAKER_TERM_THEME") or os.environ.get("CODEX_TERM_THEME")
+    if explicit in {"dark", "light"}:
+        return explicit
+    colorfgbg = os.environ.get("COLORFGBG")
+    if colorfgbg:
+        try:
+            background = int(colorfgbg.split(";")[-1])
+            return "dark" if background <= 6 or background == 8 else "light"
+        except ValueError:
+            pass
+    return "dark"
+
+
+def set_palette(theme: str) -> None:
+    global GREEN, YELLOW, RED, BLUE, CYAN
+    if theme == "light":
+        GREEN = "\033[32m"
+        YELLOW = "\033[33m"
+        RED = "\033[31m"
+        BLUE = "\033[34m"
+        CYAN = "\033[36m"
+    else:
+        GREEN = "\033[92m"
+        YELLOW = "\033[93m"
+        RED = "\033[91m"
+        BLUE = "\033[94m"
+        CYAN = "\033[96m"
+
+
+def prompt_label(text: str) -> str:
+    return style(f"💬 {text}", BOLD + YELLOW, enabled=COLOR_ENABLED)
+
+
+def command_label(text: str) -> str:
+    return style(f"🛠️  {text}", BOLD + CYAN, enabled=COLOR_ENABLED)
+
+
+def print_captured_output(stdout: str, stderr: str) -> None:
+    if stdout:
+        sys.stdout.write(stdout)
+        if not stdout.endswith("\n"):
+            sys.stdout.write("\n")
+    if stderr:
+        sys.stderr.write(stderr)
+        if not stderr.endswith("\n"):
+            sys.stderr.write("\n")
+
+
 def run(cmd: List[str], *, cwd: Optional[Path] = None) -> None:
     display = " ".join(shlex.quote(part) for part in cmd)
-    print(f"[cmd] {display}")
-    subprocess.run(cmd, cwd=str(cwd) if cwd else None, check=True)
+    print()
+    print(command_label(f"[cmd] {display}"))
+    result = subprocess.run(
+        cmd,
+        cwd=str(cwd) if cwd else None,
+        check=False,
+        text=True,
+        capture_output=not VERBOSE,
+    )
+    if VERBOSE:
+        if result.returncode != 0:
+            raise subprocess.CalledProcessError(result.returncode, cmd)
+        print()
+        return
+    if result.returncode != 0:
+        print_captured_output(result.stdout, result.stderr)
+        raise subprocess.CalledProcessError(
+            result.returncode,
+            cmd,
+            output=result.stdout,
+            stderr=result.stderr,
+        )
+    print()
 
 
 def ensure_dir(path: Path) -> None:
     path.mkdir(parents=True, exist_ok=True)
 
 
+def prepare_gpg_homedir(path: Path) -> None:
+    ensure_dir(path)
+    os.chmod(path, 0o700)
+    (path / "gpg.conf").write_text("pinentry-mode loopback\n", encoding="utf-8")
+    (path / "gpg-agent.conf").write_text("allow-loopback-pinentry\n", encoding="utf-8")
+
+
 def prompt(text: str, default: Optional[str] = None) -> str:
     suffix = f" [{default}]" if default else ""
     while True:
-        value = input(f"{text}{suffix}: ").strip()
+        value = input(f"{prompt_label('[input]')} {text}{suffix}: ").strip()
         if value:
             return value
         if default is not None:
@@ -91,13 +190,38 @@ def prompt(text: str, default: Optional[str] = None) -> str:
 def prompt_yes_no(text: str, default: bool = False) -> bool:
     hint = "Y/n" if default else "y/N"
     while True:
-        value = input(f"{text} ({hint}): ").strip().lower()
+        value = input(f"{prompt_label('[input]')} {text} ({hint}): ").strip().lower()
         if not value:
             return default
         if value in {"y", "yes"}:
             return True
         if value in {"n", "no"}:
             return False
+
+
+def prompt_choice(
+    text: str,
+    choices: List[tuple[str, str]],
+    default: Optional[str] = None,
+) -> str:
+    print()
+    print(prompt_label(text))
+    for index, (value, label) in enumerate(choices, start=1):
+        default_suffix = " (default)" if value == default else ""
+        print(f"  {index}. {label}{default_suffix}")
+    while True:
+        prompt_suffix = f" [{default}]" if default is not None else ""
+        value = input(f"{prompt_label('[input]')} Enter choice number{prompt_suffix}: ").strip().lower()
+        if not value and default is not None:
+            return default
+        if value.isdigit():
+            choice_index = int(value) - 1
+            if 0 <= choice_index < len(choices):
+                return choices[choice_index][0]
+        for choice_value, _choice_label in choices:
+            if value == choice_value:
+                return choice_value
+        warn("Please enter one of the listed numbers or choice names.", enabled=COLOR_ENABLED)
 
 
 def sanitize_domains(domains: str) -> List[str]:
@@ -117,6 +241,18 @@ def default_internal_domain(dev_domain: str, prod_domains: List[str]) -> str:
     if not compact:
         compact = "local"
     return f"{compact}.internal"
+
+
+def append_option(cmd: List[str], flag: str, value: Optional[object]) -> None:
+    if value is None:
+        return
+    cmd.append(f"{flag}={value}")
+
+
+def append_bool_option(cmd: List[str], flag: str, value: Optional[bool]) -> None:
+    if value is None:
+        return
+    cmd.append(flag if value else f"--no-{flag.removeprefix('--')}")
 
 
 def write_file(path: Path, content: str, *, force: bool) -> None:
@@ -185,6 +321,75 @@ def write_openssl_conf(path: Path, content: str) -> None:
     path.write_text(content, encoding="utf-8")
 
 
+def generate_openssl_private_key(key_path: Path, curve_or_algorithm: str) -> None:
+    curve_or_algorithm = curve_or_algorithm.lower()
+    if curve_or_algorithm == "ed25519":
+        run(
+            [
+                "openssl",
+                "genpkey",
+                "-algorithm",
+                "Ed25519",
+                "-out",
+                str(key_path),
+            ]
+        )
+        return
+    run(
+        [
+            "openssl",
+            "genpkey",
+            "-algorithm",
+            "EC",
+            "-pkeyopt",
+            f"ec_paramgen_curve:{curve_or_algorithm}",
+            "-out",
+            str(key_path),
+        ]
+    )
+
+
+def generate_vagrant_preseed_keypair(
+    preseed_dir: Path,
+    hostname: str,
+    *,
+    force: bool,
+) -> tuple[Path, Path]:
+    ensure_dir(preseed_dir)
+    private_key = preseed_dir / f"{hostname}.pem"
+    public_key = preseed_dir / f"{hostname}.pub"
+    if not force and (private_key.exists() or public_key.exists()):
+        raise FileExistsError(
+            f"Refusing to overwrite {private_key if private_key.exists() else public_key}. Use --force to replace."
+        )
+    run(["openssl", "genrsa", "-out", str(private_key), "2048"])
+    run(["openssl", "rsa", "-in", str(private_key), "-pubout", "-out", str(public_key)])
+    return private_key, public_key
+
+
+def vagrant_machine_hostnames(dev_domain: str) -> List[str]:
+    return [
+        f"saltmaster.{dev_domain}",
+        f"test.{dev_domain}",
+    ]
+
+
+def update_vagrantfile_testing_domain(vagrantfile: Path, dev_domain: str) -> None:
+    if not vagrantfile.exists():
+        raise FileNotFoundError(f"Vagrantfile not found: {vagrantfile}")
+    content = vagrantfile.read_text(encoding="utf-8")
+    updated, count = re.subn(
+        r"^\$testing_domain = '[^']*'$",
+        f"$testing_domain = '{dev_domain}'",
+        content,
+        count=1,
+        flags=re.MULTILINE,
+    )
+    if count != 1:
+        raise RuntimeError(f"Unable to update {vagrantfile}: missing $testing_domain assignment")
+    vagrantfile.write_text(updated, encoding="utf-8")
+
+
 def generate_root_ca(
     work_dir: Path,
     subject: str,
@@ -195,18 +400,7 @@ def generate_root_ca(
     cert_path = work_dir / "root-ca.crt"
     conf_path = work_dir / "root-ca.cnf"
     write_openssl_conf(conf_path, build_ca_openssl_conf(subject))
-    run(
-        [
-            "openssl",
-            "genpkey",
-            "-algorithm",
-            "EC",
-            "-pkeyopt",
-            f"ec_paramgen_curve:{ec_curve}",
-            "-out",
-            str(key_path),
-        ]
-    )
+    generate_openssl_private_key(key_path, ec_curve)
     run(
         [
             "openssl",
@@ -242,18 +436,7 @@ def generate_intermediate_ca(
     csr_path = work_dir / "intermediate-ca.csr"
     cert_path = work_dir / "intermediate-ca.crt"
     ext_path = work_dir / "intermediate-ca.ext"
-    run(
-        [
-            "openssl",
-            "genpkey",
-            "-algorithm",
-            "EC",
-            "-pkeyopt",
-            f"ec_paramgen_curve:{ec_curve}",
-            "-out",
-            str(key_path),
-        ]
-    )
+    generate_openssl_private_key(key_path, ec_curve)
     run(
         [
             "openssl",
@@ -308,18 +491,7 @@ def generate_leaf_cert(
     csr_path = work_dir / f"{name}.csr"
     cert_path = work_dir / f"{name}.crt"
     ext_path = work_dir / f"{name}.ext"
-    run(
-        [
-            "openssl",
-            "genpkey",
-            "-algorithm",
-            "EC",
-            "-pkeyopt",
-            f"ec_paramgen_curve:{ec_curve}",
-            "-out",
-            str(key_path),
-        ]
-    )
+    generate_openssl_private_key(key_path, ec_curve)
     run(
         [
             "openssl",
@@ -366,6 +538,27 @@ def build_common_sls(intermediate_cert: str) -> str:
         + sls_block("maurusnet_minionca", intermediate_cert)
         + "\n# vim: syntax=yaml\n"
     )
+
+
+def build_empty_init_sls() -> str:
+    return "# vim: syntax=yaml\n"
+
+
+def show_backup_gpg_disclaimer(*, generated: bool, enabled: bool) -> None:
+    print()
+    banner("SAVE THE BACKUP GPG KEY LOCALLY", enabled=enabled)
+    if generated:
+        print(
+            "This key is used to encrypt duplicity backups from your server (if you enable them).\n"
+            "Keep it in a safe place. It will be generated in your local keyring or a separate\n"
+            "GnuPG home and can then be exported to a PEM file for offline storage.\n"
+        )
+    else:
+        print(
+            "This key is used to encrypt duplicity backups from your server (if you enable them).\n"
+            "Make sure you control the matching secret key and keep that secret key in a safe place,\n"
+            "because you will need it to decrypt backups later.\n"
+        )
 
 
 def build_ssl_sls(
@@ -450,6 +643,30 @@ def build_gpg_sls(key_block: str) -> str:
     )
 
 
+def build_installed_keys_sls(keys: List[tuple[str, str, str]]) -> str:
+    parts = ["# autogenerated by saltshaker_secrets\n\n"]
+    for name, public_key, _fingerprint in keys:
+        var_name = re.sub(r"[^A-Za-z0-9_]+", "_", name)
+        parts.append(sls_block(f"{var_name}_public_key", public_key))
+        parts.append("\n")
+    parts.append("gpg:\n")
+    if keys:
+        parts.append("    installed-keys:\n")
+        for name, _public_key, fingerprint in keys:
+            parts.append(f"        {name}:\n")
+            parts.append(f"            fingerprint: {fingerprint}\n")
+        parts.append("    keys:\n")
+        for name, _public_key, _fingerprint in keys:
+            var_name = re.sub(r"[^A-Za-z0-9_]+", "_", name)
+            parts.append(f"        {name}: | \n")
+            parts.append(f"            {{{{{var_name}_public_key}}}}\n")
+    else:
+        parts.append("    installed-keys: {}\n")
+        parts.append("    keys: {}\n")
+    parts.append("\n\n# vim: syntax=yaml\n")
+    return "".join(parts)
+
+
 def run_certbot(
     work_dir: Path,
     domains: List[str],
@@ -503,37 +720,204 @@ def run_certbot(
     return cert_path, chain_path, privkey_path
 
 
-def generate_gpg_key(work_dir: Path, uid: str, key_type: str, key_length: int, expire: str, passphrase: str) -> str:
-    gnupg_home = work_dir / "gnupg"
-    ensure_dir(gnupg_home)
-    os.chmod(gnupg_home, 0o700)
+def write_live_ssl_placeholder(secrets_dir: Path, *, force: bool) -> None:
+    placeholder_cert = "# TODO: replace with ACME certificate\n"
+    placeholder_key = "# TODO: replace with ACME private key\n"
+    placeholder_chain = "# TODO: replace with ACME chain\n"
+    live_sls = build_ssl_sls(
+        "wildcard",
+        placeholder_cert,
+        placeholder_key,
+        placeholder_chain,
+        "maincert",
+    )
+    write_file(secrets_dir / "live-ssl.sls", live_sls, force=force)
 
-    base_cmd = ["gpg", "--homedir", str(gnupg_home), "--batch", "--pinentry-mode", "loopback"]
 
-    passphrase_arg = passphrase
+def update_acme(args: argparse.Namespace) -> None:
+    color_enabled = bool(args.color) if args.color is not None else sys.stdout.isatty()
+    set_color_enabled(color_enabled)
+    set_verbose(bool(args.verbose))
+    secrets_dir = Path(args.secrets_dir or DEFAULT_SECRETS_DIR)
+    work_dir = Path(args.work_dir or DEFAULT_WORK_DIR)
+
+    if which("certbot") is None:
+        raise FileNotFoundError("certbot not found in PATH; install it before running update-acme")
+
+    banner("SaltShaker Secrets ACME Update", enabled=color_enabled)
+    print("Fetch or renew the production wildcard certificate and update live-ssl.sls.\n")
+
+    prod_domains = sanitize_domains(args.prod_domains or prompt("Production domains (comma-separated)", ""))
+    if not prod_domains:
+        raise FileNotFoundError("At least one production domain is required for update-acme")
+
+    acme_email = args.acme_email or prompt("ACME email", f"admin@{prod_domains[0]}")
+    info("Requesting ACME wildcard certificate...", enabled=color_enabled)
+    cert_path, chain_path, key_path = run_certbot(work_dir, prod_domains, acme_email)
+    live_sls = build_ssl_sls(
+        "wildcard",
+        load_pem(cert_path),
+        load_pem(key_path),
+        load_pem(chain_path),
+        "maincert",
+    )
+    write_file(secrets_dir / "live-ssl.sls", live_sls, force=args.force)
+    ok(f"Updated {secrets_dir / 'live-ssl.sls'}", enabled=color_enabled)
+
+
+def gpg_base_cmd(
+    *,
+    homedir: Optional[Path] = None,
+    batch: bool = True,
+    loopback: bool = False,
+) -> List[str]:
+    cmd = ["gpg"]
+    if homedir is not None:
+        prepare_gpg_homedir(homedir)
+        cmd.extend(["--homedir", str(homedir)])
+    if batch:
+        cmd.append("--batch")
+    if loopback:
+        cmd.extend(["--pinentry-mode", "loopback"])
+    return cmd
+
+
+def run_capture(cmd: List[str]) -> str:
+    display = " ".join(shlex.quote(part) for part in cmd)
+    print()
+    print(command_label(f"[cmd] {display}"))
+    result = subprocess.run(cmd, check=False, text=True, capture_output=True)
+    if VERBOSE:
+        print_captured_output(result.stdout, result.stderr)
+    if result.returncode != 0:
+        print_captured_output(result.stdout, result.stderr)
+        raise subprocess.CalledProcessError(
+            result.returncode,
+            cmd,
+            output=result.stdout,
+            stderr=result.stderr,
+        )
+    output = result.stdout
+    print()
+    return output
+
+
+def first_key_fingerprint(*, homedir: Optional[Path], search: Optional[str] = None) -> str:
+    cmd = gpg_base_cmd(homedir=homedir) + ["--with-colons", "--fingerprint"]
+    if search:
+        cmd.extend(["--list-keys", search])
+    else:
+        cmd.append("--list-keys")
+    output = run_capture(cmd)
+    for line in output.splitlines():
+        if line.startswith("fpr:"):
+            return line.split(":")[9]
+    raise RuntimeError("Unable to determine GPG fingerprint")
+
+
+def export_public_key(*, homedir: Optional[Path], identifier: str) -> str:
+    return run_capture(gpg_base_cmd(homedir=homedir) + ["--armor", "--export", identifier]).strip() + "\n"
+
+
+def export_secret_key(*, homedir: Optional[Path], identifier: str, passphrase: str) -> str:
+    return (
+        run_capture(
+            gpg_base_cmd(homedir=homedir, loopback=True)
+            + ["--passphrase", passphrase, "--armor", "--export-secret-keys", identifier]
+        ).strip()
+        + "\n"
+    )
+
+
+def import_public_key(*, homedir: Path, key_data: str) -> tuple[str, str]:
+    prepare_gpg_homedir(homedir)
+    key_file = homedir / "import.asc"
+    key_file.write_text(key_data, encoding="utf-8")
+    run(gpg_base_cmd(homedir=homedir) + ["--import", str(key_file)])
+    fingerprint = first_key_fingerprint(homedir=homedir)
+    return fingerprint, export_public_key(homedir=homedir, identifier=fingerprint)
+
+
+def fetch_key_from_keyserver(*, homedir: Path, key_id: str) -> tuple[str, str]:
+    prepare_gpg_homedir(homedir)
+    if "@" in key_id:
+        print()
+        info(
+            f"Searching keys.openpgp.org for {key_id}. Select the desired key when prompted by GnuPG.",
+            enabled=COLOR_ENABLED,
+        )
+        run(
+            ["gpg", "--homedir", str(homedir), "--keyserver", "hkps://keys.openpgp.org", "--search-keys", key_id]
+        )
+        fingerprint = first_key_fingerprint(homedir=homedir)
+    else:
+        run(
+            gpg_base_cmd(homedir=homedir)
+            + ["--keyserver", "hkps://keys.openpgp.org", "--recv-keys", key_id]
+        )
+        fingerprint = first_key_fingerprint(homedir=homedir, search=key_id)
+    return fingerprint, export_public_key(homedir=homedir, identifier=fingerprint)
+
+
+def download_text(url: str) -> str:
+    with urllib.request.urlopen(url) as response:
+        return response.read().decode("utf-8")
+
+
+def gpg_algorithm_spec(key_type: str, key_length: Optional[int]) -> str:
+    key_type = key_type.lower()
+    if key_type == "rsa":
+        return f"rsa{key_length or 4096}"
+    if key_type == "ed25519":
+        return "ed25519"
+    raise ValueError(f"Unsupported GPG key type: {key_type}")
+
+
+def generate_gpg_key(
+    *,
+    homedir: Optional[Path],
+    uid: str,
+    key_type: str,
+    key_length: int,
+    expire: str,
+    passphrase: str,
+    usage: str,
+) -> tuple[str, str, str]:
+    algo = gpg_algorithm_spec(key_type, key_length)
+    if key_type.lower() == "ed25519":
+        primary_usage = "cert,sign"
+    else:
+        primary_usage = usage
 
     run(
-        base_cmd
+        gpg_base_cmd(homedir=homedir, loopback=True)
         + [
             "--passphrase",
-            passphrase_arg,
+            passphrase,
             "--quick-gen-key",
             uid,
-            f"{key_type}{key_length}",
-            "sign",
+            algo,
+            primary_usage,
             expire,
         ]
     )
-
-    public = subprocess.check_output(
-        base_cmd + ["--armor", "--export", uid],
-        text=True,
-    )
-    secret = subprocess.check_output(
-        base_cmd + ["--passphrase", passphrase_arg, "--armor", "--export-secret-keys", uid],
-        text=True,
-    )
-    return public.strip() + "\n" + secret.strip() + "\n"
+    fingerprint = first_key_fingerprint(homedir=homedir, search=uid)
+    if key_type.lower() == "ed25519" and usage == "encrypt":
+        run(
+            gpg_base_cmd(homedir=homedir, loopback=True)
+            + [
+                "--passphrase",
+                passphrase,
+                "--quick-add-key",
+                fingerprint,
+                "cv25519",
+                "encr",
+                expire,
+            ]
+        )
+    public = export_public_key(homedir=homedir, identifier=fingerprint)
+    secret = export_secret_key(homedir=homedir, identifier=fingerprint, passphrase=passphrase)
+    return fingerprint, public, secret
 
 
 def build_cert_specs(dev_domain: str, prod_domains: List[str], internal_domain: str) -> List[CertSpec]:
@@ -580,13 +964,45 @@ def build_cert_specs(dev_domain: str, prod_domains: List[str], internal_domain: 
     ]
 
 
+def clean(args: argparse.Namespace) -> None:
+    color_enabled = bool(args.color) if args.color is not None else sys.stdout.isatty()
+    set_color_enabled(color_enabled)
+    set_verbose(bool(args.verbose))
+    work_dir = Path(args.work_dir or DEFAULT_WORK_DIR)
+
+    banner("SaltShaker Secrets Clean", enabled=color_enabled)
+    print("This removes the tool working directory used for generated temporary artifacts.\n")
+
+    if not work_dir.exists():
+        warn(f"Nothing to clean. Working directory does not exist: {work_dir}", enabled=color_enabled)
+        return
+
+    info(f"Removing working directory {work_dir}...", enabled=color_enabled)
+    shutil.rmtree(work_dir)
+    ok(f"Removed {work_dir}", enabled=color_enabled)
+
+
 def init(args: argparse.Namespace) -> None:
     color_enabled = bool(args.color) if args.color is not None else sys.stdout.isatty()
+    set_color_enabled(color_enabled)
+    set_verbose(bool(args.verbose))
     secrets_dir = Path(args.secrets_dir or DEFAULT_SECRETS_DIR)
     crypto_dir = Path(args.crypto_dir or DEFAULT_CRYPTO_DIR)
     config_pillar = Path(args.config_pillar or DEFAULT_CONFIG_PILLAR)
     work_dir = Path(args.work_dir or DEFAULT_WORK_DIR)
+    vagrantfile = Path(args.vagrantfile or DEFAULT_VAGRANTFILE)
+    preseed_keys_dir = Path(args.preseed_keys_dir or DEFAULT_PRESEED_KEYS_DIR)
     ensure_dir(work_dir)
+    backup_key_fingerprint: Optional[str] = None
+    backup_key_reminder_mode: Optional[str] = None
+    fetch_acme_now: Optional[bool] = args.fetch_acme
+    generate_signing_key: Optional[bool] = args.generate_gpg_signing
+    configure_backup_key: Optional[bool] = args.configure_backup_gpg
+    gpg_uid = args.gpg_uid
+    gpg_key_type = args.gpg_key_type
+    gpg_key_length = args.gpg_key_length
+    gpg_expire = args.gpg_expire
+    gpg_passphrase = args.gpg_passphrase
 
     for tool in ("openssl", "gpg"):
         if which(tool) is None:
@@ -656,6 +1072,7 @@ def init(args: argparse.Namespace) -> None:
     write_file(crypto_dir / root_ca_name, load_pem(root_cert), force=args.force)
 
     info("Rendering pillar files...", enabled=color_enabled)
+    write_file(secrets_dir / "init.sls", build_empty_init_sls(), force=args.force)
     common_sls = build_common_sls(load_pem(int_cert))
     write_file(secrets_dir / "common.sls", common_sls, force=args.force)
 
@@ -673,46 +1090,187 @@ def init(args: argparse.Namespace) -> None:
         sls = build_ssl_sls(spec.name.replace("-", "_"), cert, key, certchain, spec.sls_key)
         write_file(secrets_dir / sls_name, sls, force=args.force)
 
-    if prod_domains and prompt_yes_no("Fetch production wildcard via ACME now?", default=False):
+    info("Generating Vagrant preseed keys...", enabled=color_enabled)
+    for hostname in vagrant_machine_hostnames(dev_domain):
+        generate_vagrant_preseed_keypair(preseed_keys_dir, hostname, force=args.force)
+
+    info("Updating Vagrantfile testing domain...", enabled=color_enabled)
+    update_vagrantfile_testing_domain(vagrantfile, dev_domain)
+
+    acme_created = False
+    if fetch_acme_now is None:
+        fetch_acme_now = prompt_yes_no("Fetch production wildcard via ACME now?", default=False)
+    if prod_domains and fetch_acme_now:
         if which("certbot") is None:
             raise FileNotFoundError("certbot not found in PATH; install it or skip ACME for now")
-        acme_email = args.acme_email or prompt("ACME email", email)
-        cert_path, chain_path, key_path = run_certbot(work_dir, prod_domains, acme_email)
-        live_sls = build_ssl_sls(
-            "wildcard",
-            load_pem(cert_path),
-            load_pem(key_path),
-            load_pem(chain_path),
-            "maincert",
+        acme_args = argparse.Namespace(
+            acme_email=args.acme_email or email,
+            color=args.color,
+            force=args.force,
+            prod_domains=",".join(prod_domains),
+            secrets_dir=str(secrets_dir),
+            work_dir=str(work_dir),
         )
-        write_file(secrets_dir / "live-ssl.sls", live_sls, force=args.force)
+        update_acme(acme_args)
+        acme_created = True
     else:
-        placeholder_cert = "# TODO: replace with ACME certificate\n"
-        placeholder_key = "# TODO: replace with ACME private key\n"
-        placeholder_chain = "# TODO: replace with ACME chain\n"
-        live_sls = build_ssl_sls(
-            "wildcard",
-            placeholder_cert,
-            placeholder_key,
-            placeholder_chain,
-            "maincert",
-        )
-        write_file(secrets_dir / "live-ssl.sls", live_sls, force=args.force)
+        write_live_ssl_placeholder(secrets_dir, force=args.force)
 
-    if prompt_yes_no("Generate GPG signing key now?", default=True):
-        gpg_uid = args.gpg_uid or prompt(
+    if generate_signing_key is None:
+        generate_signing_key = all(
+            value is not None
+            for value in (
+                args.gpg_uid,
+                args.gpg_key_type,
+                args.gpg_key_length,
+                args.gpg_expire,
+                args.gpg_passphrase,
+            )
+        ) or prompt_yes_no("Generate GPG signing key now?", default=True)
+    if generate_signing_key:
+        gpg_uid = gpg_uid or prompt(
             "GPG UID",
             f"{org} package signing key <packaging@{prod_domains[0] if prod_domains else dev_domain}>",
         )
-        gpg_key_type = args.gpg_key_type or prompt("GPG key type (rsa)", "rsa")
-        gpg_key_length = int(args.gpg_key_length or prompt("GPG key length", "4096"))
-        gpg_expire = args.gpg_expire or prompt("GPG expiration", "3y")
-        passphrase = ""
-        while not passphrase:
-            passphrase = prompt("GPG passphrase (required)", "").strip()
-        gpg_block = generate_gpg_key(work_dir, gpg_uid, gpg_key_type, gpg_key_length, gpg_expire, passphrase)
-        gpg_sls = build_gpg_sls(gpg_block)
+        gpg_key_type = gpg_key_type or prompt(f"GPG key type ({DEFAULT_GPG_KEY_TYPE})", DEFAULT_GPG_KEY_TYPE)
+        if gpg_key_type.lower() == "rsa":
+            gpg_key_length = gpg_key_length or prompt("GPG key length", "4096")
+        else:
+            gpg_key_length = gpg_key_length or "0"
+        gpg_expire = gpg_expire or prompt("GPG expiration", "3y")
+        while not gpg_passphrase:
+            gpg_passphrase = prompt("GPG passphrase (required)", "").strip()
+        signing_homedir = work_dir / "gnupg-package-signing"
+        _signing_fingerprint, public_key, secret_key = generate_gpg_key(
+            homedir=signing_homedir,
+            uid=gpg_uid,
+            key_type=gpg_key_type,
+            key_length=int(gpg_key_length),
+            expire=gpg_expire,
+            passphrase=gpg_passphrase,
+            usage="sign",
+        )
+        gpg_sls = build_gpg_sls(public_key.strip() + "\n" + secret_key.strip() + "\n")
         write_file(secrets_dir / "gpg-package-signing.sls", gpg_sls, force=args.force)
+
+    installed_keys: List[tuple[str, str, str]] = []
+    if configure_backup_key is None:
+        configure_backup_key = args.backup_gpg_source is not None or prompt_yes_no(
+            "Configure backup admin GPG key now?",
+            default=True,
+        )
+    backup_gpg_source = args.backup_gpg_source
+    backup_gpg_home = args.backup_gpg_home
+    backup_gpg_uid = args.backup_gpg_uid
+    backup_gpg_key_type = args.backup_gpg_key_type
+    backup_gpg_key_length = args.backup_gpg_key_length
+    backup_gpg_expire = args.backup_gpg_expire
+    backup_gpg_key_id = args.backup_gpg_key_id
+    backup_gpg_key_url = args.backup_gpg_key_url
+    backup_gpg_key_file = args.backup_gpg_key_file
+    backup_gpg_use_default_keyring = args.backup_gpg_use_default_keyring
+    backup_gpg_passphrase = args.backup_gpg_passphrase
+    backup_gpg_secret_export = args.backup_gpg_secret_export
+    backup_gpg_secret_export_path = args.backup_gpg_secret_export_path
+    if configure_backup_key:
+        source = args.backup_gpg_source or prompt_choice(
+            "Backup admin GPG key source",
+            [
+                ("generate", "Generate a new backup admin key"),
+                ("keyserver", "Fetch an existing key from keys.openpgp.org"),
+                ("url", "Download an armored public key from a URL"),
+                ("file", "Read an armored public key from a local file"),
+            ],
+            "generate",
+        )
+        backup_gpg_source = source
+        if source == "generate":
+            backup_key_reminder_mode = "generated"
+            default_home = str(Path.home() / ".gnupg")
+            use_default_keyring = True if backup_gpg_use_default_keyring is None else backup_gpg_use_default_keyring
+            if backup_gpg_home is None and backup_gpg_use_default_keyring is None:
+                use_default_keyring = prompt_yes_no(
+                    f"Use the default GnuPG home for the backup admin key ({default_home})?",
+                    default=True,
+                )
+            resolved_backup_gpg_home = None
+            if backup_gpg_home:
+                resolved_backup_gpg_home = Path(backup_gpg_home)
+                use_default_keyring = False
+            elif not use_default_keyring:
+                resolved_backup_gpg_home = Path(prompt("GnuPG home for the backup admin key", default_home))
+                backup_gpg_home = str(resolved_backup_gpg_home)
+            backup_gpg_use_default_keyring = use_default_keyring
+
+            backup_gpg_uid = backup_gpg_uid or prompt(
+                "Backup admin GPG UID",
+                f"{org} backup admin key <admin@{prod_domains[0] if prod_domains else dev_domain}>",
+            )
+            backup_gpg_key_type = backup_gpg_key_type or prompt(
+                f"Backup admin GPG key type ({DEFAULT_GPG_KEY_TYPE})",
+                DEFAULT_GPG_KEY_TYPE,
+            )
+            if backup_gpg_key_type.lower() == "rsa":
+                backup_gpg_key_length = backup_gpg_key_length or prompt("Backup admin GPG key length", "4096")
+            else:
+                backup_gpg_key_length = backup_gpg_key_length or "0"
+            backup_gpg_expire = backup_gpg_expire or prompt("Backup admin GPG expiration", "3y")
+            while not backup_gpg_passphrase:
+                backup_gpg_passphrase = prompt("Backup admin GPG passphrase (required)", "").strip()
+            backup_key_fingerprint, backup_public_key, backup_secret_key = generate_gpg_key(
+                homedir=resolved_backup_gpg_home,
+                uid=backup_gpg_uid,
+                key_type=backup_gpg_key_type,
+                key_length=int(backup_gpg_key_length),
+                expire=backup_gpg_expire,
+                passphrase=backup_gpg_passphrase,
+                usage="encrypt",
+            )
+            default_export = str(Path.home() / ".gnupg" / "saltshaker_admin_secretkey.pem")
+            export_secret = backup_gpg_secret_export
+            if export_secret is None:
+                export_secret = prompt_yes_no(
+                    "Export the generated backup admin secret key to a separate file?",
+                    default=True,
+                )
+            backup_gpg_secret_export = export_secret
+            if export_secret:
+                export_path = Path(
+                    backup_gpg_secret_export_path
+                    or prompt("Backup admin secret key export path", default_export)
+                )
+                backup_gpg_secret_export_path = str(export_path)
+                write_file(export_path, backup_secret_key, force=args.force)
+        else:
+            backup_key_reminder_mode = "supplied"
+            with tempfile.TemporaryDirectory(prefix="saltshaker-gpg-import-", dir=work_dir) as temp_dir:
+                import_home = Path(temp_dir)
+                if source == "keyserver":
+                    key_id = backup_gpg_key_id or prompt("OpenPGP key ID or email to fetch from keys.openpgp.org")
+                    backup_gpg_key_id = key_id
+                    backup_key_fingerprint, backup_public_key = fetch_key_from_keyserver(
+                        homedir=import_home,
+                        key_id=key_id,
+                    )
+                elif source == "url":
+                    key_url = backup_gpg_key_url or prompt("URL for armored public key")
+                    backup_gpg_key_url = key_url
+                    backup_key_fingerprint, backup_public_key = import_public_key(
+                        homedir=import_home,
+                        key_data=download_text(key_url),
+                    )
+                else:
+                    key_path = Path(backup_gpg_key_file or prompt("Path to armored public key"))
+                    backup_gpg_key_file = str(key_path)
+                    backup_key_fingerprint, backup_public_key = import_public_key(
+                        homedir=import_home,
+                        key_data=key_path.read_text(encoding="utf-8"),
+                    )
+
+        installed_keys.append(("saltshaker-backup-admin", backup_public_key, backup_key_fingerprint))
+
+    installed_keys_sls = build_installed_keys_sls(installed_keys)
+    write_file(secrets_dir / "gpg-installed-keys.sls", installed_keys_sls, force=args.force)
 
     info("Rendering global config pillar...", enabled=color_enabled)
     config_sls = build_config_sls(dev_domain, internal_domain, root_ca_name)
@@ -722,9 +1280,18 @@ def init(args: argparse.Namespace) -> None:
     print("\nNext config checks:")
     print(f"- Verify global domain settings in `{config_pillar}`")
     print(f"- Verify external_tld in `srv/pillar/local/wellknown.sls` is {dev_domain}")
+    print(f"- `vagrant/Vagrantfile` has been updated for {dev_domain} and is ready for use")
     if prod_domains:
         print(f"- Verify external_tld in `srv/pillar/hetzner/wellknown.sls` (env/hcloud) matches {prod_domains[0]}")
+        if acme_created:
+            print("- Use `python3 tools/saltshaker_secrets.py update-acme ...` later to renew the production wildcard certificate")
+        else:
+            print("- Run `python3 tools/saltshaker_secrets.py update-acme ...` to create or renew `shared/secrets/live-ssl.sls`")
     print("- Review SSH public keys in `srv/pillar/shared/ssh.sls` and update as needed")
+    if backup_key_fingerprint:
+        print(
+            f"- Use {backup_key_fingerprint[-16:]} for `duplicity-backup:gpg-keys` and `vault:encrypt-vault-keys-with-gpg` as needed"
+        )
 
     rerun = [
         "python3",
@@ -740,8 +1307,53 @@ def init(args: argparse.Namespace) -> None:
         f"--email={email}",
         f"--ec-curve={args.ec_curve}",
     ]
+    append_option(rerun, "--secrets-dir", args.secrets_dir)
+    append_option(rerun, "--crypto-dir", args.crypto_dir)
+    append_option(rerun, "--work-dir", args.work_dir)
+    append_option(rerun, "--vagrantfile", args.vagrantfile)
+    append_option(rerun, "--preseed-keys-dir", args.preseed_keys_dir)
+    append_option(rerun, "--root-days", args.root_days)
+    append_option(rerun, "--intermediate-days", args.intermediate_days)
+    append_option(rerun, "--leaf-days", args.leaf_days)
+    append_option(rerun, "--acme-email", (args.acme_email or email) if fetch_acme_now else args.acme_email)
+    append_bool_option(rerun, "--fetch-acme", fetch_acme_now)
+    append_bool_option(rerun, "--generate-gpg-signing", generate_signing_key)
+    append_option(rerun, "--gpg-uid", gpg_uid if generate_signing_key else args.gpg_uid)
+    append_option(rerun, "--gpg-key-type", gpg_key_type if generate_signing_key else args.gpg_key_type)
+    append_option(
+        rerun,
+        "--gpg-key-length",
+        (gpg_key_length if str(gpg_key_type).lower() == "rsa" else None) if generate_signing_key else args.gpg_key_length,
+    )
+    append_option(rerun, "--gpg-expire", gpg_expire if generate_signing_key else args.gpg_expire)
+    append_option(rerun, "--gpg-passphrase", gpg_passphrase if generate_signing_key else args.gpg_passphrase)
+    append_bool_option(rerun, "--configure-backup-gpg", configure_backup_key)
+    append_option(rerun, "--backup-gpg-source", backup_gpg_source)
+    append_bool_option(rerun, "--backup-gpg-use-default-keyring", backup_gpg_use_default_keyring)
+    append_option(rerun, "--backup-gpg-home", backup_gpg_home)
+    append_option(rerun, "--backup-gpg-uid", backup_gpg_uid)
+    append_option(rerun, "--backup-gpg-key-type", backup_gpg_key_type)
+    append_option(
+        rerun,
+        "--backup-gpg-key-length",
+        backup_gpg_key_length if str(backup_gpg_key_type).lower() == "rsa" else None,
+    )
+    append_option(rerun, "--backup-gpg-expire", backup_gpg_expire)
+    append_option(rerun, "--backup-gpg-key-id", backup_gpg_key_id)
+    append_option(rerun, "--backup-gpg-key-url", backup_gpg_key_url)
+    append_option(rerun, "--backup-gpg-key-file", backup_gpg_key_file)
+    append_option(rerun, "--backup-gpg-passphrase", backup_gpg_passphrase if backup_gpg_source == "generate" else None)
+    append_bool_option(rerun, "--backup-gpg-secret-export", backup_gpg_secret_export)
+    append_option(rerun, "--backup-gpg-secret-export-path", backup_gpg_secret_export_path)
+    if args.force:
+        rerun.append("--force")
     print("\nRepeat without prompts:")
     print("  " + " ".join(shlex.quote(part) for part in rerun))
+    if backup_key_reminder_mode is not None:
+        show_backup_gpg_disclaimer(
+            generated=backup_key_reminder_mode == "generated",
+            enabled=color_enabled,
+        )
 
 
 def build_parser() -> argparse.ArgumentParser:
@@ -756,7 +1368,10 @@ def build_parser() -> argparse.ArgumentParser:
     init_parser.add_argument("--crypto-dir")
     init_parser.add_argument("--config-pillar")
     init_parser.add_argument("--work-dir")
+    init_parser.add_argument("--vagrantfile")
+    init_parser.add_argument("--preseed-keys-dir")
     init_parser.add_argument("--force", action="store_true")
+    init_parser.add_argument("--verbose", action="store_true")
     init_parser.add_argument("--color", action=argparse.BooleanOptionalAction, default=None)
     init_parser.add_argument("--org")
     init_parser.add_argument("--country")
@@ -768,12 +1383,45 @@ def build_parser() -> argparse.ArgumentParser:
     init_parser.add_argument("--leaf-days", type=int, default=825)
     init_parser.add_argument("--ec-curve", default=DEFAULT_EC_CURVE)
     init_parser.add_argument("--acme-email")
+    init_parser.add_argument("--fetch-acme", action=argparse.BooleanOptionalAction, default=None)
+    init_parser.add_argument("--generate-gpg-signing", action=argparse.BooleanOptionalAction, default=None)
+    init_parser.add_argument("--configure-backup-gpg", action=argparse.BooleanOptionalAction, default=None)
     init_parser.add_argument("--gpg-uid")
     init_parser.add_argument("--gpg-key-type")
     init_parser.add_argument("--gpg-key-length")
     init_parser.add_argument("--gpg-expire")
-
+    init_parser.add_argument("--gpg-passphrase")
+    init_parser.add_argument("--backup-gpg-source", choices=["generate", "keyserver", "url", "file"])
+    init_parser.add_argument("--backup-gpg-use-default-keyring", action=argparse.BooleanOptionalAction, default=None)
+    init_parser.add_argument("--backup-gpg-home")
+    init_parser.add_argument("--backup-gpg-uid")
+    init_parser.add_argument("--backup-gpg-key-type")
+    init_parser.add_argument("--backup-gpg-key-length")
+    init_parser.add_argument("--backup-gpg-expire")
+    init_parser.add_argument("--backup-gpg-key-id")
+    init_parser.add_argument("--backup-gpg-key-url")
+    init_parser.add_argument("--backup-gpg-key-file")
+    init_parser.add_argument("--backup-gpg-passphrase")
+    init_parser.add_argument("--backup-gpg-secret-export", action=argparse.BooleanOptionalAction, default=None)
+    init_parser.add_argument("--backup-gpg-secret-export-path")
     init_parser.set_defaults(func=init)
+
+    acme_parser = sub.add_parser("update-acme", help="Fetch or renew production wildcard ACME certificate")
+    acme_parser.add_argument("--prod-domains")
+    acme_parser.add_argument("--acme-email")
+    acme_parser.add_argument("--secrets-dir")
+    acme_parser.add_argument("--work-dir")
+    acme_parser.add_argument("--force", action="store_true")
+    acme_parser.add_argument("--verbose", action="store_true")
+    acme_parser.add_argument("--color", action=argparse.BooleanOptionalAction, default=None)
+    acme_parser.set_defaults(func=update_acme)
+
+    clean_parser = sub.add_parser("clean", help="Remove generated working artifacts")
+    clean_parser.add_argument("--work-dir")
+    clean_parser.add_argument("--verbose", action="store_true")
+    clean_parser.add_argument("--color", action=argparse.BooleanOptionalAction, default=None)
+    clean_parser.set_defaults(func=clean)
+
     return parser
 
 
@@ -786,6 +1434,9 @@ def main() -> int:
         err(str(exc), enabled=sys.stdout.isatty())
         return 2
     except FileNotFoundError as exc:
+        err(str(exc), enabled=sys.stdout.isatty())
+        return 2
+    except RuntimeError as exc:
         err(str(exc), enabled=sys.stdout.isatty())
         return 2
     except ValueError as exc:
