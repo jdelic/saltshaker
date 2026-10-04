@@ -27,7 +27,7 @@ urls:
     concourse-fly: https://github.com/concourse/concourse/releases/download/v8.3.1/fly-8.3.1-linux-amd64.tgz
     consul: https://releases.hashicorp.com/consul/2.0.4/consul_2.0.4_linux_amd64.zip
     consul-template: https://releases.hashicorp.com/consul-template/0.43.0/consul-template_0.43.0_linux_amd64.zip
-    envoy: https://github.com/envoyproxy/envoy/releases/download/v1.39.0/envoy-1.39.0-linux-x86_64
+    envoy: https://github.com/envoyproxy/envoy/releases/download/v1.39.1/envoy-1.39.1-linux-x86_64
     nomad: https://releases.hashicorp.com/nomad/2.0.7/nomad_2.0.7_linux_amd64.zip
     nomad-autoscaler: https://releases.hashicorp.com/nomad-autoscaler/0.5.0/nomad-autoscaler_0.5.0_linux_amd64.zip
     nomad-cni: https://github.com/containernetworking/plugins/releases/download/v1.9.1/cni-plugins-linux-amd64-v1.9.1.tgz
@@ -42,7 +42,7 @@ hashes:
     concourse-fly: sha256=16efe4b0945d936b7669147b5beef4140c7e22b990d3776ddc08d63225c243e1
     consul: sha256=7a28033850a24fd411722593931625d8b548a27646c3ab70c1379ea7fd2af423
     consul-template: sha256=aa49f009a708f3e3beea990aa29cfaecfe6925c0b17ca9201747e1469922264e
-    envoy: sha256=4409dadc87931d8f8676314cbd83071cb65125fb4feac3f6335800580dfa9218
+    envoy: sha256=002c6e1c69ed0fa0ea381887247cadadfaec9481375fa8d8d2b1731eeabf40b8
     nomad: sha256=4c9b8a0850d6fd9caadbbab09b3e6fdf8b77aa777729543c70c61b85acca68c1
     nomad-autoscaler: sha256=45ef1905a44cf24f15e08c31f437ad5df7e55996eea91b313b0f2c5654ed1030
     nomad-cni: sha256=b98f74a0f8522f0a83867178729c1aa70f2158f90c45a2ca8fa791db1c76b303
