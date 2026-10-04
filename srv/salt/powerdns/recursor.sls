@@ -190,7 +190,6 @@ pdns-dhcpcd-enforce-nameservers:
         - name: /etc/dhcpcd.conf
         - text: |
             static domain_name_servers=169.254.1.1 ::1
-            nooption domain_name_servers
         - require:
             - service: pdns-recursor-service
         - require_in:
