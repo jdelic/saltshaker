@@ -39,6 +39,8 @@ GPG Key Lifecycle
 - Export public key for installation in ``/etc/apt/keyrings``.
 - Export private key for CI signing (installed in ``/etc/gpg-managed-keyring``).
 - Key material is embedded in ``gpg-package-signing.sls``.
+- Separately manage a backup/admin public key in ``gpg-installed-keys.sls`` so backup and Vault encryption can use the shared managed keyring without hard-coded keys in the main repo.
+- The backup/admin key may be generated into the operator's own GnuPG home, fetched from ``keys.openpgp.org``, downloaded from a URL, or imported from a local armored public key file.
 
 Safety Considerations
 ---------------------
