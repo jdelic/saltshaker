@@ -36,7 +36,6 @@ write_files:
           fi
           systemctl stop hc-net-ifup@$IFACE.service || /usr/bin/true
           systemctl mask hc-net-ifup@$IFACE.service
-          dhcpcd -x $IFACE || /usr/bin/true
           cat > /etc/network/interfaces.d/61-private-network <<EOF
           auto $IFACE
           iface $IFACE inet dhcp
