@@ -19,12 +19,12 @@ write_files:
       content: |
           #!/bin/bash
           curl -s http://169.254.169.254/hetzner/v1/metadata | yq -r '.["network-config"].config[0].subnets[] | select(.ipv6==true).address | rtrimstr("1/64")'
-%{ if internal_only ~}
+%{ if ipv6_only ~}
     - path: /tmp/setup_private_network.sh
       permissions: '0750'
       content: |
           #!/bin/bash
-          # Servers without public addresses are NATed through the natgateway via
+          # Servers without public IPv4 addresses are NATed through the natgateway via
           # the Hetzner network gateway. hc-utils brings up the private interface
           # with a bare dhcpcd that doesn't keep our default route, so hand the
           # interface over to ifupdown and add the route in post-up instead.
@@ -90,13 +90,9 @@ runcmd:
 %{ if additional_ipv4 != false || additional_ipv6 != false ~}
     - ifup eth0:1
 %{ endif ~}
-%{ if internal_only ~}
-    - /tmp/setup_private_network.sh
-%{ endif ~}
 %{ if ipv6_only ~}
     - echo true > /etc/salt/env.d/ipv6_only
-    - ip route del default || /usr/bin/true
-    - ip route add default via 10.0.0.1
+    - /tmp/setup_private_network.sh
     - echo "nameserver 8.8.8.8" >> /etc/resolv.conf
     - echo "Waiting for NAT to come up..."
     - /usr/bin/bash -c 'until dig +tries=1 +retry=0 debian.org > /dev/null; do sleep 1; echo -n "."; done; echo "";'
