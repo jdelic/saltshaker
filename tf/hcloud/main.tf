@@ -400,6 +400,7 @@ resource "hcloud_server" "servers" {
                     additional_ipv6 = each.value.additional_ipv6 == 1 ? hcloud_floating_ip.additional_ipv6[each.key].ip_address : false,
                     roles = lookup(each.value, "roles", []),
                     ipv6_only = each.value.ipv6_only == 1,
+                    internal_only = each.value.internal_only == 1,
                     desired_count_of_ipv6_ips = each.value.desired_count_of_ipv6_ips,
                     desired_count_of_additional_ipv6_ips = each.value.desired_count_of_additional_ipv6_ips,
                     hostname = each.key,
