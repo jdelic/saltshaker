@@ -193,7 +193,11 @@ consul-dhcpcd-stop-ip4ll-assignment:
 consul-dhcpcd-update:
     cmd.run:
         - name: dhcpcd -n
-        - onlyif: pgrep -x dhcpcd
+        # Only signal a dhcpcd running in manager mode. Without a manager "dhcpcd -n"
+        # starts a new one, which then also grabs interfaces that are managed by
+        # per-interface dhcpcd instances (hc-utils, ifupdown). Per-interface instances
+        # pick up the new config when they are restarted.
+        - onlyif: pgrep -f '^dhcpcd: \[manager\]'
         - require_in:
             - cmd: consul-sync-network
         - watch:
