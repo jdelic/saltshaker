@@ -79,6 +79,11 @@ _services: List[t_servicedict] = ast.literal_eval("""\
     .replace(": null", ": None").replace(": true", ": True").replace(": false", ": False") \
     .replace(":null", ":None").replace(":true", ":True").replace(":false", ":False"))
 
+# consul-template renders the default nftables table from its own environment, so all renderers on a
+# host can be pointed at a different table (e.g. using Environment= in consul-template's systemd unit).
+# --nftables-table overrides it.
+_default_nftables_table = '{{ env "SERVICERENDERER_NFTABLES_TABLE" }}' or "filter"
+
 _args = None
 
 
@@ -592,8 +597,8 @@ def _nft_any_address_for_family(family: str) -> str:
     return "::/0" if family == "ip6" else "0.0.0.0/0"
 
 
-def _nft_add_rule_cmd(family: str, chain: str, rule: t_nft_rule) -> List[str]:
-    return (["rule", family, "filter", chain] +
+def _nft_add_rule_cmd(family: str, table: str, chain: str, rule: t_nft_rule) -> List[str]:
+    return (["rule", family, table, chain] +
             [f"{' '.join(part)}" if isinstance(part, tuple) else part for part in rule])
 
 
@@ -642,7 +647,8 @@ def _get_service_tagports(svc: SmartstackService, tagprefix: str) -> Set[Tuple[s
 
 
 def _setup_nftables(services: List[SmartstackService], ips: List[str], nftable_mode: str, nftable_rules: str,
-                    input_chainname: str, output_chainname: str, debug: bool = False, verbose: bool = False) -> None:
+                    table_name: str, input_chainname: str, output_chainname: str, debug: bool = False,
+                    verbose: bool = False) -> None:
     if debug:
         print("========= NFTABLES RULES DEBUG =========")
 
@@ -726,22 +732,22 @@ def _setup_nftables(services: List[SmartstackService], ips: List[str], nftable_m
                     output_rule = None
 
                 if input_rule:
-                    input_cmd = _nft_add_rule_cmd(family, input_chainname, input_rule)
+                    input_cmd = _nft_add_rule_cmd(family, table_name, input_chainname, input_rule)
                     if debug:
                         print("%s: %s" % (svc.name, " ".join(["/usr/sbin/nft", "add"] +
                                                              input_cmd)))
                     else:
                         # check if the rule exists first...
                         with _nftables_lock():
-                            if not _check_nftables_rule_exists(family, "filter", input_chainname, input_rule, verbose):
+                            if not _check_nftables_rule_exists(family, table_name, input_chainname, input_rule, verbose):
                                 subprocess.call(["/usr/sbin/nft", "add"] + input_cmd)
                 if output_rule:
-                    output_cmd = _nft_add_rule_cmd(family, output_chainname, output_rule)
+                    output_cmd = _nft_add_rule_cmd(family, table_name, output_chainname, output_rule)
                     if debug:
                         print("%s: %s" % (svc.name, " ".join(["/usr/sbin/nft", "add"] + output_cmd)))
                     else:
                         with _nftables_lock():
-                            if not _check_nftables_rule_exists(family, "filter", output_chainname, output_rule, verbose):
+                            if not _check_nftables_rule_exists(family, table_name, output_chainname, output_rule, verbose):
                                 subprocess.call(["/usr/sbin/nft", "add"] + output_cmd)
 
         if open_output_rules:
@@ -751,12 +757,12 @@ def _setup_nftables(services: List[SmartstackService], ips: List[str], nftable_m
                                    (protocol, "dport", str(ruleport)), ("counter",), ("accept",)]
                     if nftable_mode == "conntrack":
                         output_rule = [("ct", "state", "new")] + output_rule
-                    output_cmd = _nft_add_rule_cmd(family, output_chainname, output_rule)
+                    output_cmd = _nft_add_rule_cmd(family, table_name, output_chainname, output_rule)
                     if debug:
                         print("%s: %s" % (svc.name, " ".join(["/usr/sbin/nft", "add"] + output_cmd)))
                     else:
                         with _nftables_lock():
-                            if not _check_nftables_rule_exists(family, "filter", output_chainname, output_rule, verbose):
+                            if not _check_nftables_rule_exists(family, table_name, output_chainname, output_rule, verbose):
                                 subprocess.call(["/usr/sbin/nft", "add"] + output_cmd)
 
 
@@ -819,6 +825,10 @@ def main() -> None:
                              "'output' opens smartstack:outport: egress rules and, in plain mode, the existing "
                              "source-port output rules for listener traffic. The default is 'both' for backwards "
                              "compatibility.")
+    parser.add_argument("--nftables-table", dest="nftables_table", default=_default_nftables_table,
+                        help="The name of the nftables table containing the input and output chains. The default "
+                             "is rendered by consul-template from the SERVICERENDERER_NFTABLES_TABLE environment "
+                             "variable and falls back to 'filter' (Default: %(default)s)")
     parser.add_argument("--nftables-input-chain", dest="nftables_input_chain", default="input",
                         help="The name of the input filter chain to use for nftables.")
     parser.add_argument("--nftables-output-chain", dest="nftables_output_chain", default="output",
@@ -841,6 +851,10 @@ def main() -> None:
         if os.getuid() != 0:
             print("Must run as root if --open-nftables is used")
             sys.exit(1)
+
+    if not re.match(r"^[A-Za-z_][A-Za-z0-9_-]*$", _args.nftables_table):
+        print("ERROR: '%s' is not a valid nftables table name" % _args.nftables_table)
+        sys.exit(1)
 
     for ip in _args.localips:
         try:
@@ -892,8 +906,8 @@ def main() -> None:
 
     if (_args.open_nftables and _args.only_nftables) or _args.debug_nftables:
         _setup_nftables(context["services"], context["localips"], _args.open_nftables, _args.nftables_rules,
-                        _args.nftables_input_chain, _args.nftables_output_chain, debug=_args.debug_nftables,
-                        verbose=_args.verbose)
+                        _args.nftables_table, _args.nftables_input_chain, _args.nftables_output_chain,
+                        debug=_args.debug_nftables, verbose=_args.verbose)
         sys.exit(0)
 
     env = jinja2.Environment(extensions=['jinja2.ext.do'])
@@ -910,8 +924,8 @@ def main() -> None:
 
     if _args.open_nftables:
         _setup_nftables(context["services"], context["localips"], _args.open_nftables, _args.nftables_rules,
-                        _args.nftables_input_chain, _args.nftables_output_chain, debug=_args.debug_nftables,
-                        verbose=_args.verbose)
+                        _args.nftables_table, _args.nftables_input_chain, _args.nftables_output_chain,
+                        debug=_args.debug_nftables, verbose=_args.verbose)
     if _args.command:
         if _args.verbose:
             print("Executing command: %s" % _args.command)

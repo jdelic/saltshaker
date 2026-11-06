@@ -2,7 +2,7 @@
 
 #log-input-drops:
 #    nftables.append:
-#        - table: filter
+#        - table: saltshaker
 #        - chain: INPUT
 #        - jump: log
 #        - log-prefix: "netfilter INPUT dropped: "
@@ -13,7 +13,7 @@
 
 #log-output-drops:
 #    nftables.append:
-#        - table: filter
+#        - table: saltshaker
 #        - chain: OUTPUT
 #        - jump: log
 #        - log-prefix: "netfilter OUTPUT dropped: "
@@ -24,7 +24,7 @@
 
 #log-forward-drops:
 #    nftables.append:
-#        - table: filter
+#        - table: saltshaker
 #        - chain: FORWARD
 #        - jump: log
 #        - log-prefix: "netfilter FORWARD dropped: "
