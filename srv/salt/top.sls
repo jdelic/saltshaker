@@ -128,7 +128,7 @@ base:
         - mn.cas.server
         - mn.appconfig
         - docker.authserver_dockerregistry  # empty unless a JWT key is configured
-        - apache.webdav_permissions_py
+        - apache.webdav_permissions
         - dev.concourse.authserver_oauth2
         - vaultwarden.authserver_permissions
         - dovecot.authserver_permissions
