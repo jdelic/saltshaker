@@ -338,7 +338,7 @@ fly-link-teams:
 
 concourse-tcp-in{{pillar.get('concourse-server', {}).get('tsa-port', 2222)}}-recv-ipv4:
     nftables.append:
-        - table: filter
+        - table: saltshaker
         - chain: input
         - family: ip4
         - jump: accept
@@ -350,7 +350,6 @@ concourse-tcp-in{{pillar.get('concourse-server', {}).get('tsa-port', 2222)}}-rec
         - match: state
         - connstate: new
         - proto: tcp
-        - save: True
         - require:
             - sls: basics.nftables.setup
         - require_in:
@@ -359,7 +358,7 @@ concourse-tcp-in{{pillar.get('concourse-server', {}).get('tsa-port', 2222)}}-rec
 
 concourse-tcp-in{{pillar.get('concourse-server', {}).get('atc-port', 8080)}}-recv-ipv4:
     nftables.append:
-        - table: filter
+        - table: saltshaker
         - chain: input
         - family: ip4
         - jump: accept
@@ -371,7 +370,6 @@ concourse-tcp-in{{pillar.get('concourse-server', {}).get('atc-port', 8080)}}-rec
         - match: state
         - connstate: new
         - proto: tcp
-        - save: True
         - require:
             - sls: basics.nftables.setup
         - require_in:
@@ -381,7 +379,7 @@ concourse-tcp-in{{pillar.get('concourse-server', {}).get('atc-port', 8080)}}-rec
 # allow us to talk to others
 concourse-tcp-out{{pillar.get('concourse-server', {}).get('atc-port', 8080)}}-send-ipv4:
     nftables.append:
-        - table: filter
+        - table: saltshaker
         - chain: output
         - family: ip4
         - jump: accept
@@ -393,7 +391,6 @@ concourse-tcp-out{{pillar.get('concourse-server', {}).get('atc-port', 8080)}}-se
         - match: state
         - connstate: new
         - proto: tcp
-        - save: True
         - require:
             - sls: basics.nftables.setup
         - require_in:

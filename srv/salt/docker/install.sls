@@ -47,7 +47,7 @@ dockerd-service:
 
 docker-bridge-tcp-ipv4-accept:
     nftables.append:
-        - table: filter
+        - table: saltshaker
         - chain: input
         - family: ip4
         - jump: accept
@@ -55,14 +55,13 @@ docker-bridge-tcp-ipv4-accept:
         - match: state
         - connstate: new
         - proto: tcp
-        - save: True
         - require:
             - sls: basics.nftables.setup
 
 
 docker-bridge-udp-ipv4-accept:
     nftables.append:
-        - table: filter
+        - table: saltshaker
         - chain: input
         - family: ip4
         - jump: accept
@@ -70,7 +69,6 @@ docker-bridge-udp-ipv4-accept:
         - match: state
         - connstate: new
         - proto: udp
-        - save: True
         - require:
             - sls: basics.nftables.setup
 
@@ -78,7 +76,7 @@ docker-bridge-udp-ipv4-accept:
 # docker-proxy needs to take an incoming connection and open a new connection to the container
 docker-bridge-tcp-ipv4-output-accept:
     nftables.append:
-        - table: filter
+        - table: saltshaker
         - chain: output
         - family: ip4
         - jump: accept
@@ -86,14 +84,13 @@ docker-bridge-tcp-ipv4-output-accept:
         - match: state
         - connstate: new
         - proto: tcp
-        - save: True
         - require:
             - sls: basics.nftables.setup
 
 
 docker-bridge-udp-ipv4-output-accept:
     nftables.append:
-        - table: filter
+        - table: saltshaker
         - chain: output
         - family: ip4
         - jump: accept
@@ -101,14 +98,13 @@ docker-bridge-udp-ipv4-output-accept:
         - match: state
         - connstate: new
         - proto: udp
-        - save: True
         - require:
             - sls: basics.nftables.setup
 
 
 docker-bridge-ipv4-forward-accept:
     nftables.append:
-        - table: filter
+        - table: saltshaker
         - chain: forward
         - family: ip4
         - jump: accept
@@ -116,21 +112,19 @@ docker-bridge-ipv4-forward-accept:
         - of: docker0
         - match: state
         - connstate: new
-        - save: True
         - require:
             - sls: basics.nftables.setup
 
 
 docker-bridge-ipv4-forward-reverse:
     nftables.append:
-        - table: filter
+        - table: saltshaker
         - chain: forward
         - family: ip4
         - jump: accept
         - if: docker0
         - match: state
         - connstate: new
-        - save: True
         - require:
             - sls: basics.nftables.setup
 

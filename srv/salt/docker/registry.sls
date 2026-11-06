@@ -104,7 +104,7 @@ docker-registry-servicedef:
 
 docker-registry-tcp-in{{registry_port}}-recv-ipv4:
     nftables.append:
-        - table: filter
+        - table: saltshaker
         - chain: input
         - family: ip4
         - jump: accept
@@ -114,20 +114,18 @@ docker-registry-tcp-in{{registry_port}}-recv-ipv4:
         - match: state
         - connstate: new
         - proto: tcp
-        - save: True
         - require:
             - sls: basics.nftables.setup
 
 
 docker-registry-tcp-in{{registry_port}}-forward-ipv4:
     nftables.append:
-        - table: filter
+        - table: saltshaker
         - chain: forward
         - family: ip4
         - jump: accept
         - dport: {{registry_port}}
         - proto: tcp
-        - save: True
         - require:
             - sls: basics.nftables.setup
 
