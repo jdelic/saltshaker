@@ -154,7 +154,7 @@ dovecot-consul-servicedef:
 
 dovecot-in993-recv-internal:
     nftables.append:
-        - table: filter
+        - table: saltshaker
         - chain: input
         - family: ip4
         - jump: accept
@@ -164,7 +164,6 @@ dovecot-in993-recv-internal:
         - match: state
         - connstate: new
         - proto: tcp
-        - save: True
         - require:
             - sls: basics.nftables.setup
 
@@ -174,7 +173,7 @@ dovecot-in993-recv-internal:
     {% if pillar['imap-incoming'].get('bind-ipv4', True) %}
 dovecot-in{{port}}-recv-ipv4:
     nftables.append:
-        - table: filter
+        - table: saltshaker
         - chain: input
         - family: ip4
         - jump: accept
@@ -184,14 +183,13 @@ dovecot-in{{port}}-recv-ipv4:
         - match: state
         - connstate: new
         - proto: tcp
-        - save: True
         - require:
             - sls: basics.nftables.setup
     {% endif %}
     {% if pillar['imap-incoming'].get('bind-ipv6', True) %}
 dovecot-in{{port}}-recv-ipv6:
     nftables.append:
-        - table: filter
+        - table: saltshaker
         - chain: input
         - family: ip6
         - jump: accept
@@ -201,7 +199,6 @@ dovecot-in{{port}}-recv-ipv6:
         - match: state
         - connstate: new
         - proto: tcp
-        - save: True
         - require:
             - sls: basics.nftables.setup
     {% endif %}

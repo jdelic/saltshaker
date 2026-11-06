@@ -230,7 +230,7 @@ postgresql-servicedef:
 
 postgresql-in{{port}}-recv-ip4:
     nftables.append:
-        - table: filter
+        - table: saltshaker
         - chain: input
         - jump: accept
         - family: ip4
@@ -241,7 +241,6 @@ postgresql-in{{port}}-recv-ip4:
         - dport: {{port}}
         - match: state
         - connstate: new
-        - save: True
         - require:
             - sls: basics.nftables.setup
         - require_in:

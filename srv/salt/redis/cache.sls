@@ -28,7 +28,7 @@ redis-cache:
 # allow locals to contact us on port 6379
 redis-in{{pillar.get('redis-server', {}).get('bind-port', 6379)}}-recv:
     nftables.append:
-        - table: filter
+        - table: saltshaker
         - chain: input
         - family: ip4
         - jump: accept
@@ -42,7 +42,6 @@ redis-in{{pillar.get('redis-server', {}).get('bind-port', 6379)}}-recv:
         - dport: {{pillar.get('redis-server', {}).get('bind-port', 6379)}}
         - match: state
         - connstate: new
-        - save: True
         - require:
             - sls: basics.nftables.setup
 

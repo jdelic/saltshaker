@@ -213,7 +213,7 @@ standardnotes-systemd:
 
 standardnotes-http-tcp-in{{port}}-ipv4:
     nftables.append:
-        - table: filter
+        - table: saltshaker
         - chain: input
         - family: ip4
         - jump: accept
@@ -223,14 +223,13 @@ standardnotes-http-tcp-in{{port}}-ipv4:
         - match: state
         - connstate: new
         - proto: tcp
-        - save: True
         - require:
             - sls: basics.nftables.setup
 
 
 standardnotes-webapp-http-tcp-in{{webapp_port}}-ipv4:
     nftables.append:
-        - table: filter
+        - table: saltshaker
         - chain: input
         - family: ip4
         - jump: accept
@@ -240,14 +239,13 @@ standardnotes-webapp-http-tcp-in{{webapp_port}}-ipv4:
         - match: state
         - connstate: new
         - proto: tcp
-        - save: True
         - require:
             - sls: basics.nftables.setup
 
 
 standardnotes-files-http-tcp-in{{files_port}}-ipv4:
     nftables.append:
-        - table: filter
+        - table: saltshaker
         - chain: input
         - family: ip4
         - jump: accept
@@ -257,14 +255,13 @@ standardnotes-files-http-tcp-in{{files_port}}-ipv4:
         - match: state
         - connstate: new
         - proto: tcp
-        - save: True
         - require:
             - sls: basics.nftables.setup
 
 
 standardnotes-bridge-tcp-ipv4-accept:
     nftables.append:
-        - table: filter
+        - table: saltshaker
         - chain: input
         - family: ip4
         - jump: accept
@@ -274,14 +271,13 @@ standardnotes-bridge-tcp-ipv4-accept:
         - match: state
         - connstate: new
         - proto: tcp
-        - save: True
         - require:
             - sls: basics.nftables.setup
 
 
 standardnotes-bridge-udp-ipv4-accept:
     nftables.append:
-        - table: filter
+        - table: saltshaker
         - chain: input
         - family: ip4
         - jump: accept
@@ -289,14 +285,13 @@ standardnotes-bridge-udp-ipv4-accept:
         - destination: {{pillar['standardnotes']['bridge-cidr']}}
         - if: standardnotes0
         - proto: udp
-        - save: True
         - require:
             - sls: basics.nftables.setup
 
 
 standardnotes-bridge-ipv4-forward-accept:
     nftables.append:
-        - table: filter
+        - table: saltshaker
         - chain: forward
         - family: ip4
         - jump: accept
@@ -304,21 +299,19 @@ standardnotes-bridge-ipv4-forward-accept:
         - of: standardnotes0
         - match: state
         - connstate: new
-        - save: True
         - require:
             - sls: basics.nftables.setup
 
 
 standardnotes-bridge-ipv4-forward-reverse:
     nftables.append:
-        - table: filter
+        - table: saltshaker
         - chain: forward
         - family: ip4
         - jump: accept
         - if: standardnotes0
         - match: state
         - connstate: new
-        - save: True
         - require:
             - sls: basics.nftables.setup
 
