@@ -190,11 +190,32 @@ pdns-resolvconf-head:
             - cmd: powerdns-sync
 
 
+# resolvconf appends the nameservers from all records in /run/resolvconf/interface/ that match a pattern in
+# interface-order. dhcpcd, dhclient and ifupdown (dns-nameservers from cloud-init) all register records there,
+# which adds the upstream resolvers or duplicates of ours. Without any patterns no records are used, so
+# resolv.conf only contains what's in head.
+pdns-resolvconf-interface-order:
+    file.managed:
+        - name: /etc/resolvconf/interface-order
+        - contents: |
+            # Managed by Salt (powerdns.recursor).
+            # Intentionally contains no patterns, so resolvconf ignores all interface records and
+            # /etc/resolv.conf only contains the local pdns-recursor from resolv.conf.d/head.
+        - mode: '0644'
+        - user: root
+        - group: root
+        - require:
+            - pkg: pdns-resolvconf
+        - require_in:
+            - cmd: powerdns-sync
+
+
 pdns-resolvconf-update:
     cmd.run:
         - name: /usr/sbin/resolvconf -u
         - onchanges:
             - file: pdns-resolvconf-head
+            - file: pdns-resolvconf-interface-order
         - require_in:
             - cmd: powerdns-sync
 
