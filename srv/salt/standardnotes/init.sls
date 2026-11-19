@@ -220,9 +220,6 @@ standardnotes-systemd:
             - file: standardnotes-webapp-default-sync-script
             - file: standardnotes-add-user-script
             - cmd: standardnotes-sync
-            # the bridge firewall rules must exist before the containers start:
-            # br_netfilter is loaded, so even container-to-container traffic on
-            # standardnotes0 traverses the forward chain (policy drop)
             - nftables: standardnotes-bridge-tcp-ipv4-accept
             - nftables: standardnotes-bridge-udp-ipv4-accept
             - nftables: standardnotes-bridge-ipv4-forward-accept
