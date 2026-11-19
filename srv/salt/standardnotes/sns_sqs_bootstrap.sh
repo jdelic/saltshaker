@@ -4,37 +4,42 @@ set -euo pipefail
 
 echo "configuring sns/sqs"
 echo "==================="
-LOCALSTACK_HOST=localhost
+# Creates the SNS topics, SQS queues and subscriptions the Standard Notes
+# server expects. Runs in a one-shot aws-cli container on every
+# "docker compose up" against the Floci SNS/SQS emulator. All calls are
+# idempotent (create-topic/create-queue/subscribe return the existing
+# resource), so re-running it against persisted state is safe.
+SNS_SQS_ENDPOINT="${SNS_SQS_ENDPOINT:-http://localstack:4566}"
 AWS_REGION=us-east-1
 LOCALSTACK_DUMMY_ID=000000000000
 
 get_all_queues() {
-  awslocal --endpoint-url=http://${LOCALSTACK_HOST}:4566 sqs list-queues
+  aws --endpoint-url="${SNS_SQS_ENDPOINT}" sqs list-queues
 }
 
 create_queue() {
   local QUEUE_NAME_TO_CREATE=$1
-  awslocal --endpoint-url=http://${LOCALSTACK_HOST}:4566 sqs create-queue --queue-name ${QUEUE_NAME_TO_CREATE}
+  aws --endpoint-url="${SNS_SQS_ENDPOINT}" sqs create-queue --queue-name ${QUEUE_NAME_TO_CREATE}
 }
 
 get_all_topics() {
-  awslocal --endpoint-url=http://${LOCALSTACK_HOST}:4566 sns list-topics
+  aws --endpoint-url="${SNS_SQS_ENDPOINT}" sns list-topics
 }
 
 create_topic() {
   local TOPIC_NAME_TO_CREATE=$1
-  awslocal --endpoint-url=http://${LOCALSTACK_HOST}:4566 sns create-topic --name ${TOPIC_NAME_TO_CREATE}
+  aws --endpoint-url="${SNS_SQS_ENDPOINT}" sns create-topic --name ${TOPIC_NAME_TO_CREATE}
 }
 
 link_queue_and_topic() {
   local TOPIC_ARN_TO_LINK=$1
   local QUEUE_ARN_TO_LINK=$2
-  awslocal --endpoint-url=http://${LOCALSTACK_HOST}:4566 sns subscribe --topic-arn ${TOPIC_ARN_TO_LINK} --protocol sqs --notification-endpoint ${QUEUE_ARN_TO_LINK}
+  aws --endpoint-url="${SNS_SQS_ENDPOINT}" sns subscribe --topic-arn ${TOPIC_ARN_TO_LINK} --protocol sqs --notification-endpoint ${QUEUE_ARN_TO_LINK}
 }
 
 get_queue_arn_from_name() {
   local QUEUE_NAME=$1
-  echo "arn:aws:sns:${AWS_REGION}:${LOCALSTACK_DUMMY_ID}:$QUEUE_NAME"
+  echo "arn:aws:sqs:${AWS_REGION}:${LOCALSTACK_DUMMY_ID}:$QUEUE_NAME"
 }
 
 get_topic_arn_from_name() {
