@@ -222,6 +222,67 @@ pdns-dhclient-enforce-nameservers:
             - service: pdns-recursor-service
         - require_in:
             - cmd: powerdns-sync
+
+# dhclient registers the nameservers it got with resolvconf as <interface>.dhclient and
+# <interface>.ip6.dhclient. With the supersede lines above those only contain our
+# resolvers. Any other nameserver there means a dhclient that still runs with its
+# config from before this state changed dhclient.conf: dhclient reads it only at
+# startup, so it keeps registering the DHCP server's nameservers on every lease renewal
+# until it is restarted. That entry ends up in /etc/resolv.conf after our resolver,
+# containers copy it, and musl queries all nameservers in parallel, so the DHCP
+# server's answers (NXDOMAIN for .consul) randomly win there.
+pdns-dhclient-stale-resolvconf-entries:
+    test.succeed_with_changes:
+        - onlyif: |
+            for entry in /run/resolvconf/interface/*.dhclient; do
+                [ -e "$entry" ] || continue
+                grep '^nameserver' "$entry" \
+                    | grep -qvE '^nameserver[[:space:]]+(169\.254\.1\.1|::1)[[:space:]]*$' \
+                    && exit 0
+            done
+            exit 1
+
+# dhclient has no reload signal, so restart every running dhclient with its original
+# arguments (as started by ifupdown or hc-utils). SIGTERM makes dhclient exit without
+# running dhclient-script, so addresses, routes and the lease stay in place. The new
+# instance requests the same lease again (INIT-REBOOT) and registers our nameservers
+# with resolvconf, replacing the stale entries. "dhclient -x" would run the STOP hook
+# instead, which flushes the interface's addresses. Instances started in the
+# foreground (-d) are left alone, since starting them again would block this state.
+pdns-dhclient-restart:
+    cmd.run:
+        - shell: /bin/bash
+        - name: |
+            rc=0
+            for pid in $(pgrep -x dhclient); do
+                mapfile -d '' -t args < "/proc/$pid/cmdline" || continue
+                [ "${#args[@]}" -gt 0 ] || continue
+                if printf '%s\n' "${args[@]}" | grep -qx -- '-d'; then
+                    echo "not restarting foreground dhclient $pid: ${args[*]}" >&2
+                    rc=1
+                    continue
+                fi
+                kill -TERM "$pid"
+                for i in $(seq 1 50); do
+                    kill -0 "$pid" 2>/dev/null || break
+                    sleep 0.2
+                done
+                if kill -0 "$pid" 2>/dev/null; then
+                    echo "dhclient $pid did not exit, not restarting it" >&2
+                    rc=1
+                    continue
+                fi
+                "${args[@]}" || rc=1
+            done
+            exit $rc
+        - onchanges:
+            - file: pdns-dhclient-enforce-nameservers
+            - test: pdns-dhclient-stale-resolvconf-entries
+        - require:
+            - pkg: pdns-resolvconf
+            - file: pdns-resolvconf-symlink
+        - require_in:
+            - cmd: powerdns-sync
 {% elif salt['file.file_exists']('/etc/dhcpcd.conf') and salt['cmd.retcode']('pgrep -x dhcpcd') == 0 %}
 # dhcpcd must not handle DNS at all. resolvconf gets our nameservers from
 # pdns-resolvconf-head. "nohook resolv.conf" is what dhcpcd.conf(5) recommends to
@@ -276,6 +337,67 @@ pdns-dhcpcd-update:
             - file: pdns-dhcpcd-ignore-nameservers
             - file: pdns-dhcpcd-remove-static-nameservers
             - file: pdns-dhcpcd-remove-nameservers-option
+
+# A dhcpcd resolvconf entry (<interface>.dhcp, .dhcp6 or .ra) means a dhcpcd that still
+# runs with its config from before this state is (or was) running. This triggers the
+# reload below also on hosts where dhcpcd.conf was changed by an earlier run.
+pdns-dhcpcd-stale-resolvconf-entries:
+    test.succeed_with_changes:
+        - onlyif: 'ls /run/resolvconf/interface/ | grep -qE "\.(dhcp|dhcp6|ra)$"'
+
+
+# ifupdown (and hc-utils) start one dhcpcd per interface instead of a manager, so the
+# reload above skips them. Such an instance keeps the config it had before this state
+# changed it (asking for nameservers, resolv.conf hook enabled) and registers the DHCP
+# nameservers with resolvconf on every lease renewal until the next reboot. SIGHUP
+# ("dhcpcd -n <interface>") makes a running instance reload dhcpcd.conf and rebind.
+# Only signal instances whose pid is alive: for an interface without a running
+# instance, "dhcpcd -n" would start a new one.
+pdns-dhcpcd-update-interfaces:
+    cmd.run:
+        - name: |
+            for pidfile in /run/dhcpcd/*.pid; do
+                [ -e "$pidfile" ] || continue
+                kill -0 "$(cat "$pidfile")" 2>/dev/null || continue
+                # pidfiles are <interface>.pid, or <interface>-4.pid / <interface>-6.pid
+                # for instances that only run one address family
+                name="$(basename "$pidfile" .pid)"
+                case "$name" in
+                    *-4) dhcpcd -4 -n "${name%-4}" ;;
+                    *-6) dhcpcd -6 -n "${name%-6}" ;;
+                    *)   dhcpcd -n "$name" ;;
+                esac
+            done
+        - onchanges:
+            - file: pdns-dhcpcd-ignore-nameservers
+            - file: pdns-dhcpcd-remove-static-nameservers
+            - file: pdns-dhcpcd-remove-nameservers-option
+            - test: pdns-dhcpcd-stale-resolvconf-entries
+        - require:
+            - cmd: pdns-dhcpcd-update
+        - require_in:
+            - cmd: powerdns-sync
+
+# With "nohook resolv.conf" loaded, dhcpcd no longer removes the nameservers it
+# registered with resolvconf earlier (<interface>.dhcp, .dhcp6 and .ra), so they would
+# stay in /etc/resolv.conf after our resolver until the next reboot. Containers copy
+# resolv.conf when they are created, and musl queries all nameservers in parallel, so
+# the DHCP server's answers (NXDOMAIN for .consul) randomly win there.
+pdns-dhcpcd-remove-resolvconf-entries:
+    cmd.run:
+        - name: |
+            for entry in /run/resolvconf/interface/*.dhcp /run/resolvconf/interface/*.dhcp6 \
+                         /run/resolvconf/interface/*.ra; do
+                [ -e "$entry" ] && resolvconf -d "$(basename "$entry")"
+            done
+            resolvconf -u
+        - onlyif: 'ls /run/resolvconf/interface/ | grep -qE "\.(dhcp|dhcp6|ra)$"'
+        - require:
+            - pkg: pdns-resolvconf
+            - cmd: pdns-dhcpcd-update
+            - cmd: pdns-dhcpcd-update-interfaces
+        - require_in:
+            - cmd: powerdns-sync
 {% endif %}
 
 
