@@ -95,6 +95,17 @@ standardnotes-redis-dir:
             - file: standardnotes-base-dir
 
 
+standardnotes-floci-dir:
+    file.directory:
+        - name: /secure/standardnotes/floci
+        - user: root
+        - group: root
+        - mode: '0750'
+        - makedirs: True
+        - require:
+            - file: standardnotes-base-dir
+
+
 standardnotes-envfile-base:
     file.managed:
         - name: /etc/standardnotes/.env
@@ -145,15 +156,20 @@ standardnotes-compose-file:
             - file: standardnotes-config-dir
 
 
-standardnotes-localstack-bootstrap:
+standardnotes-sns-sqs-bootstrap:
     file.managed:
-        - name: /etc/standardnotes/localstack_bootstrap.sh
-        - source: salt://standardnotes/localstack_bootstrap.sh
+        - name: /etc/standardnotes/sns_sqs_bootstrap.sh
+        - source: salt://standardnotes/sns_sqs_bootstrap.sh
         - user: root
         - group: root
         - mode: '0755'
         - require:
             - file: standardnotes-config-dir
+
+
+standardnotes-localstack-bootstrap-absent:
+    file.absent:
+        - name: /etc/standardnotes/localstack_bootstrap.sh
 
 
 standardnotes-webapp-default-sync-script:
@@ -197,16 +213,21 @@ standardnotes-systemd:
             - file: standardnotes-uploads-dir
             - file: standardnotes-db-import-dir
             - file: standardnotes-redis-dir
+            - file: standardnotes-floci-dir
             - file: standardnotes-envfile-base
             - file: standardnotes-compose-file
-            - file: standardnotes-localstack-bootstrap
+            - file: standardnotes-sns-sqs-bootstrap
             - file: standardnotes-webapp-default-sync-script
             - file: standardnotes-add-user-script
             - cmd: standardnotes-sync
+            - nftables: standardnotes-bridge-tcp-ipv4-accept
+            - nftables: standardnotes-bridge-udp-ipv4-accept
+            - nftables: standardnotes-bridge-ipv4-forward-accept
+            - nftables: standardnotes-bridge-ipv4-forward-reverse
         - watch:
             - file: standardnotes-envfile-base
             - file: standardnotes-compose-file
-            - file: standardnotes-localstack-bootstrap
+            - file: standardnotes-sns-sqs-bootstrap
             - file: standardnotes-webapp-default-sync-script
             - systemdunit: standardnotes-systemd
 

@@ -106,6 +106,18 @@ anytype-systemdunit:
         - require:
             - systemdunit: anytype-systemdunit
             - cmd: anytype-env-file
+            - nftables: anytype-bridge-forward-ipv4
+            - nftables: anytype-bridge-forward-ipv4-reverse
+            - nftables: anytype-bridge-forward-ipv6
+            - nftables: anytype-bridge-forward-ipv6-reverse
+            - nftables: anytype-bridge-input-tcp-ipv4-accept
+            - nftables: anytype-bridge-input-udp-ipv4-accept
+            - nftables: anytype-bridge-input-tcp-ipv6-accept
+            - nftables: anytype-bridge-input-udp-ipv6-accept
+            - nftables: anytype-bridge-output-tcp-ipv4-accept
+            - nftables: anytype-bridge-output-udp-ipv4-accept
+            - nftables: anytype-bridge-output-tcp-ipv6-accept
+            - nftables: anytype-bridge-output-udp-ipv6-accept
 
 
 anytype-tcp-in10001-10006-ipv4:
