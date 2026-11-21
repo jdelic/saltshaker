@@ -256,7 +256,7 @@ pdns-dhclient-restart:
             rc=0
             for pid in $(pgrep -x dhclient); do
                 mapfile -d '' -t args < "/proc/$pid/cmdline" || continue
-                [ "${#args[@]}" -gt 0 ] || continue
+                [ -n "${args[0]:-}" ] || continue
                 if printf '%s\n' "${args[@]}" | grep -qx -- '-d'; then
                     echo "not restarting foreground dhclient $pid: ${args[*]}" >&2
                     rc=1
