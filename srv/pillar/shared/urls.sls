@@ -23,29 +23,29 @@ repos:
 
 urls:
     acme: https://github.com/acmesh-official/acme.sh/archive/refs/tags/3.1.6.zip
-    concourse: https://github.com/concourse/concourse/releases/download/v8.3.3/concourse-8.3.3-linux-amd64.tgz
-    concourse-fly: https://github.com/concourse/concourse/releases/download/v8.3.3/fly-8.3.3-linux-amd64.tgz
+    concourse: https://github.com/concourse/concourse/releases/download/v8.3.4/concourse-8.3.4-linux-amd64.tgz
+    concourse-fly: https://github.com/concourse/concourse/releases/download/v8.3.4/fly-8.3.4-linux-amd64.tgz
     consul: https://releases.hashicorp.com/consul/2.1.0/consul_2.1.0_linux_amd64.zip
     consul-template: https://releases.hashicorp.com/consul-template/0.43.1/consul-template_0.43.1_linux_amd64.zip
     envoy: https://github.com/envoyproxy/envoy/releases/download/v1.40.2/envoy-1.40.2-linux-x86_64
     nomad: https://releases.hashicorp.com/nomad/2.1.1/nomad_2.1.1_linux_amd64.zip
     nomad-autoscaler: https://releases.hashicorp.com/nomad-autoscaler/0.6.0/nomad-autoscaler_0.6.0_linux_amd64.zip
     nomad-cni: https://github.com/containernetworking/plugins/releases/download/v1.9.1/cni-plugins-linux-amd64-v1.9.1.tgz
-    vault: https://releases.hashicorp.com/vault/2.2.1/vault_2.2.1_linux_amd64.zip
+    vault: https://releases.hashicorp.com/vault/2.2.2/vault_2.2.2_linux_amd64.zip
     vault-gpg-plugin: https://github.com/LeSuisse/vault-gpg-plugin/releases/download/v0.6.3/linux_amd64.zip
     vault-ssh-helper: https://releases.hashicorp.com/vault-ssh-helper/0.2.4/vault-ssh-helper_0.2.4_linux_amd64.zip
 
 
 hashes:
     acme: sha256=5b4045b6759cba44eb909f214c768f6ebdc4de149cfc8206dda6fa486f2e108d
-    concourse: sha256=6b7699a3d3d1066b15011833dfb2712af5ca94b1f49090d035596f1c5fa82ba8
-    concourse-fly: sha256=e689fdc1209463410fafe7093a74769dc2a7965c995307e11253a037813f742c
+    concourse: sha256=1fdeda7affb67b0e572761d8045913f0c3124a73159ac53f97122292844b2b84
+    concourse-fly: sha256=1ee9dcb1a312a2db3ebb998fbc6655ee72d806d9d6412f2ab137eb1b9b99fb6c
     consul: sha256=a9c9cdf1ed93bd29a9671b02e5433131f3f777bab16c076fcef712a2820bfe33
     consul-template: sha256=4f3afadcc6612abf55ae7c9c3328955bfeb43becffe15d2972acf0e0a194c339
     envoy: sha256=1d64506e25c1844f146162ddb2ece7010fa4e784faddb40a079021491f1f03cc
     nomad: sha256=073084f7690fdaea756ff1eff8b669b25c3a6c17778f19ae0c47606973ed3f39
     nomad-autoscaler: sha256=1d404b456a36a477a8c8cf26de2f79c1ad13510d0b241036f056e0675addeb15
     nomad-cni: sha256=b98f74a0f8522f0a83867178729c1aa70f2158f90c45a2ca8fa791db1c76b303
-    vault: sha256=079435de8ff146bdec4cdbe3be71d672ef4e59e4df6af0f2dba672e71be21a68
+    vault: sha256=5700edf139113609962fe371af7d2a53de8ecb720d545dc39b43de204515d3c4
     vault-gpg-plugin: sha256=975115ef6e870cd5429efe99cffc8ce1f8c17350d9fbab02527e4de9ff436e62
     vault-ssh-helper: sha256=1fd74ccfe4de134dcc527771c9eaaa2f95756975c11baff136eecdbe56bd0e1d
