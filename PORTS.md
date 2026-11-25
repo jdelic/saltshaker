@@ -45,6 +45,7 @@
 | 10046 |            | OpenSMTPD -> mailforwarder                 |
 | 10047 |            | mailforwarder -> OpenSMTPD (transactional) |
 | 31080 |     X      | vaultwarden API                            |
+| 31090 |     X      | greylistd-frontend                         |
 | 31300 |     X      | standardnotes API                          |
 | 31301 |     X      | standardnotes web app                      |
 | 32022 |     X      | SSH port forward for git miniserver        |
