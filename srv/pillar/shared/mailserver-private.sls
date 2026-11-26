@@ -1,4 +1,5 @@
 {% from "shared/ssl.sls" import combined_location, secret_key_location %}
+{% from "config.sls" import external_tld %}
 
 emailstore:
     path: /secure/email
