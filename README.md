@@ -50,7 +50,9 @@ It also contains configuration for
 
   * a fully fledged PIM+Mail server with encrypted storage (based on
     [Radicale](http://radicale.org/), [Dovecot](http://dovecot.org), 
-    [OpenSMTPD](https://www.opensmtpd.org/)),
+    [OpenSMTPD](https://www.opensmtpd.org/), with
+    [greylistd-frontend](https://github.com/jdelic/greylistd-frontend) as a
+    web interface for greylistd),
     [Vaultwarden](https://github.com/dani-garcia/vaultwarden), and
     [StandardNotes](https://standardnotes.com/)
 

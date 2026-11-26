@@ -73,6 +73,7 @@ base:
 
     'roles:mail':
         - match: grain
+        - shared.greylistd-frontend
         - shared.secrets.smtp
         - shared.secrets.smtp-relay
         - shared.secrets.imap
@@ -88,6 +89,7 @@ base:
 
     'roles:authserver':
         - match: grain
+        - shared.greylistd-frontend
         - shared.vaultwarden
 
     'roles:nomadserver':

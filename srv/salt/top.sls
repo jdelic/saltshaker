@@ -41,6 +41,7 @@ base:
         - mn.cas.vault_database
         - dev.concourse.vault_credentials
         - vaultwarden.vault_setup
+        - opensmtpd.greylistd_frontend_vault_setup
 
     'roles:docker-registry':
         - match: grain
@@ -112,6 +113,7 @@ base:
         - fstab.secure
         - dovecot
         - opensmtpd.install
+        - opensmtpd.greylistd_frontend
         - mail.spamassassin
         - mail.storage
         - mn.cas.dkimsigner
