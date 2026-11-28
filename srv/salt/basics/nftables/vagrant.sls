@@ -11,52 +11,48 @@
 {% if pillar["ifassign"].get("nat", False) %}
 vagrant-eth0-recv-ipv4:
     nftables.append:
-        - table: filter
+        - table: saltshaker
         - family: ip4
         - chain: input
         - jump: accept
         - if: {{pillar["ifassign"]["nat"]}}
         - order: 3
-        - save: True
         - require:
             - pkg: nftables
 
 
 vagrant-eth0-recv-ipv6:
     nftables.append:
-        - table: filter
+        - table: saltshaker
         - family: ip6
         - chain: input
         - jump: accept
         - if: {{pillar["ifassign"]["nat"]}}
         - order: 3
-        - save: True
         - require:
             - pkg: nftables
 
 
 vagrant-eth0-send-ipv4:
     nftables.append:
-        - table: filter
+        - table: saltshaker
         - family: ip4
         - chain: output
         - jump: accept
         - of: {{pillar["ifassign"]["nat"]}}
         - order: 3
-        - save: True
         - require:
             - pkg: nftables
 
 
 vagrant-eth0-send-ipv6:
     nftables.append:
-        - table: filter
+        - table: saltshaker
         - family: ip6
         - chain: output
         - jump: accept
         - of: {{pillar["ifassign"]["nat"]}}
         - order: 3
-        - save: True
         - require:
             - pkg: nftables
 {% endif %}

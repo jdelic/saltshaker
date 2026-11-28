@@ -167,7 +167,7 @@ vaultwarden:
 
 vaultwarden-http-tcp-in{{port}}-ipv4:
     nftables.append:
-        - table: filter
+        - table: saltshaker
         - chain: input
         - family: ip4
         - jump: accept
@@ -177,7 +177,6 @@ vaultwarden-http-tcp-in{{port}}-ipv4:
         - match: state
         - connstate: new
         - proto: tcp
-        - save: True
         - require:
             - sls: basics.nftables.setup
 

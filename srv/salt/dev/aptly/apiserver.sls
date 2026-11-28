@@ -93,7 +93,7 @@ aptly-servicedef:
 
 aptly-tcp-in{{port}}-recv:
     nftables.append:
-        - table: filter
+        - table: saltshaker
         - chain: input
         - family: ip4
         - jump: accept
@@ -103,6 +103,5 @@ aptly-tcp-in{{port}}-recv:
         - match: state
         - connstate: new
         - proto: tcp
-        - save: True
         - require:
             - sls: basics.nftables.setup

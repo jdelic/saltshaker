@@ -50,7 +50,9 @@ It also contains configuration for
 
   * a fully fledged PIM+Mail server with encrypted storage (based on
     [Radicale](http://radicale.org/), [Dovecot](http://dovecot.org), 
-    [OpenSMTPD](https://www.opensmtpd.org/)),
+    [OpenSMTPD](https://www.opensmtpd.org/), with
+    [greylistd-frontend](https://github.com/jdelic/greylistd-frontend) as a
+    web interface for greylistd),
     [Vaultwarden](https://github.com/dani-garcia/vaultwarden), and
     [StandardNotes](https://standardnotes.com/)
 
@@ -370,6 +372,16 @@ Callers can choose which rule groups are managed with
 `--nftables-rules=input`, `--nftables-rules=output`, or `--nftables-rules=both`;
 the default is `both` so existing `--open-nftables` invocations keep their
 current behavior.
+
+The rules are added to the `input` and `output` chains (see
+`--nftables-input-chain` and `--nftables-output-chain`) of the `filter` table
+by default. Use `--nftables-table` to select a different table. The default
+is rendered into the script by consul-template from the
+`SERVICERENDERER_NFTABLES_TABLE` environment variable, so it can be changed for
+all renderers on a host at once. Saltshaker sets it to `saltshaker` in
+consul-template's systemd unit, because Salt keeps all of its nftables rules in
+the `saltshaker` tables to stay out of the `filter` and `nat` tables used by
+iptables-nft.
 
 ### Integrating external services (not implemented yet)
 **Question: But I run my service X on Heroku/Amazon Elastic Beanstalk with

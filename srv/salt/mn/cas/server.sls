@@ -217,7 +217,7 @@ authserver-servicedef-internal:
 
 authserver-tcp-in{{pillar.get('authserver', {}).get('bind-port', 8999)}}-recv:
     nftables.append:
-        - table: filter
+        - table: saltshaker
         - chain: input
         - family: ip4
         - jump: accept
@@ -227,7 +227,6 @@ authserver-tcp-in{{pillar.get('authserver', {}).get('bind-port', 8999)}}-recv:
         - match: state
         - connstate: new
         - proto: tcp
-        - save: True
         - require:
             - sls: basics.nftables.setup
 

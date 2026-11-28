@@ -22,7 +22,7 @@ saltmaster-backup-symlink:
 # allow the internal network to talk to us
 saltmaster-tcp-in{{port}}-recv-ipv4:
     nftables.append:
-        - table: filter
+        - table: saltshaker
         - chain: input
         - family: ip4
         - jump: accept
@@ -33,7 +33,6 @@ saltmaster-tcp-in{{port}}-recv-ipv4:
         - connstate: new
         # it's super important these go first so the local minion works
         - order: 3
-        - save: True
 {% endfor %}
 
 

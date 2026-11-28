@@ -4,8 +4,15 @@ services:
         env_file: /etc/standardnotes/.env
         container_name: standardnotes_server
         restart: unless-stopped
+        depends_on:
+            sns-sqs-bootstrap:
+                condition: service_completed_successfully
         ports:
+            # the api server runs on port 3000 and the files server, which is
+            # part of the server container in the v2 docker setup, on port
+            # 3104 (see the upstream docker-compose.example.yml)
             - "{{ip}}:{{port}}:3000"
+            - "{{ip}}:{{files_port}}:3104"
         volumes:
             - /secure/standardnotes/logs:/var/lib/server/logs
             - /secure/standardnotes/uploads:/opt/server/packages/files/dist/uploads
@@ -25,19 +32,51 @@ services:
         networks:
             - standardnotes_self_hosted
 
-    localstack:
-        image: {{standardnotes.get('localstack-image', 'localstack/localstack:3.0')}}
-        container_name: standardnotes_localstack
+    # SNS/SQS emulator. LocalStack community is no longer maintained (newer
+    # releases require an auth token), so we use Floci (MIT). The server image
+    # hardcodes SNS_ENDPOINT/SQS_ENDPOINT=http://localstack:4566, hence the
+    # network alias. No Docker socket is mounted, so Floci's Docker-backed
+    # services (and its UI sidecar) cannot start anything.
+    sns-sqs:
+        image: {{standardnotes.get('floci-image', 'floci/floci:2.5.0')}}
+        container_name: standardnotes_floci
         expose:
             - 4566
         restart: unless-stopped
         environment:
-            - SERVICES=sns,sqs
-            - LOCALSTACK_HOST=localstack:4566
-            - SQS_ENDPOINT_STRATEGY=path
-            - LS_LOG=warn
+            - FLOCI_DEFAULT_ACCOUNT_ID=000000000000
+            - FLOCI_DEFAULT_REGION=us-east-1
+            # keep topics, queues, subscriptions and undelivered messages
+            # across restarts
+            - FLOCI_STORAGE_MODE=hybrid
+            - FLOCI_STORAGE_PERSISTENT_PATH=/app/data
+            - FLOCI_SERVICES_UI_ENABLED=false
         volumes:
-            - /etc/standardnotes/localstack_bootstrap.sh:/etc/localstack/init/ready.d/localstack_bootstrap.sh
+            - /secure/standardnotes/floci:/app/data
+        # the image ships its own HEALTHCHECK (/usr/local/bin/healthcheck.sh)
+        networks:
+            standardnotes_self_hosted:
+                aliases:
+                    - localstack
+
+    # Creates the topics/queues/subscriptions on every "compose up". The
+    # script is idempotent, so this is safe against persisted Floci state.
+    sns-sqs-bootstrap:
+        image: {{standardnotes.get('aws-cli-image', 'amazon/aws-cli:2.39.5')}}
+        container_name: standardnotes_sns_sqs_bootstrap
+        restart: "no"
+        depends_on:
+            sns-sqs:
+                condition: service_healthy
+        entrypoint: ["bash", "/sns_sqs_bootstrap.sh"]
+        environment:
+            - SNS_SQS_ENDPOINT=http://localstack:4566
+            - AWS_ACCESS_KEY_ID=x
+            - AWS_SECRET_ACCESS_KEY=x
+            - AWS_DEFAULT_REGION=us-east-1
+            - AWS_PAGER=
+        volumes:
+            - /etc/standardnotes/sns_sqs_bootstrap.sh:/sns_sqs_bootstrap.sh:ro
         networks:
             - standardnotes_self_hosted
 

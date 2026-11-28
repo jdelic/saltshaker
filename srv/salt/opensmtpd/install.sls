@@ -352,7 +352,7 @@ opensmtpd-servicedef-internal:
     {% if opensmtpd_ips['ipv4'][svc] %}
 opensmtpd-{{svc}}-tcp-in25-recv-ipv4:
     nftables.append:
-        - table: filter
+        - table: saltshaker
         - chain: input
         - family: ip4
         - jump: accept
@@ -362,14 +362,13 @@ opensmtpd-{{svc}}-tcp-in25-recv-ipv4:
         - match: state
         - connstate: new
         - proto: tcp
-        - save: True
         - require:
             - sls: basics.nftables.setup
     {% endif %}
     {% if opensmtpd_ips['ipv6'][svc] %}
 opensmtpd-{{svc}}-tcp-in25-recv-ipv6:
     nftables.append:
-        - table: filter
+        - table: saltshaker
         - chain: input
         - family: ip6
         - jump: accept
@@ -379,7 +378,6 @@ opensmtpd-{{svc}}-tcp-in25-recv-ipv6:
         - match: state
         - connstate: new
         - proto: tcp
-        - save: True
         - require:
             - sls: basics.nftables.setup
     {% endif %}
@@ -390,7 +388,7 @@ opensmtpd-{{svc}}-tcp-in25-recv-ipv6:
     {% if opensmtpd_ips['ipv4'][svc] %}
 opensmtpd-{{svc}}-tcp-in465-recv-ipv4:
     nftables.append:
-        - table: filter
+        - table: saltshaker
         - chain: input
         - family: ip4
         - jump: accept
@@ -400,14 +398,13 @@ opensmtpd-{{svc}}-tcp-in465-recv-ipv4:
         - match: state
         - connstate: new
         - proto: tcp
-        - save: True
         - require:
             - sls: basics.nftables.setup
     {% endif %}
     {% if opensmtpd_ips['ipv6'][svc] %}
 opensmtpd-{{svc}}-tcp-in465-recv-ipv6:
     nftables.append:
-        - table: filter
+        - table: saltshaker
         - chain: input
         - family: ip6
         - jump: accept
@@ -417,7 +414,6 @@ opensmtpd-{{svc}}-tcp-in465-recv-ipv6:
         - match: state
         - connstate: new
         - proto: tcp
-        - save: True
         - require:
             - sls: basics.nftables.setup
     {% endif %}
@@ -427,7 +423,7 @@ opensmtpd-{{svc}}-tcp-in465-recv-ipv6:
 {% if pillar["smtp-outgoing"].get("bind-ipv4", True) %}
 opensmtpd-relay-out25-send-ipv4:
     nftables.append:
-        - table: filter
+        - table: saltshaker
         - chain: output
         - family: ip4
         - jump: accept
@@ -437,14 +433,13 @@ opensmtpd-relay-out25-send-ipv4:
         - match: state
         - connstate: new
         - proto: tcp
-        - save: True
         - require:
             - sls: basics.nftables.setup
 
 
 opensmtpd-relay-out465-send-ipv4:
     nftables.append:
-        - table: filter
+        - table: saltshaker
         - chain: output
         - family: ip4
         - jump: accept
@@ -454,7 +449,6 @@ opensmtpd-relay-out465-send-ipv4:
         - match: state
         - connstate: new
         - proto: tcp
-        - save: True
         - require:
             - sls: basics.nftables.setup
 {% endif %}
@@ -463,7 +457,7 @@ opensmtpd-relay-out465-send-ipv4:
   {# if we have a default route, we can reach out to ipv6 mail servers #}
 opensmtpd-relay-out25-send-ipv6:
     nftables.append:
-        - table: filter
+        - table: saltshaker
         - chain: output
         - family: ip6
         - jump: accept
@@ -473,14 +467,13 @@ opensmtpd-relay-out25-send-ipv6:
         - match: state
         - connstate: new
         - proto: tcp
-        - save: True
         - require:
             - sls: basics.nftables.setup
 
 
 opensmtpd-relay-out465-send-ipv6:
     nftables.append:
-        - table: filter
+        - table: saltshaker
         - chain: output
         - family: ip6
         - jump: accept
@@ -490,7 +483,6 @@ opensmtpd-relay-out465-send-ipv6:
         - match: state
         - connstate: new
         - proto: tcp
-        - save: True
         - require:
             - sls: basics.nftables.setup
 {% endif %}

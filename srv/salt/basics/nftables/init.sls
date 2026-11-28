@@ -50,7 +50,7 @@ netfilter-persistent:
 nftables-temp-input-allow-ipv4:
     nftables.set_policy:
         - policy: accept
-        - table: filter
+        - table: saltshaker
         - family: ip4
         - chain: input
         - order: 2
@@ -63,7 +63,7 @@ nftables-temp-input-allow-ipv4:
 nftables-temp-input-allow-ipv6:
     nftables.set_policy:
         - policy: accept
-        - table: filter
+        - table: saltshaker
         - family: ip6
         - chain: input
         - order: 2
@@ -76,7 +76,7 @@ nftables-temp-input-allow-ipv6:
 nftables-temp-output-allow-ipv4:
     nftables.set_policy:
         - policy: accept
-        - table: filter
+        - table: saltshaker
         - family: ip4
         - chain: output
         - order: 2
@@ -89,7 +89,7 @@ nftables-temp-output-allow-ipv4:
 nftables-temp-output-allow-ipv6:
     nftables.set_policy:
         - policy: accept
-        - table: filter
+        - table: saltshaker
         - family: ip6
         - chain: output
         - order: 2
@@ -102,7 +102,7 @@ nftables-temp-output-allow-ipv6:
 nftables-temp-forward-allow-ipv4:
     nftables.set_policy:
         - policy: accept
-        - table: filter
+        - table: saltshaker
         - family: ip4
         - chain: forward
         - order: 2
@@ -115,11 +115,10 @@ nftables-temp-forward-allow-ipv4:
 nftables-temp-forward-allow-ipv6:
     nftables.set_policy:
         - policy: accept
-        - table: filter
+        - table: saltshaker
         - family: ip6
         - chain: forward
         - order: 2
-        - save: True
         - require:
             - pkg: nftables
             - nftables: nftables-baseconfig-chain-ipv6-forward
@@ -127,7 +126,7 @@ nftables-temp-forward-allow-ipv6:
 
 nftables-baseconfig-chain-ipv4-input-flush:
     nftables.flush:
-        - table: filter
+        - table: saltshaker
         - chain: input
         - family: ip4
         - order: 2
@@ -137,7 +136,7 @@ nftables-baseconfig-chain-ipv4-input-flush:
 
 nftables-baseconfig-chain-ipv6-input-flush:
     nftables.flush:
-        - table: filter
+        - table: saltshaker
         - chain: input
         - family: ip6
         - order: 2
@@ -147,7 +146,7 @@ nftables-baseconfig-chain-ipv6-input-flush:
 
 nftables-baseconfig-chain-ipv4-output-flush:
     nftables.flush:
-        - table: filter
+        - table: saltshaker
         - chain: output
         - family: ip4
         - order: 2
@@ -157,7 +156,7 @@ nftables-baseconfig-chain-ipv4-output-flush:
 
 nftables-baseconfig-chain-ipv6-output-flush:
     nftables.flush:
-        - table: filter
+        - table: saltshaker
         - chain: output
         - family: ip6
         - order: 2
@@ -167,7 +166,7 @@ nftables-baseconfig-chain-ipv6-output-flush:
 
 nftables-baseconfig-chain-ipv4-forward-flush:
     nftables.flush:
-        - table: filter
+        - table: saltshaker
         - chain: forward
         - family: ip4
         - order: 2
@@ -177,7 +176,7 @@ nftables-baseconfig-chain-ipv4-forward-flush:
 
 nftables-baseconfig-chain-ipv6-forward-flush:
     nftables.flush:
-        - table: filter
+        - table: saltshaker
         - chain: forward
         - family: ip6
         - order: 2
@@ -187,7 +186,7 @@ nftables-baseconfig-chain-ipv6-forward-flush:
 
 nftables-baseconfig-chain-ipv4-prerouting-flush:
     nftables.flush:
-        - table: nat
+        - table: saltshaker
         - chain: prerouting
         - family: ip4
         - order: 2
@@ -197,7 +196,7 @@ nftables-baseconfig-chain-ipv4-prerouting-flush:
 
 nftables-baseconfig-chain-ipv4-postrouting-flush:
     nftables.flush:
-        - table: nat
+        - table: saltshaker
         - chain: postrouting
         - family: ip4
         - order: 2
@@ -208,59 +207,55 @@ nftables-baseconfig-chain-ipv4-postrouting-flush:
 # always allow local connections
 localhost-recv-ipv4:
     nftables.append:
-        - table: filter
+        - table: saltshaker
         - family: ip4
         - chain: input
         - jump: accept
         - if: lo
         - order: 3
-        - save: True
         - require:
             - pkg: nftables
 
 
 localhost-recv-ipv6:
     nftables.append:
-        - table: filter
+        - table: saltshaker
         - family: ip6
         - chain: input
         - jump: accept
         - if: lo
         - order: 3
-        - save: True
         - require:
             - pkg: nftables
 
 
 localhost-send-ipv4:
     nftables.append:
-        - table: filter
+        - table: saltshaker
         - family: ip4
         - chain: output
         - jump: accept
         - of: lo
         - order: 3
-        - save: True
         - require:
             - pkg: nftables
 
 
 localhost-send-ipv6:
     nftables.append:
-        - table: filter
+        - table: saltshaker
         - family: ip6
         - chain: output
         - jump: accept
         - of: lo
         - order: 3
-        - save: True
         - require:
             - pkg: nftables
 
 
 icmp-recv-ipv4:
     nftables.append:
-        - table: filter
+        - table: saltshaker
         - family: ip4
         - chain: input
         - jump: accept
@@ -270,14 +265,13 @@ icmp-recv-ipv4:
             timestamp-request,timestamp-reply,info-request,info-reply,address-mask-request,address-mask-reply,
             router-advertisement,router-solicitation
         - order: 4
-        - save: True
         - require:
             - pkg: nftables
 
 
 icmp-send-ipv4:
     nftables.append:
-        - table: filter
+        - table: saltshaker
         - family: ip4
         - chain: output
         - jump: accept
@@ -287,14 +281,13 @@ icmp-send-ipv4:
             timestamp-request,timestamp-reply,info-request,info-reply,address-mask-request,address-mask-reply,
             router-advertisement,router-solicitation
         - order: 4
-        - save: True
         - require:
             - pkg: nftables
 
 
 icmp-forward-ipv4:
     nftables.append:
-        - table: filter
+        - table: saltshaker
         - family: ip4
         - chain: forward
         - jump: accept
@@ -304,14 +297,13 @@ icmp-forward-ipv4:
             timestamp-request,timestamp-reply,info-request,info-reply,address-mask-request,address-mask-reply,
             router-advertisement,router-solicitation
         - order: 4
-        - save: True
         - require:
             - pkg: nftables
 
 
 icmp-recv-ipv6:
     nftables.append:
-        - table: filter
+        - table: saltshaker
         - family: ip6
         - chain: input
         - jump: accept
@@ -322,14 +314,13 @@ icmp-recv-ipv6:
             nd-router-solicit,nd-router-advert,nd-neighbor-solicit,nd-neighbor-advert,
             nd-redirect,router-renumbering,ind-neighbor-solicit,ind-neighbor-advert,mld2-listener-report
         - order: 4
-        - save: True
         - require:
             - pkg: nftables
 
 
 icmp-send-ipv6:
     nftables.append:
-        - table: filter
+        - table: saltshaker
         - family: ip6
         - chain: output
         - jump: accept
@@ -340,14 +331,13 @@ icmp-send-ipv6:
               nd-router-solicit,nd-router-advert,nd-neighbor-solicit,nd-neighbor-advert,
               nd-redirect,router-renumbering,ind-neighbor-solicit,ind-neighbor-advert,mld2-listener-report
         - order: 4
-        - save: True
         - require:
             - pkg: nftables
 
 
 icmp-forward-ipv6:
     nftables.append:
-        - table: filter
+        - table: saltshaker
         - family: ip6
         - chain: forward
         - jump: accept
@@ -358,7 +348,6 @@ icmp-forward-ipv6:
               nd-router-solicit,nd-router-advert,nd-neighbor-solicit,nd-neighbor-advert,
               nd-redirect,router-renumbering,ind-neighbor-solicit,ind-neighbor-advert,mld2-listener-report
         - order: 4
-        - save: True
         - require:
             - pkg: nftables
 
@@ -366,7 +355,7 @@ icmp-forward-ipv6:
 # prevent tcp packets without a connection
 drop-confused-tcp-packets-ipv4:
     nftables.append:
-        - table: filter
+        - table: saltshaker
         - family: ip4
         - chain: input
         - jump: drop
@@ -374,14 +363,13 @@ drop-confused-tcp-packets-ipv4:
         - match: state
         - connstate: invalid
         - order: 5
-        - save: True
         - require:
             - pkg: nftables
 
 
 drop-confused-tcp-packets-ipv6:
     nftables.append:
-        - table: filter
+        - table: saltshaker
         - family: ip6
         - chain: input
         - jump: drop
@@ -389,63 +377,58 @@ drop-confused-tcp-packets-ipv6:
         - match: state
         - connstate: invalid
         - order: 5
-        - save: True
         - require:
             - pkg: nftables
 
 
 nftables-default-allow-related-established-input-ipv4:
     nftables.append:
-        - table: filter
+        - table: saltshaker
         - family: ip4
         - chain: input
         - jump: accept
         - match: state
         - connstate: established,related
         - order: 4
-        - save: True
         - require:
             - pkg: nftables
 
 
 nftables-default-allow-related-established-input-ipv6:
     nftables.append:
-        - table: filter
+        - table: saltshaker
         - family: ip6
         - chain: input
         - jump: accept
         - match: state
         - connstate: established,related
         - order: 4
-        - save: True
         - require:
             - pkg: nftables
 
 
 nftables-default-allow-related-established-output-ipv4:
     nftables.append:
-        - table: filter
+        - table: saltshaker
         - family: ip4
         - chain: output
         - jump: accept
         - match: state
         - connstate: established,related
         - order: 4
-        - save: True
         - require:
             - pkg: nftables
 
 
 nftables-default-allow-related-established-output-ipv6:
     nftables.append:
-        - table: filter
+        - table: saltshaker
         - family: ip6
         - chain: output
         - jump: accept
         - match: state
         - connstate: established,related
         - order: 4
-        - save: True
         - require:
             - pkg: nftables
 
@@ -453,14 +436,13 @@ nftables-default-allow-related-established-output-ipv6:
 nftables-default-allow-related-established-forward-ipv4:
     nftables.append:
         # insert this right at the top, since we don't have preceding appends on the forward chain
-        - table: filter
+        - table: saltshaker
         - family: ip4
         - chain: forward
         - jump: accept
         - match: state
         - connstate: established,related
         - order: 4
-        - save: True
         - require:
             - pkg: nftables
 
@@ -468,14 +450,13 @@ nftables-default-allow-related-established-forward-ipv4:
 nftables-default-allow-related-established-forward-ipv6:
     nftables.append:
         # insert this right at the top, since we don't have preceding appends on the forward chain
-        - table: filter
+        - table: saltshaker
         - family: ip6
         - chain: forward
         - jump: accept
         - match: state
         - connstate: established,related
         - order: 4
-        - save: True
         - require:
             - pkg: nftables
 
@@ -483,11 +464,10 @@ nftables-default-allow-related-established-forward-ipv6:
 nftables-default-input-drop-ipv4:
     nftables.set_policy:
         - policy: drop
-        - table: filter
+        - table: saltshaker
         - family: ip4
         - chain: input
         - order: 5
-        - save: True
         - require:
             - pkg: nftables
 
@@ -495,11 +475,10 @@ nftables-default-input-drop-ipv4:
 nftables-default-input-drop-ipv6:
     nftables.set_policy:
         - policy: drop
-        - table: filter
+        - table: saltshaker
         - family: ip6
         - chain: input
         - order: 5
-        - save: True
         - require:
             - pkg: nftables
 
@@ -507,11 +486,10 @@ nftables-default-input-drop-ipv6:
 nftables-default-output-drop-ipv4:
     nftables.set_policy:
         - policy: drop
-        - table: filter
+        - table: saltshaker
         - family: ip4
         - chain: output
         - order: 5
-        - save: True
         - require:
             - pkg: nftables
 
@@ -519,11 +497,10 @@ nftables-default-output-drop-ipv4:
 nftables-default-output-drop-ipv6:
     nftables.set_policy:
         - policy: drop
-        - table: filter
+        - table: saltshaker
         - family: ip6
         - chain: output
         - order: 5
-        - save: True
         - require:
             - pkg: nftables
 
@@ -531,11 +508,10 @@ nftables-default-output-drop-ipv6:
 nftables-default-forward-drop-ipv4:
     nftables.set_policy:
         - policy: drop
-        - table: filter
+        - table: saltshaker
         - family: ip4
         - chain: forward
         - order: 5
-        - save: True
         - require:
             - pkg: nftables
 
@@ -543,11 +519,10 @@ nftables-default-forward-drop-ipv4:
 nftables-default-forward-drop-ipv6:
     nftables.set_policy:
         - policy: drop
-        - table: filter
+        - table: saltshaker
         - family: ip6
         - chain: forward
         - order: 5
-        - save: True
         - require:
             - pkg: nftables
 

@@ -21,7 +21,7 @@ smartstack-docker-runner:
                     -D load_dhparams=True \
                 {%- endif %}
                 -o  /etc/haproxy/haproxy-docker.cfg \
-                -c  "ps awwfux | grep -v grep | grep 'haproxy -f /etc/haproxy/haproxy-docker.cfg' >/dev/null && systemctl reload haproxy@docker || systemctl restart haproxy@docker" \
+                -c  "ps awwfux | grep -v grep | grep 'haproxy -Ws -f /etc/haproxy/haproxy-docker.cfg' >/dev/null && systemctl reload haproxy@docker || systemctl restart haproxy@docker" \
                 /etc/haproxy/haproxy-internal.jinja.cfg
         - mode: 750
         - require:

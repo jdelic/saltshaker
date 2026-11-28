@@ -109,7 +109,7 @@ concourse-worker:
 {% for port in ['53', '80', '443', '8100'] %}
 concourse-worker-tcp-out{{port}}-forward-ipv4:
     nftables.append:
-        - table: filter
+        - table: saltshaker
         - chain: forward
         - family: ip4
         - jump: accept
@@ -119,7 +119,6 @@ concourse-worker-tcp-out{{port}}-forward-ipv4:
         - match: state
         - connstate: new
         - proto: tcp
-        - save: True
         - require:
             - sls: basics.nftables.setup
 {% endfor %}
@@ -130,7 +129,7 @@ concourse-worker-tcp-out{{port}}-forward-ipv4:
 {% for port in ['7777', '7788', '7799'] %}
 concourse-worker-tcp-in{{port}}-recv-ipv4:
     nftables.append:
-        - table: filter
+        - table: saltshaker
         - chain: input
         - family: ip4
         - jump: accept
@@ -139,7 +138,6 @@ concourse-worker-tcp-in{{port}}-recv-ipv4:
         - match: state
         - connstate: new
         - proto: tcp
-        - save: True
         - require:
             - sls: basics.nftables.setup
 {% endfor %}
@@ -147,7 +145,7 @@ concourse-worker-tcp-in{{port}}-recv-ipv4:
 
 concourse-worker-udp-out53-forward-ipv4:
     nftables.append:
-        - table: filter
+        - table: saltshaker
         - chain: forward
         - family: ip4
         - jump: accept
@@ -157,33 +155,30 @@ concourse-worker-udp-out53-forward-ipv4:
         - match: state
         - connstate: new
         - proto: udp
-        - save: True
         - require:
             - sls: basics.nftables.setup
 
 
 concourse-allow-inter-container-traffic-recv-ipv4:
     nftables.append:
-        - table: filter
+        - table: saltshaker
         - chain: input
         - family: ip4
         - jump: accept
         - source: {{pillar.get('ci', {}).get('backend-network-pool', '10.254.0.0/22')}}
         - destination: {{pillar.get('ci', {}).get('backend-network-pool', '10.254.0.0/22')}}
-        - save: True
         - require:
             - sls: basics.nftables.setup
 
 
 concourse-allow-inter-container-traffic-send-ipv4:
     nftables.append:
-        - table: filter
+        - table: saltshaker
         - chain: output
         - family: ip4
         - jump: accept
         - source: {{pillar.get('ci', {}).get('backend-network-pool', '10.254.0.0/22')}}
         - destination: {{pillar.get('ci', {}).get('backend-network-pool', '10.254.0.0/22')}}
-        - save: True
         - require:
             - sls: basics.nftables.setup
 

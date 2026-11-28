@@ -106,11 +106,23 @@ anytype-systemdunit:
         - require:
             - systemdunit: anytype-systemdunit
             - cmd: anytype-env-file
+            - nftables: anytype-bridge-forward-ipv4
+            - nftables: anytype-bridge-forward-ipv4-reverse
+            - nftables: anytype-bridge-forward-ipv6
+            - nftables: anytype-bridge-forward-ipv6-reverse
+            - nftables: anytype-bridge-input-tcp-ipv4-accept
+            - nftables: anytype-bridge-input-udp-ipv4-accept
+            - nftables: anytype-bridge-input-tcp-ipv6-accept
+            - nftables: anytype-bridge-input-udp-ipv6-accept
+            - nftables: anytype-bridge-output-tcp-ipv4-accept
+            - nftables: anytype-bridge-output-udp-ipv4-accept
+            - nftables: anytype-bridge-output-tcp-ipv6-accept
+            - nftables: anytype-bridge-output-udp-ipv6-accept
 
 
 anytype-tcp-in10001-10006-ipv4:
     nftables.append:
-        - table: filter
+        - table: saltshaker
         - chain: input
         - family: ip4
         - jump: accept
@@ -120,14 +132,13 @@ anytype-tcp-in10001-10006-ipv4:
         - match: state
         - connstate: new
         - proto: tcp
-        - save: True
         - require:
             - sls: basics.nftables.setup
 
 
 anytype-udp-in1011-1016-ipv4:
     nftables.append:
-        - table: filter
+        - table: saltshaker
         - chain: input
         - family: ip4
         - jump: accept
@@ -137,62 +148,57 @@ anytype-udp-in1011-1016-ipv4:
         - match: state
         - connstate: new
         - proto: udp
-        - save: True
         - require:
             - sls: basics.nftables.setup
 
 
 anytype-bridge-forward-ipv4:
     nftables.append:
-        - table: filter
+        - table: saltshaker
         - chain: forward
         - family: ip4
         - jump: accept
         - of: anytype0
-        - save: True
         - require:
             - sls: basics.nftables.setup
 
 
 anytype-bridge-forward-ipv6:
     nftables.append:
-        - table: filter
+        - table: saltshaker
         - chain: forward
         - family: ip6
         - jump: accept
         - of: anytype0
-        - save: True
         - require:
               - sls: basics.nftables.setup
 
 
 anytype-bridge-forward-ipv4-reverse:
     nftables.append:
-        - table: filter
+        - table: saltshaker
         - chain: forward
         - family: ip4
         - jump: accept
         - if: anytype0
-        - save: True
         - require:
             - sls: basics.nftables.setup
 
 
 anytype-bridge-forward-ipv6-reverse:
     nftables.append:
-        - table: filter
+        - table: saltshaker
         - chain: forward
         - family: ip6
         - jump: accept
         - if: anytype0
-        - save: True
         - require:
               - sls: basics.nftables.setup
 
 
 anytype-bridge-input-tcp-ipv4-accept:
     nftables.append:
-        - table: filter
+        - table: saltshaker
         - chain: input
         - family: ip4
         - jump: accept
@@ -200,14 +206,13 @@ anytype-bridge-input-tcp-ipv4-accept:
         - proto: tcp
         - match: state
         - connstate: new
-        - save: True
         - require:
             - sls: basics.nftables.setup
 
 
 anytype-bridge-input-udp-ipv4-accept:
     nftables.append:
-        - table: filter
+        - table: saltshaker
         - chain: input
         - family: ip4
         - jump: accept
@@ -215,14 +220,13 @@ anytype-bridge-input-udp-ipv4-accept:
         - proto: udp
         - match: state
         - connstate: new
-        - save: True
         - require:
             - sls: basics.nftables.setup
 
 
 anytype-bridge-input-tcp-ipv6-accept:
     nftables.append:
-        - table: filter
+        - table: saltshaker
         - chain: input
         - family: ip6
         - jump: accept
@@ -230,14 +234,13 @@ anytype-bridge-input-tcp-ipv6-accept:
         - proto: tcp
         - match: state
         - connstate: new
-        - save: True
         - require:
             - sls: basics.nftables.setup
 
 
 anytype-bridge-input-udp-ipv6-accept:
     nftables.append:
-        - table: filter
+        - table: saltshaker
         - chain: input
         - family: ip6
         - jump: accept
@@ -245,14 +248,13 @@ anytype-bridge-input-udp-ipv6-accept:
         - proto: udp
         - match: state
         - connstate: new
-        - save: True
         - require:
             - sls: basics.nftables.setup
 
 
 anytype-bridge-output-tcp-ipv4-accept:
     nftables.append:
-        - table: filter
+        - table: saltshaker
         - chain: output
         - family: ip4
         - jump: accept
@@ -260,14 +262,13 @@ anytype-bridge-output-tcp-ipv4-accept:
         - proto: tcp
         - match: state
         - connstate: new
-        - save: True
         - require:
             - sls: basics.nftables.setup
 
 
 anytype-bridge-output-udp-ipv4-accept:
     nftables.append:
-        - table: filter
+        - table: saltshaker
         - chain: output
         - family: ip4
         - jump: accept
@@ -275,14 +276,13 @@ anytype-bridge-output-udp-ipv4-accept:
         - proto: udp
         - match: state
         - connstate: new
-        - save: True
         - require:
             - sls: basics.nftables.setup
 
 
 anytype-bridge-output-tcp-ipv6-accept:
     nftables.append:
-        - table: filter
+        - table: saltshaker
         - chain: output
         - family: ip6
         - jump: accept
@@ -290,14 +290,13 @@ anytype-bridge-output-tcp-ipv6-accept:
         - proto: tcp
         - match: state
         - connstate: new
-        - save: True
         - require:
             - sls: basics.nftables.setup
 
 
 anytype-bridge-output-udp-ipv6-accept:
     nftables.append:
-        - table: filter
+        - table: saltshaker
         - chain: output
         - family: ip6
         - jump: accept
@@ -305,7 +304,6 @@ anytype-bridge-output-udp-ipv6-accept:
         - proto: udp
         - match: state
         - connstate: new
-        - save: True
         - require:
             - sls: basics.nftables.setup
 

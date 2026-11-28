@@ -193,7 +193,11 @@ consul-dhcpcd-stop-ip4ll-assignment:
 consul-dhcpcd-update:
     cmd.run:
         - name: dhcpcd -n
-        - onlyif: pgrep -x dhcpcd
+        # Only signal a dhcpcd running in manager mode. Without a manager "dhcpcd -n"
+        # starts a new one, which then also grabs interfaces that are managed by
+        # per-interface dhcpcd instances (hc-utils, ifupdown). Per-interface instances
+        # pick up the new config when they are restarted.
+        - onlyif: 'pgrep -f "^dhcpcd: \[manager\]"'
         - require_in:
             - cmd: consul-sync-network
         - watch:
@@ -204,12 +208,11 @@ consul-dhcpcd-update:
 # open consul interface
 consul-all-in-recv-ipv4:
     nftables.append:
-        - table: filter
+        - table: saltshaker
         - chain: input
         - family: ip4
         - jump: accept
         - destination: 169.254.1.1
-        - save: True
         - require:
             - sls: basics.nftables.setup
             - cmd: consul-network-interface
@@ -222,7 +225,7 @@ consul-all-in-recv-ipv4:
 # allow others to talk to us
 consul-tcp-in{{port}}-recv-ipv4:
     nftables.append:
-        - table: filter
+        - table: saltshaker
         - chain: input
         - jump: accept
         - family: ip4
@@ -231,9 +234,8 @@ consul-tcp-in{{port}}-recv-ipv4:
         - proto: tcp
         - match: state
         - connstate: new
-        - save: True
         - unless: >
-            nft list ruleset | grep "tcp dport {{port}} accept" 2>&1 >/dev/null
+            nft list table ip saltshaker | grep "tcp dport {{port}} accept" 2>&1 >/dev/null
         - require:
             - sls: basics.nftables.setup
         - require_in:
@@ -245,16 +247,15 @@ consul-tcp-in{{port}}-recv-ipv4:
 {% for port in ['8301', '8302', '8600'] %}
 consul-udp-in{{port}}-recv:
     nftables.append:
-        - table: filter
+        - table: saltshaker
         - chain: input
         - family: ip4
         - jump: accept
         - if: {{pillar['ifassign']['internal']}}
         - dport: {{port}}
         - proto: udp
-        - save: True
         - unless: >
-              nft list ruleset | grep "udp dport {{port}} accept" 2>&1 >/dev/null
+              nft list table ip saltshaker | grep "udp dport {{port}} accept" 2>&1 >/dev/null
         - require:
             - sls: basics.nftables.setup
         - require_in:

@@ -19,8 +19,8 @@ outport-manager-runner:
                 --include 'tags=smartstack:external,tags=regex=smartstack:outport:(.*)' \
                 --open-nftables=conntrack \
                 --nftables-rules=both \
-                --smartstack-localip {{external_ip}} \
-                --smartstack-localip {{external_ipv6}}
+                --smartstack-localip {{external_ip}}{% if external_ipv6 %} \
+                --smartstack-localip {{external_ipv6}}{% endif %}
         - mode: 750
         - require:
             - file: consul-helpers-dir

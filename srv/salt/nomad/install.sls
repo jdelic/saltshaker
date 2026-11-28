@@ -114,7 +114,7 @@ nomad-service:
 # allow others to talk to us
 nomad-tcp-in{{port}}-recv-ipv4:
     nftables.append:
-        - table: filter
+        - table: saltshaker
         - chain: input
         - family: ip4
         - jump: accept
@@ -123,7 +123,6 @@ nomad-tcp-in{{port}}-recv-ipv4:
         - match: state
         - connstate: new
         - proto: tcp
-        - save: True
         - require:
             - sls: basics.nftables.setup
 
@@ -131,7 +130,7 @@ nomad-tcp-in{{port}}-recv-ipv4:
 # allow us to talk to others
 nomad-tcp-out{{port}}-send-ipv4:
     nftables.append:
-        - table: filter
+        - table: saltshaker
         - chain: output
         - family: ip4
         - jump: accept
@@ -140,7 +139,6 @@ nomad-tcp-out{{port}}-send-ipv4:
         - match: state
         - connstate: new
         - proto: tcp
-        - save: True
         - require:
             - sls: basics.nftables.setup
 {% endfor %}
@@ -148,28 +146,26 @@ nomad-tcp-out{{port}}-send-ipv4:
 
 nomad-udp-in4648-recv-ipv4:
     nftables.append:
-        - table: filter
+        - table: saltshaker
         - chain: input
         - family: ip4
         - jump: accept
         - if: {{pillar['ifassign']['internal']}}
         - dport: 4648
         - proto: udp
-        - save: True
         - require:
             - sls: basics.nftables.setup
 
 
 nomad-udp-in4648-send-ipv4:
     nftables.append:
-        - table: filter
+        - table: saltshaker
         - chain: output
         - family: ip4
         - jump: accept
         - of: {{pillar['ifassign']['internal']}}
         - sport: 4648
         - proto: udp
-        - save: True
         - require:
             - sls: basics.nftables.setup
 
@@ -177,7 +173,7 @@ nomad-udp-in4648-send-ipv4:
 # open the Nomad dynamic port range for client ephemeral ports
 nomad-tcp-in20000-32000-recv-ipv4:
     nftables.append:
-        - table: filter
+        - table: saltshaker
         - chain: input
         - family: ip4
         - jump: accept
@@ -186,14 +182,13 @@ nomad-tcp-in20000-32000-recv-ipv4:
         - match: state
         - connstate: new
         - proto: tcp
-        - save: True
         - require:
             - sls: basics.nftables.setup
 
 
 nomad-bridge-ipv4-forward-accept:
     nftables.append:
-        - table: filter
+        - table: saltshaker
         - chain: forward
         - family: ip4
         - jump: accept
@@ -201,21 +196,19 @@ nomad-bridge-ipv4-forward-accept:
         - of: nomad
         - match: state
         - connstate: new
-        - save: True
         - require:
               - sls: basics.nftables.setup
 
 
 nomad-bridge-ipv4-forward-reverse:
     nftables.append:
-        - table: filter
+        - table: saltshaker
         - chain: forward
         - family: ip4
         - jump: accept
         - if: nomad
         - match: state
         - connstate: new
-        - save: True
         - require:
               - sls: basics.nftables.setup
 

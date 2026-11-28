@@ -569,7 +569,7 @@ vault-external-servicedef:
 # This is for contacting Vault. Outgoing connections to port 8200 are covered by basics.sls
 vault-tcp8200-recv-ipv4:
     nftables.append:
-        - table: filter
+        - table: saltshaker
         - chain: input
         - family: ip4
         - jump: accept
@@ -578,6 +578,5 @@ vault-tcp8200-recv-ipv4:
         - match: state
         - connstate: new
         - proto: tcp
-        - save: True
         - require:
             - sls: basics.nftables.setup

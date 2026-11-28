@@ -204,7 +204,7 @@ trigger-minion-sync:
 # always allow ssh in
 openssh-in22-recv-ipv4:
     nftables.append:
-        - table: filter
+        - table: saltshaker
         - chain: input
         - family: ip4
         - jump: accept
@@ -213,7 +213,6 @@ openssh-in22-recv-ipv4:
         - dport: 22
         - match: state
         - connstate: new
-        - save: True
         - order: 4
         - require:
               - sls: basics.nftables.setup
@@ -222,7 +221,7 @@ openssh-in22-recv-ipv4:
 # always allow ssh in
 openssh-in22-recv-ipv6:
     nftables.append:
-        - table: filter
+        - table: saltshaker
         - chain: input
         - family: ip6
         - jump: accept
@@ -231,7 +230,6 @@ openssh-in22-recv-ipv6:
         - dport: 22
         - match: state
         - connstate: new
-        - save: True
         - order: 4
         - require:
             - sls: basics.nftables.setup
@@ -250,7 +248,7 @@ openssh-in22-recv-ipv6:
 # allow us to contact others on ports
 basics-tcp-out{{port}}-send-ipv4:
     nftables.append:
-        - table: filter
+        - table: saltshaker
         - chain: output
         - family: ip4
         - jump: accept
@@ -259,7 +257,6 @@ basics-tcp-out{{port}}-send-ipv4:
         - match: state
         - connstate: new
         - proto: tcp
-        - save: True
         - order: 4
         - require:
             - sls: basics.nftables.setup
@@ -267,7 +264,7 @@ basics-tcp-out{{port}}-send-ipv4:
 
 basics-tcp-out{{port}}-send-ipv6:
     nftables.append:
-        - table: filter
+        - table: saltshaker
         - chain: output
         - family: ip6
         - jump: accept
@@ -276,7 +273,6 @@ basics-tcp-out{{port}}-send-ipv6:
         - match: state
         - connstate: new
         - proto: tcp
-        - save: True
         - order: 4
         - require:
             - sls: basics.nftables.setup
@@ -287,13 +283,12 @@ basics-tcp-out{{port}}-send-ipv6:
 # allow others to answer. For UDP we make this stateless here to guarantee it works.
 basics-udp-out{{port}}-recv-ipv4:
     nftables.append:
-        - table: filter
+        - table: saltshaker
         - chain: input
         - family: ip4
         - jump: accept
         - proto: udp
         - sport: {{port}}
-        - save: True
         - order: 4
         - require:
             - sls: basics.nftables.setup
@@ -301,13 +296,12 @@ basics-udp-out{{port}}-recv-ipv4:
 
 basics-udp-out{{port}}-recv-ipv6:
     nftables.append:
-        - table: filter
+        - table: saltshaker
         - chain: input
         - family: ip6
         - jump: accept
         - proto: udp
         - sport: {{port}}
-        - save: True
         - order: 4
         - require:
             - sls: basics.nftables.setup
@@ -316,13 +310,12 @@ basics-udp-out{{port}}-recv-ipv6:
 # allow us to talk to others. For UDP we make this stateless here to guarantee it works.
 basics-udp-out{{port}}-send-ipv4:
     nftables.append:
-        - table: filter
+        - table: saltshaker
         - chain: output
         - family: ip4
         - jump: accept
         - proto: udp
         - dport: {{port}}
-        - save: True
         - order: 4
         - require:
             - sls: basics.nftables.setup
@@ -330,13 +323,12 @@ basics-udp-out{{port}}-send-ipv4:
 
 basics-udp-out{{port}}-send-ipv6:
     nftables.append:
-        - table: filter
+        - table: saltshaker
         - chain: output
         - family: ip6
         - jump: accept
         - proto: udp
         - dport: {{port}}
-        - save: True
         - order: 4
         - require:
             - sls: basics.nftables.setup
@@ -346,7 +338,7 @@ basics-udp-out{{port}}-send-ipv6:
 # OPEN THE INTERNAL NETWORK FOR OUTGOING CONNECTIONS =========================
 basics-internal-network-tcp-ipv4:
     nftables.append:
-        - table: filter
+        - table: saltshaker
         - chain: output
         - family: ip4
         - jump: accept
@@ -354,7 +346,6 @@ basics-internal-network-tcp-ipv4:
         - match: state
         - connstate: new
         - proto: tcp
-        - save: True
         - order: 4
         - require:
             - sls: basics.nftables.setup
@@ -362,13 +353,12 @@ basics-internal-network-tcp-ipv4:
 
 basics-internal-network-udp-ipv4:
     nftables.append:
-        - table: filter
+        - table: saltshaker
         - chain: output
         - family: ip4
         - jump: accept
         - of: {{pillar['ifassign']['internal']}}
         - proto: udp
-        - save: True
         - order: 4
         - require:
             - sls: basics.nftables.setup

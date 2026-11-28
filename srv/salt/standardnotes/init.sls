@@ -12,6 +12,7 @@ include:
 
 {% set port = pillar.get('standardnotes', {}).get('bind-port', 31300) %}
 {% set webapp_port = pillar.get('standardnotes', {}).get('webapp-bind-port', 31301) %}
+{% set files_port = pillar.get('standardnotes', {}).get('files-bind-port', 31302) %}
 
 
 standardnotes-docker-compose-plugin:
@@ -94,6 +95,17 @@ standardnotes-redis-dir:
             - file: standardnotes-base-dir
 
 
+standardnotes-floci-dir:
+    file.directory:
+        - name: /secure/standardnotes/floci
+        - user: root
+        - group: root
+        - mode: '0750'
+        - makedirs: True
+        - require:
+            - file: standardnotes-base-dir
+
+
 standardnotes-envfile-base:
     file.managed:
         - name: /etc/standardnotes/.env
@@ -122,6 +134,7 @@ standardnotes-envfile-base:
             COOKIE_SECURE={{'false' if not standardnotes.get('cookie-secure', True) else 'true'}}
             COOKIE_PARTITIONED={{'true' if standardnotes.get('cookie-partitioned', False) else 'false'}}
             CORS_ORIGINS={{standardnotes['webapp-hostname']}}
+            PUBLIC_FILES_SERVER_URL={{standardnotes.get('public-files-server-url', 'https://' + standardnotes['files-hostname'])}}
         - require:
             - file: standardnotes-config-dir
 
@@ -137,20 +150,26 @@ standardnotes-compose-file:
         - context:
             ip: {{ip}}
             port: {{port}}
+            files_port: {{files_port}}
             standardnotes: {{standardnotes}}
         - require:
             - file: standardnotes-config-dir
 
 
-standardnotes-localstack-bootstrap:
+standardnotes-sns-sqs-bootstrap:
     file.managed:
-        - name: /etc/standardnotes/localstack_bootstrap.sh
-        - source: salt://standardnotes/localstack_bootstrap.sh
+        - name: /etc/standardnotes/sns_sqs_bootstrap.sh
+        - source: salt://standardnotes/sns_sqs_bootstrap.sh
         - user: root
         - group: root
         - mode: '0755'
         - require:
             - file: standardnotes-config-dir
+
+
+standardnotes-localstack-bootstrap-absent:
+    file.absent:
+        - name: /etc/standardnotes/localstack_bootstrap.sh
 
 
 standardnotes-webapp-default-sync-script:
@@ -194,23 +213,28 @@ standardnotes-systemd:
             - file: standardnotes-uploads-dir
             - file: standardnotes-db-import-dir
             - file: standardnotes-redis-dir
+            - file: standardnotes-floci-dir
             - file: standardnotes-envfile-base
             - file: standardnotes-compose-file
-            - file: standardnotes-localstack-bootstrap
+            - file: standardnotes-sns-sqs-bootstrap
             - file: standardnotes-webapp-default-sync-script
             - file: standardnotes-add-user-script
             - cmd: standardnotes-sync
+            - nftables: standardnotes-bridge-tcp-ipv4-accept
+            - nftables: standardnotes-bridge-udp-ipv4-accept
+            - nftables: standardnotes-bridge-ipv4-forward-accept
+            - nftables: standardnotes-bridge-ipv4-forward-reverse
         - watch:
             - file: standardnotes-envfile-base
             - file: standardnotes-compose-file
-            - file: standardnotes-localstack-bootstrap
+            - file: standardnotes-sns-sqs-bootstrap
             - file: standardnotes-webapp-default-sync-script
             - systemdunit: standardnotes-systemd
 
 
 standardnotes-http-tcp-in{{port}}-ipv4:
     nftables.append:
-        - table: filter
+        - table: saltshaker
         - chain: input
         - family: ip4
         - jump: accept
@@ -220,14 +244,13 @@ standardnotes-http-tcp-in{{port}}-ipv4:
         - match: state
         - connstate: new
         - proto: tcp
-        - save: True
         - require:
             - sls: basics.nftables.setup
 
 
 standardnotes-webapp-http-tcp-in{{webapp_port}}-ipv4:
     nftables.append:
-        - table: filter
+        - table: saltshaker
         - chain: input
         - family: ip4
         - jump: accept
@@ -237,14 +260,29 @@ standardnotes-webapp-http-tcp-in{{webapp_port}}-ipv4:
         - match: state
         - connstate: new
         - proto: tcp
-        - save: True
+        - require:
+            - sls: basics.nftables.setup
+
+
+standardnotes-files-http-tcp-in{{files_port}}-ipv4:
+    nftables.append:
+        - table: saltshaker
+        - chain: input
+        - family: ip4
+        - jump: accept
+        - source: '0/0'
+        - destination: {{ip}}/32
+        - dport: {{files_port}}
+        - match: state
+        - connstate: new
+        - proto: tcp
         - require:
             - sls: basics.nftables.setup
 
 
 standardnotes-bridge-tcp-ipv4-accept:
     nftables.append:
-        - table: filter
+        - table: saltshaker
         - chain: input
         - family: ip4
         - jump: accept
@@ -254,14 +292,13 @@ standardnotes-bridge-tcp-ipv4-accept:
         - match: state
         - connstate: new
         - proto: tcp
-        - save: True
         - require:
             - sls: basics.nftables.setup
 
 
 standardnotes-bridge-udp-ipv4-accept:
     nftables.append:
-        - table: filter
+        - table: saltshaker
         - chain: input
         - family: ip4
         - jump: accept
@@ -269,14 +306,13 @@ standardnotes-bridge-udp-ipv4-accept:
         - destination: {{pillar['standardnotes']['bridge-cidr']}}
         - if: standardnotes0
         - proto: udp
-        - save: True
         - require:
             - sls: basics.nftables.setup
 
 
 standardnotes-bridge-ipv4-forward-accept:
     nftables.append:
-        - table: filter
+        - table: saltshaker
         - chain: forward
         - family: ip4
         - jump: accept
@@ -284,21 +320,19 @@ standardnotes-bridge-ipv4-forward-accept:
         - of: standardnotes0
         - match: state
         - connstate: new
-        - save: True
         - require:
             - sls: basics.nftables.setup
 
 
 standardnotes-bridge-ipv4-forward-reverse:
     nftables.append:
-        - table: filter
+        - table: saltshaker
         - chain: forward
         - family: ip4
         - jump: accept
         - if: standardnotes0
         - match: state
         - connstate: new
-        - save: True
         - require:
             - sls: basics.nftables.setup
 
@@ -340,6 +374,22 @@ standardnotes-webapp-servicedef-external:
             ip: {{ip}}
             port: {{webapp_port}}
             hostname: {{standardnotes['webapp-hostname']}}
+        - require:
+            - file: consul-service-dir
+
+
+standardnotes-files-servicedef-external:
+    file.managed:
+        - name: /etc/consul/services.d/standardnotes-files-external.json
+        - source: salt://standardnotes/consul/standardnotes.jinja.json
+        - mode: '0644'
+        - template: jinja
+        - context:
+            service: standardnotes-files
+            suffix: ext
+            ip: {{ip}}
+            port: {{files_port}}
+            hostname: {{standardnotes['files-hostname']}}
         - require:
             - file: consul-service-dir
 
