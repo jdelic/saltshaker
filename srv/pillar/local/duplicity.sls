@@ -12,14 +12,15 @@ duplicity-backup:
     # data is already on the host, this should be fine in terms of
     # security.
     encrypt-for-host: True
-    # the key id for which backups will be encrypted
+    # the key id for which backups will be encrypted. Add your key to the managed keyring with
+    # `tools/saltshaker_secrets.py add-gpg-key --key-id <your key id>`.
     gpg-keys:
         - 1234567
         # ...
 
     # when NOT using the managed keyring, you will want to use --trusted-key with the long
     # key id here, unless the key has a set trust relationship
-    # gpg-options: --trusted-key={{'23FC12D75291ED448C0728C877C339AB7CDC4589'[-16:]}}
+    # gpg-options: --trusted-key={{'0123456789ABCDEF'[-16:]}}
 
     # replace when enabled, this requires a path (/backup), otherwise duplicity crashes!
     backup-target: sftp://test@host/backup
