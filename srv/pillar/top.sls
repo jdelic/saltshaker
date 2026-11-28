@@ -127,6 +127,7 @@ base:
         - hetzner.docker
         - hetzner.duplicity
         - hetzner.gitserver
+        - hetzner.gpg-keys
         - hetzner.mailserver-config
         - hetzner.network
         - hetzner.nomad
