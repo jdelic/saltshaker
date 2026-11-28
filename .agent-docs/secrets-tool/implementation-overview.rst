@@ -48,15 +48,23 @@ CLI Shape
   contains them.
 - ``init`` collects every answer (and fetches an existing backup key) before it writes anything, so a missing value
   doesn't leave a half-initialized secrets directory.
-- An existing CA: ``--root-ca-cert``, ``--intermediate-ca-cert`` and ``--intermediate-ca-key`` (with
-  ``--intermediate-ca-key-passphrase-file`` or ``SALTSHAKER_INTERMEDIATE_CA_KEY_PASSPHRASE`` for an encrypted key) make
-  ``init`` issue the certificates from that intermediate instead of generating a root and intermediate CA. ``init``
-  checks the key, the chain and the CA flag first. A root CA already in the crypto dir (like ``maurusnet-rootca.crt``)
+- An existing CA, instead of generating a root and intermediate CA:
+
+  - a root CA: ``--root-ca-cert`` and ``--root-ca-key`` (``--root-ca-key-passphrase-file`` or
+    ``SALTSHAKER_ROOT_CA_KEY_PASSPHRASE`` for an encrypted key). ``init`` generates an intermediate CA under it.
+  - an intermediate CA: ``--intermediate-ca-cert`` and ``--intermediate-ca-key``
+    (``--intermediate-ca-key-passphrase-file`` or ``SALTSHAKER_INTERMEDIATE_CA_KEY_PASSPHRASE``), plus ``--root-ca-cert``
+    of the root that signed it. ``init`` issues the certificates from it.
+
+  ``init`` checks the keys, the chain and the CA flags first. A root CA already in the crypto dir (like ``maurusnet-rootca.crt``)
   is used in place, and ``config.sls`` lists it in ``install_generated_ca_certs`` only if ``shared/ssl.sls`` doesn't
   install it already.
 - Validity: generated root and intermediate CAs 3650 days (``--root-days``, ``--intermediate-days``), service and dev
   wildcard certificates 825 days (``--leaf-days``).
 - Without ``--force``, ``init`` refuses before generating anything if any of its output files exists.
+- Placeholders and stubs (``live-ssl.sls`` without ACME, ``smtp-relay.sls``, ``gpg-package-signing.sls`` with
+  ``--no-signing-key``) are only written when the file doesn't exist, even with ``--force``, so they never replace
+  real settings. The backup key is merged into ``gpg-installed-keys.sls`` like ``add-gpg-key`` does.
 - Other ``init`` options: ``--dev-domain`` (e.g. ``maurusnet.test``), ``--prod-domains`` (comma list; an empty value
   means none), ``--internal-domain`` (defaults to a sanitized form of the first prod domain such as
   ``maurusnet.internal``), ``--crypto-dir``, ``--config-pillar``, ``--vagrantfile``, ``--preseed-keys-dir``, CA
