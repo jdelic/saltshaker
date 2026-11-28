@@ -64,7 +64,7 @@ Core Outputs
 - ``gpg-installed-keys.sls``: public keys imported into the managed shared keyring. Optional; written by ``init`` and ``add-gpg-key``.
 - ``vagrant/preseed-keys/*.pem`` / ``*.pub``: generated RSA keypairs for ``saltmaster.{dev_domain}``, ``test.{dev_domain}`` and ``apps.{dev_domain}``.
 - ``vagrant/Vagrantfile``: rewritten so the managed testing-domain constant matches ``--dev-domain``.
-- ``srv/salt/basics/crypto/[domain]-rootca-[run id].crt``: root CA cert. The run ID is the Unix time of the ``init`` run in hex, so a generated CA never replaces a CA file tracked in the repository (``maurusnet-rootca.crt`` is installed on every node for APT repositories). Every text file ``init`` writes starts with a comment naming the run.
+- ``srv/salt/basics/crypto/[domain]-rootca-generated.crt``: root CA cert. The suffix keeps it apart from CA files tracked in the repository (``maurusnet-rootca.crt`` is installed on every node for APT repositories). Because the name is stable, ``init`` refuses to run again when it exists, unless ``--force`` is given, which replaces it. Every text file ``init`` writes starts with a comment naming the run (the Unix time in hex).
 
 Secrets Handling
 ----------------
@@ -76,7 +76,7 @@ Assumptions (to confirm)
 ------------------------
 - The intermediate CA should be the signing CA for all internal + dev wildcard certificates.
 - Maurus.netowrks Root CA should be installed globally across nodes via ``basics/crypto/ssl.sls`` (``maurusnet-rootca.crt``).
-- The new root CA should be installed globally across nodes via ``basics/crypto/ssl.sls`` (``[domain]-rootca-[run id].crt``).
+- The new root CA should be installed globally across nodes via ``basics/crypto/ssl.sls`` (``[domain]-rootca-generated.crt``).
 - The production wildcard is only retrieved via ACME DNS challenge.
 
 Risks
