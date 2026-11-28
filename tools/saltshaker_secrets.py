@@ -287,7 +287,7 @@ def sanitize_domains(domains: str) -> List[str]:
 
 
 def new_run_id() -> str:
-    """A short ID for one init run: the Unix time in hex. It names the root CA and is noted in every file init writes."""
+    """A short ID for one init run: the Unix time in hex. It's noted at the top of every text file init writes."""
     return format(int(time.time()), "x")
 
 
@@ -295,13 +295,13 @@ def run_header(run_id: str) -> str:
     return f"# written by saltshaker_secrets init, run {run_id}\n"
 
 
-def root_ca_filename(domain: str, run_id: str) -> str:
+def root_ca_filename(domain: str) -> str:
     compact = re.sub(r"[^A-Za-z0-9]+", "", domain).lower()
     if not compact:
         compact = "local"
-    # The run ID keeps generated CAs apart from each other and from CA files tracked in the repository (e.g.
-    # maurusnet-rootca.crt, which every node installs for APT repositories).
-    return f"{compact}-rootca-{run_id}.crt"
+    # The suffix keeps the generated CA apart from CA files tracked in the repository (e.g. maurusnet-rootca.crt,
+    # which every node installs for APT repositories). The name is stable, so it also shows that init already ran.
+    return f"{compact}-rootca-generated.crt"
 
 
 def default_internal_domain(dev_domain: str, prod_domains: List[str]) -> str:
@@ -1239,6 +1239,12 @@ def init(args: argparse.Namespace) -> None:
         warn("No production domains supplied; live-ssl.sls will be stubbed.", enabled=color_enabled)
 
     base_domain = prod_domains[0] if prod_domains else dev_domain
+    root_ca_name = root_ca_filename(base_domain)
+    if (crypto_dir / root_ca_name).exists() and not args.force:
+        raise FileExistsError(
+            f"{crypto_dir / root_ca_name} exists, so the secrets are already initialized. Use --force to generate "
+            "new ones and replace them."
+        )
     org = args.org or prompt("Organization name", "SaltShaker", option="--org")
     country = args.country or prompt("Country code", "DE", option="--country")
     state = args.state or prompt("State/Province", "BY", option="--state")
@@ -1430,7 +1436,6 @@ def init(args: argparse.Namespace) -> None:
     info("Writing CA certs...", enabled=color_enabled)
     run_id = new_run_id()
     header = run_header(run_id)
-    root_ca_name = root_ca_filename(base_domain, run_id)
     write_file(crypto_dir / root_ca_name, load_pem(root_cert), force=args.force)
 
     info("Rendering pillar files...", enabled=color_enabled)
