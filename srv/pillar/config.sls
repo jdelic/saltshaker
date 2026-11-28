@@ -3,7 +3,7 @@
 # Update these values per environment/branch as needed.
 #
 
-{% set internal_domain = "internal" %}
+{% set internal_domain = "maurusnet.internal" %}
 {% set local_domain = "local" %}
 {% set external_tld = "maurusnet.test" %}
 {% set service_rootca_cert = "/usr/share/ca-certificates/local/maurusnet-rootca.crt" %}
