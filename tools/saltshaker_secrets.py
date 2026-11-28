@@ -49,6 +49,8 @@ BACKUP_KEY_PASSPHRASE_ENV = "SALTSHAKER_BACKUP_KEY_PASSPHRASE"
 INTERMEDIATE_CA_KEY_PASSPHRASE_ENV = "SALTSHAKER_INTERMEDIATE_CA_KEY_PASSPHRASE"
 ROOT_CA_KEY_PASSPHRASE_ENV = "SALTSHAKER_ROOT_CA_KEY_PASSPHRASE"
 DEFAULT_CA_DAYS = 3650
+# what clean keeps by default, because renew-certs (and a new intermediate CA) needs them
+CA_FILES = {"root-ca.crt", "root-ca.key", "intermediate-ca.crt", "intermediate-ca.key"}
 GPG_KEY_TYPES = ["ed25519", "rsa"]
 KEY_SOURCES = ["keyring", "keyserver", "url", "file"]
 
@@ -377,15 +379,19 @@ def build_intermediate_ext() -> str:
 
 
 def build_leaf_ext(san: Iterable[str]) -> str:
-    san_line = ", ".join(f"DNS:{name}" for name in san)
-    return textwrap.dedent(f"""
+    return build_leaf_ext_raw(", ".join(f"DNS:{name}" for name in san))
+
+
+def build_leaf_ext_raw(san_line: str) -> str:
+    """san_line is an openssl subjectAltName value like "DNS:a.example, IP:192.0.2.1"."""
+    san = f"subjectAltName = {san_line}\n" if san_line else ""
+    return textwrap.dedent("""
         [ v3_req ]
         basicConstraints = CA:FALSE
         keyUsage = critical, digitalSignature, keyEncipherment
         extendedKeyUsage = serverAuth, clientAuth
-        subjectAltName = {san_line}
         """
-    )
+    ) + san
 
 
 def write_openssl_conf(path: Path, content: str) -> None:
@@ -394,7 +400,12 @@ def write_openssl_conf(path: Path, content: str) -> None:
 
 
 def generate_openssl_private_key(key_path: Path, curve_or_algorithm: str) -> None:
+    """curve_or_algorithm is "ed25519", "rsa:<bits>" or an EC curve name."""
     curve_or_algorithm = curve_or_algorithm.lower()
+    if curve_or_algorithm.startswith("rsa:"):
+        run(["openssl", "genpkey", "-algorithm", "RSA", "-pkeyopt",
+             f"rsa_keygen_bits:{curve_or_algorithm.removeprefix('rsa:')}", "-out", str(key_path)])
+        return
     if curve_or_algorithm == "ed25519":
         run(
             [
@@ -589,17 +600,20 @@ def unencrypted_key_copy(key: Path, copy: Path, *, passphrase_file: Optional[str
                          option: str) -> Path:
     """Write an unencrypted copy of a private key to the work dir (mode 600), asking for its passphrase if needed."""
     ensure_dir(copy.parent)
-    copy.touch(mode=0o600)
-    os.chmod(copy, 0o600)
+    # write next to the target and move it into place, so key and copy may be the same file
+    tmp = copy.with_name(copy.name + ".tmp")
+    tmp.touch(mode=0o600)
+    os.chmod(tmp, 0o600)
     passphrase = ""
     if "ENCRYPTED" in key.read_text(encoding="utf-8"):
         passphrase = read_passphrase(passphrase_file, env_var, f"{label} passphrase", option)
     try:
-        run(["openssl", "pkey", "-in", str(key), "-passin", "fd:0", "-out", str(copy)], input_text=passphrase + "\n")
+        run(["openssl", "pkey", "-in", str(key), "-passin", "fd:0", "-out", str(tmp)], input_text=passphrase + "\n")
     except subprocess.CalledProcessError as exc:
-        copy.unlink(missing_ok=True)
+        tmp.unlink(missing_ok=True)
         hint = " Is the passphrase right?" if passphrase else ""
         raise ValueError(f"Unable to read the private key {key}.{hint}") from exc
+    os.replace(tmp, copy)
     return copy
 
 
@@ -647,6 +661,211 @@ def prepare_existing_root_ca(work_dir: Path, *, root_cert: Path, root_key: Path,
                                     option="--root-ca-key-passphrase-file")
     check_ca_cert_and_key(root_cert, key_copy, valid_for_days=intermediate_days, issued="intermediate CA")
     return key_copy
+
+
+PEM_BLOCK_RE = re.compile(
+    r"^(?P<indent>[ \t]*)-----BEGIN (?P<kind>[A-Z0-9 ]+)-----\n(?P<body>.*?)^(?P=indent)-----END (?P=kind)-----$",
+    re.MULTILINE | re.DOTALL,
+)
+
+
+@dataclass
+class PemBlock:
+    start: int
+    end: int
+    indent: str
+    kind: str
+    pem: str  # without the indentation
+
+
+def find_pem_blocks(content: str) -> List[PemBlock]:
+    blocks = []
+    for m in PEM_BLOCK_RE.finditer(content):
+        text = m.group(0)
+        pem = "\n".join(line[len(m.group("indent")):] for line in text.split("\n"))
+        blocks.append(PemBlock(m.start(), m.end(), m.group("indent"), m.group("kind"), pem))
+    return blocks
+
+
+def replace_pem_blocks(content: str, replacements: dict[int, str]) -> str:
+    """replacements maps a block's start offset to its new PEM, which gets the old block's indentation."""
+    for block in sorted(find_pem_blocks(content), key=lambda b: b.start, reverse=True):
+        if block.start in replacements:
+            new = "\n".join(block.indent + line if line else line for line in replacements[block.start].strip().split("\n"))
+            content = content[:block.start] + new + content[block.end:]
+    return content
+
+
+def openssl_out(args: List[str], pem: str) -> str:
+    """Run an openssl command on a PEM given on stdin, quietly. Used for many small checks."""
+    return subprocess.run(["openssl"] + args, input=pem + "\n", text=True, capture_output=True, check=True).stdout
+
+
+def cert_is_ca(pem: str) -> bool:
+    return "CA:TRUE" in openssl_out(["x509", "-noout", "-ext", "basicConstraints"], pem)
+
+
+def cert_subject(pem: str) -> str:
+    return openssl_out(["x509", "-noout", "-subject", "-nameopt", "RFC2253"], pem).strip().removeprefix("subject=")
+
+
+def cert_issuer(pem: str) -> str:
+    return openssl_out(["x509", "-noout", "-issuer", "-nameopt", "RFC2253"], pem).strip().removeprefix("issuer=")
+
+
+def public_key_of(pem: str, *, is_cert: bool) -> str:
+    return openssl_out(["x509", "-noout", "-pubkey"] if is_cert else ["pkey", "-pubout"], pem).strip()
+
+
+def key_spec_of(key_pem: str) -> str:
+    """The generate_openssl_private_key() argument for a key of the same type."""
+    text = openssl_out(["pkey", "-noout", "-text"], key_pem)
+    first = text.splitlines()[0] if text else ""
+    if "ED25519" in first:
+        return "ed25519"
+    curve = re.search(r"NIST CURVE: (\S+)|ASN1 OID: (\S+)", text)
+    if curve:
+        return curve.group(2) or {"P-256": "prime256v1"}.get(curve.group(1), curve.group(1))
+    bits = re.search(r"\((\d+) bit", first)
+    if bits:
+        return f"rsa:{bits.group(1)}"
+    raise ValueError("Unsupported key type")
+
+
+def reissue_leaf_cert(work_dir: Path, old_cert: str, old_key: str, *, ca_cert: Path, ca_key: Path,
+                      days: int) -> tuple[str, str]:
+    """A new key of the same type and a certificate with the old one's subject and subjectAltName."""
+    with tempfile.TemporaryDirectory(prefix="renew-", dir=work_dir) as tmp_dir:
+        tmp = Path(tmp_dir)
+        (tmp / "old.crt").write_text(old_cert + "\n", encoding="utf-8")
+        generate_openssl_private_key(tmp / "new.key", key_spec_of(old_key))
+        run(["openssl", "x509", "-x509toreq", "-in", str(tmp / "old.crt"), "-key", str(tmp / "new.key"),
+             "-out", str(tmp / "new.csr")])
+        san = openssl_out(["x509", "-noout", "-ext", "subjectAltName"], old_cert).splitlines()
+        write_openssl_conf(tmp / "new.ext", build_leaf_ext_raw(san[1].strip() if len(san) > 1 else ""))
+        run(["openssl", "x509", "-req", "-in", str(tmp / "new.csr"), "-CA", str(ca_cert), "-CAkey", str(ca_key),
+             "-CAserial", str(work_dir / "intermediate-ca.srl"), "-CAcreateserial", "-out", str(tmp / "new.crt"),
+             "-days", str(days), "-sha256", "-extfile", str(tmp / "new.ext"), "-extensions", "v3_req"])
+        return load_pem(tmp / "new.crt").strip(), load_pem(tmp / "new.key").strip()
+
+
+def config_root_ca(config_pillar: Path, crypto_dir: Path) -> Optional[Path]:
+    """The root CA file that config.sls installs as service_rootca_cert."""
+    if not config_pillar.exists():
+        return None
+    m = re.search(r'service_rootca_cert\s*=\s*"([^"]+)"', config_pillar.read_text(encoding="utf-8"))
+    return crypto_dir / Path(m.group(1)).name if m else None
+
+
+def renew_certs(args: argparse.Namespace) -> None:
+    color_enabled = COLOR_ENABLED
+    secrets_dir = Path(args.secrets_dir or DEFAULT_SECRETS_DIR)
+    crypto_dir = Path(args.crypto_dir or DEFAULT_CRYPTO_DIR)
+    config_pillar = Path(args.config_pillar or DEFAULT_CONFIG_PILLAR)
+    work_dir = Path(args.work_dir or DEFAULT_WORK_DIR)
+    if which("openssl") is None:
+        raise FileNotFoundError("Required tool not found in PATH: openssl")
+
+    banner("SaltShaker Renew Certificates", enabled=color_enabled)
+    print("Reissues every certificate in the secrets pillar that the intermediate CA issued, with a new key, the same "
+          "names and a new validity period.\n")
+
+    ensure_dir(work_dir)
+    # the intermediate CA certificate that init (or you) put into common.sls as the chain
+    common_sls = secrets_dir / "common.sls"
+    current_cas = [b.pem for b in find_pem_blocks(common_sls.read_text(encoding="utf-8"))
+                   if b.kind == "CERTIFICATE" and cert_is_ca(b.pem)] if common_sls.exists() else []
+    if args.intermediate_ca_cert:
+        int_cert = Path(args.intermediate_ca_cert)
+    else:
+        if len(current_cas) != 1:
+            raise ValueError(f"Unable to find the intermediate CA certificate in {common_sls}. Pass --intermediate-ca-cert")
+        int_cert = work_dir / "renew-intermediate-ca.crt"
+        int_cert.write_text(current_cas[0] + "\n", encoding="utf-8")
+    int_key = Path(args.intermediate_ca_key or work_dir / "intermediate-ca.key")
+    if not int_key.exists():
+        raise FileNotFoundError(
+            f"{int_key} doesn't exist. Pass --intermediate-ca-key; init keeps the key of a generated intermediate CA "
+            f"in {work_dir} unless clean --all removed it."
+        )
+    root_cert = Path(args.root_ca_cert) if args.root_ca_cert else config_root_ca(config_pillar, crypto_dir)
+    if root_cert is None:
+        raise ValueError(f"Unable to find service_rootca_cert in {config_pillar}. Pass --root-ca-cert")
+
+    with tempfile.TemporaryDirectory(prefix="renew-ca-", dir=work_dir) as ca_dir:
+        ca_key = prepare_existing_intermediate_ca(
+            Path(ca_dir), root_cert=root_cert, intermediate_cert=int_cert, intermediate_key=int_key,
+            passphrase_file=args.intermediate_ca_key_passphrase_file, leaf_days=args.leaf_days,
+        )
+        int_pem = load_pem(int_cert).strip()
+        int_subject = cert_subject(int_pem)
+        # Certificates to renew are the ones issued by this intermediate CA or by the one currently in common.sls
+        # (when a new intermediate CA replaces it).
+        issuing_cas = []
+        for i, pem in enumerate([int_pem] + [pem for pem in current_cas if pem.strip() != int_pem]):
+            path = Path(ca_dir) / f"issuer-{i}.crt"
+            path.write_text(pem.strip() + "\n", encoding="utf-8")
+            issuing_cas.append(path)
+
+        # pass 1: the certificates the intermediate CA issued, and their keys
+        new_contents: dict[Path, str] = {}
+        old_issuers = {int_subject}
+        renewed = []
+        for sls in sorted(secrets_dir.glob("*.sls")):
+            content = sls.read_text(encoding="utf-8")
+            blocks = find_pem_blocks(content)
+            replacements = {}
+            for cert in [b for b in blocks if b.kind == "CERTIFICATE" and not cert_is_ca(b.pem)]:
+                # checked by signature, whether or not the certificate is still valid
+                if not any(subprocess.run(["openssl", "verify", "-no_check_time", "-partial_chain", "-CAfile", str(ca)],
+                                          input=cert.pem + "\n", text=True, capture_output=True).returncode == 0
+                           for ca in issuing_cas):
+                    continue
+                pubkey = public_key_of(cert.pem, is_cert=True)
+                keys = [b for b in blocks if b.kind.endswith("PRIVATE KEY")
+                        and public_key_of(b.pem, is_cert=False) == pubkey]
+                if not keys:
+                    warn(f"{sls}: no private key for {cert_subject(cert.pem)}, skipping it", enabled=color_enabled)
+                    continue
+                info(f"Renewing {cert_subject(cert.pem)} in {sls.name}...", enabled=color_enabled)
+                old_issuers.add(cert_issuer(cert.pem))
+                new_cert, new_key = reissue_leaf_cert(work_dir, cert.pem, keys[0].pem, ca_cert=int_cert, ca_key=ca_key,
+                                                      days=args.leaf_days)
+                replacements[cert.start] = new_cert
+                for key in keys:
+                    replacements[key.start] = new_key
+                renewed.append((sls.name, cert_subject(cert.pem)))
+            if replacements:
+                new_contents[sls] = replace_pem_blocks(content, replacements)
+
+        if not renewed:
+            raise ValueError(f"No certificate in {secrets_dir} was issued by {int_subject}")
+
+        # pass 2: chain certificates (common.sls, inline chains) of the CA that issued the old certificates
+        for sls in sorted(secrets_dir.glob("*.sls")):
+            content = new_contents.get(sls, sls.read_text(encoding="utf-8"))
+            replacements = {b.start: int_pem for b in find_pem_blocks(content)
+                            if b.kind == "CERTIFICATE" and b.pem.strip() != int_pem and cert_is_ca(b.pem)
+                            and cert_subject(b.pem) in old_issuers}
+            if replacements:
+                info(f"Updating the intermediate CA certificate in {sls.name}", enabled=color_enabled)
+                new_contents[sls] = replace_pem_blocks(content, replacements)
+
+        # check before writing anything
+        for sls, content in new_contents.items():
+            for cert in [b for b in find_pem_blocks(content) if b.kind == "CERTIFICATE" and not cert_is_ca(b.pem)]:
+                if cert_issuer(cert.pem) != int_subject:
+                    continue
+                verify = subprocess.run(["openssl", "verify", "-CAfile", str(root_cert), "-untrusted", str(int_cert)],
+                                        input=cert.pem + "\n", text=True, capture_output=True)
+                if verify.returncode != 0:
+                    raise RuntimeError(f"The renewed certificate in {sls} doesn't verify: {verify.stdout}{verify.stderr}")
+
+    for sls, content in new_contents.items():
+        write_file(sls, content, force=True)
+    ok(f"Renewed {len(renewed)} certificate(s), valid for {args.leaf_days} days:", enabled=color_enabled)
+    for name, subject in renewed:
+        print(f"- {name}: {subject}")
 
 
 def write_stub(path: Path, content: str) -> None:
@@ -1261,15 +1480,30 @@ def clean(args: argparse.Namespace) -> None:
     work_dir = Path(args.work_dir or DEFAULT_WORK_DIR)
 
     banner("SaltShaker Secrets Clean", enabled=color_enabled)
-    print("This removes the tool working directory used for generated temporary artifacts.\n")
+    print("This removes the temporary artifacts in the tool's working directory.\n")
 
     if not work_dir.exists():
         warn(f"Nothing to clean. Working directory does not exist: {work_dir}", enabled=color_enabled)
         return
 
-    info(f"Removing working directory {work_dir}...", enabled=color_enabled)
-    shutil.rmtree(work_dir)
-    ok(f"Removed {work_dir}", enabled=color_enabled)
+    if args.all:
+        warn(f"Removing {work_dir} including the CA keys. Without the intermediate CA key, renew-certs can't renew "
+             "the certificates.", enabled=color_enabled)
+        shutil.rmtree(work_dir)
+        ok(f"Removed {work_dir}", enabled=color_enabled)
+        return
+    kept = []
+    for path in sorted(work_dir.iterdir()):
+        if path.name in CA_FILES:
+            kept.append(path.name)
+        elif path.is_dir():
+            shutil.rmtree(path)
+        else:
+            path.unlink()
+    ok(f"Cleaned {work_dir}", enabled=color_enabled)
+    if kept:
+        info(f"Kept the CA files {', '.join(kept)}, which renew-certs needs. Use --all to remove them, too.",
+             enabled=color_enabled)
 
 
 def init(args: argparse.Namespace) -> None:
@@ -1704,6 +1938,10 @@ def init(args: argparse.Namespace) -> None:
         else:
             print("- Run `python3 tools/saltshaker_secrets.py update-acme ...` to create or renew `shared/secrets/live-ssl.sls`")
     print("- Review SSH public keys in `srv/pillar/shared/ssh.sls` and update as needed")
+    ca_keys = [path for path in (work_dir / "root-ca.key", work_dir / "intermediate-ca.key") if path.exists()]
+    if ca_keys:
+        print(f"- Keep {' and '.join(str(path) for path in ca_keys)} safe (outside the repository). "
+              "`saltshaker_secrets.py renew-certs` needs the intermediate CA key to renew the certificates.")
     if backup_key_fingerprint:
         print(
             f"- Use {backup_key_fingerprint[-16:]} for `duplicity-backup:gpg-keys` and `vault:encrypt-vault-keys-with-gpg` as needed"
@@ -1898,7 +2136,31 @@ def build_parser() -> argparse.ArgumentParser:
                                 help="Name of the key in the gpg:keys pillar (Default: %(default)s)")
     add_key_parser.set_defaults(func=add_gpg_key)
 
+    renew_parser = sub.add_parser(
+        "renew-certs",
+        parents=[common, secrets],
+        help="Renew the certificates the intermediate CA issued (new keys, same names)",
+        description="Reissue every certificate in the secrets pillar that the intermediate CA issued, whether it's "
+                    "still valid or not: a new key of the same type, the old certificate's subject and "
+                    "subjectAltName, and a new validity period. Other content of the pillar files is kept. A new "
+                    "intermediate CA certificate also replaces the old one in common.sls and inline chains.",
+    )
+    renew_parser.add_argument("--intermediate-ca-cert", metavar="PATH",
+                              help="(Default: the intermediate CA certificate in common.sls)")
+    renew_parser.add_argument("--intermediate-ca-key", metavar="PATH",
+                              help=f"(Default: intermediate-ca.key in the work dir, where init leaves it)")
+    renew_parser.add_argument("--intermediate-ca-key-passphrase-file", metavar="PATH",
+                              help=f"For an encrypted key. Alternatively set {INTERMEDIATE_CA_KEY_PASSPHRASE_ENV}")
+    renew_parser.add_argument("--root-ca-cert", metavar="PATH",
+                              help="The root CA the intermediate must chain to (Default: config.sls's service_rootca_cert)")
+    renew_parser.add_argument("--crypto-dir")
+    renew_parser.add_argument("--config-pillar")
+    renew_parser.add_argument("--leaf-days", type=int, default=825, help="Validity (Default: %(default)s)")
+    renew_parser.set_defaults(func=renew_certs)
+
     clean_parser = sub.add_parser("clean", parents=[common], help="Remove generated working artifacts")
+    clean_parser.add_argument("--all", action="store_true",
+                              help="Also remove the CA certificates and keys that renew-certs needs")
     clean_parser.set_defaults(func=clean)
 
     return parser
