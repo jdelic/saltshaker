@@ -49,7 +49,7 @@ smartstack-external-runner:
                     {{' '}}-D load_dhparams=True \
                 {%- endif %}
                 -o  /etc/haproxy/haproxy-external.cfg \
-                -c  "ps awwfux | grep -v grep | grep 'haproxy -f /etc/haproxy/haproxy-external.cfg' >/dev/null && systemctl reload haproxy@external || systemctl restart haproxy@external" \
+                -c  "ps awwfux | grep -v grep | grep 'haproxy -Ws -f /etc/haproxy/haproxy-external.cfg' >/dev/null && systemctl reload haproxy@external || systemctl restart haproxy@external" \
                 /etc/haproxy/haproxy-external.jinja.cfg
         - mode: 750
         - require:
