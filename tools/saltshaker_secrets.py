@@ -599,8 +599,13 @@ def prepare_existing_ca(work_dir: Path, *, root_cert: Path, intermediate_cert: P
     if "ENCRYPTED" in intermediate_key.read_text(encoding="utf-8"):
         passphrase = read_passphrase(passphrase_file, INTERMEDIATE_CA_KEY_PASSPHRASE_ENV, "Intermediate CA key passphrase",
                                      "--intermediate-ca-key-passphrase-file")
-    run(["openssl", "pkey", "-in", str(intermediate_key), "-passin", "fd:0", "-out", str(key_copy)],
-        input_text=passphrase + "\n")
+    try:
+        run(["openssl", "pkey", "-in", str(intermediate_key), "-passin", "fd:0", "-out", str(key_copy)],
+            input_text=passphrase + "\n")
+    except subprocess.CalledProcessError as exc:
+        key_copy.unlink(missing_ok=True)
+        hint = " Is the passphrase right?" if passphrase else ""
+        raise ValueError(f"Unable to read the private key {intermediate_key}.{hint}") from exc
 
     cert_pubkey = run_capture(["openssl", "x509", "-in", str(intermediate_cert), "-noout", "-pubkey"])
     key_pubkey = run_capture(["openssl", "pkey", "-in", str(key_copy), "-pubout"])
