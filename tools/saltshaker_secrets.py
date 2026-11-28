@@ -28,7 +28,7 @@ DEFAULT_CONFIG_PILLAR = ROOT / "srv" / "pillar" / "config.sls"
 DEFAULT_WORK_DIR = ROOT / ".saltshaker-secrets"
 DEFAULT_VAGRANTFILE = ROOT / "vagrant" / "Vagrantfile"
 DEFAULT_PRESEED_KEYS_DIR = ROOT / "vagrant" / "preseed-keys"
-DEFAULT_EC_CURVE = "ed25519"
+DEFAULT_EC_CURVE = "prime256v1"
 DEFAULT_GPG_KEY_TYPE = "ed25519"
 
 RESET = "\033[0m"
@@ -2055,7 +2055,10 @@ def build_parser() -> argparse.ArgumentParser:
                              help=f"Validity of a generated intermediate CA (Default: {DEFAULT_CA_DAYS})")
     init_parser.add_argument("--leaf-days", type=int, default=825,
                              help="Validity of the service and dev wildcard certificates (Default: %(default)s)")
-    init_parser.add_argument("--ec-curve", default=DEFAULT_EC_CURVE)
+    init_parser.add_argument("--ec-curve", default=DEFAULT_EC_CURVE,
+                             help="Key type for the generated CAs and certificates: an EC curve name or ed25519. "
+                                  "Don't use ed25519: OpenSMTPD doesn't start with an ed25519 key and browsers "
+                                  "don't accept ed25519 certificates. (Default: %(default)s)")
     init_parser.add_argument("--fetch-acme", action=argparse.BooleanOptionalAction, default=None)
     init_parser.add_argument("--acme-email")
 
