@@ -24,18 +24,34 @@ Scope
 CLI Shape
 ---------
 - Entry point: ``saltshaker/tools/saltshaker_secrets.py`` (Python).
-- Primary command: ``init`` (interactive by default).
-- ``add-gpg-key --keyring|--keyserver|--url|--file KEY [--name NAME] [--replace]``: add one public key to the managed keyring pillar of an existing installation.
-- Options for non-interactive use:
+- Subcommands: ``init`` (interactive by default), ``update-acme``, ``add-gpg-key``, ``clean``.
+- Options every subcommand takes (after the subcommand name): ``--verbose``, ``--color``/``--no-color``,
+  ``--no-input`` (never prompt; use defaults where there are any and fail naming the missing option otherwise) and
+  ``--work-dir``. ``init``, ``update-acme`` and ``add-gpg-key`` also take ``--secrets-dir``.
+- ``--force`` exists only on ``init`` and means "overwrite existing output files". ``update-acme`` always replaces
+  ``live-ssl.sls`` and ``add-gpg-key`` always replaces a key with the same ``--name``, because updating is what they
+  are for.
+- Existing public keys use the same option names everywhere: a source (``keyring``, ``keyserver``, ``url`` or
+  ``file``), a key ID for the keyring and keyserver sources, a URL or a file. The source defaults to what the other
+  options imply (a key ID alone means the local keyring).
 
-  - ``--dev-domain`` (single dev/test domain, e.g. ``maurusnet.test``)
-  - ``--prod-domains`` (comma list, e.g. ``maurus.net``)
-  - ``--internal-domain`` (internal service suffix, defaults to a sanitized form of the first prod domain such as ``maurusnet.internal``)
-  - ``--secrets-dir`` (defaults to secrets submodule)
-  - ``--crypto-dir`` (defaults to basics/crypto)
-  - ``--force`` (overwrite)
-  - ``--acme-email``
-  - ACME uses manual DNS challenge only
+  - ``add-gpg-key [--source S] [--key-id ID | --url URL | --file PATH] [--gpg-home PATH] [--name NAME]``
+  - ``init``: ``--backup-key-source`` (also ``generate``), ``--backup-key-id``, ``--backup-key-url``,
+    ``--backup-key-file``, ``--backup-key-gpg-home``
+
+- Generated keys: ``--signing-key``/``--no-signing-key`` with ``--signing-key-uid``, ``--signing-key-type``,
+  ``--signing-key-length``, ``--signing-key-expire``; ``--backup-key``/``--no-backup-key`` with the same
+  ``--backup-key-*`` options plus ``--backup-key-export-secret PATH``/``--no-backup-key-export-secret``.
+- Passphrases are never command line options. They come from ``--signing-key-passphrase-file``/
+  ``--backup-key-passphrase-file``, from ``SALTSHAKER_SIGNING_KEY_PASSPHRASE``/``SALTSHAKER_BACKUP_KEY_PASSPHRASE``,
+  or from a hidden prompt, and they reach gpg on stdin. The "repeat without prompts" command ``init`` prints never
+  contains them.
+- ``init`` collects every answer (and fetches an existing backup key) before it writes anything, so a missing value
+  doesn't leave a half-initialized secrets directory.
+- Other ``init`` options: ``--dev-domain`` (e.g. ``maurusnet.test``), ``--prod-domains`` (comma list; an empty value
+  means none), ``--internal-domain`` (defaults to a sanitized form of the first prod domain such as
+  ``maurusnet.internal``), ``--crypto-dir``, ``--config-pillar``, ``--vagrantfile``, ``--preseed-keys-dir``, CA
+  subject fields, validity periods, ``--fetch-acme`` and ``--acme-email``. ACME uses the manual DNS challenge only.
 
 Core Outputs
 ------------
@@ -45,7 +61,7 @@ Core Outputs
 - ``smtp.sls`` / ``imap.sls`` / ``vault-ssl.sls`` / ``postgresql.sls``: leaf certs signed by intermediate CA.
 - ``gpg-package-signing.sls``: public + private key blocks.
 - ``gpg-installed-keys.sls``: public keys imported into the managed shared keyring. Optional; written by ``init`` and ``add-gpg-key``.
-- ``vagrant/preseed-keys/*.pem`` / ``*.pub``: generated RSA keypairs for ``saltmaster.{dev_domain}`` and ``test.{dev_domain}``.
+- ``vagrant/preseed-keys/*.pem`` / ``*.pub``: generated RSA keypairs for ``saltmaster.{dev_domain}``, ``test.{dev_domain}`` and ``apps.{dev_domain}``.
 - ``vagrant/Vagrantfile``: rewritten so the managed testing-domain constant matches ``--dev-domain``.
 - ``srv/salt/basics/crypto/[domain]-rootca.crt``: root CA cert.
 

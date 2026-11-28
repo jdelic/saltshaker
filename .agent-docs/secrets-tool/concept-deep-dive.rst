@@ -41,7 +41,7 @@ GPG Key Lifecycle
 - Key material is embedded in ``gpg-package-signing.sls``.
 - Separately manage a backup/admin public key in ``gpg-installed-keys.sls`` so backup and Vault encryption can use the shared managed keyring without hard-coded keys in the main repo.
 - The backup/admin key may be generated into the operator's own GnuPG home, exported from the operator's GnuPG keyring, fetched from ``keys.openpgp.org``, downloaded from a URL, or imported from a local armored public key file.
-- ``add-gpg-key`` adds or replaces a single key in ``gpg-installed-keys.sls`` and keeps the others, so existing installations can add their key without rerunning ``init``. Supplied armored keys are stored verbatim (wrapped in a Jinja ``raw`` block) when they contain a single public key.
+- ``add-gpg-key`` adds a single key to ``gpg-installed-keys.sls``, or replaces the key with the same name, and keeps the others, so existing installations can add their key without rerunning ``init``. Supplied armored keys are stored verbatim (wrapped in a Jinja ``raw`` block) when they contain a single public key.
 - ``gpg-installed-keys.sls`` is optional. ``srv/pillar/top.sls`` lists it in a separate ``ignore_missing`` target, so installations without it still render their pillar.
 - The tool never writes configuration into an existing GnuPG home. Only homes it creates itself get ``gpg.conf``/``gpg-agent.conf``.
 

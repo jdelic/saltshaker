@@ -13,7 +13,7 @@ duplicity-backup:
     # security.
     encrypt-for-host: True
     # the key id for which backups will be encrypted. Add your key to the managed keyring with
-    # `tools/saltshaker_secrets.py add-gpg-key --keyring <your key id>`.
+    # `tools/saltshaker_secrets.py add-gpg-key --key-id <your key id>`.
     gpg-keys:
         - 1234567
         # ...
