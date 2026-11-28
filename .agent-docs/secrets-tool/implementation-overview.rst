@@ -48,6 +48,15 @@ CLI Shape
   contains them.
 - ``init`` collects every answer (and fetches an existing backup key) before it writes anything, so a missing value
   doesn't leave a half-initialized secrets directory.
+- An existing CA: ``--root-ca-cert``, ``--intermediate-ca-cert`` and ``--intermediate-ca-key`` (with
+  ``--intermediate-ca-key-passphrase-file`` or ``SALTSHAKER_INTERMEDIATE_CA_KEY_PASSPHRASE`` for an encrypted key) make
+  ``init`` issue the certificates from that intermediate instead of generating a root and intermediate CA. ``init``
+  checks the key, the chain and the CA flag first. A root CA already in the crypto dir (like ``maurusnet-rootca.crt``)
+  is used in place, and ``config.sls`` lists it in ``install_generated_ca_certs`` only if ``shared/ssl.sls`` doesn't
+  install it already.
+- Validity: generated root and intermediate CAs 3650 days (``--root-days``, ``--intermediate-days``), service and dev
+  wildcard certificates 825 days (``--leaf-days``).
+- Without ``--force``, ``init`` refuses before generating anything if any of its output files exists.
 - Other ``init`` options: ``--dev-domain`` (e.g. ``maurusnet.test``), ``--prod-domains`` (comma list; an empty value
   means none), ``--internal-domain`` (defaults to a sanitized form of the first prod domain such as
   ``maurusnet.internal``), ``--crypto-dir``, ``--config-pillar``, ``--vagrantfile``, ``--preseed-keys-dir``, CA
