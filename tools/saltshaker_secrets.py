@@ -627,6 +627,10 @@ def ca_installed_by_shared_pillar(config_pillar: Path, root_ca_name: str) -> boo
     return shared_ssl.exists() and f"salt://basics/crypto/{root_ca_name}" in shared_ssl.read_text(encoding="utf-8")
 
 
+def leaf_sls_name(spec: CertSpec) -> str:
+    return {"dev-wildcard": "dev-ssl.sls", "vault": "vault-ssl.sls"}.get(spec.name, f"{spec.name}.sls")
+
+
 def build_common_sls(intermediate_cert: str) -> str:
     return (
         "# import this into other states\n"
@@ -1468,6 +1472,24 @@ def init(args: argparse.Namespace) -> None:
                 gpg_home=backup_key_gpg_home if backup_key_source == "keyring" else None,
             )
 
+    # Refuse before generating anything if any output exists, instead of failing halfway through writing them.
+    # config.sls and the Vagrantfile are always updated in place.
+    if not args.force:
+        root_ca_in_place = use_existing_ca and (crypto_dir / root_ca_name).exists() and (
+            (crypto_dir / root_ca_name).samefile(args.root_ca_cert))
+        outputs = [] if root_ca_in_place else [crypto_dir / root_ca_name]
+        outputs += [secrets_dir / name for name in ("init.sls", "common.sls", "live-ssl.sls", "smtp-relay.sls",
+                                                    "gpg-installed-keys.sls")]
+        outputs += [secrets_dir / leaf_sls_name(spec) for spec in build_cert_specs(dev_domain, prod_domains,
+                                                                                    internal_domain)]
+        outputs += [preseed_keys_dir / f"{hostname}.{ext}" for hostname in vagrant_machine_hostnames(dev_domain)
+                    for ext in ("pem", "pub")]
+        if signing_key:
+            outputs.append(secrets_dir / "gpg-package-signing.sls")
+        existing = [str(path) for path in outputs if path.exists()]
+        if existing:
+            raise FileExistsError(f"Refusing to overwrite existing files, use --force to replace them: {', '.join(existing)}")
+
     if use_existing_ca:
         root_cert = Path(args.root_ca_cert)
     else:
@@ -1520,13 +1542,7 @@ def init(args: argparse.Namespace) -> None:
         cert = load_pem(cert_path)
         key = load_pem(key_path)
         certchain = load_pem(int_cert)
-        if spec.name == "dev-wildcard":
-            sls_name = "dev-ssl.sls"
-        elif spec.name == "vault":
-            sls_name = "vault-ssl.sls"
-        else:
-            sls_name = f"{spec.name}.sls"
-
+        sls_name = leaf_sls_name(spec)
         sls = build_ssl_sls(spec.name.replace("-", "_"), cert, key, certchain, spec.sls_key)
         write_file(secrets_dir / sls_name, header + sls, force=args.force)
 
