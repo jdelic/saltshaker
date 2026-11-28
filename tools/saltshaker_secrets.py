@@ -47,6 +47,7 @@ NO_INPUT = False
 SIGNING_KEY_PASSPHRASE_ENV = "SALTSHAKER_SIGNING_KEY_PASSPHRASE"
 BACKUP_KEY_PASSPHRASE_ENV = "SALTSHAKER_BACKUP_KEY_PASSPHRASE"
 INTERMEDIATE_CA_KEY_PASSPHRASE_ENV = "SALTSHAKER_INTERMEDIATE_CA_KEY_PASSPHRASE"
+ROOT_CA_KEY_PASSPHRASE_ENV = "SALTSHAKER_ROOT_CA_KEY_PASSPHRASE"
 DEFAULT_CA_DAYS = 3650
 GPG_KEY_TYPES = ["ed25519", "rsa"]
 KEY_SOURCES = ["keyring", "keyserver", "url", "file"]
@@ -518,6 +519,8 @@ def generate_intermediate_ca(work_dir: Path, subject: str, days: int, ec_curve: 
             str(root_cert),
             "-CAkey",
             str(root_key),
+            "-CAserial",
+            str(work_dir / "root-ca.srl"),
             "-CAcreateserial",
             "-out",
             str(cert_path),
@@ -582,48 +585,88 @@ def generate_leaf_cert(work_dir: Path, name: str, subject: str, days: int, ec_cu
     return key_path, cert_path
 
 
-def prepare_existing_ca(work_dir: Path, *, root_cert: Path, intermediate_cert: Path, intermediate_key: Path,
-                        passphrase_file: Optional[str], leaf_days: int) -> Path:
-    """
-    Check an existing root and intermediate CA and return the path of an unencrypted copy of the intermediate key
-    in the work dir (where init keeps its generated CA keys, too).
-    """
+def unencrypted_key_copy(key: Path, copy: Path, *, passphrase_file: Optional[str], env_var: str, label: str,
+                         option: str) -> Path:
+    """Write an unencrypted copy of a private key to the work dir (mode 600), asking for its passphrase if needed."""
+    ensure_dir(copy.parent)
+    copy.touch(mode=0o600)
+    os.chmod(copy, 0o600)
+    passphrase = ""
+    if "ENCRYPTED" in key.read_text(encoding="utf-8"):
+        passphrase = read_passphrase(passphrase_file, env_var, f"{label} passphrase", option)
+    try:
+        run(["openssl", "pkey", "-in", str(key), "-passin", "fd:0", "-out", str(copy)], input_text=passphrase + "\n")
+    except subprocess.CalledProcessError as exc:
+        copy.unlink(missing_ok=True)
+        hint = " Is the passphrase right?" if passphrase else ""
+        raise ValueError(f"Unable to read the private key {key}.{hint}") from exc
+    return copy
+
+
+def check_ca_cert_and_key(cert: Path, key: Path, *, valid_for_days: int, issued: str) -> None:
+    """Check that key belongs to cert and that cert is a CA that stays valid for what it will issue."""
+    cert_pubkey = run_capture(["openssl", "x509", "-in", str(cert), "-noout", "-pubkey"])
+    key_pubkey = run_capture(["openssl", "pkey", "-in", str(key), "-pubout"])
+    if cert_pubkey.strip() != key_pubkey.strip():
+        raise ValueError(f"The private key doesn't belong to {cert}")
+    constraints = run_capture(["openssl", "x509", "-in", str(cert), "-noout", "-ext", "basicConstraints"])
+    if "CA:TRUE" not in constraints:
+        raise ValueError(f"{cert} isn't a CA certificate")
+    checkend = subprocess.run(["openssl", "x509", "-in", str(cert), "-noout", "-checkend", str(valid_for_days * 86400)],
+                              check=False, capture_output=True)
+    if checkend.returncode != 0:
+        warn(f"{cert} expires within {valid_for_days} days, before the {issued} it issues; those will stop validating "
+             "when it does", enabled=COLOR_ENABLED)
+
+
+def prepare_existing_intermediate_ca(work_dir: Path, *, root_cert: Path, intermediate_cert: Path, intermediate_key: Path,
+                                     passphrase_file: Optional[str], leaf_days: int) -> Path:
+    """Check an existing intermediate CA and return an unencrypted copy of its key in the work dir."""
     for path in (root_cert, intermediate_cert, intermediate_key):
         if not path.is_file():
             raise FileNotFoundError(f"{path} doesn't exist")
-    key_copy = work_dir / "intermediate-ca.key"
-    ensure_dir(work_dir)
-    key_copy.touch(mode=0o600)
-    os.chmod(key_copy, 0o600)
-    passphrase = ""
-    if "ENCRYPTED" in intermediate_key.read_text(encoding="utf-8"):
-        passphrase = read_passphrase(passphrase_file, INTERMEDIATE_CA_KEY_PASSPHRASE_ENV, "Intermediate CA key passphrase",
-                                     "--intermediate-ca-key-passphrase-file")
-    try:
-        run(["openssl", "pkey", "-in", str(intermediate_key), "-passin", "fd:0", "-out", str(key_copy)],
-            input_text=passphrase + "\n")
-    except subprocess.CalledProcessError as exc:
-        key_copy.unlink(missing_ok=True)
-        hint = " Is the passphrase right?" if passphrase else ""
-        raise ValueError(f"Unable to read the private key {intermediate_key}.{hint}") from exc
-
-    cert_pubkey = run_capture(["openssl", "x509", "-in", str(intermediate_cert), "-noout", "-pubkey"])
-    key_pubkey = run_capture(["openssl", "pkey", "-in", str(key_copy), "-pubout"])
-    if cert_pubkey.strip() != key_pubkey.strip():
-        raise ValueError(f"{intermediate_key} isn't the key of {intermediate_cert}")
+    key_copy = unencrypted_key_copy(intermediate_key, work_dir / "intermediate-ca.key", passphrase_file=passphrase_file,
+                                    env_var=INTERMEDIATE_CA_KEY_PASSPHRASE_ENV, label="Intermediate CA key",
+                                    option="--intermediate-ca-key-passphrase-file")
     verify = subprocess.run(["openssl", "verify", "-CAfile", str(root_cert), str(intermediate_cert)], check=False,
                             text=True, capture_output=True)
     if verify.returncode != 0:
         raise ValueError(f"{intermediate_cert} isn't signed by {root_cert}: {verify.stderr.strip() or verify.stdout.strip()}")
-    constraints = run_capture(["openssl", "x509", "-in", str(intermediate_cert), "-noout", "-ext", "basicConstraints"])
-    if "CA:TRUE" not in constraints:
-        raise ValueError(f"{intermediate_cert} isn't a CA certificate")
-    checkend = subprocess.run(["openssl", "x509", "-in", str(intermediate_cert), "-noout", "-checkend",
-                               str(leaf_days * 86400)], check=False, capture_output=True)
-    if checkend.returncode != 0:
-        warn(f"{intermediate_cert} expires within --leaf-days ({leaf_days} days); the certificates will stop "
-             "validating when it does", enabled=COLOR_ENABLED)
+    check_ca_cert_and_key(intermediate_cert, key_copy, valid_for_days=leaf_days, issued="certificates")
     return key_copy
+
+
+def prepare_existing_root_ca(work_dir: Path, *, root_cert: Path, root_key: Path, passphrase_file: Optional[str],
+                             intermediate_days: int) -> Path:
+    """Check an existing root CA and return an unencrypted copy of its key in the work dir."""
+    for path in (root_cert, root_key):
+        if not path.is_file():
+            raise FileNotFoundError(f"{path} doesn't exist")
+    key_copy = unencrypted_key_copy(root_key, work_dir / "root-ca.key", passphrase_file=passphrase_file,
+                                    env_var=ROOT_CA_KEY_PASSPHRASE_ENV, label="Root CA key",
+                                    option="--root-ca-key-passphrase-file")
+    check_ca_cert_and_key(root_cert, key_copy, valid_for_days=intermediate_days, issued="intermediate CA")
+    return key_copy
+
+
+def write_stub(path: Path, content: str) -> None:
+    """Placeholders and stubs never replace an existing file, not even with --force: it may hold the real thing."""
+    if path.exists():
+        info(f"Keeping the existing {path}", enabled=COLOR_ENABLED)
+        return
+    write_file(path, content, force=False)
+
+
+def build_signing_key_stub_sls() -> str:
+    return textwrap.dedent("""
+        # No package signing key was generated. Rerun init with --signing-key, or put the public and secret key
+        # blocks here as gpg:keys:package-signing (see gpg-package-signing.sls written by init).
+        {}
+
+
+        # vim: syntax=yaml
+        """
+    ).lstrip()
 
 
 def ca_installed_by_shared_pillar(config_pillar: Path, root_ca_name: str) -> bool:
@@ -987,7 +1030,7 @@ def build_smtp_relay_sls() -> str:
     ).lstrip()
 
 
-def write_live_ssl_placeholder(secrets_dir: Path, *, force: bool, header: str = "") -> None:
+def write_live_ssl_placeholder(secrets_dir: Path, *, header: str = "") -> None:
     placeholder_cert = "# TODO: replace with ACME certificate\n"
     placeholder_key = "# TODO: replace with ACME private key\n"
     placeholder_chain = "# TODO: replace with ACME chain\n"
@@ -998,7 +1041,7 @@ def write_live_ssl_placeholder(secrets_dir: Path, *, force: bool, header: str = 
         placeholder_chain,
         "maincert",
     )
-    write_file(secrets_dir / "live-ssl.sls", header + live_sls, force=force)
+    write_stub(secrets_dir / "live-ssl.sls", header + live_sls)
 
 
 def update_acme(args: argparse.Namespace) -> None:
@@ -1245,13 +1288,25 @@ def init(args: argparse.Namespace) -> None:
         if which(tool) is None:
             raise FileNotFoundError(f"Required tool not found in PATH: {tool}")
 
-    existing_ca = [args.root_ca_cert, args.intermediate_ca_cert, args.intermediate_ca_key]
-    use_existing_ca = any(existing_ca)
-    if use_existing_ca and not all(existing_ca):
-        raise ValueError("--root-ca-cert, --intermediate-ca-cert and --intermediate-ca-key go together")
-    if use_existing_ca and (args.root_days is not None or args.intermediate_days is not None):
-        raise ValueError("--root-days and --intermediate-days only apply when init generates the CAs")
-    if args.intermediate_ca_key_passphrase_file and not use_existing_ca:
+    # An existing CA: either a root CA (certificate and key; init generates an intermediate under it) or an
+    # intermediate CA (certificate and key, plus the certificate of the root that signed it).
+    use_existing_root = bool(args.root_ca_cert)
+    use_existing_intermediate = bool(args.intermediate_ca_cert or args.intermediate_ca_key)
+    if use_existing_intermediate and not (args.intermediate_ca_cert and args.intermediate_ca_key):
+        raise ValueError("--intermediate-ca-cert and --intermediate-ca-key go together")
+    if (args.root_ca_key or use_existing_intermediate) and not args.root_ca_cert:
+        raise ValueError("An existing CA also needs --root-ca-cert")
+    if use_existing_root and not (args.root_ca_key or use_existing_intermediate):
+        raise ValueError("--root-ca-cert needs --root-ca-key, or --intermediate-ca-cert and --intermediate-ca-key")
+    if args.root_ca_key and use_existing_intermediate:
+        raise ValueError("Use either --root-ca-key (init generates an intermediate CA) or an existing intermediate CA")
+    if use_existing_root and args.root_days is not None:
+        raise ValueError("--root-days only applies when init generates the root CA")
+    if use_existing_intermediate and args.intermediate_days is not None:
+        raise ValueError("--intermediate-days only applies when init generates the intermediate CA")
+    if args.root_ca_key_passphrase_file and not args.root_ca_key:
+        raise ValueError("--root-ca-key-passphrase-file only applies with --root-ca-key")
+    if args.intermediate_ca_key_passphrase_file and not use_existing_intermediate:
         raise ValueError("--intermediate-ca-key-passphrase-file only applies with --intermediate-ca-key")
 
     # check the backup key options before doing any work
@@ -1308,20 +1363,26 @@ def init(args: argparse.Namespace) -> None:
         warn("No production domains supplied; live-ssl.sls will be stubbed.", enabled=color_enabled)
 
     base_domain = prod_domains[0] if prod_domains else dev_domain
-    root_ca_name = Path(args.root_ca_cert).name if use_existing_ca else root_ca_filename(base_domain)
-    for marker in ([] if use_existing_ca else [crypto_dir / root_ca_name]) + [secrets_dir / "common.sls"]:
+    root_ca_name = Path(args.root_ca_cert).name if use_existing_root else root_ca_filename(base_domain)
+    for marker in ([] if use_existing_root else [crypto_dir / root_ca_name]) + [secrets_dir / "common.sls"]:
         if marker.exists() and not args.force:
             raise FileExistsError(
                 f"{marker} exists, so the secrets are already initialized. Use --force to generate new ones and "
                 "replace them."
             )
-    if use_existing_ca:
-        # check the CA before asking anything else
+    # check an existing CA before asking anything else
+    if use_existing_intermediate:
         int_cert = Path(args.intermediate_ca_cert)
-        int_key = prepare_existing_ca(
+        int_key = prepare_existing_intermediate_ca(
             work_dir, root_cert=Path(args.root_ca_cert), intermediate_cert=int_cert,
             intermediate_key=Path(args.intermediate_ca_key), passphrase_file=args.intermediate_ca_key_passphrase_file,
             leaf_days=args.leaf_days,
+        )
+    elif use_existing_root:
+        root_key = prepare_existing_root_ca(
+            work_dir, root_cert=Path(args.root_ca_cert), root_key=Path(args.root_ca_key),
+            passphrase_file=args.root_ca_key_passphrase_file,
+            intermediate_days=args.intermediate_days or DEFAULT_CA_DAYS,
         )
     org = args.org or prompt("Organization name", "SaltShaker", option="--org")
     country = args.country or prompt("Country code", "DE", option="--country")
@@ -1480,11 +1541,14 @@ def init(args: argparse.Namespace) -> None:
     # Refuse before generating anything if any output exists, instead of failing halfway through writing them.
     # config.sls and the Vagrantfile are always updated in place.
     if not args.force:
-        root_ca_in_place = use_existing_ca and (crypto_dir / root_ca_name).exists() and (
+        root_ca_in_place = use_existing_root and (crypto_dir / root_ca_name).exists() and (
             (crypto_dir / root_ca_name).samefile(args.root_ca_cert))
         outputs = [] if root_ca_in_place else [crypto_dir / root_ca_name]
-        outputs += [secrets_dir / name for name in ("init.sls", "common.sls", "live-ssl.sls", "smtp-relay.sls",
-                                                    "gpg-installed-keys.sls")]
+        # stubs (live-ssl.sls without ACME, smtp-relay.sls, a missing signing key) never replace an existing file,
+        # and the backup key is merged into gpg-installed-keys.sls, so those don't count
+        outputs += [secrets_dir / name for name in ("init.sls", "common.sls")]
+        if prod_domains and fetch_acme_now:
+            outputs.append(secrets_dir / "live-ssl.sls")
         outputs += [secrets_dir / leaf_sls_name(spec) for spec in build_cert_specs(dev_domain, prod_domains,
                                                                                     internal_domain)]
         outputs += [preseed_keys_dir / f"{hostname}.{ext}" for hostname in vagrant_machine_hostnames(dev_domain)
@@ -1495,17 +1559,19 @@ def init(args: argparse.Namespace) -> None:
         if existing:
             raise FileExistsError(f"Refusing to overwrite existing files, use --force to replace them: {', '.join(existing)}")
 
-    if use_existing_ca:
+    if use_existing_root:
         root_cert = Path(args.root_ca_cert)
     else:
-        int_subject = f"/C={country}/ST={state}/L={locality}/O={org}/CN={org} Intermediate CA/emailAddress={email}"
-        info("Generating root and intermediate CA...", enabled=color_enabled)
+        info("Generating root CA...", enabled=color_enabled)
         root_key, root_cert = generate_root_ca(
             work_dir,
             subject=f"C = {country}\nST = {state}\nL = {locality}\nO = {org}\nCN = {org} Root CA\nemailAddress = {email}",
             days=args.root_days or DEFAULT_CA_DAYS,
             ec_curve=args.ec_curve,
         )
+    if not use_existing_intermediate:
+        int_subject = f"/C={country}/ST={state}/L={locality}/O={org}/CN={org} Intermediate CA/emailAddress={email}"
+        info("Generating intermediate CA...", enabled=color_enabled)
         int_key, int_cert = generate_intermediate_ca(
             work_dir,
             subject=int_subject,
@@ -1568,8 +1634,8 @@ def init(args: argparse.Namespace) -> None:
         ))
         acme_created = True
     else:
-        write_live_ssl_placeholder(secrets_dir, force=args.force, header=header)
-    write_file(secrets_dir / "smtp-relay.sls", header + build_smtp_relay_sls(), force=args.force)
+        write_live_ssl_placeholder(secrets_dir, header=header)
+    write_stub(secrets_dir / "smtp-relay.sls", header + build_smtp_relay_sls())
 
     if signing_key:
         # A fresh GnuPG home each run: the key only lives on in the pillar, and gpg won't create a second key with
@@ -1586,9 +1652,22 @@ def init(args: argparse.Namespace) -> None:
             )
         gpg_sls = build_gpg_sls(public_key.strip() + "\n" + secret_key.strip() + "\n")
         write_file(secrets_dir / "gpg-package-signing.sls", header + gpg_sls, force=args.force)
+    else:
+        # top.sls loads it on dev and build servers
+        write_stub(secrets_dir / "gpg-package-signing.sls", header + build_signing_key_stub_sls())
 
+    # merge the backup key into gpg-installed-keys.sls like add-gpg-key does, keeping keys added with it
+    installed_keys_file = secrets_dir / "gpg-installed-keys.sls"
     installed_keys: List[tuple[str, str, str]] = []
+    if installed_keys_file.exists():
+        try:
+            installed_keys = parse_installed_keys_sls(installed_keys_file.read_text(encoding="utf-8"))
+        except RuntimeError as exc:
+            if not args.force:
+                raise RuntimeError(f"{exc} Fix or remove {installed_keys_file}, or use --force to replace it.") from exc
+            warn(f"Replacing {installed_keys_file}, which isn't readable as written by this tool", enabled=color_enabled)
     if backup_key:
+        installed_keys = [key for key in installed_keys if key[0] != "saltshaker-backup-admin"]
         if backup_key_source == "generate":
             backup_key_fingerprint, backup_public_key, backup_secret_key = generate_gpg_key(
                 homedir=Path(backup_key_gpg_home) if backup_key_gpg_home else None,
@@ -1604,7 +1683,7 @@ def init(args: argparse.Namespace) -> None:
         installed_keys.append(("saltshaker-backup-admin", backup_public_key, backup_key_fingerprint))
 
     installed_keys_sls = build_installed_keys_sls(installed_keys)
-    write_file(secrets_dir / "gpg-installed-keys.sls", header + installed_keys_sls, force=args.force)
+    write_file(installed_keys_file, header + installed_keys_sls, force=True)
 
     info("Rendering global config pillar...", enabled=color_enabled)
     config_sls = build_config_sls(
@@ -1654,6 +1733,8 @@ def init(args: argparse.Namespace) -> None:
     append_option(rerun, "--root-days", args.root_days)
     append_option(rerun, "--intermediate-days", args.intermediate_days)
     append_option(rerun, "--root-ca-cert", args.root_ca_cert)
+    append_option(rerun, "--root-ca-key", args.root_ca_key)
+    append_option(rerun, "--root-ca-key-passphrase-file", args.root_ca_key_passphrase_file)
     append_option(rerun, "--intermediate-ca-cert", args.intermediate_ca_cert)
     append_option(rerun, "--intermediate-ca-key", args.intermediate_ca_key)
     append_option(rerun, "--intermediate-ca-key-passphrase-file", args.intermediate_ca_key_passphrase_file)
@@ -1742,10 +1823,15 @@ def build_parser() -> argparse.ArgumentParser:
 
     existing_ca = init_parser.add_argument_group(
         "existing CA",
-        "Issue the certificates from an existing CA instead of generating a root and intermediate CA. A root CA "
-        "certificate that's already in the crypto dir (like maurusnet-rootca.crt) is used where it is.",
+        "Use an existing CA instead of generating a root and intermediate CA: either a root CA (--root-ca-cert and "
+        "--root-ca-key; init generates an intermediate CA under it) or an intermediate CA (--intermediate-ca-cert and "
+        "--intermediate-ca-key, plus --root-ca-cert of the root that signed it). A root CA certificate that's already "
+        "in the crypto dir (like maurusnet-rootca.crt) is used where it is.",
     )
     existing_ca.add_argument("--root-ca-cert", metavar="PATH")
+    existing_ca.add_argument("--root-ca-key", metavar="PATH")
+    existing_ca.add_argument("--root-ca-key-passphrase-file", metavar="PATH",
+                             help=f"For an encrypted key. Alternatively set {ROOT_CA_KEY_PASSPHRASE_ENV}")
     existing_ca.add_argument("--intermediate-ca-cert", metavar="PATH")
     existing_ca.add_argument("--intermediate-ca-key", metavar="PATH")
     existing_ca.add_argument("--intermediate-ca-key-passphrase-file", metavar="PATH",
