@@ -24,7 +24,7 @@ Scope
 CLI Shape
 ---------
 - Entry point: ``saltshaker/tools/saltshaker_secrets.py`` (Python).
-- Subcommands: ``init`` (interactive by default), ``update-acme``, ``add-gpg-key``, ``clean``.
+- Subcommands: ``init`` (interactive by default), ``update-acme``, ``add-gpg-key``, ``renew-certs``, ``clean``.
 - Options every subcommand takes (after the subcommand name): ``--verbose``, ``--color``/``--no-color``,
   ``--no-input`` (never prompt; use defaults where there are any and fail naming the missing option otherwise) and
   ``--work-dir``. ``init``, ``update-acme`` and ``add-gpg-key`` also take ``--secrets-dir``.
@@ -62,6 +62,15 @@ CLI Shape
 - Validity: generated root and intermediate CAs 3650 days (``--root-days``, ``--intermediate-days``), service and dev
   wildcard certificates 825 days (``--leaf-days``).
 - Without ``--force``, ``init`` refuses before generating anything if any of its output files exists.
+- ``renew-certs`` reissues every certificate in the secrets pillar that the intermediate CA (or the one currently
+  in ``common.sls``) issued, valid or expired: a new key of the same type, the old subject and subjectAltName, and
+  ``--leaf-days`` validity. It only replaces PEM blocks, so hand-written pillar files keep their structure. The
+  intermediate CA defaults to the certificate in ``common.sls`` and ``intermediate-ca.key`` in the work dir, and must
+  chain to the root CA ``config.sls`` installs (or ``--root-ca-cert``). A new intermediate CA
+  (``--intermediate-ca-cert``/``--intermediate-ca-key``) also replaces the old one in ``common.sls`` and inline chains.
+  After the intermediate CA itself expires: ``init --root-ca-cert ... --root-ca-key ...`` for a new one, then
+  ``renew-certs`` with it.
+- ``clean`` keeps the CA certificates and keys in the work dir (``renew-certs`` needs them) unless ``--all`` is given.
 - Placeholders and stubs (``live-ssl.sls`` without ACME, ``smtp-relay.sls``, ``gpg-package-signing.sls`` with
   ``--no-signing-key``) are only written when the file doesn't exist, even with ``--force``, so they never replace
   real settings. The backup key is merged into ``gpg-installed-keys.sls`` like ``add-gpg-key`` does.
