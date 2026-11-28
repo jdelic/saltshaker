@@ -25,6 +25,7 @@ CLI Shape
 ---------
 - Entry point: ``saltshaker/tools/saltshaker_secrets.py`` (Python).
 - Primary command: ``init`` (interactive by default).
+- ``add-gpg-key --keyring|--keyserver|--url|--file KEY [--name NAME] [--replace]``: add one public key to the managed keyring pillar of an existing installation.
 - Options for non-interactive use:
 
   - ``--dev-domain`` (single dev/test domain, e.g. ``maurusnet.test``)
@@ -43,7 +44,7 @@ Core Outputs
 - ``live-ssl.sls``: wildcard prod cert + key + chain (ACME). If ACME not run, create a placeholder with instructions.
 - ``smtp.sls`` / ``imap.sls`` / ``vault-ssl.sls`` / ``postgresql.sls``: leaf certs signed by intermediate CA.
 - ``gpg-package-signing.sls``: public + private key blocks.
-- ``gpg-installed-keys.sls``: public keys imported into the managed shared keyring.
+- ``gpg-installed-keys.sls``: public keys imported into the managed shared keyring. Optional; written by ``init`` and ``add-gpg-key``.
 - ``vagrant/preseed-keys/*.pem`` / ``*.pub``: generated RSA keypairs for ``saltmaster.{dev_domain}`` and ``test.{dev_domain}``.
 - ``vagrant/Vagrantfile``: rewritten so the managed testing-domain constant matches ``--dev-domain``.
 - ``srv/salt/basics/crypto/[domain]-rootca.crt``: root CA cert.

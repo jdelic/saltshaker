@@ -12,7 +12,8 @@ duplicity-backup:
     # data is already on the host, this should be fine in terms of
     # security.
     encrypt-for-host: True
-    # the key id for which backups will be encrypted
+    # the key id for which backups will be encrypted. Add your key to the managed keyring with
+    # `tools/saltshaker_secrets.py add-gpg-key --keyring <your key id>`.
     gpg-keys:
         - 1234567
         # ...

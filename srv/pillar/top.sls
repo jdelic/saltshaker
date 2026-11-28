@@ -8,9 +8,16 @@ base:
         - shared.saltmine
         - shared.ssl
         - shared.gpg
-        - shared.secrets.gpg-installed-keys
         - shared.network
         - shared.vault
+
+    # GPG public keys for the shared managed keyring (e.g. the key that encrypts Vault keys and backups). This file
+    # is created by `tools/saltshaker_secrets.py init` or `add-gpg-key` and is optional. The pcre target matches
+    # every minion like '*' does, but has to be a separate target so ignore_missing doesn't apply to the list above.
+    '.*':
+        - match: pcre
+        - ignore_missing: True
+        - shared.secrets.gpg-installed-keys
 
     'saltmaster*.maurusnet.test':
         - shared.secrets.vault-ssl
