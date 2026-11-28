@@ -12,6 +12,7 @@ import subprocess
 import sys
 import textwrap
 import tempfile
+import time
 import urllib.request
 from dataclasses import dataclass
 from pathlib import Path
@@ -285,11 +286,22 @@ def sanitize_domains(domains: str) -> List[str]:
     return [d.strip() for d in domains.split(",") if d.strip()]
 
 
-def root_ca_filename(domain: str) -> str:
+def new_run_id() -> str:
+    """A short ID for one init run: the Unix time in hex. It names the root CA and is noted in every file init writes."""
+    return format(int(time.time()), "x")
+
+
+def run_header(run_id: str) -> str:
+    return f"# written by saltshaker_secrets init, run {run_id}\n"
+
+
+def root_ca_filename(domain: str, run_id: str) -> str:
     compact = re.sub(r"[^A-Za-z0-9]+", "", domain).lower()
     if not compact:
         compact = "local"
-    return f"{compact}-rootca.crt"
+    # The run ID keeps generated CAs apart from each other and from CA files tracked in the repository (e.g.
+    # maurusnet-rootca.crt, which every node installs for APT repositories).
+    return f"{compact}-rootca-{run_id}.crt"
 
 
 def default_internal_domain(dev_domain: str, prod_domains: List[str]) -> str:
@@ -895,7 +907,27 @@ def run_certbot(work_dir: Path, domains: List[str], email: str) -> tuple[Path, P
     return cert_path, chain_path, privkey_path
 
 
-def write_live_ssl_placeholder(secrets_dir: Path, *, force: bool) -> None:
+def build_smtp_relay_sls() -> str:
+    return textwrap.dedent("""
+        # Settings for an external transactional relay that the mail servers can send through. To enable it, set
+        # the values below. opensmtpd/smtpd.jinja.conf renders them as `relay host <url> auth { <auth> }`, so url is
+        # an OpenSMTPD relay URL and auth the contents of an inline credentials table (see smtpd.conf(5)).
+        #
+        # smtp:
+        #     enable-transactional-relay: True
+        #     transactional-relay-via:
+        #         url: smtp+tls://label@relay.example.com:587
+        #         auth: label = "username:password"
+        smtp:
+            enable-transactional-relay: False
+
+
+        # vim: syntax=yaml
+        """
+    ).lstrip()
+
+
+def write_live_ssl_placeholder(secrets_dir: Path, *, force: bool, header: str = "") -> None:
     placeholder_cert = "# TODO: replace with ACME certificate\n"
     placeholder_key = "# TODO: replace with ACME private key\n"
     placeholder_chain = "# TODO: replace with ACME chain\n"
@@ -906,7 +938,7 @@ def write_live_ssl_placeholder(secrets_dir: Path, *, force: bool) -> None:
         placeholder_chain,
         "maincert",
     )
-    write_file(secrets_dir / "live-ssl.sls", live_sls, force=force)
+    write_file(secrets_dir / "live-ssl.sls", header + live_sls, force=force)
 
 
 def update_acme(args: argparse.Namespace) -> None:
@@ -1396,13 +1428,15 @@ def init(args: argparse.Namespace) -> None:
         leaf_material[spec.name] = (key_path, cert_path, spec)
 
     info("Writing CA certs...", enabled=color_enabled)
-    root_ca_name = root_ca_filename(base_domain)
+    run_id = new_run_id()
+    header = run_header(run_id)
+    root_ca_name = root_ca_filename(base_domain, run_id)
     write_file(crypto_dir / root_ca_name, load_pem(root_cert), force=args.force)
 
     info("Rendering pillar files...", enabled=color_enabled)
-    write_file(secrets_dir / "init.sls", build_empty_init_sls(), force=args.force)
+    write_file(secrets_dir / "init.sls", header + build_empty_init_sls(), force=args.force)
     common_sls = build_common_sls(load_pem(int_cert))
-    write_file(secrets_dir / "common.sls", common_sls, force=args.force)
+    write_file(secrets_dir / "common.sls", header + common_sls, force=args.force)
 
     for spec_name, (key_path, cert_path, spec) in leaf_material.items():
         cert = load_pem(cert_path)
@@ -1416,7 +1450,7 @@ def init(args: argparse.Namespace) -> None:
             sls_name = f"{spec.name}.sls"
 
         sls = build_ssl_sls(spec.name.replace("-", "_"), cert, key, certchain, spec.sls_key)
-        write_file(secrets_dir / sls_name, sls, force=args.force)
+        write_file(secrets_dir / sls_name, header + sls, force=args.force)
 
     info("Generating Vagrant preseed keys...", enabled=color_enabled)
     for hostname in vagrant_machine_hostnames(dev_domain):
@@ -1435,7 +1469,8 @@ def init(args: argparse.Namespace) -> None:
         ))
         acme_created = True
     else:
-        write_live_ssl_placeholder(secrets_dir, force=args.force)
+        write_live_ssl_placeholder(secrets_dir, force=args.force, header=header)
+    write_file(secrets_dir / "smtp-relay.sls", header + build_smtp_relay_sls(), force=args.force)
 
     if signing_key:
         # A fresh GnuPG home each run: the key only lives on in the pillar, and gpg won't create a second key with
@@ -1451,7 +1486,7 @@ def init(args: argparse.Namespace) -> None:
                 usage="sign",
             )
         gpg_sls = build_gpg_sls(public_key.strip() + "\n" + secret_key.strip() + "\n")
-        write_file(secrets_dir / "gpg-package-signing.sls", gpg_sls, force=args.force)
+        write_file(secrets_dir / "gpg-package-signing.sls", header + gpg_sls, force=args.force)
 
     installed_keys: List[tuple[str, str, str]] = []
     if backup_key:
@@ -1470,13 +1505,13 @@ def init(args: argparse.Namespace) -> None:
         installed_keys.append(("saltshaker-backup-admin", backup_public_key, backup_key_fingerprint))
 
     installed_keys_sls = build_installed_keys_sls(installed_keys)
-    write_file(secrets_dir / "gpg-installed-keys.sls", installed_keys_sls, force=args.force)
+    write_file(secrets_dir / "gpg-installed-keys.sls", header + installed_keys_sls, force=args.force)
 
     info("Rendering global config pillar...", enabled=color_enabled)
     config_sls = build_config_sls(dev_domain, internal_domain, root_ca_name)
-    write_file(config_pillar, config_sls, force=True)
+    write_file(config_pillar, header + config_sls, force=True)
 
-    ok("Secrets initialization complete.", enabled=color_enabled)
+    ok(f"Secrets initialization complete (run {run_id}, root CA {crypto_dir / root_ca_name}).", enabled=color_enabled)
     print("\nNext config checks:")
     print(f"- Verify global domain settings in `{config_pillar}`")
     print(f"- Verify external_tld in `srv/pillar/local/wellknown.sls` is {dev_domain}")
